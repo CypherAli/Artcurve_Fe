@@ -25,10 +25,9 @@
 
 import { useRef, useEffect } from 'react'
 import Image                 from 'next/image'
-import { gsap }              from 'gsap'
-import { ScrollTrigger }     from 'gsap/ScrollTrigger'
+import { gsap }              from '@/lib/gsap'
 
-gsap.registerPlugin(ScrollTrigger)
+
 
 // ── Image layout definitions ──────────────────────────────────────
 //

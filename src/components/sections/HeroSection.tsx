@@ -17,10 +17,9 @@
 // ─────────────────────────────────────────────────────────────────
 
 import { useEffect, useRef } from 'react'
-import { gsap }              from 'gsap'
-import { ScrollTrigger }     from 'gsap/ScrollTrigger'
+import { gsap, ScrollTrigger } from '@/lib/gsap'
 
-gsap.registerPlugin(ScrollTrigger)
+
 
 const HERO_LINES = ['Where Art', 'Meets the', 'Blockchain.']
 
@@ -66,40 +65,39 @@ export function HeroSection() {
       // Skill: hero bg/media first, headline second, copy third, CTA last
       const tl = gsap.timeline({ defaults: { ease: 'power4.out' } })
 
-      // 1. Video column: clip-path reveal (inset bottom → 0)
-      //    Skill pattern: clipPath inset(0 0 100% 0) → inset(0 0 0% 0)
+      // 1. Video column: fast expo.out reveal — starts immediately at full speed
       tl.fromTo(videoColRef.current,
         { clipPath: 'inset(0 0 100% 0)', opacity: 1 },
-        { clipPath: 'inset(0 0 0% 0)',   duration: 1.3, ease: 'power4.inOut' },
+        { clipPath: 'inset(0 0 0% 0)',   duration: 0.7, ease: 'expo.out' },
         0
       )
 
-      // 2. Headline lines rise from mask
+      // 2. Headline lines — start almost simultaneously with video
       tl.fromTo(lines,
-        { yPercent: 110, opacity: 0, filter: 'blur(6px)' },
-        { yPercent: 0, opacity: 1, filter: 'blur(0px)', duration: 1.1, stagger: 0.1 },
-        0.3
+        { yPercent: 110, opacity: 0 },
+        { yPercent: 0,   opacity: 1, duration: 0.85, stagger: 0.08 },
+        0.05
       )
 
       // 3. Sub-copy
       .fromTo(subRef.current,
-        { y: 22, opacity: 0 },
-        { y: 0,  opacity: 1, duration: 0.9 },
-        '-=0.6'
+        { y: 18, opacity: 0 },
+        { y: 0,  opacity: 1, duration: 0.65 },
+        '-=0.45'
       )
 
       // 4. CTAs
       .fromTo(ctaRef.current,
-        { y: 16, opacity: 0 },
-        { y: 0,  opacity: 1, duration: 0.8 },
-        '-=0.5'
+        { y: 12, opacity: 0 },
+        { y: 0,  opacity: 1, duration: 0.6 },
+        '-=0.4'
       )
 
       // 5. Stats strip
       .fromTo(statsRef.current,
-        { y: 10, opacity: 0 },
-        { y: 0,  opacity: 1, duration: 0.7 },
-        '-=0.4'
+        { y: 8, opacity: 0 },
+        { y: 0,  opacity: 1, duration: 0.55 },
+        '-=0.35'
       )
 
       // Scroll parallax disabled — video stays fixed, no sway on scroll

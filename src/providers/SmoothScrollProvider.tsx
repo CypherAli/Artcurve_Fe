@@ -16,10 +16,8 @@
 
 import { ReactNode, useEffect } from 'react'
 import Lenis                    from 'lenis'
-import { gsap }                 from 'gsap'
-import { ScrollTrigger }        from 'gsap/ScrollTrigger'
+import { gsap, ScrollTrigger } from '@/lib/gsap'
 
-gsap.registerPlugin(ScrollTrigger)
 gsap.defaults({ ease: 'power3.out', duration: 0.85 })
 
 interface SmoothScrollProviderProps {
@@ -62,13 +60,15 @@ export function SmoothScrollProvider({ children }: SmoothScrollProviderProps) {
     gsap.ticker.lagSmoothing(0)
 
     // Refresh ScrollTrigger after all images/fonts load
-    window.addEventListener('load', () => ScrollTrigger.refresh())
+    // rAF defers to next paint so all DOM is fully laid out
+    window.addEventListener('load', () => requestAnimationFrame(() => ScrollTrigger.refresh()))
 
     // ── Initialize GSAP Motion System ───────────────────────────
-    initMotionSystem(reduceMotion)
+    const cleanupMotion = initMotionSystem(reduceMotion)
 
     return () => {
       // Cleanup: kill Lenis + ScrollTrigger on unmount / route change
+      cleanupMotion?.()
       gsap.ticker.remove(gsapTickerId)
       lenis.destroy()
       ScrollTrigger.getAll().forEach((t) => t.kill())
@@ -91,7 +91,6 @@ function initMotionSystem(reduceMotion: boolean) {
     initScrollReveals()
     initImageReveals()
     initMouseParallax()
-    ScrollTrigger.refresh()
   })
 
   return () => ctx.revert()
@@ -125,9 +124,9 @@ function initTextReveals() {
     gsap.set(el, { autoAlpha: 1 })
     gsap.fromTo(
       el.querySelectorAll('.motion-word'),
-      { yPercent: 110, autoAlpha: 0, filter: 'blur(6px)' },
+      { yPercent: 110, autoAlpha: 0 },
       {
-        yPercent: 0, autoAlpha: 1, filter: 'blur(0px)',
+        yPercent: 0, autoAlpha: 1,
         duration: 0.9, ease: 'power4.out', stagger: 0.055,
         scrollTrigger: { trigger: el, start: 'top 82%', once: true },
       }
@@ -142,9 +141,9 @@ function initTextReveals() {
     gsap.set(el, { autoAlpha: 1 })
     gsap.fromTo(
       targets,
-      { yPercent: 100, autoAlpha: 0, filter: 'blur(6px)' },
+      { yPercent: 100, autoAlpha: 0 },
       {
-        yPercent: 0, autoAlpha: 1, filter: 'blur(0px)',
+        yPercent: 0, autoAlpha: 1,
         duration: 1.05, ease: 'power4.out', stagger: 0.1,
         scrollTrigger: { trigger: el, start: 'top 84%', once: true },
       }
@@ -156,7 +155,7 @@ function initTextReveals() {
 function initScrollReveals() {
   const presets: Record<string, { from: gsap.TweenVars; to: gsap.TweenVars }> = {
     'fade-up':    { from: { y: 32,  autoAlpha: 0 }, to: { y: 0, autoAlpha: 1 } },
-    'blur-in':    { from: { y: 18,  autoAlpha: 0, filter: 'blur(10px)' }, to: { y: 0, autoAlpha: 1, filter: 'blur(0px)' } },
+    'blur-in':    { from: { y: 18,  autoAlpha: 0 }, to: { y: 0, autoAlpha: 1 } },
     'scale':      { from: { scale: 0.96, autoAlpha: 0 }, to: { scale: 1, autoAlpha: 1 } },
     'slide-left': { from: { x: 48,  autoAlpha: 0 }, to: { x: 0, autoAlpha: 1 } },
     'slide-right':{ from: { x: -48, autoAlpha: 0 }, to: { x: 0, autoAlpha: 1 } },
@@ -167,9 +166,9 @@ function initScrollReveals() {
     const items = group.querySelectorAll('[data-reveal-item]')
     gsap.set(group, { autoAlpha: 1 })
     gsap.fromTo(items,
-      { y: 36, autoAlpha: 0, filter: 'blur(8px)' },
+      { y: 36, autoAlpha: 0 },
       {
-        y: 0, autoAlpha: 1, filter: 'blur(0px)',
+        y: 0, autoAlpha: 1,
         duration: 0.95, ease: 'power4.out', stagger: 0.075,
         scrollTrigger: { trigger: group, start: 'top 82%', once: true },
       }

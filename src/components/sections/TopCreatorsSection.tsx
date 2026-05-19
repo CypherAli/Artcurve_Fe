@@ -16,10 +16,9 @@
 // ─────────────────────────────────────────────────────────────────
 
 import { useEffect, useRef } from 'react'
-import { gsap }              from 'gsap'
-import { ScrollTrigger }     from 'gsap/ScrollTrigger'
+import { gsap }              from '@/lib/gsap'
 
-gsap.registerPlugin(ScrollTrigger)
+
 
 // ── Artist data ───────────────────────────────────────────────────
 const ARTISTS = [
@@ -151,6 +150,8 @@ function ArtistRow({ artist }: { artist: typeof ARTISTS[0] }) {
             <img
               src={artist.avatar}
               alt={artist.name}
+              loading="lazy"
+              decoding="async"
               className="w-full h-full object-cover
                          transition-transform duration-700
                          group-hover:scale-110"
@@ -240,7 +241,7 @@ export function TopCreatorsSection() {
 
     // ── Initial states ────────────────────────────────────────────
     gsap.set(labelRef.current, { autoAlpha: 0, y: 14 })
-    gsap.set(titleWords,       { yPercent: 110, opacity: 0, filter: 'blur(8px)' })
+    gsap.set(titleWords,       { yPercent: 110, opacity: 0 })
     gsap.set(linesRef.current.filter(Boolean), {
       scaleX: 0, transformOrigin: 'left center',
     })
@@ -253,12 +254,12 @@ export function TopCreatorsSection() {
 
       // ── Header: eyebrow + word-mask title ─────────────────────
       gsap.timeline({
-        scrollTrigger: { trigger: sectionRef.current, start: 'top 78%', once: true },
+        scrollTrigger: { trigger: sectionRef.current, start: 'top 78%', once: true, invalidateOnRefresh: true },
       })
       .to(labelRef.current,
         { autoAlpha: 1, y: 0, duration: 0.55, ease: 'power3.out' }, 0)
       .to(titleWords,
-        { yPercent: 0, opacity: 1, filter: 'blur(0px)',
+        { yPercent: 0, opacity: 1,
           duration: 1.05, ease: 'expo.out', stagger: 0.14 }, 0.1)
 
       // ── Rows: divider line scaleX then clip-path reveal ────────
@@ -324,7 +325,7 @@ export function TopCreatorsSection() {
               >
                 <span
                   className="tc-word inline-block"
-                  style={{ willChange: 'transform, opacity, filter' }}
+                  style={{ willChange: 'transform, opacity' }}
                 >
                   {word}
                 </span>
