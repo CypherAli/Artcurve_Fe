@@ -1,0 +1,147 @@
+@import "tailwindcss";
+
+/* ─────────────────────────────────────────────────────────────────
+   ArtCurve — Neo-Luxury Design System
+   Tailwind v4 CSS-first configuration
+   Palette: Off-white cream (#FDFBF7) + Charcoal (#1A1A1A) + Gold
+───────────────────────────────────────────────────────────────── */
+
+@theme {
+  /* ── Brand Colors ────────────────────────────────────────────── */
+  --color-cream:        #FDFBF7;
+  --color-cream-dark:   #F5F0E8;
+  --color-charcoal:     #1A1A1A;
+  --color-charcoal-soft:#2C2C2C;
+  --color-muted:        #7A7570;
+  --color-border:       #E4DDD3;
+
+  /* Gold accent — luxury signature */
+  --color-gold:         #C9A96E;
+  --color-gold-light:   #E8D5B0;
+  --color-gold-dark:    #8B6914;
+
+  /* ── Typography ──────────────────────────────────────────────── */
+  --font-serif:   'Cormorant Garamond', 'Garamond', Georgia, serif;
+  --font-sans:    var(--font-inter), system-ui, -apple-system, sans-serif;
+
+  /* ── Custom Easing ───────────────────────────────────────────── */
+  --ease-luxury:  cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-reveal:  cubic-bezier(0.77, 0, 0.175, 1);
+}
+
+/* ── Base Reset ─────────────────────────────────────────────────── */
+*, *::before, *::after { box-sizing: border-box; }
+
+html {
+  scroll-behavior: auto;          /* Lenis handles smooth scroll */
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+body {
+  background-color: #FDFBF7;
+  color: #1A1A1A;
+  font-family: var(--font-sans);
+  overflow-x: hidden;
+  background-image: none;
+}
+
+/* ── Grid ruler overlay — hidden ─────────────────────────────────── */
+.grid-overlay {
+  display: none;
+}
+
+/* ── Selection ──────────────────────────────────────────────────── */
+::selection {
+  background-color: #E8D5B0;
+  color: #1A1A1A;
+}
+
+/* ── Scrollbar ──────────────────────────────────────────────────── */
+::-webkit-scrollbar          { width: 3px; }
+::-webkit-scrollbar-track    { background: #FDFBF7; }
+::-webkit-scrollbar-thumb    { background: #C9A96E; border-radius: 2px; }
+
+/* ── GSAP Motion System (cinematic-gsap-lenis skill pattern) ─────── */
+html.has-motion [data-motion-text],
+html.has-motion [data-reveal],
+html.has-motion [data-reveal-item],
+html.has-motion [data-image-reveal] {
+  visibility: hidden;
+}
+
+.motion-line-mask,
+.motion-word-mask {
+  display: inline-block;
+  overflow: hidden;
+  vertical-align: top;
+}
+
+.motion-line,
+.motion-word {
+  display: inline-block;
+  will-change: transform, opacity;
+}
+
+[data-image-reveal] { overflow: hidden; }
+
+/* ── Custom Cursor ──────────────────────────────────────────────── */
+[data-cursor] {
+  position: fixed;
+  left: 0; top: 0;
+  z-index: 9999;
+  pointer-events: none;
+  mix-blend-mode: difference;
+  transform: translate3d(-50%, -50%, 0);
+  will-change: transform;
+}
+@media (prefers-reduced-motion: reduce), (pointer: coarse) {
+  [data-cursor] { display: none; }
+}
+
+/* ── Gold shimmer text animation ────────────────────────────────── */
+@keyframes shimmer {
+  0%   { background-position: -200% center; }
+  100% { background-position:  200% center; }
+}
+.text-gold-shimmer {
+  background: linear-gradient(
+    90deg,
+    #8B6914 0%, #C9A96E 40%, #E8D5B0 60%, #C9A96E 100%
+  );
+  background-size: 200% auto;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  animation: shimmer 4s linear infinite;
+}
+
+/* ── Hero image float animation (contralabs-style gentle bob) ───── */
+@keyframes heroFloat {
+  0%, 100% { transform: translateY(0px);    }
+  50%       { transform: translateY(-18px); }
+}
+
+.hero-float {
+  animation: heroFloat 8s ease-in-out infinite;
+  will-change: transform;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hero-float { animation: none; }
+}
+
+/* ── Subtle grain overlay (luxury print feel) ───────────────────── */
+.grain-overlay {
+  position: relative;
+}
+.grain-overlay::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.035'/%3E%3C/svg%3E");
+  background-size: 200px;
+  pointer-events: none;
+  opacity: 0.07;
+  mix-blend-mode: multiply;
+}

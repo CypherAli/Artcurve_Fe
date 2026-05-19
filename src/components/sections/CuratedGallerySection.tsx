@@ -1,0 +1,465 @@
+'use client'
+
+// ─────────────────────────────────────────────────────────────────
+//  CuratedGallerySection.tsx  —  Hot Artworks Gallery
+//
+//  Skill patterns (cinematic-gsap-lenis):
+//    • Eyebrow + heading: masked word reveal
+//    • Cards: stagger fade-up on scroll
+//    • Horizontal scroll carousel with drag
+//    • Each card: sparkline SVG + price + artist info
+//    • Hover: image scale + gold border reveal
+// ─────────────────────────────────────────────────────────────────
+
+import { useEffect, useRef } from 'react'
+import { gsap }              from 'gsap'
+import { ScrollTrigger }     from 'gsap/ScrollTrigger'
+
+gsap.registerPlugin(ScrollTrigger)
+
+// ── Mock artwork data ──────────────────────────────────────────────
+const ARTWORKS = [
+  {
+    id: 1,
+    title: 'Nocturne at the Bridge',
+    artist: 'Elena Vasquez',
+    price: '0.0234',
+    change: '+18.4%',
+    phase: 'FOMO',
+    phaseColor: '#C9A96E',
+    progress: 62,
+    // Steady rise → dip → strong breakout
+    sparkline: [4, 5.2, 6.8, 6.1, 5.4, 7.0, 9.5, 14.2, 19.8, 23.4],
+    image: '/images/artworks/art1.jpg',
+  },
+  {
+    id: 2,
+    title: 'Shattered Embrace',
+    artist: 'Marcus Chen',
+    price: '0.0089',
+    change: '+7.2%',
+    phase: 'Accumulation',
+    phaseColor: '#4ade80',
+    progress: 28,
+    // Flat accumulation with tiny bumps
+    sparkline: [5, 4.8, 5.3, 5.1, 5.6, 5.4, 6.2, 7.1, 7.8, 8.9],
+    image: '/images/artworks/art2.jpg',
+  },
+  {
+    id: 3,
+    title: 'Bloom & Blade',
+    artist: 'Aiko Tanaka',
+    price: '0.0412',
+    change: '+29.3%',
+    phase: 'FOMO',
+    phaseColor: '#C9A96E',
+    progress: 71,
+    // Volatile: sharp pump → crash → recovery → new high
+    sparkline: [3, 7.5, 14.0, 9.2, 6.8, 10.5, 16.0, 12.4, 28.0, 41.2],
+    image: '/images/artworks/art3.jpg',
+  },
+  {
+    id: 4,
+    title: 'Self-Portrait with Death',
+    artist: 'Arnold Böcklin',
+    price: '0.1820',
+    change: '+44.1%',
+    phase: 'Migration',
+    phaseColor: '#f87171',
+    progress: 94,
+    // Slow then parabolic explosion at end
+    sparkline: [2, 2.3, 2.8, 3.5, 5.0, 9.0, 22.0, 58.0, 120.0, 182.0],
+    image: '/images/artworks/art4.jpg',
+  },
+  {
+    id: 5,
+    title: 'The Last March',
+    artist: 'Yui Nakamura',
+    price: '0.0551',
+    change: '+33.7%',
+    phase: 'FOMO',
+    phaseColor: '#C9A96E',
+    progress: 78,
+    // W-shape: dip → recovery → dip → strong rally
+    sparkline: [8, 6.0, 4.2, 5.8, 8.5, 6.5, 9.0, 14.5, 22.0, 55.1],
+    image: '/images/artworks/art5.jpg',
+  },
+]
+
+// ── Sparkline helpers ──────────────────────────────────────────────
+function buildSparkPath(data: number[], w: number, h: number, pad: number) {
+  const min = Math.min(...data)
+  const max = Math.max(...data)
+  const pts = data.map((v, i) => {
+    const x = pad + (i / (data.length - 1)) * (w - pad * 2)
+    const y = h - pad - ((v - min) / (max - min || 1)) * (h - pad * 2)
+    return `${x.toFixed(1)},${y.toFixed(1)}`
+  })
+  const d     = `M${pts.join(' L')}`
+  const areaD = `${d} L${(w - pad).toFixed(1)},${(h - pad).toFixed(1)} L${pad},${(h - pad).toFixed(1)} Z`
+  return { d, areaD, lastPt: pts[pts.length - 1] }
+}
+
+// Mini: shown in card info area by default, hides on hover
+function SparklineMini({ data, color, id }: { data: number[]; color: string; id: number }) {
+  const w = 80, h = 32, pad = 2
+  const { d, areaD } = buildSparkPath(data, w, h, pad)
+  const gid = `sgmini-${id}`
+  return (
+    <svg viewBox={`0 0 ${w} ${h}`} className="w-20 h-8" aria-hidden="true">
+      <defs>
+        <linearGradient id={gid} x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%"   stopColor={color} stopOpacity="0.3" />
+          <stop offset="100%" stopColor={color} stopOpacity="0.02" />
+        </linearGradient>
+      </defs>
+      <path d={areaD} fill={`url(#${gid})`} />
+      <path d={d} fill="none" stroke={color} strokeWidth="1.5" strokeLinecap="round" />
+    </svg>
+  )
+}
+
+// Large: overlays on artwork image on hover — trading-chart style
+function SparklineLarge({ data, color, id, price, change }: {
+  data: number[]; color: string; id: number; price: string; change: string
+}) {
+  const w = 240, h = 90, pad = { t: 10, r: 8, b: 20, l: 8 }
+  const pw = w - pad.l - pad.r
+  const ph = h - pad.t - pad.b
+  const { d, areaD, lastPt } = buildSparkPath(data, pw, ph, 0)
+  // offset path into padded space
+  const offsetD     = d.replace(/(M|L)([\d.]+),([\d.]+)/g,
+    (_m, cmd, x, y) => `${cmd}${(+x + pad.l).toFixed(1)},${(+y + pad.t).toFixed(1)}`)
+  const offsetAreaD = areaD.replace(/(M|L)([\d.]+),([\d.]+)/g,
+    (_m, cmd, x, y) => `${cmd}${(+x + pad.l).toFixed(1)},${(+y + pad.t).toFixed(1)}`)
+  const [lx, ly]    = lastPt.split(',').map(Number)
+  const dotX = lx + pad.l, dotY = ly + pad.t
+  const gid  = `sglarge-${id}`
+
+  return (
+    <svg viewBox={`0 0 ${w} ${h}`} className="w-full h-full" aria-hidden="true">
+      <defs>
+        <linearGradient id={gid} x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%"   stopColor={color} stopOpacity="0.35" />
+          <stop offset="100%" stopColor={color} stopOpacity="0.0" />
+        </linearGradient>
+        <filter id={`glowlg-${id}`} x="-40%" y="-40%" width="180%" height="180%">
+          <feGaussianBlur in="SourceGraphic" stdDeviation="2.5" result="blur" />
+          <feMerge><feMergeNode in="blur" /><feMergeNode in="SourceGraphic" /></feMerge>
+        </filter>
+      </defs>
+
+      {/* Horizontal grid lines */}
+      {[0.25, 0.5, 0.75].map(t => (
+        <line key={t}
+          x1={pad.l} x2={w - pad.r}
+          y1={pad.t + ph * t} y2={pad.t + ph * t}
+          stroke="rgba(255,255,255,0.12)" strokeWidth="1"
+        />
+      ))}
+
+      {/* Area fill */}
+      <path d={offsetAreaD} fill={`url(#${gid})`} />
+
+      {/* Main line */}
+      <path d={offsetD} fill="none" stroke={color} strokeWidth="2"
+        strokeLinecap="round" filter={`url(#glowlg-${id})`} />
+
+      {/* Last point dot */}
+      <circle cx={dotX} cy={dotY} r="3.5" fill={color} filter={`url(#glowlg-${id})`} />
+      <circle cx={dotX} cy={dotY} r="2"   fill="white" />
+
+      {/* Price label */}
+      <text x={dotX + 5} y={dotY + 4}
+        fill="white" fontSize="9" fontFamily="system-ui,sans-serif" fontWeight="600">
+        {price} ETH
+      </text>
+      <text x={dotX + 5} y={dotY + 14}
+        fill={color} fontSize="8" fontFamily="system-ui,sans-serif">
+        {change}
+      </text>
+    </svg>
+  )
+}
+
+// ── Component ──────────────────────────────────────────────────────
+export function CuratedGallerySection() {
+  const sectionRef  = useRef<HTMLElement>(null)
+  const labelRef    = useRef<HTMLParagraphElement>(null)
+  const titleRef    = useRef<HTMLHeadingElement>(null)
+  const lineRef     = useRef<HTMLDivElement>(null)
+  const viewAllRef  = useRef<HTMLAnchorElement>(null)
+  const cardsRef    = useRef<(HTMLDivElement | null)[]>([])
+  const trackRef    = useRef<HTMLDivElement>(null)
+
+  // ── Drag-to-scroll on carousel ─────────────────────────────────
+  useEffect(() => {
+    const track = trackRef.current
+    if (!track) return
+    let isDown = false, startX = 0, scrollLeft = 0
+
+    const onDown  = (e: MouseEvent) => { isDown = true; startX = e.pageX - track.offsetLeft; scrollLeft = track.scrollLeft; track.style.cursor = 'grabbing' }
+    const onLeave = () => { isDown = false; track.style.cursor = 'grab' }
+    const onUp    = () => { isDown = false; track.style.cursor = 'grab' }
+    const onMove  = (e: MouseEvent) => {
+      if (!isDown) return
+      e.preventDefault()
+      const x    = e.pageX - track.offsetLeft
+      const walk = (x - startX) * 1.4
+      track.scrollLeft = scrollLeft - walk
+    }
+
+    track.addEventListener('mousedown',  onDown)
+    track.addEventListener('mouseleave', onLeave)
+    track.addEventListener('mouseup',    onUp)
+    track.addEventListener('mousemove',  onMove)
+    return () => {
+      track.removeEventListener('mousedown',  onDown)
+      track.removeEventListener('mouseleave', onLeave)
+      track.removeEventListener('mouseup',    onUp)
+      track.removeEventListener('mousemove',  onMove)
+    }
+  }, [])
+
+  // ── GSAP scroll animations ─────────────────────────────────────
+  useEffect(() => {
+    const titleWords = Array.from(
+      titleRef.current?.querySelectorAll<HTMLElement>('.cg-word') ?? []
+    )
+
+    // ── Initial states ────────────────────────────────────────────
+    gsap.set(labelRef.current,  { autoAlpha: 0, x: -20 })
+    gsap.set(titleWords,        { yPercent: 115, opacity: 0, filter: 'blur(10px)', scale: 1.08 })
+    gsap.set(lineRef.current,   { scaleX: 0, transformOrigin: 'left center' })
+    gsap.set(viewAllRef.current,{ autoAlpha: 0, x: 16 })
+    gsap.set(cardsRef.current.filter(Boolean), {
+      clipPath: 'inset(0 0 100% 0)', autoAlpha: 0,
+    })
+
+    const ctx = gsap.context(() => {
+
+      // ── Header: cinematic multi-layer reveal ──────────────────
+      gsap.timeline({
+        scrollTrigger: { trigger: sectionRef.current, start: 'top 78%', once: true },
+      })
+      // 1. Label slides in from left
+      .to(labelRef.current,
+        { autoAlpha: 1, x: 0, duration: 0.55, ease: 'power3.out' }, 0)
+      // 2. Words: scale + blur + rise — stagger 0.14s
+      .to(titleWords,
+        { yPercent: 0, opacity: 1, filter: 'blur(0px)', scale: 1,
+          duration: 1.1, ease: 'expo.out', stagger: 0.14 }, 0.15)
+      // 3. Gold divider draws left→right
+      .to(lineRef.current,
+        { scaleX: 1, duration: 0.8, ease: 'power3.inOut' }, 0.55)
+      // 4. "View All" slides in from right
+      .to(viewAllRef.current,
+        { autoAlpha: 1, x: 0, duration: 0.5, ease: 'power3.out' }, 0.7)
+
+      // ── Cards: clip-path reveal from bottom, cascading ────────
+      cardsRef.current.forEach((el, i) => {
+        if (!el) return
+        gsap.to(el, {
+          clipPath: 'inset(0 0 0% 0)',
+          autoAlpha: 1,
+          duration: 1.0,
+          ease: 'expo.out',
+          delay: i * 0.08,
+          scrollTrigger: {
+            trigger: trackRef.current,
+            start: 'top 85%',
+            once: true,
+          },
+        })
+      })
+    })
+
+    return () => ctx.revert()
+  }, [])
+
+  return (
+    <section
+      ref={sectionRef}
+      className="relative bg-white pt-6 pb-16 overflow-hidden"
+      aria-label="Curated Gallery"
+    >
+      {/* Grid overlay — consistent with other sections */}
+      <div className="grid-overlay" aria-hidden="true" />
+
+      {/* ── Header ─────────────────────────────────────────────── */}
+      <div className="px-6 md:px-16 lg:px-24 mb-10">
+        <p
+          ref={labelRef}
+          className="mb-4 text-[11px] tracking-[0.35em] uppercase text-[#C9A96E]"
+        >
+          Featured Works
+        </p>
+
+        <div className="flex items-end justify-between gap-4 flex-wrap mb-5">
+          <h2
+            ref={titleRef}
+            className="font-light text-[#1A1A1A] flex flex-wrap gap-x-[0.22em]"
+            style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: 'clamp(2rem, 4vw, 3.5rem)' }}
+            aria-label="Curated Gallery"
+          >
+            {['Curated', 'Gallery'].map(word => (
+              <span key={word} className="overflow-hidden inline-block" aria-hidden="true">
+                <span className="cg-word inline-block" style={{ willChange: 'transform, opacity, filter, scale' }}>
+                  {word}
+                </span>
+              </span>
+            ))}
+          </h2>
+          <a
+            ref={viewAllRef}
+            href="#marketplace"
+            className="text-[11px] tracking-[0.2em] uppercase text-[#C9A96E] border-b border-[#C9A96E]/40 pb-0.5 hover:border-[#C9A96E] transition-colors duration-300 shrink-0"
+          >
+            View All →
+          </a>
+        </div>
+
+        {/* Gold divider — draws in after heading */}
+        <div
+          ref={lineRef}
+          className="h-px bg-gradient-to-r from-[#C9A96E] via-[#E8D5B0] to-transparent"
+          style={{ transformOrigin: 'left center' }}
+          aria-hidden="true"
+        />
+      </div>
+
+      {/* ── Carousel ───────────────────────────────────────────── */}
+      <div
+        ref={trackRef}
+        className="flex gap-5 overflow-x-auto pb-4 select-none"
+        style={{
+          cursor: 'grab',
+          scrollbarWidth: 'none',
+          msOverflowStyle: 'none',
+        }}
+      >
+        {/* Left spacer — mirrors right spacer for equal padding */}
+        <div className="shrink-0 w-0 md:w-0 lg:w-0" aria-hidden="true" />
+
+        {ARTWORKS.map((art, i) => (
+          <div
+            key={art.id}
+            ref={el => { cardsRef.current[i] = el }}
+            className="group relative flex-none w-[260px] md:w-[280px] bg-white border border-[#E4DDD3] hover:border-[#C9A96E] transition-all duration-500 cursor-pointer"
+            style={{ opacity: 0 }}
+          >
+            {/* Artwork image */}
+            <div className="relative overflow-hidden" style={{ aspectRatio: '3/4' }}>
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                src={art.image}
+                alt={art.title}
+                className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
+                draggable={false}
+              />
+
+              {/* Phase badge */}
+              <div
+                className="absolute top-3 left-3 px-2 py-0.5 text-[9px] tracking-[0.25em] uppercase font-medium"
+                style={{
+                  background: `${art.phaseColor}18`,
+                  border: `1px solid ${art.phaseColor}55`,
+                  color: art.phaseColor,
+                  backdropFilter: 'blur(4px)',
+                }}
+              >
+                {art.phase}
+              </div>
+
+              {/* ── Mini sparkline — bottom-right corner, always visible ── */}
+              <div
+                className="absolute bottom-3 right-3
+                           opacity-100 group-hover:opacity-0
+                           transition-opacity duration-300 pointer-events-none"
+              >
+                <SparklineMini data={art.sparkline} color="#4ade80" id={art.id} />
+              </div>
+
+              {/* ── Large chart overlay — slides up on hover ── */}
+              <div
+                className="absolute inset-x-0 bottom-0 h-[46%]
+                           translate-y-full group-hover:translate-y-0
+                           transition-transform duration-500 ease-out pointer-events-none"
+                style={{ background: 'none' }}
+              >
+                <SparklineLarge
+                  data={art.sparkline}
+                  color="#4ade80"
+                  id={art.id}
+                  price={art.price}
+                  change={art.change}
+                />
+              </div>
+
+              {/* Progress bar */}
+              <div className="absolute bottom-0 left-0 right-0 h-[3px] bg-black/20">
+                <div
+                  className="h-full transition-all duration-1000"
+                  style={{ width: `${art.progress}%`, background: art.phaseColor }}
+                />
+              </div>
+            </div>
+
+            {/* Card info */}
+            <div className="p-4">
+              <p className="text-[10px] tracking-[0.22em] uppercase text-[#7A7570] mb-1">
+                {art.artist}
+              </p>
+              <h3
+                className="text-[1.05rem] font-light text-[#1A1A1A] mb-3 leading-tight"
+                style={{ fontFamily: "'Cormorant Garamond', serif" }}
+              >
+                {art.title}
+              </h3>
+              <div className="flex items-end justify-between">
+                <div>
+                  <p className="text-[9px] tracking-[0.2em] uppercase text-[#7A7570] mb-0.5">
+                    Current Price
+                  </p>
+                  <p
+                    className="text-[1.25rem] font-light text-[#1A1A1A] leading-none"
+                    style={{ fontFamily: "'Cormorant Garamond', serif" }}
+                  >
+                    {art.price}
+                    <span className="text-[#C9A96E] text-xs ml-1">ETH</span>
+                  </p>
+                  <p className="text-[10px] mt-0.5" style={{ color: art.phaseColor }}>
+                    {art.change}
+                  </p>
+                </div>
+              </div>
+
+              {/* Collect button */}
+              <div className="mt-3 overflow-hidden h-0 group-hover:h-9 transition-all duration-400">
+                <button
+                  type="button"
+                  className="w-full h-9 text-[10px] tracking-[0.2em] uppercase bg-[#1A1A1A] text-white hover:bg-[#C9A96E] hover:text-[#1A1A1A] transition-colors duration-300"
+                >
+                  Collect Now
+                </button>
+              </div>
+            </div>
+          </div>
+        ))}
+
+        {/* Right spacer — makes last card fully visible when scrolled to end */}
+        <div className="shrink-0 w-6 md:w-16 lg:w-24" aria-hidden="true" />
+      </div>
+
+      {/* Scroll hint */}
+      <div className="flex justify-center mt-6 gap-1.5" aria-hidden="true">
+        {ARTWORKS.map((_, i) => (
+          <div
+            key={i}
+            className="h-px w-6 bg-[#C9A96E] opacity-30 first:opacity-80"
+          />
+        ))}
+      </div>
+    </section>
+  )
+}
