@@ -12,10 +12,9 @@
 // ─────────────────────────────────────────────────────────────────
 
 import { useEffect, useRef } from 'react'
-import { gsap }              from 'gsap'
-import { ScrollTrigger }     from 'gsap/ScrollTrigger'
+import { gsap }              from '@/lib/gsap'
 
-gsap.registerPlugin(ScrollTrigger)
+
 
 // ── Mock artwork data ──────────────────────────────────────────────
 const ARTWORKS = [
@@ -229,25 +228,25 @@ export function CuratedGallerySection() {
 
     // ── Initial states ────────────────────────────────────────────
     gsap.set(labelRef.current,  { autoAlpha: 0, x: -20 })
-    gsap.set(titleWords,        { yPercent: 115, opacity: 0, filter: 'blur(10px)', scale: 1.08 })
+    gsap.set(titleWords,        { yPercent: 115, opacity: 0, scale: 1.04 })
     gsap.set(lineRef.current,   { scaleX: 0, transformOrigin: 'left center' })
     gsap.set(viewAllRef.current,{ autoAlpha: 0, x: 16 })
     gsap.set(cardsRef.current.filter(Boolean), {
-      clipPath: 'inset(0 0 100% 0)', autoAlpha: 0,
+      y: 28, autoAlpha: 0,
     })
 
     const ctx = gsap.context(() => {
 
       // ── Header: cinematic multi-layer reveal ──────────────────
       gsap.timeline({
-        scrollTrigger: { trigger: sectionRef.current, start: 'top 78%', once: true },
+        scrollTrigger: { trigger: sectionRef.current, start: 'top 78%', once: true, invalidateOnRefresh: true },
       })
       // 1. Label slides in from left
       .to(labelRef.current,
         { autoAlpha: 1, x: 0, duration: 0.55, ease: 'power3.out' }, 0)
       // 2. Words: scale + blur + rise — stagger 0.14s
       .to(titleWords,
-        { yPercent: 0, opacity: 1, filter: 'blur(0px)', scale: 1,
+        { yPercent: 0, opacity: 1, scale: 1,
           duration: 1.1, ease: 'expo.out', stagger: 0.14 }, 0.15)
       // 3. Gold divider draws left→right
       .to(lineRef.current,
@@ -256,21 +255,18 @@ export function CuratedGallerySection() {
       .to(viewAllRef.current,
         { autoAlpha: 1, x: 0, duration: 0.5, ease: 'power3.out' }, 0.7)
 
-      // ── Cards: clip-path reveal from bottom, cascading ────────
-      cardsRef.current.forEach((el, i) => {
-        if (!el) return
-        gsap.to(el, {
-          clipPath: 'inset(0 0 0% 0)',
-          autoAlpha: 1,
-          duration: 1.0,
-          ease: 'expo.out',
-          delay: i * 0.08,
-          scrollTrigger: {
-            trigger: trackRef.current,
-            start: 'top 85%',
-            once: true,
-          },
-        })
+      // ── Cards: fast fade+rise, pure transform — no clip-path repaint
+      gsap.to(cardsRef.current.filter(Boolean), {
+        y: 0,
+        autoAlpha: 1,
+        duration: 0.55,
+        ease: 'power3.out',
+        stagger: 0.055,
+        scrollTrigger: {
+          trigger: trackRef.current,
+          start: 'top 85%',
+          once: true,
+        },
       })
     })
 
@@ -304,7 +300,7 @@ export function CuratedGallerySection() {
           >
             {['Curated', 'Gallery'].map(word => (
               <span key={word} className="overflow-hidden inline-block" aria-hidden="true">
-                <span className="cg-word inline-block" style={{ willChange: 'transform, opacity, filter, scale' }}>
+                <span className="cg-word inline-block" style={{ willChange: 'transform, opacity' }}>
                   {word}
                 </span>
               </span>
@@ -345,7 +341,7 @@ export function CuratedGallerySection() {
           <div
             key={art.id}
             ref={el => { cardsRef.current[i] = el }}
-            className="group relative flex-none w-[260px] md:w-[280px] bg-white border border-[#E4DDD3] hover:border-[#C9A96E] transition-all duration-500 cursor-pointer"
+            className="group relative flex-none w-[260px] md:w-[280px] bg-white border border-[#E4DDD3] hover:border-[#C9A96E] transition-[border-color] duration-300 cursor-pointer"
             style={{ opacity: 0 }}
           >
             {/* Artwork image */}
@@ -354,20 +350,21 @@ export function CuratedGallerySection() {
               <img
                 src={art.image}
                 alt={art.title}
+                loading="lazy"
+                decoding="async"
                 className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
                 draggable={false}
               />
 
               {/* Phase badge */}
               <div
-                className="absolute top-3 left-3 px-2 py-0.5 text-[9px] tracking-[0.25em] uppercase font-medium"
-                style={{
-                  background: `${art.phaseColor}18`,
-                  border: `1px solid ${art.phaseColor}55`,
-                  color: art.phaseColor,
-                  backdropFilter: 'blur(4px)',
-                }}
+                className="absolute top-3 left-3 flex items-center gap-1.5 px-2 py-0.5 text-[9px] tracking-[0.25em] uppercase font-medium text-white"
+                style={{ background: 'rgba(0,0,0,0.62)', border: '1px solid rgba(255,255,255,0.14)' }}
               >
+                <span
+                  className="shrink-0 size-[5px] rounded-full"
+                  style={{ background: art.phaseColor }}
+                />
                 {art.phase}
               </div>
 
@@ -396,13 +393,6 @@ export function CuratedGallerySection() {
                 />
               </div>
 
-              {/* Progress bar */}
-              <div className="absolute bottom-0 left-0 right-0 h-[3px] bg-black/20">
-                <div
-                  className="h-full transition-all duration-1000"
-                  style={{ width: `${art.progress}%`, background: art.phaseColor }}
-                />
-              </div>
             </div>
 
             {/* Card info */}

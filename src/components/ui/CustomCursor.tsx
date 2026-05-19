@@ -11,7 +11,7 @@
 // ─────────────────────────────────────────────────────────────────
 
 import { useEffect, useRef } from 'react'
-import { gsap }              from 'gsap'
+import { gsap }              from '@/lib/gsap'
 
 export function CustomCursor() {
   const cursorRef = useRef<HTMLDivElement>(null)
@@ -37,28 +37,30 @@ export function CustomCursor() {
     }
     document.addEventListener('pointermove', onMove)
 
-    // Expand cursor on interactive elements
-    const interactiveEls = document.querySelectorAll<HTMLElement>(
-      'a, button, [data-cursor-label], [data-magnetic]'
-    )
+    // Expand cursor on interactive elements — store handlers for cleanup
+    const onEnter = () => {
+      gsap.to(cursor, { scale: 2.2, duration: 0.35, ease: 'power3.out' })
+      if (dotRef.current) gsap.to(dotRef.current, { scale: 0.4, duration: 0.35 })
+    }
+    const onLeave = () => {
+      gsap.to(cursor, { scale: 1, duration: 0.35, ease: 'power3.out' })
+      if (dotRef.current) gsap.to(dotRef.current, { scale: 1, duration: 0.35 })
+    }
 
+    const interactiveEls = Array.from(
+      document.querySelectorAll<HTMLElement>('a, button, [data-cursor-label], [data-magnetic]')
+    )
     interactiveEls.forEach((el) => {
-      el.addEventListener('pointerenter', () => {
-        gsap.to(cursor, { scale: 2.2, duration: 0.35, ease: 'power3.out' })
-        if (dotRef.current) {
-          gsap.to(dotRef.current, { scale: 0.4, duration: 0.35 })
-        }
-      })
-      el.addEventListener('pointerleave', () => {
-        gsap.to(cursor, { scale: 1, duration: 0.35, ease: 'power3.out' })
-        if (dotRef.current) {
-          gsap.to(dotRef.current, { scale: 1, duration: 0.35 })
-        }
-      })
+      el.addEventListener('pointerenter', onEnter)
+      el.addEventListener('pointerleave', onLeave)
     })
 
     return () => {
       document.removeEventListener('pointermove', onMove)
+      interactiveEls.forEach((el) => {
+        el.removeEventListener('pointerenter', onEnter)
+        el.removeEventListener('pointerleave', onLeave)
+      })
     }
   }, [])
 

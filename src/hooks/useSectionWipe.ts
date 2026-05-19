@@ -15,10 +15,9 @@
 // ─────────────────────────────────────────────────────────────────
 
 import { RefObject, useEffect } from 'react'
-import { gsap }          from 'gsap'
-import { ScrollTrigger } from 'gsap/ScrollTrigger'
+import { gsap }          from '@/lib/gsap'
 
-gsap.registerPlugin(ScrollTrigger)
+
 
 interface WipeOptions {
   /** Scroll distance the wipe plays over. Default: '75vh' */

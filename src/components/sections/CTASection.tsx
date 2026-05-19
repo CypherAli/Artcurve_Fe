@@ -24,9 +24,9 @@ export function CTASection() {
   const luxuryEase: [number, number, number, number] = [0.16, 1, 0.3, 1]
 
   const itemVariants = {
-    hidden:  { y: 40, opacity: 0, filter: 'blur(8px)'  },
+    hidden:  { y: 40, opacity: 0 },
     visible: {
-      y: 0, opacity: 1, filter: 'blur(0px)',
+      y: 0, opacity: 1,
       transition: { duration: 0.9, ease: luxuryEase },
     },
   }

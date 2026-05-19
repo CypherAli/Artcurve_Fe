@@ -11,10 +11,9 @@
 
 import { useEffect, useRef, useState } from 'react'
 import { AnimatePresence, motion }      from 'framer-motion'
-import { gsap }                         from 'gsap'
-import { ScrollTrigger }                from 'gsap/ScrollTrigger'
+import { gsap }                         from '@/lib/gsap'
 
-gsap.registerPlugin(ScrollTrigger)
+
 
 const FAQS = [
   {
@@ -133,18 +132,18 @@ export function FAQSection() {
     )
 
     gsap.set(labelRef.current, { autoAlpha: 0, y: 12 })
-    gsap.set(titleWords,       { yPercent: 110, opacity: 0, filter: 'blur(8px)' })
+    gsap.set(titleWords,       { yPercent: 110, opacity: 0 })
     gsap.set(itemsRef.current.filter(Boolean), { autoAlpha: 0, y: 28 })
 
     const ctx = gsap.context(() => {
       // Header reveal
       gsap.timeline({
-        scrollTrigger: { trigger: sectionRef.current, start: 'top 78%', once: true },
+        scrollTrigger: { trigger: sectionRef.current, start: 'top 78%', once: true, invalidateOnRefresh: true },
       })
       .to(labelRef.current,
         { autoAlpha: 1, y: 0, duration: 0.55, ease: 'power3.out' }, 0)
       .to(titleWords,
-        { yPercent: 0, opacity: 1, filter: 'blur(0px)',
+        { yPercent: 0, opacity: 1,
           duration: 1.0, ease: 'expo.out', stagger: 0.14 }, 0.1)
 
       // Items stagger
@@ -192,7 +191,7 @@ export function FAQSection() {
             {['Frequently', 'Asked'].map(word => (
               <span key={word} className="overflow-hidden inline-block" aria-hidden="true">
                 <span className="faq-word inline-block"
-                  style={{ willChange: 'transform, opacity, filter' }}>
+                  style={{ willChange: 'transform, opacity' }}>
                   {word}
                 </span>
               </span>

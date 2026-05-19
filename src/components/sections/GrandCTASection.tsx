@@ -1,10 +1,9 @@
 'use client'
 
 import { useRef, useEffect } from 'react'
-import { gsap }              from 'gsap'
-import { ScrollTrigger }     from 'gsap/ScrollTrigger'
+import { gsap, ScrollTrigger } from '@/lib/gsap'
 
-gsap.registerPlugin(ScrollTrigger)
+
 
 // ── Primary button — liquid fill + magnetic hover ─────────────────
 function PrimaryButton({ label }: { label: string }) {
@@ -14,8 +13,10 @@ function PrimaryButton({ label }: { label: string }) {
   const arrowRef = useRef<HTMLSpanElement>(null)
 
   // Magnetic quickTo
-  const qX = useRef<ReturnType<typeof gsap.quickTo>>()
-  const qY = useRef<ReturnType<typeof gsap.quickTo>>()
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const qX = useRef<((value: number) => any) | undefined>(undefined)
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const qY = useRef<((value: number) => any) | undefined>(undefined)
 
   useEffect(() => {
     if (!btnRef.current) return
@@ -125,19 +126,27 @@ export function GrandCTASection() {
     gsap.set(Array.from(lines),  { yPercent: 110, opacity: 0 })
     gsap.set(Array.from(extras), { opacity: 0, y: 16 })
 
+    // Dynamic import: refresh scroll positions after this section mounts
+    requestAnimationFrame(() => ScrollTrigger.refresh())
+
     const ctx = gsap.context(() => {
 
       const tl = gsap.timeline({
-        scrollTrigger: { trigger: section, start: 'top 70%', once: true },
+        scrollTrigger: {
+          trigger: section,
+          start: 'top bottom',    // fires the moment section enters viewport bottom
+          once: true,
+          invalidateOnRefresh: true,
+        },
         defaults: { ease: 'power4.out' },
       })
 
       tl.to([frameTopRef.current, frameBotRef.current],
-            { scaleX: 1, duration: 0.9, ease: 'expo.out', stagger: 0.08 })
+            { scaleX: 1, duration: 0.6, ease: 'expo.out', stagger: 0.06 })
         .to(videoWrapRef.current,
-            { clipPath: 'inset(0 0 0% 0 round 2px)', duration: 1.1, ease: 'expo.out' }, '-=0.7')
+            { clipPath: 'inset(0 0 0% 0 round 2px)', duration: 0.75, ease: 'expo.out' }, '-=0.45')
         .to(videoInnerRef.current,
-            { scale: 1.0, duration: 1.4, ease: 'power3.out' }, '<')
+            { scale: 1.0, duration: 1.0, ease: 'power3.out' }, '<')
         .to(Array.from(lines),
             { yPercent: 0, opacity: 1, duration: 1.0, ease: 'expo.out', stagger: 0.12 }, '-=0.65')
         .to(Array.from(extras),
@@ -169,24 +178,15 @@ export function GrandCTASection() {
           <div ref={frameTopRef} className="absolute top-0 left-0 right-0 h-px z-20" aria-hidden="true"
             style={{ background: 'linear-gradient(90deg, #C9A96E, rgba(201,169,110,0.4) 60%, transparent)', transformOrigin: 'left center' }} />
 
-          {/* SVG sharpen */}
-          <svg width="0" height="0" style={{ position: 'absolute' }} aria-hidden="true">
-            <defs>
-              <filter id="sharpen" x="0" y="0" width="100%" height="100%" colorInterpolationFilters="linearRGB">
-                <feConvolutionMatrix order="3" kernelMatrix="0 -0.5 0  -0.5 3 -0.5  0 -0.5 0" preserveAlpha="true" />
-              </filter>
-            </defs>
-          </svg>
-
           {/* Clip-path reveal */}
           <div ref={videoWrapRef} className="relative overflow-hidden w-full" style={{ aspectRatio: '16 / 9' }}>
 
             {/* Scale / Ken-Burns */}
             <div ref={videoInnerRef} className="absolute inset-0" style={{ willChange: 'transform' }}>
-              <video src="/cta-video.mp4" autoPlay muted loop playsInline
+              <video src="/cta-video.mp4" autoPlay muted loop playsInline preload="auto"
                 className="w-full h-full object-cover"
                 style={{ display: 'block', objectPosition: 'center 25%',
-                  filter: 'brightness(1.1) contrast(1.25) saturate(1.1) url(#sharpen)' }}
+                  filter: 'brightness(1.08) contrast(1.12)' }}
               />
 
               {/* Dual gradient: left + bottom */}

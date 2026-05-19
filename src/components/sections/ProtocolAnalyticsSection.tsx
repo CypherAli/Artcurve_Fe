@@ -9,10 +9,9 @@
 // ─────────────────────────────────────────────────────────────────
 
 import { useEffect, useRef } from 'react'
-import { gsap }              from 'gsap'
-import { ScrollTrigger }     from 'gsap/ScrollTrigger'
+import { gsap, ScrollTrigger } from '@/lib/gsap'
 
-gsap.registerPlugin(ScrollTrigger)
+
 
 const STATS = [
   {
@@ -62,7 +61,7 @@ export function ProtocolAnalyticsSection() {
       // Eyebrow
       gsap.to(labelRef.current, {
         autoAlpha: 1, y: 0, duration: 0.5, ease: 'power3.out',
-        scrollTrigger: { trigger: sectionRef.current, start: 'top 80%', once: true },
+        scrollTrigger: { trigger: sectionRef.current, start: 'top 80%', once: true, invalidateOnRefresh: true },
       })
 
       // Columns stagger fade-up

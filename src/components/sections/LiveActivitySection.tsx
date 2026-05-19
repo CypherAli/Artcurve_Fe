@@ -13,10 +13,9 @@
 
 import { useEffect, useRef, useState } from 'react'
 import { AnimatePresence, motion }      from 'framer-motion'
-import { gsap }                         from 'gsap'
-import { ScrollTrigger }                from 'gsap/ScrollTrigger'
+import { gsap }                         from '@/lib/gsap'
 
-gsap.registerPlugin(ScrollTrigger)
+
 
 // ── Mock data pools ───────────────────────────────────────────────
 const ARTWORKS: { name: string; img: string }[] = [
@@ -107,6 +106,7 @@ function TradeRow({ trade, isNew }: { trade: Trade; isNew: boolean }) {
       <div className="shrink-0 size-10 overflow-hidden rounded-sm border border-[#E4DDD3]">
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img src={trade.img} alt={trade.artwork}
+          loading="lazy" decoding="async"
           className="w-full h-full object-cover" draggable={false} />
       </div>
 
@@ -212,9 +212,25 @@ export function LiveActivitySection() {
     return () => ctx.revert()
   }, [mounted])
 
+  // ── Pause timers when section is off-screen ───────────────────
+  const visibleRef = useRef(false)
+
+  useEffect(() => {
+    if (!mounted) return
+    const el = sectionRef.current
+    if (!el) return
+    const io = new IntersectionObserver(
+      ([entry]) => { visibleRef.current = entry.isIntersecting },
+      { threshold: 0.05 }
+    )
+    io.observe(el)
+    return () => io.disconnect()
+  }, [mounted])
+
   useEffect(() => {
     if (!mounted) return
     const age = setInterval(() => {
+      if (!visibleRef.current) return
       setTrades(prev => prev.map((t, i) => ({
         ...t, time: i === 0 ? 'Just now' : `${(i + 1) * 4}s ago`,
       })))
@@ -227,9 +243,11 @@ export function LiveActivitySection() {
     let timer: ReturnType<typeof setTimeout>
     const schedule = () => {
       timer = setTimeout(() => {
-        const t = generateTrade()
-        setNewId(t.id)
-        setTrades(prev => [t, ...prev].slice(0, MAX_TRADES))
+        if (visibleRef.current) {
+          const t = generateTrade()
+          setNewId(t.id)
+          setTrades(prev => [t, ...prev].slice(0, MAX_TRADES))
+        }
         schedule()
       }, 3000 + Math.random() * 2000)
     }
