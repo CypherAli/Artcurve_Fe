@@ -308,7 +308,7 @@ export function CuratedGallerySection() {
           </h2>
           <a
             ref={viewAllRef}
-            href="#marketplace"
+            href="/marketplace"
             className="text-[11px] tracking-[0.2em] uppercase text-[#C9A96E] border-b border-[#C9A96E]/40 pb-0.5 hover:border-[#C9A96E] transition-colors duration-300 shrink-0"
           >
             View All →
