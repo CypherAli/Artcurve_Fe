@@ -234,7 +234,7 @@ function NotificationsDropdown({ onClose }: { onClose: () => void }) {
 }
 
 const NAV_LINKS = [
-  { label: 'Marketplace', href: '#marketplace' },
+  { label: 'Marketplace', href: '/marketplace' },
   { label: 'Trade',       href: '#trade' },
   { label: 'Live',        href: '#live' },
   { label: 'Vault',       href: '#vault' },
