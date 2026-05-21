@@ -385,31 +385,49 @@ function BondingCurveChart({ art }: { art: MarketArtwork }) {
 function ListItem({
   art,
   active,
+  autoActive,
   onClick,
 }: {
-  art:     MarketArtwork
-  active:  boolean
-  onClick: () => void
+  art:        MarketArtwork
+  active:     boolean
+  autoActive: boolean   // pulsing when auto-rotate is about to select
+  onClick:    () => void
 }) {
+  const [hovered, setHovered] = useState(false)
+
+  // Mini sparkline helper (inline — no external dep needed)
+  const sparkW = hovered ? 72 : 40
+  const sparkH = hovered ? 28 : 16
+  const { d: sd, areaD: sad } = useMemo(() => {
+    const data = art.sparkline
+    const pw = sparkW - 2, ph = sparkH - 2
+    const min = Math.min(...data), max = Math.max(...data)
+    const pts = data.map((v, i) => ({
+      x: 1 + (i / (data.length - 1)) * pw,
+      y: 1 + ph - ((v - min) / (max - min || 1)) * ph,
+    }))
+    const d = `M${pts.map(p => `${p.x.toFixed(1)},${p.y.toFixed(1)}`).join(' L')}`
+    const last = pts[pts.length - 1]
+    const areaD = `${d} L${last.x.toFixed(1)},${(1 + ph).toFixed(1)} L1,${(1 + ph).toFixed(1)} Z`
+    return { d, areaD }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [art.sparkline, sparkW, sparkH])
+
   return (
     <button
       type="button"
       onClick={onClick}
+      onMouseEnter={() => setHovered(true)}
+      onMouseLeave={() => setHovered(false)}
       className="w-full flex items-center gap-3 py-3 px-4 text-left
                  transition-colors duration-150 relative"
       style={{
         borderBottom: '1px solid rgba(255,255,255,0.05)',
-        background:   active ? 'rgba(255,255,255,0.04)' : 'transparent',
+        background:   active ? 'rgba(255,255,255,0.04)' : hovered ? 'rgba(255,255,255,0.025)' : 'transparent',
         borderLeft:   active ? `2px solid #D4AF37` : '2px solid transparent',
       }}
-      onMouseEnter={e => {
-        if (!active) e.currentTarget.style.background = 'rgba(255,255,255,0.03)'
-      }}
-      onMouseLeave={e => {
-        if (!active) e.currentTarget.style.background = 'transparent'
-      }}
     >
-      {/* Col 1: thumbnail */}
+      {/* Auto-rotate pulse ring on thumb */}
       <div className="relative w-10 h-10 shrink-0 overflow-hidden rounded-sm">
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img
@@ -417,23 +435,23 @@ function ListItem({
           className="w-full h-full object-cover"
           loading="lazy" decoding="async"
         />
-        {/* Phase left sliver */}
-        <span
-          className="absolute left-0 top-0 bottom-0 w-[2px]"
-          style={{ background: art.phaseColor }}
-        />
+        <span className="absolute left-0 top-0 bottom-0 w-[2px]"
+          style={{ background: art.phaseColor }}/>
+        {/* Pulsing border when auto-selecting */}
+        {autoActive && !active && (
+          <span className="absolute inset-0 animate-ping rounded-sm opacity-40"
+            style={{ border: `1px solid ${art.phaseColor}` }}/>
+        )}
       </div>
 
-      {/* Col 2: title + ticker */}
+      {/* Title + ticker */}
       <div className="flex-1 min-w-0">
-        <p
-          className="truncate text-[12.5px] leading-tight"
+        <p className="truncate text-[12.5px] leading-tight"
           style={{
             color:      active ? '#FDFBF7' : 'rgba(255,255,255,0.72)',
             fontFamily: "'Cormorant Garamond', serif",
             fontWeight: 400,
-          }}
-        >
+          }}>
           {art.title}
         </p>
         <p className="text-[9px] font-mono tracking-wide mt-0.5"
@@ -442,7 +460,7 @@ function ListItem({
         </p>
       </div>
 
-      {/* Col 3: market cap */}
+      {/* Market cap + 24h */}
       <div className="text-right shrink-0 w-20">
         <p className="font-mono text-[11.5px]"
           style={{ color: active ? '#FDFBF7' : 'rgba(255,255,255,0.65)' }}>
@@ -454,25 +472,26 @@ function ListItem({
         </p>
       </div>
 
-      {/* Col 4: mini progress bar */}
-      <div className="shrink-0 w-12">
-        <div
-          className="h-[3px] rounded-full overflow-hidden"
-          style={{ background: 'rgba(255,255,255,0.1)' }}
-          title={`${art.progress}% to graduation`}
-        >
-          <div
-            className="h-full rounded-full"
-            style={{
-              width:      `${art.progress}%`,
-              background: `linear-gradient(90deg, ${art.phaseColor}80, ${art.phaseColor})`,
-            }}
-          />
-        </div>
-        <p className="font-mono text-[7.5px] mt-0.5 text-right"
-          style={{ color: 'rgba(255,255,255,0.22)' }}>
-          {art.progress}%
-        </p>
+      {/* ── Mini sparkline — small by default, expands on row hover ── */}
+      <div
+        className="shrink-0 overflow-hidden"
+        style={{
+          width:      sparkW,
+          height:     sparkH,
+          transition: 'width 0.28s ease, height 0.28s ease',
+        }}
+      >
+        <svg viewBox={`0 0 ${sparkW} ${sparkH}`} className="w-full h-full" aria-hidden>
+          <defs>
+            <linearGradient id={`ls-${art.id}`} x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%"   stopColor={art.phaseColor} stopOpacity="0.35"/>
+              <stop offset="100%" stopColor={art.phaseColor} stopOpacity="0"/>
+            </linearGradient>
+          </defs>
+          <path d={sad} fill={`url(#ls-${art.id})`}/>
+          <path d={sd}  fill="none" stroke={art.phaseColor}
+            strokeWidth={hovered ? 1.5 : 1.2} strokeLinecap="round"/>
+        </svg>
       </div>
     </button>
   )
@@ -815,19 +834,26 @@ function BuyModal({ art, onClose }: { art: MarketArtwork; onClose: () => void })
   )
 }
 
+// ── Auto-rotate interval (ms) ─────────────────────────────────────
+const ROTATE_MS = 4500
+
 // ── Main MarketplacePage ───────────────────────────────────────────
 export function MarketplacePage() {
-  const [selected,    setSelected]    = useState<MarketArtwork>(ARTWORKS[0])
-  const [activePhase, setActivePhase] = useState<Phase | 'All'>('All')
-  const [sortKey,     setSortKey]     = useState<SortKey>('market_cap')
-  const [search,      setSearch]      = useState('')
-  const [sortOpen,    setSortOpen]    = useState(false)
-  const [buyArt,      setBuyArt]      = useState<MarketArtwork | null>(null)
-  // Mobile bottom sheet
-  const [sheetOpen,   setSheetOpen]   = useState(false)
+  const [selected,     setSelected]     = useState<MarketArtwork>(ARTWORKS[0])
+  const [activePhase,  setActivePhase]  = useState<Phase | 'All'>('All')
+  const [sortKey,      setSortKey]      = useState<SortKey>('market_cap')
+  const [search,       setSearch]       = useState('')
+  const [sortOpen,     setSortOpen]     = useState(false)
+  const [buyArt,       setBuyArt]       = useState<MarketArtwork | null>(null)
+  const [sheetOpen,    setSheetOpen]    = useState(false)
+  // Auto-rotate
+  const [listHovered,  setListHovered]  = useState(false)
+  const [rotateProgress, setRotateProg] = useState(0)
+  const [nextId,       setNextId]       = useState<number | null>(null)
 
-  const sortRef   = useRef<HTMLDivElement>(null)
-  const headerRef = useRef<HTMLDivElement>(null)
+  const sortRef      = useRef<HTMLDivElement>(null)
+  const headerRef    = useRef<HTMLDivElement>(null)
+  const resumeTimer  = useRef<ReturnType<typeof setTimeout> | null>(null)
 
   // ── Filter + sort ──────────────────────────────────────────────
   const filtered = useMemo(() => {
@@ -852,12 +878,64 @@ export function MarketplacePage() {
     return items
   }, [activePhase, sortKey, search])
 
-  // If selected is filtered out, auto-select first visible
+  // If selected gets filtered out, auto-select first
   useEffect(() => {
     if (filtered.length && !filtered.find(a => a.id === selected.id)) {
       setSelected(filtered[0])
     }
   }, [filtered, selected.id])
+
+  // ── Auto-rotation — cycles every ROTATE_MS, pauses on hover ──
+  useEffect(() => {
+    if (listHovered || filtered.length <= 1) {
+      setNextId(null)
+      setRotateProg(0)
+      return
+    }
+
+    // Tick progress bar every 80ms
+    const TICK = 80
+    let elapsed = 0
+    const progressId = setInterval(() => {
+      elapsed += TICK
+      const pct = Math.min(100, (elapsed / ROTATE_MS) * 100)
+      setRotateProg(pct)
+
+      // Preview which row is "next" at 70% progress
+      if (pct >= 70) {
+        const idx  = filtered.findIndex(a => a.id === selected.id)
+        const next = filtered[(idx + 1) % filtered.length]
+        setNextId(next.id)
+      }
+    }, TICK)
+
+    // Rotate when full
+    const rotateId = setTimeout(() => {
+      setSelected(prev => {
+        const idx  = filtered.findIndex(a => a.id === prev.id)
+        return filtered[(idx + 1) % filtered.length]
+      })
+      setRotateProg(0)
+      setNextId(null)
+    }, ROTATE_MS)
+
+    return () => {
+      clearInterval(progressId)
+      clearTimeout(rotateId)
+    }
+  }, [listHovered, filtered, selected.id])
+
+  // Pause auto-rotate on hover, resume 2 s after leave
+  const onListEnter = useCallback(() => {
+    if (resumeTimer.current) clearTimeout(resumeTimer.current)
+    setListHovered(true)
+    setNextId(null)
+    setRotateProg(0)
+  }, [])
+
+  const onListLeave = useCallback(() => {
+    resumeTimer.current = setTimeout(() => setListHovered(false), 2000)
+  }, [])
 
   // Phase counts
   const counts = useMemo(() => ({
@@ -891,20 +969,25 @@ export function MarketplacePage() {
     return () => { clearTimeout(t); document.removeEventListener('mousedown', h) }
   }, [sortOpen])
 
+  // Manual select — also stops auto-rotate briefly
   const handleSelect = (art: MarketArtwork) => {
     setSelected(art)
-    setSheetOpen(true) // triggers bottom sheet on mobile
+    setListHovered(true)
+    setRotateProg(0)
+    setNextId(null)
+    if (resumeTimer.current) clearTimeout(resumeTimer.current)
+    resumeTimer.current = setTimeout(() => setListHovered(false), 3000)
+    setSheetOpen(true)
   }
 
   const currentSort = SORT_OPTIONS.find(s => s.key === sortKey)!
 
+  // ── RIGHT PANEL sticky top = 80px header + 48px navigator = 128px
+  const STICKY_TOP = 128
+
   return (
     <>
-      {/* ── Full-viewport flex column ────────────────────────── */}
-      <div
-        className="flex flex-col"
-        style={{ height: '100dvh', paddingTop: 80, background: '#0A0A0A' }}
-      >
+      <div style={{ paddingTop: 80, background: '#0A0A0A', minHeight: '100dvh' }}>
 
         {/* ══ COMMAND CENTER ══════════════════════════════════ */}
         <div
@@ -964,8 +1047,9 @@ export function MarketplacePage() {
 
         {/* ══ FLOW NAVIGATOR ══════════════════════════════════ */}
         <div
-          className="shrink-0 flex items-center justify-between gap-4 px-6"
+          className="sticky z-30 flex items-center justify-between gap-4 px-6"
           style={{
+            top:          80,
             borderBottom: '1px solid rgba(255,255,255,0.08)',
             background:   'rgba(10,10,10,0.98)',
             height:       48,
@@ -1083,11 +1167,12 @@ export function MarketplacePage() {
         </div>
 
         {/* ══ SPLIT PANE ══════════════════════════════════════ */}
-        <div className="flex flex-1 min-h-0">
+        <div className="flex items-start">
 
           {/* ── Left: Compact List (40%) ── */}
           <div
-            className="overflow-y-auto shrink-0"
+            onMouseEnter={onListEnter}
+            onMouseLeave={onListLeave}
             style={{
               width:          '40%',
               borderRight:    '1px solid rgba(255,255,255,0.07)',
@@ -1095,13 +1180,31 @@ export function MarketplacePage() {
               scrollbarColor: 'rgba(212,175,55,0.15) transparent',
             }}
           >
+            {/* Auto-rotate progress bar */}
+            <div
+              className="h-[2px] w-full"
+              style={{ background: 'rgba(255,255,255,0.05)' }}
+            >
+              <div
+                className="h-full"
+                style={{
+                  width:      `${rotateProgress}%`,
+                  background: listHovered
+                    ? 'transparent'
+                    : 'linear-gradient(90deg, #D4AF37, #F3E5AB)',
+                  transition: listHovered ? 'none' : 'width 0.08s linear',
+                }}
+              />
+            </div>
+
             {/* List header */}
             <div
-              className="grid gap-3 sticky top-0 z-10 px-4 py-2"
+              className="grid gap-3 sticky z-10 px-4 py-2"
               style={{
+                top:                 128, /* 80px header + 48px nav */
                 gridTemplateColumns: '40px 1fr 80px 48px',
-                background:   '#0A0A0A',
-                borderBottom: '1px solid rgba(255,255,255,0.06)',
+                background:          '#0A0A0A',
+                borderBottom:        '1px solid rgba(255,255,255,0.06)',
               }}
             >
               {['', 'Artwork', 'Cap', '%'].map(h => (
@@ -1129,15 +1232,23 @@ export function MarketplacePage() {
                 key={art.id}
                 art={art}
                 active={selected.id === art.id}
+                autoActive={nextId === art.id}
                 onClick={() => handleSelect(art)}
               />
             ))}
           </div>
 
-          {/* ── Right: Inspection Deck (60%) — hidden on mobile ── */}
+          {/* ── Right: Inspection Deck (60%) — hidden on mobile, sticky ── */}
           <div
             className="hidden md:block flex-1 min-w-0"
-            style={{ background: '#0A0A0A' }}
+            style={{
+              position:   'sticky',
+              top:        STICKY_TOP,
+              height:     `calc(100vh - ${STICKY_TOP}px)`,
+              overflowY:  'auto',
+              background: '#0A0A0A',
+              scrollbarWidth: 'none',
+            }}
           >
             <InspectionDeck art={selected} onCollect={setBuyArt}/>
           </div>
