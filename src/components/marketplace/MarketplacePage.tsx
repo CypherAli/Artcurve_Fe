@@ -180,6 +180,289 @@ function buildSparkPath(
   return { d, areaD, last }
 }
 
+// ── Chart time range ──────────────────────────────────────────────
+type TimeRange = '1H' | '6H' | '1D' | '7D'
+
+function getChartData(sparkline: number[], range: TimeRange): number[] {
+  switch (range) {
+    case '1H': return sparkline.slice(-4)
+    case '6H': return sparkline.slice(-6)
+    case '7D': {
+      const f = sparkline[0]
+      return [f * 0.22, f * 0.44, f * 0.70, f * 0.90, ...sparkline]
+    }
+    default: return sparkline // '1D'
+  }
+}
+
+const TIME_AXIS: Record<TimeRange, string[]> = {
+  '1H': ['45m', '30m', '15m', 'Now'],
+  '6H': ['5h', '4h', '3h', '2h', '1h', 'Now'],
+  '1D': ['7d', '6d', '5d', '4d', '3d', '2d', '1d', 'Now'],
+  '7D': ['11d', '10d', '8d', '7d', '5d', '4d', '3d', '2d', '1d', 'Now'],
+}
+
+// ── Live activity feed data ────────────────────────────────────────
+interface LiveTrade {
+  id:        number
+  art:       MarketArtwork
+  addr:      string
+  action:    'bought' | 'collected'
+  ethAmount: string
+}
+const FAKE_WALLETS = [
+  '0x4f2…a91', '0x8d3…f44', '0x1a9…c33',
+  '0x7e1…b22', '0x2b5…d81', '0x9c4…e17', '0x3f7…a04',
+]
+
+// ── Scrolling trade ticker tape ───────────────────────────────────
+function TickerTape() {
+  const items = ARTWORKS.map(a => ({
+    ticker:   a.ticker,
+    change:   a.change24h,
+    positive: a.changePositive,
+    color:    a.phaseColor,
+    vol:      a.volume24h,
+  }))
+  return (
+    <div
+      className="overflow-hidden"
+      style={{
+        height:       26,
+        borderBottom: '1px solid rgba(255,255,255,0.05)',
+        background:   'rgba(0,0,0,0.5)',
+      }}
+    >
+      <motion.div
+        className="flex items-center h-full"
+        animate={{ x: ['0%', '-50%'] }}
+        transition={{ duration: 34, ease: 'linear', repeat: Infinity, repeatType: 'loop' as const }}
+        style={{ width: 'max-content', willChange: 'transform' }}
+      >
+        {[...items, ...items].map((item, i) => (
+          <span
+            key={i}
+            className="flex items-center gap-2 px-5 h-full shrink-0"
+            style={{ borderRight: '1px solid rgba(255,255,255,0.04)' }}
+          >
+            <span
+              className="font-mono text-[8.5px] tracking-wide"
+              style={{ color: 'rgba(255,255,255,0.3)' }}
+            >
+              {item.ticker}
+            </span>
+            <span
+              className="font-mono text-[8.5px] font-semibold"
+              style={{ color: item.positive ? '#4ade80' : '#f87171' }}
+            >
+              {item.change}
+            </span>
+            <span className="font-mono text-[7.5px]"
+              style={{ color: 'rgba(255,255,255,0.18)' }}>
+              VOL {item.vol}
+            </span>
+            <span
+              className="size-[5px] rounded-full shrink-0"
+              style={{ background: item.color }}
+            />
+          </span>
+        ))}
+      </motion.div>
+    </div>
+  )
+}
+
+// ── Live activity feed (placed below list items) ──────────────────
+function ActivityFeed() {
+  const [trades, setTrades] = useState<LiveTrade[]>(() =>
+    [0, 1, 2, 3, 4].map(i => ({
+      id:        i,
+      art:       ARTWORKS[i % ARTWORKS.length],
+      addr:      FAKE_WALLETS[i % FAKE_WALLETS.length],
+      action:    (i % 3 === 0 ? 'collected' : 'bought') as LiveTrade['action'],
+      ethAmount: (0.12 + (i % 5) * 0.28).toFixed(2),
+    }))
+  )
+  const counterRef = useRef(10)
+
+  useEffect(() => {
+    const timer = setInterval(() => {
+      const c = counterRef.current++
+      setTrades(prev => [{
+        id:        Date.now() + c,
+        art:       ARTWORKS[c % ARTWORKS.length],
+        addr:      FAKE_WALLETS[c % FAKE_WALLETS.length],
+        action:    (c % 3 === 0 ? 'collected' : 'bought') as LiveTrade['action'],
+        ethAmount: (0.12 + (c % 5) * 0.28).toFixed(2),
+      }, ...prev.slice(0, 6)])
+    }, 3600)
+    return () => clearInterval(timer)
+  }, [])
+
+  return (
+    <div style={{ borderTop: '1px solid rgba(255,255,255,0.07)' }}>
+      {/* Header */}
+      <div
+        className="flex items-center justify-between px-4 py-2.5"
+        style={{ borderBottom: '1px solid rgba(255,255,255,0.05)' }}
+      >
+        <span
+          className="font-mono text-[8px] uppercase tracking-[0.22em]"
+          style={{ color: 'rgba(255,255,255,0.22)' }}
+        >
+          Live Activity
+        </span>
+        <span className="flex items-center gap-1.5">
+          <span
+            className="size-1.5 rounded-full animate-pulse"
+            style={{ background: '#4ade80' }}
+          />
+          <span
+            className="font-mono text-[7.5px] tracking-widest"
+            style={{ color: '#4ade80' }}
+          >
+            LIVE
+          </span>
+        </span>
+      </div>
+
+      {/* Trade rows */}
+      <AnimatePresence initial={false}>
+        {trades.map(trade => (
+          <motion.div
+            key={trade.id}
+            initial={{ opacity: 0, x: -8 }}
+            animate={{ opacity: 1, x: 0 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.28 }}
+            className="flex items-center gap-3 px-4 py-2.5"
+            style={{ borderBottom: '1px solid rgba(255,255,255,0.04)' }}
+          >
+            {/* Thumbnail */}
+            <div className="relative w-[22px] h-[22px] shrink-0 overflow-hidden rounded-sm">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src={trade.art.image} alt="" className="w-full h-full object-cover" />
+              <span
+                className="absolute left-0 top-0 bottom-0 w-[2px]"
+                style={{ background: trade.art.phaseColor }}
+              />
+            </div>
+
+            {/* Description */}
+            <p
+              className="flex-1 min-w-0 text-[8.5px] truncate"
+              style={{ color: 'rgba(255,255,255,0.4)' }}
+            >
+              <span
+                className="font-mono"
+                style={{ color: 'rgba(255,255,255,0.18)' }}
+              >
+                {trade.addr}
+              </span>
+              {' '}{trade.action}{' '}
+              <span className="font-mono" style={{ color: trade.art.phaseColor }}>
+                {trade.art.ticker}
+              </span>
+            </p>
+
+            {/* Amount */}
+            <span
+              className="font-mono text-[8.5px] shrink-0"
+              style={{ color: 'rgba(255,255,255,0.35)' }}
+            >
+              {trade.ethAmount} ETH
+            </span>
+          </motion.div>
+        ))}
+      </AnimatePresence>
+    </div>
+  )
+}
+
+// ── Fullscreen artwork lightbox ───────────────────────────────────
+function ArtLightbox({ art, onClose }: { art: MarketArtwork; onClose: () => void }) {
+  // Close on Escape
+  useEffect(() => {
+    const handler = (e: KeyboardEvent) => { if (e.key === 'Escape') onClose() }
+    document.addEventListener('keydown', handler)
+    return () => document.removeEventListener('keydown', handler)
+  }, [onClose])
+
+  return (
+    <motion.div
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0 }}
+      transition={{ duration: 0.22 }}
+      className="fixed inset-0 z-[95] flex items-center justify-center p-8 cursor-zoom-out"
+      style={{ background: 'rgba(0,0,0,0.94)', backdropFilter: 'blur(24px)' }}
+      onClick={onClose}
+    >
+      <motion.div
+        initial={{ scale: 0.9, opacity: 0 }}
+        animate={{ scale: 1, opacity: 1 }}
+        exit={{ scale: 0.95, opacity: 0 }}
+        transition={{ duration: 0.3, ease: [0.25, 0.46, 0.45, 0.94] as const }}
+        className="relative"
+        onClick={e => e.stopPropagation()}
+      >
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img
+          src={art.image}
+          alt={art.title}
+          className="block max-h-[84vh] max-w-[84vw] object-contain"
+          style={{ boxShadow: '0 48px 120px rgba(0,0,0,0.85)' }}
+          draggable={false}
+        />
+
+        {/* Phase left accent */}
+        <span
+          className="absolute left-0 top-0 bottom-0 w-[3px]"
+          style={{ background: art.phaseColor }}
+        />
+
+        {/* Info overlay at bottom */}
+        <div
+          className="absolute bottom-0 left-0 right-0 px-6 py-5 pointer-events-none"
+          style={{ background: 'linear-gradient(to top, rgba(0,0,0,0.88) 0%, transparent 100%)' }}
+        >
+          <h2
+            className="font-light leading-tight mb-1"
+            style={{
+              fontFamily: "'Cormorant Garamond', serif",
+              fontSize:   'clamp(1.4rem, 3vw, 2.2rem)',
+              color:      '#FDFBF7',
+            }}
+          >
+            {art.title}
+          </h2>
+          <p
+            className="font-mono text-[9px] tracking-[0.2em] uppercase"
+            style={{ color: art.phaseColor }}
+          >
+            {art.ticker} · {art.artist}
+          </p>
+        </div>
+
+        {/* Close button */}
+        <button
+          type="button"
+          onClick={onClose}
+          className="absolute top-3 right-3 w-9 h-9 flex items-center justify-center
+                     rounded-full pointer-events-auto cursor-pointer transition-colors duration-150"
+          style={{ background: 'rgba(0,0,0,0.7)', border: '1px solid rgba(255,255,255,0.18)' }}
+          onMouseEnter={e => (e.currentTarget.style.background = 'rgba(255,255,255,0.14)')}
+          onMouseLeave={e => (e.currentTarget.style.background = 'rgba(0,0,0,0.7)')}
+        >
+          <svg viewBox="0 0 24 24" className="w-4 h-4" fill="none" stroke="white" strokeWidth="2">
+            <path d="M18 6L6 18M6 6l12 12" strokeLinecap="round" />
+          </svg>
+        </button>
+      </motion.div>
+    </motion.div>
+  )
+}
+
 // ── Artwork image with sparkline overlay (like homepage) ───────────
 function ArtworkWithChart({
   art,
@@ -309,9 +592,10 @@ function ArtworkWithChart({
 }
 
 // ── Bonding curve chart (larger version for detail bottom) ─────────
-function BondingCurveChart({ art }: { art: MarketArtwork }) {
+function BondingCurveChart({ art, range }: { art: MarketArtwork; range: TimeRange }) {
   const W = 600, H = 160
-  const { d, areaD, last } = buildSparkPath(art.sparkline, W, H, 10, 12, 32, 12)
+  const chartData = getChartData(art.sparkline, range)
+  const { d, areaD, last } = buildSparkPath(chartData, W, H, 10, 12, 32, 12)
   const gid      = `bc-${art.id}`
   const filterId = `bcglow-${art.id}`
 
@@ -371,7 +655,7 @@ function BondingCurveChart({ art }: { art: MarketArtwork }) {
 
       {/* Bottom time axis */}
       <div className="absolute bottom-1.5 inset-x-3 flex justify-between pointer-events-none">
-        {['7d ago', '6d', '5d', '4d', '3d', '2d', '1d', 'Now'].map(t => (
+        {TIME_AXIS[range].map(t => (
           <span key={t} className="font-mono text-[7px]" style={{ color: 'rgba(255,255,255,0.18)' }}>
             {t}
           </span>
@@ -501,10 +785,29 @@ function ListItem({
 function InspectionDeck({
   art,
   onCollect,
+  onLightbox,
 }: {
-  art:       MarketArtwork
-  onCollect: (art: MarketArtwork) => void
+  art:        MarketArtwork
+  onCollect:  (art: MarketArtwork) => void
+  onLightbox: (art: MarketArtwork) => void
 }) {
+  const [chartRange,  setChartRange]  = useState<TimeRange>('1D')
+  const [tilt,        setTilt]        = useState({ rx: 0, ry: 0 })
+
+  // Reset state when artwork changes
+  useEffect(() => {
+    setChartRange('1D')
+    setTilt({ rx: 0, ry: 0 })
+  }, [art.id])
+
+  const handleTiltMove = useCallback((e: React.MouseEvent<HTMLDivElement>) => {
+    const rect = e.currentTarget.getBoundingClientRect()
+    const ry =  ((e.clientX - rect.left) / rect.width  - 0.5) *  7
+    const rx = -((e.clientY - rect.top)  / rect.height - 0.5) *  7
+    setTilt({ rx, ry })
+  }, [])
+  const handleTiltLeave = useCallback(() => setTilt({ rx: 0, ry: 0 }), [])
+
   return (
     <AnimatePresence mode="wait">
       <motion.div
@@ -519,8 +822,19 @@ function InspectionDeck({
         {/* ── Top Half: Art + Typography ── */}
         <div className="flex gap-6">
 
-          {/* Left: Artwork with sparkline overlay */}
-          <div className="w-1/2 shrink-0">
+          {/* Left: Artwork — click to lightbox, hover to 3-D tilt */}
+          <div
+            className="w-1/2 shrink-0 cursor-zoom-in"
+            onMouseMove={handleTiltMove}
+            onMouseLeave={handleTiltLeave}
+            onClick={() => onLightbox(art)}
+            style={{
+              transform:        `perspective(700px) rotateY(${tilt.ry}deg) rotateX(${tilt.rx}deg)`,
+              transition:       'transform 0.22s ease',
+              transformOrigin:  'center center',
+            }}
+            title="Click to expand"
+          >
             <ArtworkWithChart art={art}/>
           </div>
 
@@ -629,13 +943,35 @@ function InspectionDeck({
             ))}
           </div>
 
-          {/* Bonding curve chart */}
+          {/* Bonding curve chart + timeframe switcher */}
           <div>
-            <p className="font-mono text-[9px] tracking-[0.22em] uppercase mb-2.5"
-              style={{ color: 'rgba(255,255,255,0.28)' }}>
-              Bonding Curve · 7-Day Price History
-            </p>
-            <BondingCurveChart art={art}/>
+            <div className="flex items-center justify-between mb-2.5">
+              <p
+                className="font-mono text-[9px] tracking-[0.22em] uppercase"
+                style={{ color: 'rgba(255,255,255,0.28)' }}
+              >
+                Bonding Curve · Price History
+              </p>
+              {/* Timeframe tabs */}
+              <div className="flex items-center gap-1">
+                {(['1H', '6H', '1D', '7D'] as TimeRange[]).map(r => (
+                  <button
+                    key={r}
+                    type="button"
+                    onClick={() => setChartRange(r)}
+                    className="font-mono text-[8px] px-2 py-1 transition-colors duration-150"
+                    style={{
+                      color:      chartRange === r ? '#D4AF37' : 'rgba(255,255,255,0.3)',
+                      background: chartRange === r ? 'rgba(212,175,55,0.1)' : 'transparent',
+                      border:     `1px solid ${chartRange === r ? 'rgba(212,175,55,0.3)' : 'rgba(255,255,255,0.07)'}`,
+                    }}
+                  >
+                    {r}
+                  </button>
+                ))}
+              </div>
+            </div>
+            <BondingCurveChart art={art} range={chartRange}/>
           </div>
 
           {/* Progress bar */}
@@ -691,8 +1027,11 @@ function InspectionDeck({
 // ── Buy confirmation modal (lightweight) ──────────────────────────
 type TxState = 'idle' | 'pending' | 'confirming' | 'success'
 
+const QUICK_AMOUNTS = ['0.1 ETH', '0.5 ETH', '1 ETH'] as const
+
 function BuyModal({ art, onClose }: { art: MarketArtwork; onClose: () => void }) {
-  const [tx, setTx] = useState<TxState>('idle')
+  const [tx,         setTx]         = useState<TxState>('idle')
+  const [buyAmount,  setBuyAmount]   = useState<string>('0.1 ETH')
   const overlayRef  = useRef<HTMLDivElement>(null)
   const panelRef    = useRef<HTMLDivElement>(null)
 
@@ -780,14 +1119,50 @@ function BuyModal({ art, onClose }: { art: MarketArtwork; onClose: () => void })
           </div>
 
           {tx === 'idle' && (
-            <button onClick={buy}
-              className="w-full h-11 font-mono text-[10.5px] tracking-[0.28em] uppercase font-semibold
-                         transition-opacity duration-200"
-              style={{ background: 'linear-gradient(90deg, #D4AF37, #F3E5AB)', color: '#0A0A0A' }}
-              onMouseEnter={e => (e.currentTarget.style.opacity = '0.9')}
-              onMouseLeave={e => (e.currentTarget.style.opacity = '1')}>
-              Confirm Purchase — {art.marketCapLabel}
-            </button>
+            <>
+              {/* Quick amount presets */}
+              <div className="flex gap-2 mb-3">
+                {QUICK_AMOUNTS.map(amt => (
+                  <button
+                    key={amt}
+                    type="button"
+                    onClick={() => setBuyAmount(amt)}
+                    className="flex-1 h-8 font-mono text-[9px] tracking-widest transition-colors duration-150"
+                    style={{
+                      border:     `1px solid ${buyAmount === amt ? '#D4AF37' : 'rgba(255,255,255,0.1)'}`,
+                      color:      buyAmount === amt ? '#D4AF37' : 'rgba(255,255,255,0.35)',
+                      background: buyAmount === amt ? 'rgba(212,175,55,0.08)' : 'transparent',
+                    }}
+                  >
+                    {amt}
+                  </button>
+                ))}
+              </div>
+
+              {/* Gas fee estimate */}
+              <div
+                className="flex items-center justify-between px-3 py-2 mb-3 font-mono text-[8px]"
+                style={{
+                  background: 'rgba(255,255,255,0.025)',
+                  border:     '1px solid rgba(255,255,255,0.06)',
+                }}
+              >
+                <span style={{ color: 'rgba(255,255,255,0.28)' }}>Network fee</span>
+                <span style={{ color: 'rgba(255,255,255,0.45)' }}>~$0.04 · Base · EIP-1559</span>
+              </div>
+
+              {/* Confirm button */}
+              <button
+                onClick={buy}
+                className="w-full h-11 font-mono text-[10.5px] tracking-[0.28em] uppercase font-semibold
+                           transition-opacity duration-200"
+                style={{ background: 'linear-gradient(90deg, #D4AF37, #F3E5AB)', color: '#0A0A0A' }}
+                onMouseEnter={e => (e.currentTarget.style.opacity = '0.9')}
+                onMouseLeave={e => (e.currentTarget.style.opacity = '1')}
+              >
+                BUY {buyAmount} — {art.ticker}
+              </button>
+            </>
           )}
           {(tx === 'pending' || tx === 'confirming') && (
             <div className="w-full h-11 flex items-center justify-center gap-3"
@@ -846,6 +1221,7 @@ export function MarketplacePage() {
   const [sortOpen,     setSortOpen]     = useState(false)
   const [buyArt,       setBuyArt]       = useState<MarketArtwork | null>(null)
   const [sheetOpen,    setSheetOpen]    = useState(false)
+  const [lightboxArt,  setLightboxArt]  = useState<MarketArtwork | null>(null)
   // Auto-rotate
   const [listHovered,  setListHovered]  = useState(false)
   const [rotateProgress, setRotateProg] = useState(0)
@@ -988,6 +1364,9 @@ export function MarketplacePage() {
   return (
     <>
       <div style={{ paddingTop: 80, background: '#0A0A0A', minHeight: '100dvh' }}>
+
+        {/* ══ TICKER TAPE ═════════════════════════════════════ */}
+        <TickerTape />
 
         {/* ══ COMMAND CENTER ══════════════════════════════════ */}
         <div
@@ -1236,6 +1615,9 @@ export function MarketplacePage() {
                 onClick={() => handleSelect(art)}
               />
             ))}
+
+            {/* ── Live Activity Feed ── */}
+            <ActivityFeed />
           </div>
 
           {/* ── Right: Inspection Deck (60%) — hidden on mobile, sticky ── */}
@@ -1250,7 +1632,7 @@ export function MarketplacePage() {
               scrollbarWidth: 'none',
             }}
           >
-            <InspectionDeck art={selected} onCollect={setBuyArt}/>
+            <InspectionDeck art={selected} onCollect={setBuyArt} onLightbox={setLightboxArt}/>
           </div>
         </div>
       </div>
@@ -1288,7 +1670,7 @@ export function MarketplacePage() {
                 <div className="w-10 h-1 rounded-full" style={{ background: 'rgba(255,255,255,0.15)' }}/>
               </div>
               <div style={{ maxHeight: 'calc(90dvh - 24px)', overflowY: 'auto' }}>
-                <InspectionDeck art={selected} onCollect={art => { setSheetOpen(false); setBuyArt(art) }}/>
+                <InspectionDeck art={selected} onCollect={art => { setSheetOpen(false); setBuyArt(art) }} onLightbox={setLightboxArt}/>
               </div>
             </motion.div>
           </>
@@ -1297,6 +1679,17 @@ export function MarketplacePage() {
 
       {/* ══ BUY MODAL ════════════════════════════════════════ */}
       {buyArt && <BuyModal art={buyArt} onClose={() => setBuyArt(null)}/>}
+
+      {/* ══ ARTWORK LIGHTBOX ═════════════════════════════════ */}
+      <AnimatePresence>
+        {lightboxArt && (
+          <ArtLightbox
+            key="lightbox"
+            art={lightboxArt}
+            onClose={() => setLightboxArt(null)}
+          />
+        )}
+      </AnimatePresence>
     </>
   )
 }
