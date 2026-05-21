@@ -24,7 +24,7 @@
 import {
   useEffect, useRef, useState, useMemo, useCallback,
 } from 'react'
-import { motion, AnimatePresence } from 'framer-motion'
+import { motion, AnimatePresence, LayoutGroup } from 'framer-motion'
 import { gsap }                    from '@/lib/gsap'
 import { PHASE_COLOR, Phase }      from './ArtCard'
 
@@ -670,14 +670,23 @@ function ListItem({
   art,
   active,
   autoActive,
+  livePrice,
+  isFlashing,
   onClick,
 }: {
   art:        MarketArtwork
   active:     boolean
   autoActive: boolean   // pulsing when auto-rotate is about to select
+  livePrice:  number    // live-updated price for flash + display
+  isFlashing: boolean   // brief colour flash on price tick
   onClick:    () => void
 }) {
   const [hovered, setHovered] = useState(false)
+
+  // Live % change vs original seed price
+  const liveDelta = ((livePrice - art.marketCap) / art.marketCap) * 100
+  const liveUp    = liveDelta >= 0
+  const liveDeltaStr = `${liveUp ? '+' : ''}${liveDelta.toFixed(1)}%`
 
   // Mini sparkline helper (inline — no external dep needed)
   const sparkW = hovered ? 72 : 40
@@ -698,17 +707,22 @@ function ListItem({
   }, [art.sparkline, sparkW, sparkH])
 
   return (
-    <button
+    <motion.button
+      layout
       type="button"
       onClick={onClick}
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => setHovered(false)}
-      className="w-full flex items-center gap-3 py-3 px-4 text-left
-                 transition-colors duration-150 relative"
+      className="w-full flex items-center gap-3 py-3 px-4 text-left relative"
       style={{
-        borderBottom: '1px solid rgba(255,255,255,0.05)',
-        background:   active ? 'rgba(255,255,255,0.04)' : hovered ? 'rgba(255,255,255,0.025)' : 'transparent',
-        borderLeft:   active ? `2px solid #D4AF37` : '2px solid transparent',
+        borderBottom:    '1px solid rgba(255,255,255,0.05)',
+        background:      isFlashing
+          ? (liveUp ? 'rgba(74,222,128,0.07)' : 'rgba(248,113,113,0.07)')
+          : active  ? 'rgba(255,255,255,0.04)'
+          : hovered ? 'rgba(255,255,255,0.025)'
+          : 'transparent',
+        borderLeft:      active ? '2px solid #D4AF37' : '2px solid transparent',
+        transition:      `background-color ${isFlashing ? '0.55s' : '0.15s'} ease, border-color 0.15s ease`,
       }}
     >
       {/* Auto-rotate pulse ring on thumb */}
@@ -744,15 +758,19 @@ function ListItem({
         </p>
       </div>
 
-      {/* Market cap + 24h */}
+      {/* Live market cap + live delta */}
       <div className="text-right shrink-0 w-20">
-        <p className="font-mono text-[11.5px]"
-          style={{ color: active ? '#FDFBF7' : 'rgba(255,255,255,0.65)' }}>
-          {art.marketCapLabel}
+        <p
+          className="font-mono text-[11.5px]"
+          style={{ color: active ? '#FDFBF7' : 'rgba(255,255,255,0.65)' }}
+        >
+          {livePrice.toFixed(2)} ETH
         </p>
-        <p className="font-mono text-[9px] mt-0.5"
-          style={{ color: art.changePositive ? '#4ade80' : '#f87171' }}>
-          {art.change24h}
+        <p
+          className="font-mono text-[9px] mt-0.5"
+          style={{ color: liveUp ? '#4ade80' : '#f87171' }}
+        >
+          {liveDeltaStr}
         </p>
       </div>
 
@@ -777,7 +795,7 @@ function ListItem({
             strokeWidth={hovered ? 1.5 : 1.2} strokeLinecap="round"/>
         </svg>
       </div>
-    </button>
+    </motion.button>
   )
 }
 
@@ -1227,9 +1245,37 @@ export function MarketplacePage() {
   const [rotateProgress, setRotateProg] = useState(0)
   const [nextId,       setNextId]       = useState<number | null>(null)
 
+  // Live price simulation
+  const [livePrices, setLivePrices] = useState<Record<number, number>>(
+    () => Object.fromEntries(ARTWORKS.map(a => [a.id, a.marketCap]))
+  )
+  const [flashId,    setFlashId]    = useState<number | null>(null)
+
   const sortRef      = useRef<HTMLDivElement>(null)
   const headerRef    = useRef<HTMLDivElement>(null)
   const resumeTimer  = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const flashTimer   = useRef<ReturnType<typeof setTimeout> | null>(null)
+
+  // Simulate live price ticks — random artwork, -3% to +9% per tick
+  useEffect(() => {
+    const timer = setInterval(() => {
+      const art = ARTWORKS[Math.floor(Math.random() * ARTWORKS.length)]
+      // Bias slightly positive (bullish market feel)
+      const delta = 1 + (Math.random() * 0.12 - 0.03)
+      setLivePrices(prev => ({
+        ...prev,
+        [art.id]: parseFloat((prev[art.id] * delta).toFixed(3)),
+      }))
+      // Flash highlight
+      setFlashId(art.id)
+      if (flashTimer.current) clearTimeout(flashTimer.current)
+      flashTimer.current = setTimeout(() => setFlashId(null), 700)
+    }, 2800)
+    return () => {
+      clearInterval(timer)
+      if (flashTimer.current) clearTimeout(flashTimer.current)
+    }
+  }, [])
 
   // ── Filter + sort ──────────────────────────────────────────────
   const filtered = useMemo(() => {
@@ -1244,15 +1290,17 @@ export function MarketplacePage() {
       )
     }
     items.sort((a, b) => {
-      if (sortKey === 'market_cap') return b.marketCap - a.marketCap
-      if (sortKey === 'price_asc')  return a.marketCap - b.marketCap
-      if (sortKey === 'price_desc') return b.marketCap - a.marketCap
+      const pa = livePrices[a.id] ?? a.marketCap
+      const pb = livePrices[b.id] ?? b.marketCap
+      if (sortKey === 'market_cap') return pb - pa
+      if (sortKey === 'price_asc')  return pa - pb
+      if (sortKey === 'price_desc') return pb - pa
       if (sortKey === 'change')
         return parseFloat(b.change24h) - parseFloat(a.change24h)
       return b.id - a.id
     })
     return items
-  }, [activePhase, sortKey, search])
+  }, [activePhase, sortKey, search, livePrices])
 
   // If selected gets filtered out, auto-select first
   useEffect(() => {
@@ -1606,15 +1654,21 @@ export function MarketplacePage() {
                   Clear filters
                 </button>
               </div>
-            ) : filtered.map(art => (
-              <ListItem
-                key={art.id}
-                art={art}
-                active={selected.id === art.id}
-                autoActive={nextId === art.id}
-                onClick={() => handleSelect(art)}
-              />
-            ))}
+            ) : (
+              <LayoutGroup>
+                {filtered.map(art => (
+                  <ListItem
+                    key={art.id}
+                    art={art}
+                    active={selected.id === art.id}
+                    autoActive={nextId === art.id}
+                    livePrice={livePrices[art.id] ?? art.marketCap}
+                    isFlashing={flashId === art.id}
+                    onClick={() => handleSelect(art)}
+                  />
+                ))}
+              </LayoutGroup>
+            )}
 
             {/* ── Live Activity Feed ── */}
             <ActivityFeed />
