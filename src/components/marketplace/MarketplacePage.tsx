@@ -1375,10 +1375,13 @@ export function MarketplacePage() {
   )
   const [flashId,    setFlashId]    = useState<number | null>(null)
 
-  const sortRef      = useRef<HTMLDivElement>(null)
-  const headerRef    = useRef<HTMLDivElement>(null)
-  const resumeTimer  = useRef<ReturnType<typeof setTimeout> | null>(null)
-  const flashTimer   = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const sortRef         = useRef<HTMLDivElement>(null)
+  const headerRef       = useRef<HTMLDivElement>(null)
+  const resumeTimer     = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const flashTimer      = useRef<ReturnType<typeof setTimeout> | null>(null)
+  // Tracks whether user manually picked an item (pauses top-1 auto-follow for 12 s)
+  const manualPickTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const userPickedRef   = useRef(false)
 
   // ── Two-tier price simulation ──────────────────────────────────
   //  Tier 1 — micro tick every 2.4s: ±5% flash (UI noise, no rank change)
@@ -1451,6 +1454,18 @@ export function MarketplacePage() {
       setSelected(filtered[0])
     }
   }, [filtered, selected.id])
+
+  // Auto-follow rank-1: when the top-ranked item changes, snap the right
+  // panel to it — unless the user manually picked something in the last 12 s.
+  const top1Id = filtered[0]?.id
+  useEffect(() => {
+    if (top1Id == null || userPickedRef.current) return
+    setSelected(prev => {
+      const top1 = filtered.find(a => a.id === top1Id)
+      return top1 ?? prev
+    })
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [top1Id])
 
   // ── Auto-rotation — cycles every ROTATE_MS, pauses on hover ──
   useEffect(() => {
@@ -1536,12 +1551,16 @@ export function MarketplacePage() {
     return () => { clearTimeout(t); document.removeEventListener('mousedown', h) }
   }, [sortOpen])
 
-  // Manual select — also stops auto-rotate briefly
+  // Manual select — stops auto-rotate briefly + pauses top-1 auto-follow 12 s
   const handleSelect = (art: MarketArtwork) => {
     setSelected(art)
     setListHovered(true)
     setRotateProg(0)
     setNextId(null)
+    // Mark user pick; clear the top-1 follow for 12 s then resume
+    userPickedRef.current = true
+    if (manualPickTimer.current) clearTimeout(manualPickTimer.current)
+    manualPickTimer.current = setTimeout(() => { userPickedRef.current = false }, 12_000)
     if (resumeTimer.current) clearTimeout(resumeTimer.current)
     resumeTimer.current = setTimeout(() => setListHovered(false), 3000)
     setSheetOpen(true)
