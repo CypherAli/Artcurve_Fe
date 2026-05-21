@@ -215,6 +215,108 @@ const FAKE_WALLETS = [
   '0x7e1…b22', '0x2b5…d81', '0x9c4…e17', '0x3f7…a04',
 ]
 
+// ── Animated background chart for the Command Center header ──────
+//
+//  Uses overlapping sine waves whose periods all divide evenly into W=1200
+//  ⟹ y(0) = y(1200) exactly ⟹ the path tiles seamlessly.
+//  Two SVG copies side-by-side, translate -50% ⟹ infinite smooth scroll.
+//
+function HeaderChartBg() {
+  const W = 1200, H = 80
+
+  const { mainD, areaD, accentD } = useMemo(() => {
+    const mainPts:   [number, number][] = []
+    const accentPts: [number, number][] = []
+
+    for (let x = 0; x <= W; x += 3) {
+      // ── Main line ──────────────────────────────────────────────
+      // All periods divide W=1200 ⟹ every sin term = 0 at x=W ⟹ perfect loop
+      const y =
+        42
+        + 18 * Math.sin((2 * Math.PI * x) / 1200)      // slow full cycle
+        +  9 * Math.sin((2 * Math.PI * x) /  400 + 0.7)// medium
+        +  5 * Math.sin((2 * Math.PI * x) /  200 + 1.5)// fast ripple
+        +  3 * Math.sin((2 * Math.PI * x) /  120 + 2.1)// micro noise
+      mainPts.push([x, Math.max(6, Math.min(74, y))])
+
+      // ── Accent line (different phase, smaller amplitude) ──────
+      const y2 =
+        50
+        + 10 * Math.sin((2 * Math.PI * x) /  600 + 1.2)
+        +  5 * Math.sin((2 * Math.PI * x) /  300 + 0.4)
+        +  3 * Math.sin((2 * Math.PI * x) /  150 + 1.8)
+      accentPts.push([x, Math.max(12, Math.min(68, y2))])
+    }
+
+    const toD = (pts: [number, number][]) =>
+      pts.map((p, i) => `${i === 0 ? 'M' : 'L'}${p[0]},${p[1].toFixed(1)}`).join(' ')
+
+    const mainStr = toD(mainPts)
+    return {
+      mainD:   mainStr,
+      areaD:   `${mainStr} L${W},${H} L0,${H} Z`,
+      accentD: toD(accentPts),
+    }
+  }, [])  // deps [] — deterministic, runs once
+
+  return (
+    <div
+      className="absolute inset-0 overflow-hidden pointer-events-none"
+      aria-hidden="true"
+      style={{ zIndex: 0 }}
+    >
+      {/* ── Main chart: gold area + line, 30s scroll ── */}
+      <motion.div
+        className="absolute inset-0 flex"
+        animate={{ x: ['0%', '-50%'] }}
+        transition={{ duration: 30, ease: 'linear', repeat: Infinity, repeatType: 'loop' as const }}
+        style={{ width: '200%' }}
+      >
+        {([0, 1] as const).map(idx => (
+          <svg
+            key={idx}
+            viewBox={`0 0 ${W} ${H}`}
+            preserveAspectRatio="none"
+            className="h-full"
+            style={{ width: '50%', flexShrink: 0 }}
+          >
+            <defs>
+              <linearGradient id={`hcg-${idx}`} x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%"   stopColor="#D4AF37" stopOpacity="0.16"/>
+                <stop offset="100%" stopColor="#D4AF37" stopOpacity="0"/>
+              </linearGradient>
+            </defs>
+            <path d={areaD} fill={`url(#hcg-${idx})`}/>
+            <path d={mainD} fill="none" stroke="#D4AF37"
+              strokeWidth="1.3" strokeOpacity="0.28" strokeLinecap="round"/>
+          </svg>
+        ))}
+      </motion.div>
+
+      {/* ── Accent chart: white ghost, 46s scroll (different speed = parallax depth) ── */}
+      <motion.div
+        className="absolute inset-0 flex"
+        animate={{ x: ['0%', '-50%'] }}
+        transition={{ duration: 46, ease: 'linear', repeat: Infinity, repeatType: 'loop' as const }}
+        style={{ width: '200%' }}
+      >
+        {([0, 1] as const).map(idx => (
+          <svg
+            key={idx}
+            viewBox={`0 0 ${W} ${H}`}
+            preserveAspectRatio="none"
+            className="h-full"
+            style={{ width: '50%', flexShrink: 0 }}
+          >
+            <path d={accentD} fill="none" stroke="rgba(255,255,255,0.055)"
+              strokeWidth="1" strokeLinecap="round"/>
+          </svg>
+        ))}
+      </motion.div>
+    </div>
+  )
+}
+
 // ── Scrolling trade ticker tape ───────────────────────────────────
 function TickerTape() {
   const items = ARTWORKS.map(a => ({
@@ -1486,10 +1588,14 @@ export function MarketplacePage() {
         {/* ══ COMMAND CENTER ══════════════════════════════════ */}
         <div
           ref={headerRef}
-          className="shrink-0 px-8 py-5"
+          className="relative shrink-0 px-8 py-5 overflow-hidden"
           style={{ borderBottom: '1px solid rgba(255,255,255,0.08)' }}
         >
-          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+          {/* Animated background chart */}
+          <HeaderChartBg />
+
+          {/* Content — above the background */}
+          <div className="relative z-10 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
             <div>
               <h1
                 data-fade
