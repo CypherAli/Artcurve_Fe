@@ -27,6 +27,7 @@ import {
 import { motion, AnimatePresence, LayoutGroup } from 'framer-motion'
 import { gsap }                    from '@/lib/gsap'
 import { PHASE_COLOR, Phase }      from './ArtCard'
+import { CandlestickChart }        from '../charts/CandlestickChart'
 
 // ── Extended artwork type ──────────────────────────────────────────
 interface MarketArtwork {
@@ -180,27 +181,8 @@ function buildSparkPath(
   return { d, areaD, last }
 }
 
-// ── Chart time range ──────────────────────────────────────────────
+// ── Chart time range (re-export CandleRange alias) ────────────────
 type TimeRange = '1H' | '6H' | '1D' | '7D'
-
-function getChartData(sparkline: number[], range: TimeRange): number[] {
-  switch (range) {
-    case '1H': return sparkline.slice(-4)
-    case '6H': return sparkline.slice(-6)
-    case '7D': {
-      const f = sparkline[0]
-      return [f * 0.22, f * 0.44, f * 0.70, f * 0.90, ...sparkline]
-    }
-    default: return sparkline // '1D'
-  }
-}
-
-const TIME_AXIS: Record<TimeRange, string[]> = {
-  '1H': ['45m', '30m', '15m', 'Now'],
-  '6H': ['5h', '4h', '3h', '2h', '1h', 'Now'],
-  '1D': ['7d', '6d', '5d', '4d', '3d', '2d', '1d', 'Now'],
-  '7D': ['11d', '10d', '8d', '7d', '5d', '4d', '3d', '2d', '1d', 'Now'],
-}
 
 // ── Live activity feed data ────────────────────────────────────────
 interface LiveTrade {
@@ -760,82 +742,20 @@ function ArtworkWithChart({
   )
 }
 
-// ── Bonding curve chart (larger version for detail bottom) ─────────
+// ── Bonding curve chart — candlestick via ApexCharts ──────────────
 function BondingCurveChart({
   art, range, height = 160,
 }: {
   art: MarketArtwork; range: TimeRange; height?: number
 }) {
-  const W = 600, H = 160                       // viewBox always fixed
-  const chartData = getChartData(art.sparkline, range)
-  const { d, areaD, last } = buildSparkPath(chartData, W, H, 10, 12, 32, 12)
-  const gid      = `bc-${art.id}`
-  const filterId = `bcglow-${art.id}`
-
   return (
-    <div
-      className="relative w-full rounded-sm overflow-hidden"
-      style={{
-        height,
-        transition: 'height 0.38s cubic-bezier(0.25, 0.46, 0.45, 0.94)',
-        background: 'rgba(255,255,255,0.03)',
-        border:     '1px solid rgba(255,255,255,0.07)',
-      }}
-    >
-      {/* Y-axis labels */}
-      <div className="absolute left-2 top-0 bottom-6 flex flex-col justify-between pointer-events-none">
-        {[...art.sparkline].sort((a,b) => b-a).filter((_,i) => i === 0 || i === Math.floor(art.sparkline.length/2)).map((v, i) => (
-          <span key={i} className="font-mono text-[8px]" style={{ color: 'rgba(255,255,255,0.2)' }}>
-            {v.toFixed(2)}
-          </span>
-        ))}
-      </div>
-
-      <svg
-        viewBox={`0 0 ${W} ${H}`}
-        className="w-full h-full"
-        preserveAspectRatio="none"
-        aria-hidden="true"
-      >
-        <defs>
-          <linearGradient id={gid} x1="0" y1="0" x2="0" y2="1">
-            <stop offset="0%"   stopColor={art.phaseColor} stopOpacity="0.35"/>
-            <stop offset="100%" stopColor={art.phaseColor} stopOpacity="0"/>
-          </linearGradient>
-          <filter id={filterId} x="-10%" y="-30%" width="120%" height="160%">
-            <feGaussianBlur in="SourceGraphic" stdDeviation="3" result="blur"/>
-            <feMerge>
-              <feMergeNode in="blur"/>
-              <feMergeNode in="SourceGraphic"/>
-            </feMerge>
-          </filter>
-        </defs>
-
-        {/* Grid */}
-        {[0.25, 0.5, 0.75].map(t => (
-          <line key={t}
-            x1={12} x2={W - 12}
-            y1={10 + (H - 42) * t} y2={10 + (H - 42) * t}
-            stroke="rgba(255,255,255,0.07)" strokeWidth="1" strokeDasharray="4 6"
-          />
-        ))}
-
-        <path d={areaD} fill={`url(#${gid})`}/>
-        <path d={d} fill="none" stroke={art.phaseColor} strokeWidth="2"
-          strokeLinecap="round" filter={`url(#${filterId})`}/>
-        <circle cx={last.x} cy={last.y} r="4" fill={art.phaseColor} filter={`url(#${filterId})`}/>
-        <circle cx={last.x} cy={last.y} r="2" fill="white"/>
-      </svg>
-
-      {/* Bottom time axis */}
-      <div className="absolute bottom-1.5 inset-x-3 flex justify-between pointer-events-none">
-        {TIME_AXIS[range].map(t => (
-          <span key={t} className="font-mono text-[7px]" style={{ color: 'rgba(255,255,255,0.18)' }}>
-            {t}
-          </span>
-        ))}
-      </div>
-    </div>
+    <CandlestickChart
+      artId={art.id}
+      sparkline={art.sparkline}
+      phaseColor={art.phaseColor}
+      range={range}
+      height={height}
+    />
   )
 }
 
