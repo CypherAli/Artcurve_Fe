@@ -217,36 +217,38 @@ const FAKE_WALLETS = [
 
 // ── Animated background chart for the Command Center header ──────
 //
-//  Uses overlapping sine waves whose periods all divide evenly into W=1200
-//  ⟹ y(0) = y(1200) exactly ⟹ the path tiles seamlessly.
+//  Jagged price-chart aesthetic (gập khúc) — sparse angular points,
+//  straight L commands only, no bezier smoothing.
+//  Seamless loop: mainPts[0].y === mainPts[last].y (both = 45)
+//                 accentPts[0].y === accentPts[last].y (both = 52)
 //  Two SVG copies side-by-side, translate -50% ⟹ infinite smooth scroll.
 //
 function HeaderChartBg() {
   const W = 1200, H = 80
 
   const { mainD, areaD, accentD } = useMemo(() => {
-    const mainPts:   [number, number][] = []
-    const accentPts: [number, number][] = []
+    // ── Main line: gold — crypto price chart with sharp swings ────
+    // First Y = Last Y = 45 ⟹ seamless tile
+    const mainPts: [number, number][] = [
+      [0,    45], [38,   41], [72,   59], [105,  34], [145,  63],
+      [178,  49], [215,  70], [248,  43], [288,  74], [325,  54],
+      [358,  37], [398,  65], [432,  28], [468,  58], [498,  44],
+      [532,  72], [562,  50], [592,  33], [628,  62], [668,  47],
+      [705,  20], [735,  52], [768,  67], [804,  46], [838,  74],
+      [872,  54], [908,  38], [945,  66], [978,  49], [1015, 34],
+      [1052, 61], [1092, 43], [1132, 59], [1168, 39], [1200, 45],
+    ]
 
-    for (let x = 0; x <= W; x += 3) {
-      // ── Main line ──────────────────────────────────────────────
-      // All periods divide W=1200 ⟹ every sin term = 0 at x=W ⟹ perfect loop
-      const y =
-        42
-        + 18 * Math.sin((2 * Math.PI * x) / 1200)      // slow full cycle
-        +  9 * Math.sin((2 * Math.PI * x) /  400 + 0.7)// medium
-        +  5 * Math.sin((2 * Math.PI * x) /  200 + 1.5)// fast ripple
-        +  3 * Math.sin((2 * Math.PI * x) /  120 + 2.1)// micro noise
-      mainPts.push([x, Math.max(6, Math.min(74, y))])
-
-      // ── Accent line (different phase, smaller amplitude) ──────
-      const y2 =
-        50
-        + 10 * Math.sin((2 * Math.PI * x) /  600 + 1.2)
-        +  5 * Math.sin((2 * Math.PI * x) /  300 + 0.4)
-        +  3 * Math.sin((2 * Math.PI * x) /  150 + 1.8)
-      accentPts.push([x, Math.max(12, Math.min(68, y2))])
-    }
+    // ── Accent line: white ghost — different rhythm, same loop rule ─
+    // First Y = Last Y = 52 ⟹ seamless tile
+    const accentPts: [number, number][] = [
+      [0,    52], [48,   36], [88,   61], [130,  43], [168,  67],
+      [208,  39], [255,  70], [295,  47], [348,  63], [390,  33],
+      [428,  57], [468,  41], [515,  66], [558,  47], [598,  30],
+      [645,  56], [688,  43], [728,  69], [768,  51], [815,  37],
+      [858,  63], [898,  45], [942,  71], [988,  51], [1028, 36],
+      [1078, 59], [1122, 43], [1162, 59], [1200, 52],
+    ]
 
     const toD = (pts: [number, number][]) =>
       pts.map((p, i) => `${i === 0 ? 'M' : 'L'}${p[0]},${p[1].toFixed(1)}`).join(' ')
@@ -288,7 +290,7 @@ function HeaderChartBg() {
             </defs>
             <path d={areaD} fill={`url(#hcg-${idx})`}/>
             <path d={mainD} fill="none" stroke="#D4AF37"
-              strokeWidth="1.3" strokeOpacity="0.28" strokeLinecap="round"/>
+              strokeWidth="1.3" strokeOpacity="0.28" strokeLinejoin="round"/>
           </svg>
         ))}
       </motion.div>
@@ -309,7 +311,7 @@ function HeaderChartBg() {
             style={{ width: '50%', flexShrink: 0 }}
           >
             <path d={accentD} fill="none" stroke="rgba(255,255,255,0.055)"
-              strokeWidth="1" strokeLinecap="round"/>
+              strokeWidth="1" strokeLinejoin="round"/>
           </svg>
         ))}
       </motion.div>
