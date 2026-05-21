@@ -592,8 +592,12 @@ function ArtworkWithChart({
 }
 
 // ── Bonding curve chart (larger version for detail bottom) ─────────
-function BondingCurveChart({ art, range }: { art: MarketArtwork; range: TimeRange }) {
-  const W = 600, H = 160
+function BondingCurveChart({
+  art, range, height = 160,
+}: {
+  art: MarketArtwork; range: TimeRange; height?: number
+}) {
+  const W = 600, H = 160                       // viewBox always fixed
   const chartData = getChartData(art.sparkline, range)
   const { d, areaD, last } = buildSparkPath(chartData, W, H, 10, 12, 32, 12)
   const gid      = `bc-${art.id}`
@@ -603,7 +607,8 @@ function BondingCurveChart({ art, range }: { art: MarketArtwork; range: TimeRang
     <div
       className="relative w-full rounded-sm overflow-hidden"
       style={{
-        height:     160,
+        height,
+        transition: 'height 0.38s cubic-bezier(0.25, 0.46, 0.45, 0.94)',
         background: 'rgba(255,255,255,0.03)',
         border:     '1px solid rgba(255,255,255,0.07)',
       }}
@@ -809,12 +814,14 @@ function InspectionDeck({
   onCollect:  (art: MarketArtwork) => void
   onLightbox: (art: MarketArtwork) => void
 }) {
-  const [chartRange,  setChartRange]  = useState<TimeRange>('1D')
-  const [tilt,        setTilt]        = useState({ rx: 0, ry: 0 })
+  const [chartRange,   setChartRange]   = useState<TimeRange>('1D')
+  const [chartHovered, setChartHovered] = useState(false)
+  const [tilt,         setTilt]         = useState({ rx: 0, ry: 0 })
 
   // Reset state when artwork changes
   useEffect(() => {
     setChartRange('1D')
+    setChartHovered(false)
     setTilt({ rx: 0, ry: 0 })
   }, [art.id])
 
@@ -961,17 +968,36 @@ function InspectionDeck({
             ))}
           </div>
 
-          {/* Bonding curve chart + timeframe switcher */}
-          <div>
+          {/* Bonding curve chart + timeframe switcher — collapses to 52px, expand on hover */}
+          <div
+            onMouseEnter={() => setChartHovered(true)}
+            onMouseLeave={() => setChartHovered(false)}
+            className="cursor-ns-resize"
+          >
+            {/* Header row — always visible */}
             <div className="flex items-center justify-between mb-2.5">
-              <p
-                className="font-mono text-[9px] tracking-[0.22em] uppercase"
-                style={{ color: 'rgba(255,255,255,0.28)' }}
+              <div className="flex items-center gap-2">
+                <p
+                  className="font-mono text-[9px] tracking-[0.22em] uppercase"
+                  style={{ color: 'rgba(255,255,255,0.28)' }}
+                >
+                  Bonding Curve · Price History
+                </p>
+                {/* Expand hint — only shown when collapsed */}
+                {!chartHovered && (
+                  <span
+                    className="font-mono text-[7.5px] tracking-wide transition-opacity duration-300"
+                    style={{ color: 'rgba(255,255,255,0.18)' }}
+                  >
+                    hover to expand
+                  </span>
+                )}
+              </div>
+              {/* Timeframe tabs — fade in when expanded */}
+              <div
+                className="flex items-center gap-1 transition-opacity duration-300"
+                style={{ opacity: chartHovered ? 1 : 0, pointerEvents: chartHovered ? 'auto' : 'none' }}
               >
-                Bonding Curve · Price History
-              </p>
-              {/* Timeframe tabs */}
-              <div className="flex items-center gap-1">
                 {(['1H', '6H', '1D', '7D'] as TimeRange[]).map(r => (
                   <button
                     key={r}
@@ -989,7 +1015,13 @@ function InspectionDeck({
                 ))}
               </div>
             </div>
-            <BondingCurveChart art={art} range={chartRange}/>
+
+            {/* Chart — 52px collapsed, 160px expanded */}
+            <BondingCurveChart
+              art={art}
+              range={chartRange}
+              height={chartHovered ? 160 : 52}
+            />
           </div>
 
           {/* Progress bar */}
