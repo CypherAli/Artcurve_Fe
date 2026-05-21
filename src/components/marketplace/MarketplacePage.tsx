@@ -1,107 +1,157 @@
 'use client'
 
 // ─────────────────────────────────────────────────────────────────
-//  MarketplacePage.tsx  —  Neo-Luxury Trading Floor
+//  MarketplacePage.tsx  —  Split-Pane Trading Terminal
 //
-//  Layout (100% width, no sidebar):
+//  Layout (Master-Detail, 100% viewport height):
 //
-//    ┌──────────────────── COMMAND CENTER ────────────────────────┐
-//    │  LIVE MARKETPLACE          │  VOL │ LISTINGS │ 24H        │
-//    └────────────────────────────────────────────────────────────┘
-//    ┌──────────────────── FLOW NAVIGATOR ────────────────────────┐
-//    │  [ALL] [ACCUMULATION] [FOMO] [MIGRATION]    [search] [▼]  │
-//    └────────────────────────────────────────────────────────────┘
-//    ┌──────────────────── TRADING GRID ──────────────────────────┐
-//    │  ArtCard  ArtCard  ArtCard  ArtCard  ← Framer stagger      │
-//    │  ArtCard  ArtCard  ArtCard  ArtCard                        │
-//    └────────────────────────────────────────────────────────────┘
+//    ┌──────── COMMAND CENTER ────────────────────────────────────┐
+//    │  LIVE MARKETPLACE              VOL │ LISTINGS │ 24H       │
+//    ├──────── FLOW NAVIGATOR ────────────────────────────────────┤
+//    │  [ALL] [ACCUMULATION] [FOMO] [MIGRATION]   [search] [▼]   │
+//    ├──── LIST (40%) ──────┬──── INSPECTION DECK (60%) ─────────┤
+//    │ ● Nocturne   2.45ETH │  [Artwork Image]  │ Title          │
+//    │ ● Shattered  0.89ETH │  + Sparkline      │ $TICKER        │
+//    │ ● Bloom      4.12ETH │  overlay          │ Description    │
+//    │ ● Böcklin  18.20ETH  ├───────────────────┴────────────────┤
+//    │ ...                  │  [Bonding Curve Chart]             │
+//    │                      │  [BUY $TOKEN ─────────────────]   │
+//    └──────────────────────┴────────────────────────────────────┘
 //
-//  Core rules:
-//    · ZERO sidebar  — every pixel goes to art + data
-//    · Art zone = clean image only, no overlays
-//    · Data zone = data terminal below the image
-//    · Framer Motion staggerChildren re-fires on every filter change
+//  Mobile: left list only → click row → bottom sheet slides up
 // ─────────────────────────────────────────────────────────────────
 
-import { useEffect, useRef, useState, useMemo, useCallback } from 'react'
-import { motion, AnimatePresence }                            from 'framer-motion'
-import { gsap }                                               from '@/lib/gsap'
 import {
-  ArtCard, ArtCardData, Phase, PHASE_COLOR, cardVariants,
-} from './ArtCard'
+  useEffect, useRef, useState, useMemo, useCallback,
+} from 'react'
+import { motion, AnimatePresence } from 'framer-motion'
+import { gsap }                    from '@/lib/gsap'
+import { PHASE_COLOR, Phase }      from './ArtCard'
 
-// ── Mock Data (8 artworks with realistic bonding-curve metrics) ────
+// ── Extended artwork type ──────────────────────────────────────────
+interface MarketArtwork {
+  id:             number
+  title:          string
+  ticker:         string
+  artist:         string
+  artistAddr:     string
+  phase:          Phase
+  phaseColor:     string
+  marketCap:      number      // raw ETH (for sort)
+  marketCapLabel: string
+  change24h:      string
+  changePositive: boolean
+  change7d:       string
+  volume24h:      string
+  holders:        number
+  progress:       number      // 0–100
+  image:          string
+  description:    string
+  sparkline:      number[]    // 10-point price history
+}
 
-const ARTWORKS: ArtCardData[] = [
+// ── Artwork catalogue ──────────────────────────────────────────────
+const ARTWORKS: MarketArtwork[] = [
   {
     id: 1, title: 'Nocturne at the Bridge', ticker: '$NOCTURNE',
-    artist: 'Elena Vasquez', phase: 'FOMO',
+    artist: 'Elena Vasquez', artistAddr: '0x4f2…a91',
+    phase: 'FOMO', phaseColor: PHASE_COLOR['FOMO'],
     marketCap: 2.45, marketCapLabel: '2.45 ETH',
-    change24h: '+18.4%', changePositive: true, progress: 62,
+    change24h: '+18.4%', changePositive: true, change7d: '+31.2%',
+    volume24h: '1.42 ETH', holders: 24, progress: 62,
     image: '/images/artworks/art1.jpg',
+    description: 'A cinematic study of artificial light fracturing across still water — painted at the precise moment before the bridge lamps extinguish for dawn.',
+    sparkline: [4, 5.2, 6.8, 6.1, 5.4, 7.0, 9.5, 14.2, 19.8, 23.4],
   },
   {
     id: 2, title: 'Shattered Embrace', ticker: '$SHATTER',
-    artist: 'Marcus Chen', phase: 'Accumulation',
+    artist: 'Marcus Chen', artistAddr: '0x8d3…f44',
+    phase: 'Accumulation', phaseColor: PHASE_COLOR['Accumulation'],
     marketCap: 0.89, marketCapLabel: '0.89 ETH',
-    change24h: '+7.2%', changePositive: true, progress: 28,
+    change24h: '+7.2%', changePositive: true, change7d: '+9.8%',
+    volume24h: '0.38 ETH', holders: 8, progress: 28,
     image: '/images/artworks/art2.jpg',
+    description: 'Porcelain figures frozen mid-collapse — an allegory for the tension between intimacy and inevitability. Early collectors form the foundation of this bonding curve.',
+    sparkline: [5, 4.8, 5.3, 5.1, 5.6, 5.4, 6.2, 7.1, 7.8, 8.9],
   },
   {
     id: 3, title: 'Bloom & Blade', ticker: '$BLOOM',
-    artist: 'Aiko Tanaka', phase: 'FOMO',
+    artist: 'Aiko Tanaka', artistAddr: '0x1a9…c33',
+    phase: 'FOMO', phaseColor: PHASE_COLOR['FOMO'],
     marketCap: 4.12, marketCapLabel: '4.12 ETH',
-    change24h: '+29.3%', changePositive: true, progress: 71,
+    change24h: '+29.3%', changePositive: true, change7d: '+58.4%',
+    volume24h: '2.87 ETH', holders: 31, progress: 71,
     image: '/images/artworks/art3.jpg',
+    description: 'Cherry blossoms edged in obsidian — the duality of beauty and violence rendered in hyper-saturated ink. Demand has accelerated beyond early projections.',
+    sparkline: [3, 7.5, 14.0, 9.2, 6.8, 10.5, 16.0, 12.4, 28.0, 41.2],
   },
   {
     id: 4, title: 'Self-Portrait with Death', ticker: '$BÖCKLIN',
-    artist: 'Arnold Böcklin', phase: 'Migration',
+    artist: 'Arnold Böcklin', artistAddr: '0x7e1…b22',
+    phase: 'Migration', phaseColor: PHASE_COLOR['Migration'],
     marketCap: 18.20, marketCapLabel: '18.20 ETH',
-    change24h: '+44.1%', changePositive: true, progress: 94,
+    change24h: '+44.1%', changePositive: true, change7d: '+112.3%',
+    volume24h: '8.62 ETH', holders: 47, progress: 94,
     image: '/images/artworks/art4.jpg',
+    description: 'The master stares down his own mortality — a 19th-century meditation on time tokenised on-chain for the first time. 94% toward graduation liquidity.',
+    sparkline: [2, 2.3, 2.8, 3.5, 5.0, 9.0, 22.0, 58.0, 120.0, 182.0],
   },
   {
     id: 5, title: 'The Last March', ticker: '$MARCH',
-    artist: 'Yui Nakamura', phase: 'FOMO',
+    artist: 'Yui Nakamura', artistAddr: '0x2b5…d81',
+    phase: 'FOMO', phaseColor: PHASE_COLOR['FOMO'],
     marketCap: 5.51, marketCapLabel: '5.51 ETH',
-    change24h: '+33.7%', changePositive: true, progress: 78,
+    change24h: '+33.7%', changePositive: true, change7d: '+71.0%',
+    volume24h: '3.21 ETH', holders: 28, progress: 78,
     image: '/images/artworks/art5.jpg',
+    description: "Soldiers dissolving into fog — a requiem for certainty. The bonding curve reflects the market's collective dirge: slow at first, then all at once.",
+    sparkline: [8, 6.0, 4.2, 5.8, 8.5, 6.5, 9.0, 14.5, 22.0, 55.1],
   },
   {
     id: 6, title: 'Ghost of the Meridian', ticker: '$GHOST',
-    artist: 'Ivan Sorokin', phase: 'Accumulation',
+    artist: 'Ivan Sorokin', artistAddr: '0x9c4…e17',
+    phase: 'Accumulation', phaseColor: PHASE_COLOR['Accumulation'],
     marketCap: 0.61, marketCapLabel: '0.61 ETH',
-    change24h: '+3.1%', changePositive: true, progress: 12,
+    change24h: '+3.1%', changePositive: true, change7d: '+4.8%',
+    volume24h: '0.14 ETH', holders: 5, progress: 12,
     image: '/images/artworks/art1.jpg',
+    description: 'A cartographic ghost — the meridian line that never existed, traced in oil. Accumulation phase. The curve is waiting for discovery.',
+    sparkline: [4, 4.2, 3.9, 4.5, 4.3, 5.1, 5.4, 5.8, 5.9, 6.1],
   },
   {
     id: 7, title: 'Pale Architecture', ticker: '$PALE',
-    artist: 'Soo-Ah Lim', phase: 'Migration',
+    artist: 'Soo-Ah Lim', artistAddr: '0x3f7…a04',
+    phase: 'Migration', phaseColor: PHASE_COLOR['Migration'],
     marketCap: 23.40, marketCapLabel: '23.40 ETH',
-    change24h: '+51.8%', changePositive: true, progress: 97,
+    change24h: '+51.8%', changePositive: true, change7d: '+138.0%',
+    volume24h: '12.40 ETH', holders: 53, progress: 97,
     image: '/images/artworks/art2.jpg',
+    description: 'Brutalism made spectral — load-bearing columns rendered translucent. 97% to graduation. The final 3% of this curve carries maximum price velocity.',
+    sparkline: [1, 1.5, 2.2, 4.0, 8.5, 18.0, 42.0, 88.0, 164.0, 234.0],
   },
   {
     id: 8, title: 'Cathedral of Ash', ticker: '$CATHEDRA',
-    artist: 'Elena Vasquez', phase: 'FOMO',
+    artist: 'Elena Vasquez', artistAddr: '0x4f2…a91',
+    phase: 'FOMO', phaseColor: PHASE_COLOR['FOMO'],
     marketCap: 6.77, marketCapLabel: '6.77 ETH',
-    change24h: '+28.1%', changePositive: true, progress: 66,
+    change24h: '+28.1%', changePositive: true, change7d: '+62.4%',
+    volume24h: '4.03 ETH', holders: 33, progress: 66,
     image: '/images/artworks/art3.jpg',
+    description: "Gothic spires reclaimed by fire — what remains after belief burns away. Vasquez's most ambitious work on-chain, with consistent inflow since mint.",
+    sparkline: [5, 6.2, 7.8, 9.5, 8.1, 11.0, 15.5, 20.3, 29.0, 67.7],
   },
 ]
 
-// ── Sort options ───────────────────────────────────────────────────
+// ── Sort / phase types ─────────────────────────────────────────────
 type SortKey = 'market_cap' | 'price_asc' | 'price_desc' | 'change' | 'newest'
 const SORT_OPTIONS: { key: SortKey; label: string }[] = [
-  { key: 'market_cap',  label: 'Market Cap' },
-  { key: 'change',      label: 'Top Gainers' },
-  { key: 'price_desc',  label: 'Price: High → Low' },
-  { key: 'price_asc',   label: 'Price: Low → High' },
-  { key: 'newest',      label: 'Recently Listed' },
+  { key: 'market_cap', label: 'Market Cap' },
+  { key: 'change',     label: 'Top Gainers' },
+  { key: 'price_desc', label: 'Price: High → Low' },
+  { key: 'price_asc',  label: 'Price: Low → High' },
+  { key: 'newest',     label: 'Recently Listed' },
 ]
 
-// ── Phase tab meta ─────────────────────────────────────────────────
 const PHASE_TABS: { key: Phase | 'All'; label: string }[] = [
   { key: 'All',          label: 'ALL' },
   { key: 'Accumulation', label: 'ACCUMULATION' },
@@ -109,34 +159,530 @@ const PHASE_TABS: { key: Phase | 'All'; label: string }[] = [
   { key: 'Migration',    label: 'MIGRATION' },
 ]
 
-// ── Framer Motion: grid container stagger ─────────────────────────
-const containerVariants = {
-  hidden:  {},
-  visible: {
-    transition: { staggerChildren: 0.07, delayChildren: 0.05 },
-  },
+// ── Sparkline helpers ──────────────────────────────────────────────
+function buildSparkPath(
+  data: number[],
+  W: number, H: number,
+  padT: number, padR: number, padB: number, padL: number,
+) {
+  const pw = W - padL - padR
+  const ph = H - padT - padB
+  const min = Math.min(...data), max = Math.max(...data)
+  const pts = data.map((v, i) => ({
+    x: padL + (i / (data.length - 1)) * pw,
+    y: padT + ph - ((v - min) / (max - min || 1)) * ph,
+  }))
+  const d = `M${pts.map(p => `${p.x.toFixed(1)},${p.y.toFixed(1)}`).join(' L')}`
+  const last = pts[pts.length - 1]
+  const areaD =
+    `${d} L${last.x.toFixed(1)},${(padT + ph).toFixed(1)} ` +
+    `L${padL.toFixed(1)},${(padT + ph).toFixed(1)} Z`
+  return { d, areaD, last }
 }
 
-// ── Types ──────────────────────────────────────────────────────────
-type TxState = 'idle' | 'pending' | 'confirming' | 'success' | 'error'
+// ── Artwork image with sparkline overlay (like homepage) ───────────
+function ArtworkWithChart({
+  art,
+}: {
+  art: MarketArtwork
+}) {
+  const W = 400, H = 200
+  const { d, areaD, last } = buildSparkPath(art.sparkline, W, H, 12, 8, 28, 8)
+  const gid = `co-${art.id}`
+  const filterId = `cglow-${art.id}`
 
-// ── Buy Modal ──────────────────────────────────────────────────────
-function BuyModal({ art, onClose }: { art: ArtCardData; onClose: () => void }) {
-  const [txState, setTxState] = useState<TxState>('idle')
-  const [qty,     setQty]     = useState(1)
-  const overlayRef            = useRef<HTMLDivElement>(null)
-  const panelRef              = useRef<HTMLDivElement>(null)
+  return (
+    <div className="relative w-full aspect-square overflow-hidden rounded-sm bg-[#0D0D0D]">
+      {/* Artwork */}
+      {/* eslint-disable-next-line @next/next/no-img-element */}
+      <img
+        src={art.image}
+        alt={art.title}
+        className="absolute inset-0 w-full h-full object-cover"
+        draggable={false}
+      />
 
-  const phaseColor = PHASE_COLOR[art.phase]
-  const total      = (art.marketCap * qty).toFixed(4)
+      {/* Phase badge — top left */}
+      <div
+        className="absolute top-3 left-3 z-10 flex items-center gap-1.5 px-2 py-1
+                   text-[9px] tracking-[0.24em] uppercase font-medium"
+        style={{
+          background: 'rgba(0,0,0,0.65)',
+          border:     `1px solid ${art.phaseColor}40`,
+          color:      art.phaseColor,
+        }}
+      >
+        <span className="size-[5px] rounded-full" style={{ background: art.phaseColor }}/>
+        {art.phase}
+      </div>
 
-  // Entrance
+      {/* 24h badge — top right */}
+      <div
+        className="absolute top-3 right-3 z-10 px-2 py-1 font-mono text-[10px] font-semibold"
+        style={{
+          background: art.changePositive ? 'rgba(74,222,128,0.15)' : 'rgba(248,113,113,0.15)',
+          border:     `1px solid ${art.changePositive ? 'rgba(74,222,128,0.35)' : 'rgba(248,113,113,0.35)'}`,
+          color:      art.changePositive ? '#4ade80' : '#f87171',
+        }}
+      >
+        {art.change24h}
+      </div>
+
+      {/* Bottom gradient for chart readability */}
+      <div
+        className="absolute inset-x-0 bottom-0 h-[55%] pointer-events-none"
+        style={{
+          background: 'linear-gradient(to top, rgba(0,0,0,0.82) 0%, rgba(0,0,0,0.4) 50%, transparent 100%)',
+        }}
+      />
+
+      {/* Sparkline chart overlaid on image — the FOMO weapon */}
+      <div className="absolute inset-x-0 bottom-0 h-[46%] pointer-events-none">
+        <svg
+          viewBox={`0 0 ${W} ${H}`}
+          className="w-full h-full"
+          preserveAspectRatio="none"
+          aria-hidden="true"
+        >
+          <defs>
+            <linearGradient id={gid} x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%"   stopColor={art.phaseColor} stopOpacity="0.45"/>
+              <stop offset="100%" stopColor={art.phaseColor} stopOpacity="0"/>
+            </linearGradient>
+            <filter id={filterId} x="-20%" y="-40%" width="140%" height="180%">
+              <feGaussianBlur in="SourceGraphic" stdDeviation="3.5" result="blur"/>
+              <feMerge>
+                <feMergeNode in="blur"/>
+                <feMergeNode in="SourceGraphic"/>
+              </feMerge>
+            </filter>
+          </defs>
+
+          {/* Horizontal grid lines */}
+          {[0.25, 0.5, 0.75].map(t => (
+            <line
+              key={t}
+              x1={8} x2={W - 8}
+              y1={12 + (H - 40) * t} y2={12 + (H - 40) * t}
+              stroke="rgba(255,255,255,0.1)"
+              strokeWidth="1"
+              strokeDasharray="3 5"
+            />
+          ))}
+
+          {/* Area fill */}
+          <path d={areaD} fill={`url(#${gid})`}/>
+
+          {/* Main line with glow */}
+          <path
+            d={d}
+            fill="none"
+            stroke={art.phaseColor}
+            strokeWidth="2.5"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            filter={`url(#${filterId})`}
+          />
+
+          {/* Last point: outer glow + white dot */}
+          <circle cx={last.x} cy={last.y} r="5.5" fill={art.phaseColor} opacity="0.5" filter={`url(#${filterId})`}/>
+          <circle cx={last.x} cy={last.y} r="3.5" fill={art.phaseColor} filter={`url(#${filterId})`}/>
+          <circle cx={last.x} cy={last.y} r="2"   fill="white"/>
+
+          {/* Price label next to last point */}
+          <text
+            x={last.x + 7} y={last.y + 4}
+            fill="white" fontSize="10" fontFamily="ui-monospace,monospace" fontWeight="600"
+          >
+            {art.marketCapLabel}
+          </text>
+          <text
+            x={last.x + 7} y={last.y + 16}
+            fill={art.phaseColor} fontSize="8.5" fontFamily="ui-monospace,monospace"
+          >
+            {art.change24h}
+          </text>
+        </svg>
+      </div>
+    </div>
+  )
+}
+
+// ── Bonding curve chart (larger version for detail bottom) ─────────
+function BondingCurveChart({ art }: { art: MarketArtwork }) {
+  const W = 600, H = 160
+  const { d, areaD, last } = buildSparkPath(art.sparkline, W, H, 10, 12, 32, 12)
+  const gid      = `bc-${art.id}`
+  const filterId = `bcglow-${art.id}`
+
+  return (
+    <div
+      className="relative w-full rounded-sm overflow-hidden"
+      style={{
+        height:     160,
+        background: 'rgba(255,255,255,0.03)',
+        border:     '1px solid rgba(255,255,255,0.07)',
+      }}
+    >
+      {/* Y-axis labels */}
+      <div className="absolute left-2 top-0 bottom-6 flex flex-col justify-between pointer-events-none">
+        {[...art.sparkline].sort((a,b) => b-a).filter((_,i) => i === 0 || i === Math.floor(art.sparkline.length/2)).map((v, i) => (
+          <span key={i} className="font-mono text-[8px]" style={{ color: 'rgba(255,255,255,0.2)' }}>
+            {v.toFixed(2)}
+          </span>
+        ))}
+      </div>
+
+      <svg
+        viewBox={`0 0 ${W} ${H}`}
+        className="w-full h-full"
+        preserveAspectRatio="none"
+        aria-hidden="true"
+      >
+        <defs>
+          <linearGradient id={gid} x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%"   stopColor={art.phaseColor} stopOpacity="0.35"/>
+            <stop offset="100%" stopColor={art.phaseColor} stopOpacity="0"/>
+          </linearGradient>
+          <filter id={filterId} x="-10%" y="-30%" width="120%" height="160%">
+            <feGaussianBlur in="SourceGraphic" stdDeviation="3" result="blur"/>
+            <feMerge>
+              <feMergeNode in="blur"/>
+              <feMergeNode in="SourceGraphic"/>
+            </feMerge>
+          </filter>
+        </defs>
+
+        {/* Grid */}
+        {[0.25, 0.5, 0.75].map(t => (
+          <line key={t}
+            x1={12} x2={W - 12}
+            y1={10 + (H - 42) * t} y2={10 + (H - 42) * t}
+            stroke="rgba(255,255,255,0.07)" strokeWidth="1" strokeDasharray="4 6"
+          />
+        ))}
+
+        <path d={areaD} fill={`url(#${gid})`}/>
+        <path d={d} fill="none" stroke={art.phaseColor} strokeWidth="2"
+          strokeLinecap="round" filter={`url(#${filterId})`}/>
+        <circle cx={last.x} cy={last.y} r="4" fill={art.phaseColor} filter={`url(#${filterId})`}/>
+        <circle cx={last.x} cy={last.y} r="2" fill="white"/>
+      </svg>
+
+      {/* Bottom time axis */}
+      <div className="absolute bottom-1.5 inset-x-3 flex justify-between pointer-events-none">
+        {['7d ago', '6d', '5d', '4d', '3d', '2d', '1d', 'Now'].map(t => (
+          <span key={t} className="font-mono text-[7px]" style={{ color: 'rgba(255,255,255,0.18)' }}>
+            {t}
+          </span>
+        ))}
+      </div>
+    </div>
+  )
+}
+
+// ── Left column: compact list item ────────────────────────────────
+function ListItem({
+  art,
+  active,
+  onClick,
+}: {
+  art:     MarketArtwork
+  active:  boolean
+  onClick: () => void
+}) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      className="w-full flex items-center gap-3 py-3 px-4 text-left
+                 transition-colors duration-150 relative"
+      style={{
+        borderBottom: '1px solid rgba(255,255,255,0.05)',
+        background:   active ? 'rgba(255,255,255,0.04)' : 'transparent',
+        borderLeft:   active ? `2px solid #D4AF37` : '2px solid transparent',
+      }}
+      onMouseEnter={e => {
+        if (!active) e.currentTarget.style.background = 'rgba(255,255,255,0.03)'
+      }}
+      onMouseLeave={e => {
+        if (!active) e.currentTarget.style.background = 'transparent'
+      }}
+    >
+      {/* Col 1: thumbnail */}
+      <div className="relative w-10 h-10 shrink-0 overflow-hidden rounded-sm">
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img
+          src={art.image} alt={art.title}
+          className="w-full h-full object-cover"
+          loading="lazy" decoding="async"
+        />
+        {/* Phase left sliver */}
+        <span
+          className="absolute left-0 top-0 bottom-0 w-[2px]"
+          style={{ background: art.phaseColor }}
+        />
+      </div>
+
+      {/* Col 2: title + ticker */}
+      <div className="flex-1 min-w-0">
+        <p
+          className="truncate text-[12.5px] leading-tight"
+          style={{
+            color:      active ? '#FDFBF7' : 'rgba(255,255,255,0.72)',
+            fontFamily: "'Cormorant Garamond', serif",
+            fontWeight: 400,
+          }}
+        >
+          {art.title}
+        </p>
+        <p className="text-[9px] font-mono tracking-wide mt-0.5"
+          style={{ color: 'rgba(255,255,255,0.3)' }}>
+          {art.ticker}
+        </p>
+      </div>
+
+      {/* Col 3: market cap */}
+      <div className="text-right shrink-0 w-20">
+        <p className="font-mono text-[11.5px]"
+          style={{ color: active ? '#FDFBF7' : 'rgba(255,255,255,0.65)' }}>
+          {art.marketCapLabel}
+        </p>
+        <p className="font-mono text-[9px] mt-0.5"
+          style={{ color: art.changePositive ? '#4ade80' : '#f87171' }}>
+          {art.change24h}
+        </p>
+      </div>
+
+      {/* Col 4: mini progress bar */}
+      <div className="shrink-0 w-12">
+        <div
+          className="h-[3px] rounded-full overflow-hidden"
+          style={{ background: 'rgba(255,255,255,0.1)' }}
+          title={`${art.progress}% to graduation`}
+        >
+          <div
+            className="h-full rounded-full"
+            style={{
+              width:      `${art.progress}%`,
+              background: `linear-gradient(90deg, ${art.phaseColor}80, ${art.phaseColor})`,
+            }}
+          />
+        </div>
+        <p className="font-mono text-[7.5px] mt-0.5 text-right"
+          style={{ color: 'rgba(255,255,255,0.22)' }}>
+          {art.progress}%
+        </p>
+      </div>
+    </button>
+  )
+}
+
+// ── Right column: Inspection Deck ─────────────────────────────────
+function InspectionDeck({
+  art,
+  onCollect,
+}: {
+  art:       MarketArtwork
+  onCollect: (art: MarketArtwork) => void
+}) {
+  return (
+    <AnimatePresence mode="wait">
+      <motion.div
+        key={art.id}
+        initial={{ opacity: 0, x: 12 }}
+        animate={{ opacity: 1, x: 0 }}
+        exit={{ opacity: 0, x: -8 }}
+        transition={{ duration: 0.28, ease: [0.25, 0.46, 0.45, 0.94] }}
+        className="h-full overflow-y-auto p-8 flex flex-col gap-7"
+        style={{ scrollbarWidth: 'none' }}
+      >
+        {/* ── Top Half: Art + Typography ── */}
+        <div className="flex gap-6">
+
+          {/* Left: Artwork with sparkline overlay */}
+          <div className="w-1/2 shrink-0">
+            <ArtworkWithChart art={art}/>
+          </div>
+
+          {/* Right: Typography block */}
+          <div className="flex-1 min-w-0 flex flex-col justify-center gap-4">
+
+            {/* Eyebrow */}
+            <div className="flex items-center gap-2.5 flex-wrap">
+              <span
+                className="font-mono text-[10px] tracking-[0.2em] uppercase px-2 py-1"
+                style={{
+                  background: `${art.phaseColor}15`,
+                  border:     `1px solid ${art.phaseColor}35`,
+                  color:      art.phaseColor,
+                }}
+              >
+                {art.phase}
+              </span>
+              <span
+                className="font-mono text-[10px] tracking-wider"
+                style={{ color: 'rgba(255,255,255,0.28)' }}
+              >
+                {art.ticker}
+              </span>
+            </div>
+
+            {/* Title */}
+            <h2
+              className="font-light leading-[1.08]"
+              style={{
+                fontFamily: "'Cormorant Garamond', serif",
+                fontSize:   'clamp(1.6rem, 2.4vw, 2.4rem)',
+                color:      '#FDFBF7',
+              }}
+            >
+              {art.title}
+            </h2>
+
+            {/* Artist */}
+            <p className="text-[10px] tracking-[0.24em] uppercase"
+              style={{ color: 'rgba(255,255,255,0.35)' }}>
+              {art.artist}
+              <span className="ml-2 font-mono" style={{ color: 'rgba(255,255,255,0.2)' }}>
+                {art.artistAddr}
+              </span>
+            </p>
+
+            {/* Description */}
+            <p
+              className="text-[13px] leading-relaxed"
+              style={{ color: 'rgba(255,255,255,0.52)', maxWidth: '36ch' }}
+            >
+              {art.description}
+            </p>
+
+            {/* Key metrics */}
+            <div className="grid grid-cols-3 gap-2 mt-1">
+              {[
+                { label: 'Market Cap',  value: art.marketCapLabel, color: '#FDFBF7' },
+                { label: '24h Change',  value: art.change24h, color: art.changePositive ? '#4ade80' : '#f87171' },
+                { label: '7d Change',   value: art.change7d,  color: 'rgba(255,255,255,0.7)' },
+              ].map(m => (
+                <div
+                  key={m.label}
+                  className="px-3 py-2.5 text-center"
+                  style={{
+                    background: 'rgba(255,255,255,0.04)',
+                    border:     '1px solid rgba(255,255,255,0.07)',
+                  }}
+                >
+                  <p className="text-[7.5px] uppercase tracking-[0.2em] mb-1"
+                    style={{ color: 'rgba(255,255,255,0.28)' }}>{m.label}</p>
+                  <p className="font-mono text-[12px] font-medium" style={{ color: m.color }}>
+                    {m.value}
+                  </p>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+
+        {/* ── Divider ── */}
+        <div
+          className="h-px w-full"
+          style={{
+            background: `linear-gradient(90deg, ${art.phaseColor}30, rgba(255,255,255,0.07) 40%, transparent)`,
+          }}
+        />
+
+        {/* ── Bottom Half: Chart + CTA ── */}
+        <div className="flex flex-col gap-5">
+
+          {/* Holders + volume micro-stats */}
+          <div className="flex items-center gap-6">
+            {[
+              { label: 'Volume 24h',  value: art.volume24h },
+              { label: 'Holders',     value: String(art.holders) },
+              { label: 'Edition',     value: 'Open' },
+            ].map(s => (
+              <div key={s.label}>
+                <p className="text-[8px] uppercase tracking-[0.2em] mb-0.5"
+                  style={{ color: 'rgba(255,255,255,0.28)' }}>{s.label}</p>
+                <p className="font-mono text-[12.5px]"
+                  style={{ color: 'rgba(255,255,255,0.75)' }}>{s.value}</p>
+              </div>
+            ))}
+          </div>
+
+          {/* Bonding curve chart */}
+          <div>
+            <p className="font-mono text-[9px] tracking-[0.22em] uppercase mb-2.5"
+              style={{ color: 'rgba(255,255,255,0.28)' }}>
+              Bonding Curve · 7-Day Price History
+            </p>
+            <BondingCurveChart art={art}/>
+          </div>
+
+          {/* Progress bar */}
+          <div>
+            <div className="flex justify-between font-mono text-[9px] mb-1.5">
+              <span style={{ color: 'rgba(255,255,255,0.3)' }}>Curve Progress</span>
+              <span style={{ color: '#D4AF37' }}>{art.progress}% to Graduation</span>
+            </div>
+            <div className="h-[5px] w-full rounded-full"
+              style={{ background: 'rgba(255,255,255,0.08)' }}>
+              <div className="h-full rounded-full transition-all duration-700"
+                style={{
+                  width:      `${art.progress}%`,
+                  background: 'linear-gradient(90deg, #D4AF37, #F3E5AB)',
+                }}/>
+            </div>
+            <div className="flex justify-between font-mono text-[7.5px] mt-1.5"
+              style={{ color: 'rgba(255,255,255,0.2)' }}>
+              <span>Accumulation</span>
+              <span>FOMO</span>
+              <span>Migration</span>
+            </div>
+          </div>
+
+          {/* BUY CTA */}
+          <button
+            type="button"
+            onClick={() => onCollect(art)}
+            className="relative w-full h-[52px] font-mono tracking-[0.32em] uppercase font-semibold
+                       overflow-hidden group/btn transition-all duration-250 active:scale-[0.99]"
+            style={{
+              background:  'linear-gradient(90deg, #D4AF37, #F3E5AB 50%, #D4AF37)',
+              backgroundSize: '200% 100%',
+              color:       '#0A0A0A',
+              fontSize:    '11px',
+            }}
+            onMouseEnter={e => (e.currentTarget.style.backgroundPosition = '100% 0')}
+            onMouseLeave={e => (e.currentTarget.style.backgroundPosition = '0% 0')}
+          >
+            BUY {art.ticker} — {art.marketCapLabel}
+          </button>
+
+          <p className="text-center font-mono text-[8px] tracking-[0.14em] uppercase"
+            style={{ color: 'rgba(255,255,255,0.16)' }}>
+            Base Network · Bonding Curve · {art.holders} current holders
+          </p>
+        </div>
+      </motion.div>
+    </AnimatePresence>
+  )
+}
+
+// ── Buy confirmation modal (lightweight) ──────────────────────────
+type TxState = 'idle' | 'pending' | 'confirming' | 'success'
+
+function BuyModal({ art, onClose }: { art: MarketArtwork; onClose: () => void }) {
+  const [tx, setTx] = useState<TxState>('idle')
+  const overlayRef  = useRef<HTMLDivElement>(null)
+  const panelRef    = useRef<HTMLDivElement>(null)
+
   useEffect(() => {
     const ctx = gsap.context(() => {
       gsap.fromTo(overlayRef.current, { autoAlpha: 0 }, { autoAlpha: 1, duration: 0.22 })
       gsap.fromTo(panelRef.current,
-        { autoAlpha: 0, y: 32, scale: 0.97 },
-        { autoAlpha: 1, y: 0,  scale: 1, duration: 0.3, ease: 'power3.out' }
+        { autoAlpha: 0, y: 28, scale: 0.97 },
+        { autoAlpha: 1, y: 0,  scale: 1, duration: 0.28, ease: 'power3.out' }
       )
     })
     return () => ctx.revert()
@@ -148,52 +694,47 @@ function BuyModal({ art, onClose }: { art: ArtCardData; onClose: () => void }) {
     })
   }, [onClose])
 
-  const collect = useCallback(async () => {
-    if (txState !== 'idle') return
-    setTxState('pending')
-    await new Promise(r => setTimeout(r, 1800))
-    setTxState('confirming')
-    await new Promise(r => setTimeout(r, 2400))
-    setTxState('success')
-  }, [txState])
+  const buy = useCallback(async () => {
+    setTx('pending')
+    await new Promise(r => setTimeout(r, 1700))
+    setTx('confirming')
+    await new Promise(r => setTimeout(r, 2200))
+    setTx('success')
+  }, [])
 
   return (
     <div ref={overlayRef}
       className="fixed inset-0 z-[80] flex items-end sm:items-center justify-center p-4"
-      style={{ background: 'rgba(0,0,0,0.85)', backdropFilter: 'blur(10px)' }}
+      style={{ background: 'rgba(0,0,0,0.88)', backdropFilter: 'blur(12px)' }}
       onClick={e => { if (e.target === overlayRef.current) close() }}>
-
       <div ref={panelRef}
-        className="relative w-full max-w-[420px] overflow-hidden"
+        className="relative w-full max-w-[400px] overflow-hidden"
         style={{
           background:  '#0D0D0D',
-          border:      `1px solid ${phaseColor}28`,
-          boxShadow:   `0 40px 80px rgba(0,0,0,0.85), 0 0 60px -20px ${phaseColor}18`,
+          border:      `1px solid ${art.phaseColor}25`,
+          boxShadow:   `0 32px 80px rgba(0,0,0,0.85), 0 0 50px -20px ${art.phaseColor}18`,
         }}>
-
-        {/* Phase stripe top */}
         <div className="h-[2px]"
-          style={{ background: `linear-gradient(90deg, ${phaseColor}, ${phaseColor}40 60%, transparent)` }}/>
+          style={{ background: `linear-gradient(90deg, ${art.phaseColor}, ${art.phaseColor}40 60%, transparent)` }}/>
 
-        {/* Header */}
-        <div className="flex items-center gap-4 px-6 pt-5 pb-4"
+        <div className="flex items-start gap-4 px-6 pt-5 pb-4"
           style={{ borderBottom: '1px solid rgba(255,255,255,0.07)' }}>
-          <div className="relative w-14 h-14 shrink-0 overflow-hidden rounded-sm">
+          <div className="relative w-12 h-12 shrink-0 overflow-hidden rounded-sm">
             {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src={art.image} alt={art.title} className="w-full h-full object-cover"/>
-            <span className="absolute left-0 top-0 bottom-0 w-[3px]"
-              style={{ background: phaseColor }}/>
+            <img src={art.image} alt="" className="w-full h-full object-cover"/>
+            <span className="absolute left-0 top-0 bottom-0 w-[2px]"
+              style={{ background: art.phaseColor }}/>
           </div>
           <div className="flex-1 min-w-0">
-            <p className="text-[9px] tracking-[0.24em] uppercase mb-0.5"
-              style={{ color: 'rgba(255,255,255,0.32)' }}>{art.ticker}</p>
+            <p className="font-mono text-[9px] tracking-widest uppercase mb-0.5"
+              style={{ color: art.phaseColor }}>{art.ticker}</p>
             <h3 className="font-light text-white/90 truncate"
-              style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: '1.2rem' }}>
+              style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: '1.15rem' }}>
               {art.title}
             </h3>
           </div>
-          <button onClick={close} aria-label="Close"
-            className="w-7 h-7 flex items-center justify-center rounded-sm transition-colors duration-150"
+          <button onClick={close}
+            className="w-7 h-7 flex items-center justify-center rounded-sm transition-colors"
             style={{ color: 'rgba(255,255,255,0.3)' }}
             onMouseEnter={e => (e.currentTarget.style.background = 'rgba(255,255,255,0.08)')}
             onMouseLeave={e => (e.currentTarget.style.background = 'transparent')}>
@@ -203,121 +744,68 @@ function BuyModal({ art, onClose }: { art: ArtCardData; onClose: () => void }) {
           </button>
         </div>
 
-        {/* Body */}
-        <div className="px-6 py-5 space-y-4">
-
-          {/* Price */}
-          <div className="flex items-end justify-between pb-4"
-            style={{ borderBottom: '1px solid rgba(255,255,255,0.07)' }}>
+        <div className="px-6 py-5">
+          <div className="flex justify-between items-end mb-5"
+            style={{ borderBottom: '1px solid rgba(255,255,255,0.07)', paddingBottom: '1.25rem' }}>
             <div>
-              <p className="text-[8px] tracking-[0.24em] uppercase mb-1"
+              <p className="text-[8px] uppercase tracking-widest mb-1"
                 style={{ color: 'rgba(255,255,255,0.3)' }}>Market Cap</p>
               <p className="font-light text-white leading-none"
                 style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: '2rem' }}>
                 {art.marketCapLabel}
               </p>
             </div>
-            <p className="font-mono font-semibold" style={{ color: phaseColor }}>
-              {art.change24h} <span className="text-[10px] opacity-60">24h</span>
+            <p className="font-mono font-semibold" style={{ color: art.phaseColor }}>
+              {art.change24h}
             </p>
           </div>
 
-          {/* Curve progress */}
-          <div>
-            <div className="flex justify-between text-[9px] font-mono mb-1.5">
-              <span style={{ color: 'rgba(255,255,255,0.32)' }}>Bonding Curve</span>
-              <span style={{ color: '#D4AF37' }}>{art.progress}% to Graduation</span>
-            </div>
-            <div className="h-1.5 rounded-full" style={{ background: 'rgba(255,255,255,0.08)' }}>
-              <div className="h-full rounded-full"
-                style={{ width: `${art.progress}%`, background: 'linear-gradient(90deg, #D4AF37, #F3E5AB)' }}/>
-            </div>
-          </div>
-
-          {/* Quantity */}
-          <div className="flex items-center gap-4 pt-1">
-            <div className="flex items-center border"
-              style={{ borderColor: 'rgba(255,255,255,0.12)' }}>
-              <button onClick={() => setQty(q => Math.max(1, q - 1))}
-                disabled={qty <= 1 || txState !== 'idle'}
-                className="w-9 h-9 flex items-center justify-center transition-colors duration-150
-                           disabled:opacity-30"
-                style={{ color: 'rgba(255,255,255,0.5)' }}
-                onMouseEnter={e => (e.currentTarget.style.background = 'rgba(255,255,255,0.07)')}
-                onMouseLeave={e => (e.currentTarget.style.background = 'transparent')}>
-                <svg viewBox="0 0 24 24" className="w-3 h-3" fill="none" stroke="currentColor" strokeWidth="2.5">
-                  <path d="M5 12h14" strokeLinecap="round"/>
-                </svg>
-              </button>
-              <span className="w-9 text-center font-light text-white"
-                style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: '1.1rem' }}>{qty}</span>
-              <button onClick={() => setQty(q => Math.min(10, q + 1))}
-                disabled={qty >= 10 || txState !== 'idle'}
-                className="w-9 h-9 flex items-center justify-center transition-colors duration-150
-                           disabled:opacity-30"
-                style={{ color: 'rgba(255,255,255,0.5)' }}
-                onMouseEnter={e => (e.currentTarget.style.background = 'rgba(255,255,255,0.07)')}
-                onMouseLeave={e => (e.currentTarget.style.background = 'transparent')}>
-                <svg viewBox="0 0 24 24" className="w-3 h-3" fill="none" stroke="currentColor" strokeWidth="2.5">
-                  <path d="M12 5v14M5 12h14" strokeLinecap="round"/>
-                </svg>
-              </button>
-            </div>
-            <div className="flex-1 text-right">
-              <p className="text-[8px] uppercase tracking-widest mb-0.5"
-                style={{ color: 'rgba(255,255,255,0.28)' }}>Total</p>
-              <p className="font-mono text-white">{total} ETH</p>
-            </div>
-          </div>
-        </div>
-
-        {/* CTA */}
-        <div className="px-6 pb-6 space-y-2">
-          {txState === 'idle' && (
-            <button onClick={collect}
-              className="w-full h-11 text-[10.5px] tracking-[0.3em] uppercase font-semibold
-                         transition-opacity duration-200 active:scale-[0.99]"
-              style={{ background: phaseColor, color: '#0A0A0A' }}
-              onMouseEnter={e => (e.currentTarget.style.opacity = '0.88')}
+          {tx === 'idle' && (
+            <button onClick={buy}
+              className="w-full h-11 font-mono text-[10.5px] tracking-[0.28em] uppercase font-semibold
+                         transition-opacity duration-200"
+              style={{ background: 'linear-gradient(90deg, #D4AF37, #F3E5AB)', color: '#0A0A0A' }}
+              onMouseEnter={e => (e.currentTarget.style.opacity = '0.9')}
               onMouseLeave={e => (e.currentTarget.style.opacity = '1')}>
-              Collect {qty > 1 ? `× ${qty}` : 'Now'} — {total} ETH
+              Confirm Purchase — {art.marketCapLabel}
             </button>
           )}
-          {(txState === 'pending' || txState === 'confirming') && (
+          {(tx === 'pending' || tx === 'confirming') && (
             <div className="w-full h-11 flex items-center justify-center gap-3"
-              style={{ border: `1px solid ${phaseColor}35` }}>
+              style={{ border: `1px solid ${art.phaseColor}35` }}>
               <svg className="w-4 h-4 animate-spin" viewBox="0 0 24 24" fill="none"
-                style={{ color: phaseColor }}>
+                style={{ color: art.phaseColor }}>
                 <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="2" strokeOpacity="0.2"/>
                 <path d="M12 2a10 10 0 0 1 10 10" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
               </svg>
-              <span className="text-[10px] tracking-[0.24em] uppercase" style={{ color: phaseColor }}>
-                {txState === 'pending' ? 'Confirm in Wallet' : 'Confirming on Base…'}
+              <span className="font-mono text-[10px] tracking-widest uppercase"
+                style={{ color: art.phaseColor }}>
+                {tx === 'pending' ? 'Confirm in Wallet' : 'On Base…'}
               </span>
             </div>
           )}
-          {txState === 'success' && (
-            <>
-              <div className="w-full h-11 flex items-center justify-center gap-2.5"
+          {tx === 'success' && (
+            <div>
+              <div className="w-full h-11 flex items-center justify-center gap-2.5 mb-2"
                 style={{ border: '1px solid rgba(74,222,128,0.3)', background: 'rgba(74,222,128,0.06)' }}>
-                <svg viewBox="0 0 24 24" className="w-4 h-4 text-emerald-400"
-                  fill="none" stroke="currentColor" strokeWidth="2">
+                <svg viewBox="0 0 24 24" className="w-4 h-4" fill="none"
+                  stroke="#4ade80" strokeWidth="2">
                   <path d="M5 13l4 4L19 7" strokeLinecap="round" strokeLinejoin="round"/>
                 </svg>
-                <span className="text-[10px] tracking-[0.2em] uppercase text-emerald-400">
-                  Collected Successfully
+                <span className="font-mono text-[10px] tracking-widest uppercase text-emerald-400">
+                  Collected
                 </span>
               </div>
               <button onClick={close}
-                className="w-full h-8 text-[9px] tracking-widest uppercase transition-colors duration-150"
+                className="w-full h-8 font-mono text-[9px] tracking-widest uppercase transition-colors"
                 style={{ color: 'rgba(255,255,255,0.28)' }}
-                onMouseEnter={e => (e.currentTarget.style.color = 'rgba(255,255,255,0.6)')}
+                onMouseEnter={e => (e.currentTarget.style.color = 'rgba(255,255,255,0.55)')}
                 onMouseLeave={e => (e.currentTarget.style.color = 'rgba(255,255,255,0.28)')}>
                 Close
               </button>
-            </>
+            </div>
           )}
-          <p className="text-center text-[8px] tracking-[0.12em] uppercase"
+          <p className="text-center font-mono text-[8px] tracking-widest uppercase mt-3"
             style={{ color: 'rgba(255,255,255,0.16)' }}>
             Base Network · Bonding Curve Contract
           </p>
@@ -327,18 +815,21 @@ function BuyModal({ art, onClose }: { art: ArtCardData; onClose: () => void }) {
   )
 }
 
-// ── Main Page Component ────────────────────────────────────────────
+// ── Main MarketplacePage ───────────────────────────────────────────
 export function MarketplacePage() {
+  const [selected,    setSelected]    = useState<MarketArtwork>(ARTWORKS[0])
   const [activePhase, setActivePhase] = useState<Phase | 'All'>('All')
   const [sortKey,     setSortKey]     = useState<SortKey>('market_cap')
   const [search,      setSearch]      = useState('')
   const [sortOpen,    setSortOpen]    = useState(false)
-  const [buyArt,      setBuyArt]      = useState<ArtCardData | null>(null)
+  const [buyArt,      setBuyArt]      = useState<MarketArtwork | null>(null)
+  // Mobile bottom sheet
+  const [sheetOpen,   setSheetOpen]   = useState(false)
 
-  const sortRef    = useRef<HTMLDivElement>(null)
-  const headerRef  = useRef<HTMLDivElement>(null)
+  const sortRef   = useRef<HTMLDivElement>(null)
+  const headerRef = useRef<HTMLDivElement>(null)
 
-  // ── Filter + sort ────────────────────────────────────────────────
+  // ── Filter + sort ──────────────────────────────────────────────
   const filtered = useMemo(() => {
     let items = [...ARTWORKS]
     if (activePhase !== 'All') items = items.filter(a => a.phase === activePhase)
@@ -351,14 +842,22 @@ export function MarketplacePage() {
       )
     }
     items.sort((a, b) => {
-      if (sortKey === 'market_cap')  return b.marketCap - a.marketCap
-      if (sortKey === 'price_asc')   return a.marketCap - b.marketCap
-      if (sortKey === 'price_desc')  return b.marketCap - a.marketCap
-      if (sortKey === 'change')      return parseFloat(b.change24h) - parseFloat(a.change24h)
-      return b.id - a.id // newest
+      if (sortKey === 'market_cap') return b.marketCap - a.marketCap
+      if (sortKey === 'price_asc')  return a.marketCap - b.marketCap
+      if (sortKey === 'price_desc') return b.marketCap - a.marketCap
+      if (sortKey === 'change')
+        return parseFloat(b.change24h) - parseFloat(a.change24h)
+      return b.id - a.id
     })
     return items
   }, [activePhase, sortKey, search])
+
+  // If selected is filtered out, auto-select first visible
+  useEffect(() => {
+    if (filtered.length && !filtered.find(a => a.id === selected.id)) {
+      setSelected(filtered[0])
+    }
+  }, [filtered, selected.id])
 
   // Phase counts
   const counts = useMemo(() => ({
@@ -368,14 +867,14 @@ export function MarketplacePage() {
     Migration:    ARTWORKS.filter(a => a.phase === 'Migration').length,
   }), [])
 
-  // Header entrance (GSAP)
+  // Header entrance
   useEffect(() => {
     const ctx = gsap.context(() => {
       const els = headerRef.current?.querySelectorAll<HTMLElement>('[data-fade]')
       if (els?.length) {
         gsap.fromTo(Array.from(els),
-          { y: 18, autoAlpha: 0 },
-          { y: 0, autoAlpha: 1, duration: 0.6, ease: 'power3.out', stagger: 0.08, delay: 0.1 }
+          { y: 16, autoAlpha: 0 },
+          { y: 0, autoAlpha: 1, duration: 0.55, ease: 'power3.out', stagger: 0.07, delay: 0.05 }
         )
       }
     })
@@ -392,332 +891,301 @@ export function MarketplacePage() {
     return () => { clearTimeout(t); document.removeEventListener('mousedown', h) }
   }, [sortOpen])
 
+  const handleSelect = (art: MarketArtwork) => {
+    setSelected(art)
+    setSheetOpen(true) // triggers bottom sheet on mobile
+  }
+
   const currentSort = SORT_OPTIONS.find(s => s.key === sortKey)!
 
-  // Unique grid key — forces Framer to re-mount + re-stagger on filter change
-  const gridKey = `${activePhase}|${sortKey}|${search}`
-
   return (
-    <div className="min-h-screen" style={{ background: '#0A0A0A', paddingTop: 80 }}>
-
-      {/* ══════════════════════════════════════════════════════
-          1. COMMAND CENTER
-          Full-width header: title/subtitle left, 3 stat boxes right
-      ══════════════════════════════════════════════════════ */}
+    <>
+      {/* ── Full-viewport flex column ────────────────────────── */}
       <div
-        ref={headerRef}
-        className="px-8 py-7"
-        style={{ borderBottom: '1px solid rgba(255,255,255,0.08)' }}
+        className="flex flex-col"
+        style={{ height: '100dvh', paddingTop: 80, background: '#0A0A0A' }}
       >
-        <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6">
 
-          {/* Left: identity */}
-          <div>
-            <h1
-              data-fade
-              className="font-light tracking-[0.06em] leading-none mb-2"
-              style={{
-                fontFamily: "'Cormorant Garamond', serif",
-                fontSize:   'clamp(1.9rem, 3.8vw, 3.2rem)',
-                color:      '#FDFBF7',
-                opacity:    0,
-              }}
-            >
-              LIVE MARKETPLACE
-            </h1>
-            <p
-              data-fade
-              className="text-[12px] tracking-[0.18em]"
-              style={{ color: 'rgba(255,255,255,0.38)', opacity: 0 }}
-            >
-              Trade unique artworks on the bonding curve.
-            </p>
-          </div>
-
-          {/* Right: 3 market stat boxes */}
-          <div data-fade className="flex gap-3 flex-wrap" style={{ opacity: 0 }}>
-            {[
-              { label: 'TOTAL VOLUME', value: '4,218 ETH', gold: true },
-              { label: 'LIVE LISTINGS', value: '2,847', gold: false },
-              { label: '24H TRADES', value: '+12.4%', green: true },
-            ].map(s => (
-              <div
-                key={s.label}
-                className="px-5 py-3 text-center"
+        {/* ══ COMMAND CENTER ══════════════════════════════════ */}
+        <div
+          ref={headerRef}
+          className="shrink-0 px-8 py-5"
+          style={{ borderBottom: '1px solid rgba(255,255,255,0.08)' }}
+        >
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+            <div>
+              <h1
+                data-fade
+                className="font-light tracking-[0.06em] leading-none"
                 style={{
-                  border:     '1px solid rgba(255,255,255,0.1)',
-                  background: 'rgba(255,255,255,0.02)',
-                  minWidth:   110,
+                  fontFamily: "'Cormorant Garamond', serif",
+                  fontSize:   'clamp(1.6rem, 3vw, 2.6rem)',
+                  color:      '#FDFBF7',
+                  opacity:    0,
                 }}
               >
-                <p className="font-mono text-[8px] tracking-[0.22em] uppercase mb-1.5"
-                  style={{ color: 'rgba(255,255,255,0.3)' }}>
-                  {s.label}
-                </p>
-                <p
-                  className="font-mono text-[1rem] leading-none"
-                  style={{
-                    color: s.gold ? '#D4AF37' : s.green ? '#4ade80' : 'rgba(255,255,255,0.85)',
-                  }}
-                >
-                  {s.value}
-                </p>
-              </div>
-            ))}
-          </div>
-        </div>
-      </div>
-
-      {/* ══════════════════════════════════════════════════════
-          2. FLOW NAVIGATOR
-          Sticky bar: phase tabs left  |  search + sort right
-      ══════════════════════════════════════════════════════ */}
-      <div
-        className="sticky z-30 flex items-center justify-between gap-4 px-8"
-        style={{
-          top:              80,
-          borderBottom:     '1px solid rgba(255,255,255,0.08)',
-          background:       'rgba(10,10,10,0.97)',
-          backdropFilter:   'blur(14px)',
-          height:           52,
-        }}
-      >
-        {/* Phase tabs */}
-        <nav className="flex items-center h-full overflow-x-auto" style={{ scrollbarWidth: 'none' }}>
-          {PHASE_TABS.map(tab => {
-            const active = activePhase === tab.key
-            const color  = tab.key === 'All'
-              ? '#D4AF37'
-              : PHASE_COLOR[tab.key as Phase]
-            const count  = counts[tab.key as keyof typeof counts]
-
-            return (
-              <button
-                key={tab.key}
-                type="button"
-                onClick={() => setActivePhase(tab.key)}
-                className="relative flex items-center gap-2 h-full px-4 shrink-0
-                           text-[10px] tracking-[0.2em] uppercase
-                           transition-colors duration-200"
-                style={{ color: active ? color : 'rgba(255,255,255,0.35)' }}
+                LIVE MARKETPLACE
+              </h1>
+              <p
+                data-fade
+                className="text-[11px] tracking-[0.18em] mt-1"
+                style={{ color: 'rgba(255,255,255,0.35)', opacity: 0 }}
               >
-                {/* Active indicator dot (non-All tabs) */}
-                {tab.key !== 'All' && active && (
-                  <span className="size-[5px] rounded-full" style={{ background: color }}/>
-                )}
-                {tab.label}
-                {/* Count badge */}
-                <span
-                  className="font-mono text-[8px] px-1.5 py-0.5"
+                Trade unique artworks on the bonding curve.
+              </p>
+            </div>
+            {/* Market stats */}
+            <div data-fade className="flex gap-2 flex-wrap" style={{ opacity: 0 }}>
+              {[
+                { label: 'TOTAL VOLUME', value: '4,218 ETH', gold: true },
+                { label: 'LIVE LISTINGS', value: '2,847' },
+                { label: '24H TRADES', value: '+12.4%', green: true },
+              ].map(s => (
+                <div key={s.label}
+                  className="px-4 py-2.5 text-center"
                   style={{
-                    background: active ? `${color}18` : 'rgba(255,255,255,0.06)',
-                    color:      active ? color : 'rgba(255,255,255,0.25)',
-                  }}
-                >
-                  {count}
-                </span>
-                {/* Underline */}
-                {active && (
-                  <span
-                    className="absolute bottom-0 left-2 right-2 h-px"
-                    style={{ background: color }}
-                  />
-                )}
-              </button>
-            )
-          })}
-        </nav>
-
-        {/* Right: search + sort */}
-        <div className="flex items-center gap-3 shrink-0">
-
-          {/* Search — underline style */}
-          <div className="relative">
-            <svg
-              viewBox="0 0 24 24" className="absolute left-0 top-1/2 -translate-y-1/2 w-3 h-3"
-              style={{ color: 'rgba(255,255,255,0.28)' }}
-              fill="none" stroke="currentColor" strokeWidth="2">
-              <circle cx="11" cy="11" r="8"/>
-              <path d="m21 21-4.35-4.35" strokeLinecap="round"/>
-            </svg>
-            <input
-              type="search"
-              placeholder="Search works, artists, tickers…"
-              value={search}
-              onChange={e => setSearch(e.target.value)}
-              className="h-8 pl-5 pr-2 w-52 text-[11px] bg-transparent outline-none
-                         placeholder:text-white/20"
-              style={{
-                borderBottom: '1px solid rgba(255,255,255,0.18)',
-                color:        'rgba(255,255,255,0.75)',
-              }}
-              onFocus={e  => (e.currentTarget.style.borderBottomColor = 'rgba(212,175,55,0.7)')}
-              onBlur={e   => (e.currentTarget.style.borderBottomColor = 'rgba(255,255,255,0.18)')}
-            />
+                    border:     '1px solid rgba(255,255,255,0.1)',
+                    background: 'rgba(255,255,255,0.02)',
+                    minWidth:   96,
+                  }}>
+                  <p className="font-mono text-[7.5px] tracking-[0.22em] uppercase mb-1"
+                    style={{ color: 'rgba(255,255,255,0.3)' }}>{s.label}</p>
+                  <p className="font-mono text-[0.95rem] leading-none"
+                    style={{
+                      color: s.gold ? '#D4AF37' : s.green ? '#4ade80' : 'rgba(255,255,255,0.82)',
+                    }}>
+                    {s.value}
+                  </p>
+                </div>
+              ))}
+            </div>
           </div>
-
-          {/* Sort dropdown */}
-          <div ref={sortRef} className="relative">
-            <button
-              type="button"
-              onClick={() => setSortOpen(v => !v)}
-              className="flex items-center gap-2 h-8 px-3 text-[10px] tracking-[0.14em]
-                         uppercase transition-colors duration-200"
-              style={{
-                border: '1px solid rgba(255,255,255,0.1)',
-                color:  'rgba(255,255,255,0.5)',
-              }}
-              onMouseEnter={e => (e.currentTarget.style.borderColor = 'rgba(212,175,55,0.4)')}
-              onMouseLeave={e => !sortOpen && (e.currentTarget.style.borderColor = 'rgba(255,255,255,0.1)')}
-            >
-              <span>Sort: {currentSort.label}</span>
-              <svg
-                viewBox="0 0 24 24" className={`w-2.5 h-2.5 transition-transform ${sortOpen ? 'rotate-180' : ''}`}
-                fill="none" stroke="currentColor" strokeWidth="2.5">
-                <path d="M6 9l6 6 6-6" strokeLinecap="round" strokeLinejoin="round"/>
-              </svg>
-            </button>
-
-            <AnimatePresence>
-              {sortOpen && (
-                <motion.div
-                  initial={{ opacity: 0, y: -4 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: -4 }}
-                  transition={{ duration: 0.15 }}
-                  className="absolute right-0 top-[calc(100%+4px)] z-50 overflow-hidden"
-                  style={{
-                    background:  '#111',
-                    border:      '1px solid rgba(255,255,255,0.1)',
-                    minWidth:    180,
-                    boxShadow:   '0 16px 40px rgba(0,0,0,0.6)',
-                  }}
-                >
-                  {SORT_OPTIONS.map(s => (
-                    <button
-                      key={s.key}
-                      type="button"
-                      onClick={() => { setSortKey(s.key); setSortOpen(false) }}
-                      className="w-full text-left px-4 py-2.5 text-[10.5px] tracking-wide
-                                 transition-colors duration-100 flex items-center justify-between"
-                      style={{
-                        color:      s.key === sortKey ? '#D4AF37' : 'rgba(255,255,255,0.5)',
-                        background: s.key === sortKey ? 'rgba(212,175,55,0.08)' : 'transparent',
-                      }}
-                      onMouseEnter={e => {
-                        if (s.key !== sortKey) e.currentTarget.style.background = 'rgba(255,255,255,0.04)'
-                      }}
-                      onMouseLeave={e => {
-                        if (s.key !== sortKey) e.currentTarget.style.background = 'transparent'
-                      }}
-                    >
-                      {s.label}
-                      {s.key === sortKey && (
-                        <svg viewBox="0 0 24 24" className="w-3 h-3" fill="none"
-                          stroke="currentColor" strokeWidth="2.5">
-                          <path d="M5 13l4 4L19 7" strokeLinecap="round" strokeLinejoin="round"/>
-                        </svg>
-                      )}
-                    </button>
-                  ))}
-                </motion.div>
-              )}
-            </AnimatePresence>
-          </div>
-
         </div>
-      </div>
 
-      {/* ══════════════════════════════════════════════════════
-          3. TRADING GRID
-          100% width, responsive columns, Framer stagger.
-          Key changes on every filter/sort → full re-stagger.
-      ══════════════════════════════════════════════════════ */}
-      <div className="px-8 py-8">
-
-        {/* Result count */}
-        <p className="font-mono text-[10px] tracking-[0.18em] uppercase mb-6"
-          style={{ color: 'rgba(255,255,255,0.28)' }}>
-          {filtered.length === 0
-            ? 'No results'
-            : `${filtered.length} work${filtered.length === 1 ? '' : 's'}`
-          }
-          {activePhase !== 'All' ? ` · ${activePhase}` : ''}
-          {search ? ` · "${search}"` : ''}
-        </p>
-
-        {filtered.length === 0 ? (
-
-          /* Empty state */
-          <div className="flex flex-col items-center justify-center py-24 gap-5">
-            <svg viewBox="0 0 48 48" className="w-10 h-10" fill="none"
-              style={{ color: 'rgba(255,255,255,0.1)' }}>
-              <rect x="6" y="6" width="36" height="36" rx="2" stroke="currentColor" strokeWidth="1.5"/>
-              <path d="M6 18h36M18 42V18" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
-            </svg>
-            <p className="text-sm" style={{ color: 'rgba(255,255,255,0.3)' }}>
-              No artworks match your filters
-            </p>
-            <button
-              type="button"
-              onClick={() => { setActivePhase('All'); setSearch('') }}
-              className="text-[10px] tracking-[0.22em] uppercase pb-0.5 transition-colors duration-200"
-              style={{ color: '#D4AF37', borderBottom: '1px solid rgba(212,175,55,0.35)' }}
-              onMouseEnter={e => (e.currentTarget.style.borderBottomColor = '#D4AF37')}
-              onMouseLeave={e => (e.currentTarget.style.borderBottomColor = 'rgba(212,175,55,0.35)')}>
-              Clear filters
-            </button>
+        {/* ══ FLOW NAVIGATOR ══════════════════════════════════ */}
+        <div
+          className="shrink-0 flex items-center justify-between gap-4 px-6"
+          style={{
+            borderBottom: '1px solid rgba(255,255,255,0.08)',
+            background:   'rgba(10,10,10,0.98)',
+            height:       48,
+          }}
+        >
+          {/* Phase tabs */}
+          <div className="flex items-center h-full overflow-x-auto" style={{ scrollbarWidth: 'none' }}>
+            {PHASE_TABS.map(tab => {
+              const active = activePhase === tab.key
+              const color  = tab.key === 'All'
+                ? '#D4AF37'
+                : PHASE_COLOR[tab.key as Phase]
+              const count  = counts[tab.key as keyof typeof counts]
+              return (
+                <button key={tab.key} type="button"
+                  onClick={() => setActivePhase(tab.key)}
+                  className="relative flex items-center gap-1.5 h-full px-3.5 shrink-0
+                             text-[9.5px] tracking-[0.2em] uppercase transition-colors duration-200"
+                  style={{ color: active ? color : 'rgba(255,255,255,0.32)' }}>
+                  {tab.key !== 'All' && active && (
+                    <span className="size-[4px] rounded-full" style={{ background: color }}/>
+                  )}
+                  {tab.label}
+                  <span className="font-mono text-[7.5px] px-1 py-0.5"
+                    style={{
+                      background: active ? `${color}18` : 'rgba(255,255,255,0.05)',
+                      color:      active ? color : 'rgba(255,255,255,0.22)',
+                    }}>
+                    {count}
+                  </span>
+                  {active && (
+                    <span className="absolute bottom-0 left-2 right-2 h-px"
+                      style={{ background: color }}/>
+                  )}
+                </button>
+              )
+            })}
           </div>
 
-        ) : (
+          {/* Search + sort */}
+          <div className="flex items-center gap-2.5 shrink-0">
+            <div className="relative">
+              <svg viewBox="0 0 24 24"
+                className="absolute left-0 top-1/2 -translate-y-1/2 w-3 h-3"
+                style={{ color: 'rgba(255,255,255,0.25)' }}
+                fill="none" stroke="currentColor" strokeWidth="2">
+                <circle cx="11" cy="11" r="8"/>
+                <path d="m21 21-4.35-4.35" strokeLinecap="round"/>
+              </svg>
+              <input type="search" placeholder="Search…"
+                value={search} onChange={e => setSearch(e.target.value)}
+                className="h-7 pl-5 pr-2 w-36 text-[10.5px] bg-transparent outline-none
+                           placeholder:text-white/20"
+                style={{
+                  borderBottom: '1px solid rgba(255,255,255,0.15)',
+                  color:        'rgba(255,255,255,0.7)',
+                }}
+                onFocus={e => (e.currentTarget.style.borderBottomColor = 'rgba(212,175,55,0.65)')}
+                onBlur={e  => (e.currentTarget.style.borderBottomColor = 'rgba(255,255,255,0.15)')}
+              />
+            </div>
+            <div ref={sortRef} className="relative">
+              <button type="button" onClick={() => setSortOpen(v => !v)}
+                className="flex items-center gap-1.5 h-7 px-2.5 text-[9.5px] tracking-wide
+                           uppercase transition-colors duration-200"
+                style={{ border: '1px solid rgba(255,255,255,0.1)', color: 'rgba(255,255,255,0.45)' }}
+                onMouseEnter={e => (e.currentTarget.style.borderColor = 'rgba(212,175,55,0.4)')}
+                onMouseLeave={e => !sortOpen && (e.currentTarget.style.borderColor = 'rgba(255,255,255,0.1)')}>
+                {currentSort.label}
+                <svg viewBox="0 0 24 24"
+                  className={`w-2.5 h-2.5 transition-transform ${sortOpen ? 'rotate-180' : ''}`}
+                  fill="none" stroke="currentColor" strokeWidth="2.5">
+                  <path d="M6 9l6 6 6-6" strokeLinecap="round" strokeLinejoin="round"/>
+                </svg>
+              </button>
+              <AnimatePresence>
+                {sortOpen && (
+                  <motion.div
+                    initial={{ opacity: 0, y: -4 }} animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -4 }} transition={{ duration: 0.14 }}
+                    className="absolute right-0 top-[calc(100%+4px)] z-50 overflow-hidden"
+                    style={{
+                      background: '#111', border: '1px solid rgba(255,255,255,0.1)',
+                      minWidth: 170, boxShadow: '0 16px 40px rgba(0,0,0,0.6)',
+                    }}>
+                    {SORT_OPTIONS.map(s => (
+                      <button key={s.key} type="button"
+                        onClick={() => { setSortKey(s.key); setSortOpen(false) }}
+                        className="w-full text-left px-4 py-2.5 text-[10px] tracking-wide
+                                   transition-colors duration-100 flex items-center justify-between"
+                        style={{
+                          color:      s.key === sortKey ? '#D4AF37' : 'rgba(255,255,255,0.5)',
+                          background: s.key === sortKey ? 'rgba(212,175,55,0.08)' : 'transparent',
+                        }}
+                        onMouseEnter={e => {
+                          if (s.key !== sortKey) e.currentTarget.style.background = 'rgba(255,255,255,0.04)'
+                        }}
+                        onMouseLeave={e => {
+                          if (s.key !== sortKey) e.currentTarget.style.background = 'transparent'
+                        }}>
+                        {s.label}
+                        {s.key === sortKey && (
+                          <svg viewBox="0 0 24 24" className="w-3 h-3" fill="none"
+                            stroke="currentColor" strokeWidth="2.5">
+                            <path d="M5 13l4 4L19 7" strokeLinecap="round" strokeLinejoin="round"/>
+                          </svg>
+                        )}
+                      </button>
+                    ))}
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </div>
+          </div>
+        </div>
 
-          /* Stagger grid — key forces re-mount → re-stagger on filter change */
-          <motion.div
-            key={gridKey}
-            variants={containerVariants}
-            initial="hidden"
-            animate="visible"
-            className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6"
+        {/* ══ SPLIT PANE ══════════════════════════════════════ */}
+        <div className="flex flex-1 min-h-0">
+
+          {/* ── Left: Compact List (40%) ── */}
+          <div
+            className="overflow-y-auto shrink-0"
+            style={{
+              width:          '40%',
+              borderRight:    '1px solid rgba(255,255,255,0.07)',
+              scrollbarWidth: 'thin',
+              scrollbarColor: 'rgba(212,175,55,0.15) transparent',
+            }}
           >
-            {filtered.map(art => (
-              <ArtCard
+            {/* List header */}
+            <div
+              className="grid gap-3 sticky top-0 z-10 px-4 py-2"
+              style={{
+                gridTemplateColumns: '40px 1fr 80px 48px',
+                background:   '#0A0A0A',
+                borderBottom: '1px solid rgba(255,255,255,0.06)',
+              }}
+            >
+              {['', 'Artwork', 'Cap', '%'].map(h => (
+                <p key={h} className="font-mono text-[7.5px] uppercase tracking-[0.2em]"
+                  style={{ color: 'rgba(255,255,255,0.22)' }}>
+                  {h}
+                </p>
+              ))}
+            </div>
+
+            {filtered.length === 0 ? (
+              <div className="flex flex-col items-center justify-center py-16 gap-3">
+                <p className="font-mono text-[10px]" style={{ color: 'rgba(255,255,255,0.25)' }}>
+                  No results
+                </p>
+                <button type="button"
+                  onClick={() => { setActivePhase('All'); setSearch('') }}
+                  className="font-mono text-[9px] uppercase tracking-widest pb-0.5"
+                  style={{ color: '#D4AF37', borderBottom: '1px solid rgba(212,175,55,0.3)' }}>
+                  Clear filters
+                </button>
+              </div>
+            ) : filtered.map(art => (
+              <ListItem
                 key={art.id}
-                data={art}
-                onCollect={setBuyArt}
+                art={art}
+                active={selected.id === art.id}
+                onClick={() => handleSelect(art)}
               />
             ))}
-          </motion.div>
-
-        )}
-
-        {/* Load more */}
-        {filtered.length > 0 && (
-          <div className="flex justify-center mt-12">
-            <button
-              type="button"
-              className="h-11 px-10 font-mono text-[10px] tracking-[0.3em] uppercase
-                         transition-all duration-300"
-              style={{
-                border: '1px solid rgba(212,175,55,0.25)',
-                color:  'rgba(212,175,55,0.6)',
-              }}
-              onMouseEnter={e => {
-                e.currentTarget.style.borderColor = '#D4AF37'
-                e.currentTarget.style.color       = '#D4AF37'
-              }}
-              onMouseLeave={e => {
-                e.currentTarget.style.borderColor = 'rgba(212,175,55,0.25)'
-                e.currentTarget.style.color       = 'rgba(212,175,55,0.6)'
-              }}
-            >
-              Load More
-            </button>
           </div>
-        )}
+
+          {/* ── Right: Inspection Deck (60%) — hidden on mobile ── */}
+          <div
+            className="hidden md:block flex-1 min-w-0"
+            style={{ background: '#0A0A0A' }}
+          >
+            <InspectionDeck art={selected} onCollect={setBuyArt}/>
+          </div>
+        </div>
       </div>
 
-      {/* Buy Modal */}
+      {/* ══ MOBILE BOTTOM SHEET ══════════════════════════════ */}
+      <AnimatePresence>
+        {sheetOpen && (
+          <>
+            {/* Backdrop */}
+            <motion.div
+              key="backdrop"
+              initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+              transition={{ duration: 0.22 }}
+              className="fixed inset-0 z-[60] md:hidden"
+              style={{ background: 'rgba(0,0,0,0.85)' }}
+              onClick={() => setSheetOpen(false)}
+            />
+            {/* Sheet */}
+            <motion.div
+              key="sheet"
+              initial={{ y: '100%' }}
+              animate={{ y: 0 }}
+              exit={{ y: '100%' }}
+              transition={{ type: 'spring', damping: 32, stiffness: 320 }}
+              className="fixed bottom-0 left-0 right-0 z-[70] md:hidden overflow-hidden"
+              style={{
+                background:   '#0D0D0D',
+                border:       '1px solid rgba(255,255,255,0.1)',
+                borderBottom: 'none',
+                maxHeight:    '90dvh',
+              }}
+            >
+              {/* Drag handle */}
+              <div className="flex justify-center pt-3 pb-1">
+                <div className="w-10 h-1 rounded-full" style={{ background: 'rgba(255,255,255,0.15)' }}/>
+              </div>
+              <div style={{ maxHeight: 'calc(90dvh - 24px)', overflowY: 'auto' }}>
+                <InspectionDeck art={selected} onCollect={art => { setSheetOpen(false); setBuyArt(art) }}/>
+              </div>
+            </motion.div>
+          </>
+        )}
+      </AnimatePresence>
+
+      {/* ══ BUY MODAL ════════════════════════════════════════ */}
       {buyArt && <BuyModal art={buyArt} onClose={() => setBuyArt(null)}/>}
-    </div>
+    </>
   )
 }
