@@ -474,8 +474,15 @@ function ArtworkWithChart({
   const gid = `co-${art.id}`
   const filterId = `cglow-${art.id}`
 
+  const [chartVisible, setChartVisible] = useState(false)
+  const EASE = 'cubic-bezier(0.25, 0.46, 0.45, 0.94)'
+
   return (
-    <div className="relative w-full aspect-square overflow-hidden rounded-sm bg-[#0D0D0D]">
+    <div
+      className="relative w-full aspect-square overflow-hidden rounded-sm bg-[#0D0D0D]"
+      onMouseEnter={() => setChartVisible(true)}
+      onMouseLeave={() => setChartVisible(false)}
+    >
       {/* Artwork */}
       {/* eslint-disable-next-line @next/next/no-img-element */}
       <img
@@ -511,16 +518,24 @@ function ArtworkWithChart({
         {art.change24h}
       </div>
 
-      {/* Bottom gradient for chart readability */}
+      {/* Bottom gradient — deepens when chart is expanded */}
       <div
-        className="absolute inset-x-0 bottom-0 h-[55%] pointer-events-none"
+        className="absolute inset-x-0 bottom-0 pointer-events-none"
         style={{
-          background: 'linear-gradient(to top, rgba(0,0,0,0.82) 0%, rgba(0,0,0,0.4) 50%, transparent 100%)',
+          height:     chartVisible ? '62%' : '22%',
+          transition: `height 0.4s ${EASE}`,
+          background: 'linear-gradient(to top, rgba(0,0,0,0.88) 0%, rgba(0,0,0,0.45) 55%, transparent 100%)',
         }}
       />
 
-      {/* Sparkline chart overlaid on image — the FOMO weapon */}
-      <div className="absolute inset-x-0 bottom-0 h-[46%] pointer-events-none">
+      {/* Sparkline chart — slides up from bottom on hover */}
+      <div
+        className="absolute inset-x-0 bottom-0 pointer-events-none overflow-hidden"
+        style={{
+          height:     chartVisible ? '46%' : '14%',
+          transition: `height 0.38s ${EASE}`,
+        }}
+      >
         <svg
           viewBox={`0 0 ${W} ${H}`}
           className="w-full h-full"
