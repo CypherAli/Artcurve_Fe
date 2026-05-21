@@ -227,27 +227,53 @@ function HeaderChartBg() {
   const W = 1200, H = 80
 
   const { mainD, areaD, accentD } = useMemo(() => {
-    // ── Main line: gold — crypto price chart with sharp swings ────
-    // First Y = Last Y = 45 ⟹ seamless tile
+    // ── Main line: gold — real stock-chart rhythm ────────────────
+    // Anatomy: flat open → gradual uptrend → pullback → spike → slow bleed back
+    // SVG: y↑ = price↓ on screen.  y=55 ≈ base, y=28 ≈ high spike.
+    // First Y = Last Y = 55 ⟹ seamless tile
     const mainPts: [number, number][] = [
-      [0,    45], [38,   41], [72,   59], [105,  34], [145,  63],
-      [178,  49], [215,  70], [248,  43], [288,  74], [325,  54],
-      [358,  37], [398,  65], [432,  28], [468,  58], [498,  44],
-      [532,  72], [562,  50], [592,  33], [628,  62], [668,  47],
-      [705,  20], [735,  52], [768,  67], [804,  46], [838,  74],
-      [872,  54], [908,  38], [945,  66], [978,  49], [1015, 34],
-      [1052, 61], [1092, 43], [1132, 59], [1168, 39], [1200, 45],
+      [0,    55],               // open — flat base
+      [55,   54], [110,  56],   // minor noise / consolidation
+      [160,  53], [210,  50],   // drift up
+      [255,  47], [295,  43],   // uptrend accelerates
+      [330,  39], [358,  35],   // strong rally
+      [378,  32],               // ← spike high (sharp peak, not a mountain)
+      [398,  37], [420,  42],   // fast rejection / v-shape reversal
+      [455,  46], [495,  50],   // back to base
+      [540,  52], [580,  55],   // slight bleed / consolidation
+      [625,  57], [660,  60],   // mild dip (support test)
+      [695,  57], [725,  54],   // bounce
+      [758,  50], [790,  47],   // building again
+      [818,  43], [842,  39],   // mini rally
+      [862,  36],               // ← secondary spike
+      [882,  41], [908,  46],   // reversal
+      [945,  50], [985,  53],   // drift
+      [1025, 55], [1065, 56],   // flat late session
+      [1110, 54], [1155, 55],   // close noise
+      [1200, 55],               // = open ⟹ seamless
     ]
 
-    // ── Accent line: white ghost — different rhythm, same loop rule ─
+    // ── Accent line: white ghost — independent price action ────────
+    // Different rhythm: early dip, then a slow climb, late consolidation
     // First Y = Last Y = 52 ⟹ seamless tile
     const accentPts: [number, number][] = [
-      [0,    52], [48,   36], [88,   61], [130,  43], [168,  67],
-      [208,  39], [255,  70], [295,  47], [348,  63], [390,  33],
-      [428,  57], [468,  41], [515,  66], [558,  47], [598,  30],
-      [645,  56], [688,  43], [728,  69], [768,  51], [815,  37],
-      [858,  63], [898,  45], [942,  71], [988,  51], [1028, 36],
-      [1078, 59], [1122, 43], [1162, 59], [1200, 52],
+      [0,    52],                         // open
+      [70,   54], [140,  57],             // drift down
+      [185,  60], [225,  57],             // dip then bounce
+      [270,  53], [315,  49],             // recovery
+      [360,  45], [400,  41],             // uptrend
+      [430,  38],                         // ← spike
+      [455,  43], [490,  48],             // pullback
+      [530,  52], [575,  55],             // base
+      [620,  52], [665,  49],             // slow creep up
+      [710,  45], [748,  42],             // building
+      [775,  39],                         // ← second spike
+      [798,  44], [828,  49],             // reversal
+      [868,  53], [910,  55],             // settle
+      [960,  57], [1010, 55],             // minor bump
+      [1060, 53], [1110, 52],             // flat into close
+      [1160, 52],
+      [1200, 52],                         // = open ⟹ seamless
     ]
 
     const toD = (pts: [number, number][]) =>
