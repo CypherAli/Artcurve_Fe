@@ -227,53 +227,78 @@ function HeaderChartBg() {
   const W = 1200, H = 80
 
   const { mainD, areaD, accentD } = useMemo(() => {
-    // ── Main line: gold — real stock-chart rhythm ────────────────
-    // Anatomy: flat open → gradual uptrend → pullback → spike → slow bleed back
-    // SVG: y↑ = price↓ on screen.  y=55 ≈ base, y=28 ≈ high spike.
-    // First Y = Last Y = 55 ⟹ seamless tile
+    // ── Main line: gold ───────────────────────────────────────────
+    // Macro anatomy (like the screenshot):
+    //   Phase 1 (0–480):    slow downtrend with bounces — "distribution"
+    //   Phase 2 (480–560):  bottom / accumulation zone — tight range
+    //   Phase 3 (560–920):  uptrend, steeper than the decline — "mark-up"
+    //   Phase 4 (920–1200): profit-taking, drift back to open — seamless tile
+    //
+    // SVG y: 0 = top of chart (HIGH price), 80 = bottom (LOW price)
+    // First Y = Last Y = 48 ⟹ seamless tile
     const mainPts: [number, number][] = [
-      [0,    55],               // open — flat base
-      [55,   54], [110,  56],   // minor noise / consolidation
-      [160,  53], [210,  50],   // drift up
-      [255,  47], [295,  43],   // uptrend accelerates
-      [330,  39], [358,  35],   // strong rally
-      [378,  32],               // ← spike high (sharp peak, not a mountain)
-      [398,  37], [420,  42],   // fast rejection / v-shape reversal
-      [455,  46], [495,  50],   // back to base
-      [540,  52], [580,  55],   // slight bleed / consolidation
-      [625,  57], [660,  60],   // mild dip (support test)
-      [695,  57], [725,  54],   // bounce
-      [758,  50], [790,  47],   // building again
-      [818,  43], [842,  39],   // mini rally
-      [862,  36],               // ← secondary spike
-      [882,  41], [908,  46],   // reversal
-      [945,  50], [985,  53],   // drift
-      [1025, 55], [1065, 56],   // flat late session
-      [1110, 54], [1155, 55],   // close noise
-      [1200, 55],               // = open ⟹ seamless
+      // ── Phase 1: gradual sell-off with dead-cat bounces ─────────
+      [0,    48],
+      [45,   50], [85,   47],             // early noise
+      [120,  52], [152,  49],             // lower high
+      [182,  54], [210,  51],             // bounce fails
+      [242,  56], [268,  53],             // lower low
+      [298,  58], [322,  55],             // bounce
+      [352,  60], [375,  57],             // continuation
+      [405,  62], [428,  59],             // near bottom
+      // ── Phase 2: bottom / accumulation ──────────────────────────
+      [458,  65],                         // ← THE BOTTOM
+      [478,  63], [498,  66], [518,  62], // tight chop at lows
+      [538,  64], [555,  61],             // base forming
+      // ── Phase 3: uptrend — steeper than decline ─────────────────
+      [575,  57], [600,  52],             // breakout begins
+      [622,  55], [645,  49],             // pullback → resume
+      [668,  44], [688,  47],             // higher low
+      [710,  41], [730,  37],             // momentum
+      [748,  40], [768,  35],             // pullback → new high
+      [788,  31], [805,  34],             // strong push
+      [822,  29],                         // ← THE TOP
+      [840,  33], [858,  37],             // take profit
+      [878,  34], [898,  31],             // re-test high
+      [918,  35],                         // last push
+      // ── Phase 4: distribution / drift back to open ──────────────
+      [945,  38], [975,  41],
+      [1005, 43], [1040, 45],
+      [1075, 46], [1115, 47],
+      [1155, 48],
+      [1200, 48],                         // = open ⟹ seamless ✓
     ]
 
-    // ── Accent line: white ghost — independent price action ────────
-    // Different rhythm: early dip, then a slow climb, late consolidation
+    // ── Accent line: white ghost — offset version of same macro ───
+    // Bottom comes earlier (x≈400), top later (x≈980), different noise
     // First Y = Last Y = 52 ⟹ seamless tile
     const accentPts: [number, number][] = [
-      [0,    52],                         // open
-      [70,   54], [140,  57],             // drift down
-      [185,  60], [225,  57],             // dip then bounce
-      [270,  53], [315,  49],             // recovery
-      [360,  45], [400,  41],             // uptrend
-      [430,  38],                         // ← spike
-      [455,  43], [490,  48],             // pullback
-      [530,  52], [575,  55],             // base
-      [620,  52], [665,  49],             // slow creep up
-      [710,  45], [748,  42],             // building
-      [775,  39],                         // ← second spike
-      [798,  44], [828,  49],             // reversal
-      [868,  53], [910,  55],             // settle
-      [960,  57], [1010, 55],             // minor bump
-      [1060, 53], [1110, 52],             // flat into close
-      [1160, 52],
-      [1200, 52],                         // = open ⟹ seamless
+      // Phase 1: decline
+      [0,    52],
+      [60,   54], [115,  51],
+      [155,  56], [195,  53],
+      [232,  58], [265,  55],
+      [300,  61], [328,  58],
+      [362,  63], [388,  60],
+      // Bottom
+      [418,  67],                         // ← bottom
+      [440,  65], [462,  68], [480,  64],
+      [500,  66], [518,  63],
+      // Phase 3: rally
+      [540,  59], [568,  54],
+      [590,  57], [615,  51],
+      [640,  46], [662,  49],
+      [688,  43], [710,  40],
+      [730,  44], [752,  38],
+      [772,  34], [790,  37],
+      [810,  32],                         // ← top
+      [830,  36], [852,  33],
+      [875,  37], [900,  40],
+      // Phase 4: drift back
+      [935,  43], [968,  46],
+      [1005, 48], [1045, 50],
+      [1090, 51], [1140, 52],
+      [1200, 52],                         // = open ⟹ seamless ✓
     ]
 
     const toD = (pts: [number, number][]) =>
