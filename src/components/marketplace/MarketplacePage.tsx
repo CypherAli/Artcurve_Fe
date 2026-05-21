@@ -729,6 +729,7 @@ function ListItem({
   return (
     <motion.button
       layout
+      transition={{ layout: { type: 'spring', stiffness: 420, damping: 32 } }}
       type="button"
       onClick={onClick}
       onMouseEnter={() => setHovered(true)}
@@ -1303,23 +1304,42 @@ export function MarketplacePage() {
   const resumeTimer  = useRef<ReturnType<typeof setTimeout> | null>(null)
   const flashTimer   = useRef<ReturnType<typeof setTimeout> | null>(null)
 
-  // Simulate live price ticks — random artwork, -3% to +9% per tick
+  // ── Two-tier price simulation ──────────────────────────────────
+  //  Tier 1 — micro tick every 2.4s: ±5% flash (UI noise, no rank change)
+  //  Tier 2 — spike event every 4.5s: +20% to +130% (causes rank jumps)
   useEffect(() => {
-    const timer = setInterval(() => {
-      const art = ARTWORKS[Math.floor(Math.random() * ARTWORKS.length)]
-      // Bias slightly positive (bullish market feel)
-      const delta = 1 + (Math.random() * 0.12 - 0.03)
+    const doFlash = (id: number, duration = 700) => {
+      setFlashId(id)
+      if (flashTimer.current) clearTimeout(flashTimer.current)
+      flashTimer.current = setTimeout(() => setFlashId(null), duration)
+    }
+
+    // Tier 1: small ticks — just for visual activity
+    const microTimer = setInterval(() => {
+      const art  = ARTWORKS[Math.floor(Math.random() * ARTWORKS.length)]
+      const delta = 1 + (Math.random() * 0.08 - 0.03) // -3% to +5%
       setLivePrices(prev => ({
         ...prev,
         [art.id]: parseFloat((prev[art.id] * delta).toFixed(3)),
       }))
-      // Flash highlight
-      setFlashId(art.id)
-      if (flashTimer.current) clearTimeout(flashTimer.current)
-      flashTimer.current = setTimeout(() => setFlashId(null), 700)
-    }, 2800)
+      doFlash(art.id, 600)
+    }, 2400)
+
+    // Tier 2: spike events — enough to cause visible rank changes
+    const spikeTimer = setInterval(() => {
+      const art   = ARTWORKS[Math.floor(Math.random() * ARTWORKS.length)]
+      // +20% to +130% spike — can shoot a low-ranked item past multiple rows
+      const spike = 1 + (Math.random() * 1.1 + 0.20)
+      setLivePrices(prev => ({
+        ...prev,
+        [art.id]: parseFloat((prev[art.id] * spike).toFixed(3)),
+      }))
+      doFlash(art.id, 1200)
+    }, 4500)
+
     return () => {
-      clearInterval(timer)
+      clearInterval(microTimer)
+      clearInterval(spikeTimer)
       if (flashTimer.current) clearTimeout(flashTimer.current)
     }
   }, [])
