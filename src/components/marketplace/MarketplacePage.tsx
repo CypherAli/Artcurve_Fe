@@ -228,77 +228,76 @@ function HeaderChartBg() {
 
   const { mainD, areaD, accentD } = useMemo(() => {
     // ── Main line: gold ───────────────────────────────────────────
-    // Macro anatomy (like the screenshot):
-    //   Phase 1 (0–480):    slow downtrend with bounces — "distribution"
-    //   Phase 2 (480–560):  bottom / accumulation zone — tight range
-    //   Phase 3 (560–920):  uptrend, steeper than the decline — "mark-up"
-    //   Phase 4 (920–1200): profit-taking, drift back to open — seamless tile
-    //
-    // SVG y: 0 = top of chart (HIGH price), 80 = bottom (LOW price)
-    // First Y = Last Y = 48 ⟹ seamless tile
+    // Macro anatomy (like screenshot): decline → bottom → steeper rally
+    // LARGE amplitude: y=44 (open) → y=70 (bottom) → y=14 (top) → y=44
+    // SVG: y=0 = chart top (HIGH), y=80 = chart bottom (LOW)
+    // First Y = Last Y = 44 ⟹ seamless tile
     const mainPts: [number, number][] = [
-      // ── Phase 1: gradual sell-off with dead-cat bounces ─────────
-      [0,    48],
-      [45,   50], [85,   47],             // early noise
-      [120,  52], [152,  49],             // lower high
-      [182,  54], [210,  51],             // bounce fails
-      [242,  56], [268,  53],             // lower low
-      [298,  58], [322,  55],             // bounce
-      [352,  60], [375,  57],             // continuation
-      [405,  62], [428,  59],             // near bottom
-      // ── Phase 2: bottom / accumulation ──────────────────────────
-      [458,  65],                         // ← THE BOTTOM
-      [478,  63], [498,  66], [518,  62], // tight chop at lows
-      [538,  64], [555,  61],             // base forming
-      // ── Phase 3: uptrend — steeper than decline ─────────────────
-      [575,  57], [600,  52],             // breakout begins
-      [622,  55], [645,  49],             // pullback → resume
-      [668,  44], [688,  47],             // higher low
-      [710,  41], [730,  37],             // momentum
-      [748,  40], [768,  35],             // pullback → new high
-      [788,  31], [805,  34],             // strong push
-      [822,  29],                         // ← THE TOP
-      [840,  33], [858,  37],             // take profit
-      [878,  34], [898,  31],             // re-test high
-      [918,  35],                         // last push
-      // ── Phase 4: distribution / drift back to open ──────────────
-      [945,  38], [975,  41],
-      [1005, 43], [1040, 45],
-      [1075, 46], [1115, 47],
-      [1155, 48],
-      [1200, 48],                         // = open ⟹ seamless ✓
+      // ── Phase 1: gradual distribution, lower-highs, lower-lows ──
+      [0,    44],
+      [42,   47], [80,   43],
+      [115,  50], [148,  46],
+      [178,  54], [208,  49],
+      [238,  57], [265,  52],
+      [292,  61], [316,  56],
+      [342,  64], [365,  59],
+      [392,  67], [412,  62],
+      // ── Phase 2: bottom / base, tight chop ──────────────────────
+      [435,  70],                         // ← THE BOTTOM
+      [452,  67], [470,  71], [488,  68],
+      [505,  70], [522,  67],
+      // ── Phase 3: rally — steeper slope than decline ──────────────
+      [542,  62], [562,  55],
+      [580,  59], [602,  51],             // pullback → resume
+      [622,  45], [640,  49],             // higher low
+      [660,  41], [678,  36],
+      [694,  40], [712,  31],
+      [726,  35], [742,  26],
+      [755,  30], [768,  21],
+      [780,  25], [792,  17],
+      [803,  21], [814,  14],             // ← THE TOP
+      [826,  18], [838,  23],
+      [852,  19], [866,  27],             // re-test
+      [882,  32], [900,  36],
+      // ── Phase 4: slow drift back to open ─────────────────────────
+      [928,  38], [960,  40],
+      [995,  41], [1032, 42],
+      [1072, 43], [1115, 44],
+      [1160, 44],
+      [1200, 44],                         // = open ⟹ seamless ✓
     ]
 
-    // ── Accent line: white ghost — offset version of same macro ───
-    // Bottom comes earlier (x≈400), top later (x≈980), different noise
-    // First Y = Last Y = 52 ⟹ seamless tile
+    // ── Accent line: white ghost — same macro, different timing ───
+    // Bottom at x≈380, top at x≈820, offset creates parallax depth
+    // First Y = Last Y = 48 ⟹ seamless tile
     const accentPts: [number, number][] = [
-      // Phase 1: decline
-      [0,    52],
-      [60,   54], [115,  51],
-      [155,  56], [195,  53],
-      [232,  58], [265,  55],
-      [300,  61], [328,  58],
-      [362,  63], [388,  60],
+      [0,    48],
+      [55,   51], [105,  47],
+      [148,  54], [188,  50],
+      [222,  58], [255,  53],
+      [288,  62], [315,  57],
+      [345,  65], [370,  60],
       // Bottom
-      [418,  67],                         // ← bottom
-      [440,  65], [462,  68], [480,  64],
-      [500,  66], [518,  63],
-      // Phase 3: rally
-      [540,  59], [568,  54],
-      [590,  57], [615,  51],
-      [640,  46], [662,  49],
-      [688,  43], [710,  40],
-      [730,  44], [752,  38],
-      [772,  34], [790,  37],
-      [810,  32],                         // ← top
-      [830,  36], [852,  33],
-      [875,  37], [900,  40],
-      // Phase 4: drift back
-      [935,  43], [968,  46],
-      [1005, 48], [1045, 50],
-      [1090, 51], [1140, 52],
-      [1200, 52],                         // = open ⟹ seamless ✓
+      [398,  69],                         // ← bottom
+      [418,  66], [438,  70], [456,  67],
+      [474,  69], [492,  66],
+      // Rally
+      [512,  61], [535,  54],
+      [555,  58], [578,  49],
+      [600,  44], [620,  48],
+      [642,  39], [662,  34],
+      [680,  38], [700,  28],
+      [718,  32], [736,  23],
+      [752,  27], [766,  19],
+      [780,  23], [792,  16],             // ← top
+      [806,  20], [820,  25],
+      [836,  21], [852,  29],
+      [870,  34], [892,  38],
+      // Drift back
+      [922,  40], [955,  43],
+      [992,  45], [1035, 47],
+      [1085, 48], [1145, 48],
+      [1200, 48],                         // = open ⟹ seamless ✓
     ]
 
     const toD = (pts: [number, number][]) =>
