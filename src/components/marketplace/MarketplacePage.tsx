@@ -1773,23 +1773,6 @@ export function MarketplacePage() {
               scrollbarColor: 'rgba(212,175,55,0.15) transparent',
             }}
           >
-            {/* Auto-rotate progress bar */}
-            <div
-              className="h-[2px] w-full"
-              style={{ background: 'rgba(255,255,255,0.05)' }}
-            >
-              <div
-                className="h-full"
-                style={{
-                  width:      `${rotateProgress}%`,
-                  background: listHovered
-                    ? 'transparent'
-                    : 'linear-gradient(90deg, #D4AF37, #F3E5AB)',
-                  transition: listHovered ? 'none' : 'width 0.08s linear',
-                }}
-              />
-            </div>
-
             {/* List header */}
             <div
               className="grid gap-3 sticky z-10 px-4 py-2"
