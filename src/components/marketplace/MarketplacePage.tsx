@@ -761,6 +761,290 @@ function BondingCurveChart({
   )
 }
 
+// ─────────────────────────────────────────────────────────────────
+//  RACE VIEW  ── "Leo tháp hạ tháp" live ranking visualization
+//
+//  Layout:
+//    ┌─ PriceRaceChart (180px) ─────────────────────────────────┐
+//    │  Multi-line SVG: % gain normalised to initial price      │
+//    │  Avatar circles float at right-end of each line          │
+//    └──────────────────────────────────────────────────────────┘
+//    ┌─ Race Bars (scrollable) ─────────────────────────────────┐
+//    │  #1 [img] Title   ████████████████  813 ETH  +154%       │
+//    │  #2 [img] Title   ██████████        763 ETH  +362%       │
+//    │     motion.div layout + spring → smooth rank reorder     │
+//    └──────────────────────────────────────────────────────────┘
+// ─────────────────────────────────────────────────────────────────
+
+// ── Multi-line percentage-gain chart ──────────────────────────────
+function PriceRaceChart({
+  artworks,
+  priceHistory,
+}: {
+  artworks:     MarketArtwork[]
+  priceHistory: Record<number, number[]>
+}) {
+  const W = 1000, H = 160
+  const PAD = { t: 12, r: 32, b: 20, l: 8 }
+  const pw = W - PAD.l - PAD.r
+  const ph = H - PAD.t - PAD.b
+
+  // Normalize each snapshot to ratio vs initial (1.0 = starting price)
+  const traces = useMemo(() => artworks.map(art => {
+    const init = art.marketCap
+    const pts  = (priceHistory[art.id] ?? [init]).map(p => p / init)
+    return { art, pts }
+  }), [artworks, priceHistory])
+
+  const maxRatio = useMemo(() => {
+    const all = traces.flatMap(t => t.pts)
+    return Math.max(...all, 2) // floor at 2× so chart isn't flat at start
+  }, [traces])
+
+  const toXY = (pts: number[], i: number) => {
+    const n = pts.length
+    const x = PAD.l + (n < 2 ? pw : (i / (n - 1)) * pw)
+    const y = PAD.t + ph - ((pts[i] - 1) / (maxRatio - 1 || 1)) * ph
+    return { x, y: Math.max(PAD.t, Math.min(PAD.t + ph, y)) }
+  }
+
+  return (
+    <div
+      className="relative w-full shrink-0"
+      style={{ height: H, borderBottom: '1px solid rgba(255,255,255,0.06)' }}
+    >
+      <svg
+        viewBox={`0 0 ${W} ${H}`}
+        preserveAspectRatio="none"
+        className="w-full h-full"
+        aria-hidden="true"
+      >
+        <defs>
+          {/* per-artwork avatar clip circles */}
+          {traces.map(({ art }) => (
+            <clipPath key={art.id} id={`rc-clip-${art.id}`}>
+              <circle cx="0" cy="0" r="11"/>
+            </clipPath>
+          ))}
+          {/* baseline grid line */}
+        </defs>
+
+        {/* Baseline at ratio=1 (no gain) */}
+        <line
+          x1={PAD.l} x2={PAD.l + pw}
+          y1={PAD.t + ph} y2={PAD.t + ph}
+          stroke="rgba(255,255,255,0.07)" strokeWidth="1" strokeDasharray="4 6"
+        />
+
+        {/* Price lines */}
+        {traces.map(({ art, pts }) => {
+          if (pts.length < 2) return null
+          const d = pts.map((_, i) => {
+            const { x, y } = toXY(pts, i)
+            return `${i === 0 ? 'M' : 'L'}${x.toFixed(1)},${y.toFixed(1)}`
+          }).join(' ')
+          const { x: ex, y: ey } = toXY(pts, pts.length - 1)
+          return (
+            <g key={art.id}>
+              {/* Line */}
+              <path
+                d={d}
+                fill="none"
+                stroke={art.phaseColor}
+                strokeWidth="1.5"
+                strokeOpacity="0.65"
+                strokeLinejoin="round"
+              />
+              {/* End dot glow */}
+              <circle cx={ex} cy={ey} r="4" fill={art.phaseColor} opacity="0.25"/>
+              <circle cx={ex} cy={ey} r="2.5" fill={art.phaseColor} opacity="0.9"/>
+              {/* Avatar image circle */}
+              <g transform={`translate(${ex + 10}, ${ey})`}>
+                <circle cx="0" cy="0" r="11"
+                  fill="#111" stroke={art.phaseColor} strokeWidth="1" strokeOpacity="0.7"/>
+                <image
+                  href={art.image}
+                  x="-11" y="-11" width="22" height="22"
+                  clipPath={`url(#rc-clip-${art.id})`}
+                  preserveAspectRatio="xMidYMid slice"
+                />
+              </g>
+            </g>
+          )
+        })}
+      </svg>
+
+      {/* Y-axis label */}
+      <div className="absolute left-2 top-2 font-mono text-[7px] tracking-widest"
+        style={{ color: 'rgba(255,255,255,0.2)' }}>
+        % GAIN
+      </div>
+      <div className="absolute right-2 top-2 font-mono text-[7px]"
+        style={{ color: 'rgba(255,255,255,0.18)' }}>
+        {maxRatio.toFixed(1)}×
+      </div>
+    </div>
+  )
+}
+
+// ── Single race bar ────────────────────────────────────────────────
+function RaceBar({
+  art, rank, barPct, livePrice, isFlashing, isSelected, onClick,
+}: {
+  art:        MarketArtwork
+  rank:       number
+  barPct:     number     // 0-100, % of max price
+  livePrice:  number
+  isFlashing: boolean
+  isSelected: boolean
+  onClick:    () => void
+}) {
+  const liveDelta = ((livePrice - art.marketCap) / art.marketCap) * 100
+  const liveUp    = liveDelta >= 0
+
+  return (
+    <motion.div
+      layout
+      transition={{ layout: { type: 'spring', stiffness: 400, damping: 36 } }}
+      onClick={onClick}
+      aria-pressed={isSelected}
+      className="flex items-center gap-3 px-4 cursor-pointer"
+      style={{
+        height:     54,
+        background: isFlashing
+          ? (liveUp ? 'rgba(74,222,128,0.06)' : 'rgba(248,113,113,0.06)')
+          : isSelected
+            ? 'rgba(255,255,255,0.035)'
+            : 'transparent',
+        borderBottom: '1px solid rgba(255,255,255,0.045)',
+        transition:   `background ${isFlashing ? '0.6s' : '0.15s'} ease`,
+      }}
+    >
+      {/* Rank number */}
+      <span
+        className="font-mono text-[11px] w-5 shrink-0 text-right"
+        style={{ color: rank <= 3 ? '#D4AF37' : 'rgba(255,255,255,0.22)' }}
+      >
+        {rank}
+      </span>
+
+      {/* Phase accent bar (3px left, like ArtCard) */}
+      <span className="h-8 w-[2px] shrink-0 rounded-full"
+        style={{ background: art.phaseColor, opacity: 0.7 }}/>
+
+      {/* Thumbnail */}
+      <div className="w-8 h-8 shrink-0 overflow-hidden rounded-sm">
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img src={art.image} alt={art.title}
+          className="w-full h-full object-cover" draggable={false}/>
+      </div>
+
+      {/* Name + ticker */}
+      <div className="w-36 shrink-0">
+        <p className="text-[11px] font-light leading-snug truncate"
+          style={{ fontFamily: "'Cormorant Garamond', serif", color: '#FDFBF7' }}>
+          {art.title}
+        </p>
+        <p className="font-mono text-[8px] tracking-wide mt-0.5"
+          style={{ color: 'rgba(255,255,255,0.28)' }}>
+          {art.ticker}
+        </p>
+      </div>
+
+      {/* Progress bar — animated width */}
+      <div className="flex-1 flex items-center gap-2.5">
+        <div
+          className="h-[4px] flex-1 overflow-hidden rounded-full"
+          style={{ background: 'rgba(255,255,255,0.06)' }}
+        >
+          <motion.div
+            className="h-full rounded-full"
+            animate={{ width: `${barPct}%` }}
+            transition={{ type: 'spring', stiffness: 260, damping: 28 }}
+            style={{
+              background: `linear-gradient(90deg, ${art.phaseColor}55, ${art.phaseColor})`,
+            }}
+          />
+        </div>
+
+        {/* Live price */}
+        <span
+          className="font-mono text-[10.5px] whitespace-nowrap shrink-0"
+          style={{ color: 'rgba(255,255,255,0.8)', minWidth: 80, textAlign: 'right' }}
+        >
+          {livePrice >= 1000
+            ? `${(livePrice / 1000).toFixed(1)}k`
+            : livePrice.toFixed(2)} ETH
+        </span>
+
+        {/* % change */}
+        <span
+          className="font-mono text-[9.5px] shrink-0"
+          style={{
+            color:    liveUp ? '#4ade80' : '#f87171',
+            minWidth: 62,
+            textAlign: 'right',
+          }}
+        >
+          {liveUp ? '+' : ''}{liveDelta.toFixed(1)}%
+        </span>
+      </div>
+    </motion.div>
+  )
+}
+
+// ── Race view container ────────────────────────────────────────────
+function RaceView({
+  artworks,
+  livePrices,
+  flashId,
+  priceHistory,
+  selectedId,
+  onSelect,
+}: {
+  artworks:     MarketArtwork[]
+  livePrices:   Record<number, number>
+  flashId:      number | null
+  priceHistory: Record<number, number[]>
+  selectedId:   number
+  onSelect:     (art: MarketArtwork) => void
+}) {
+  const sorted = useMemo(
+    () => [...artworks].sort((a, b) =>
+      (livePrices[b.id] ?? b.marketCap) - (livePrices[a.id] ?? a.marketCap)
+    ),
+    [artworks, livePrices],
+  )
+
+  const maxPrice = livePrices[sorted[0]?.id] ?? sorted[0]?.marketCap ?? 1
+
+  return (
+    <div className="flex flex-col w-full" style={{ minHeight: 0 }}>
+      {/* ── Multi-line % gain chart ── */}
+      <PriceRaceChart artworks={artworks} priceHistory={priceHistory} />
+
+      {/* ── Race bars ── */}
+      <div style={{ overflowY: 'auto', flex: 1, scrollbarWidth: 'thin',
+        scrollbarColor: 'rgba(212,175,55,0.12) transparent' }}>
+        <LayoutGroup id="race-bars">
+          {sorted.map((art, idx) => (
+            <RaceBar
+              key={art.id}
+              art={art}
+              rank={idx + 1}
+              barPct={((livePrices[art.id] ?? art.marketCap) / maxPrice) * 100}
+              livePrice={livePrices[art.id] ?? art.marketCap}
+              isFlashing={flashId === art.id}
+              isSelected={selectedId === art.id}
+              onClick={() => onSelect(art)}
+            />
+          ))}
+        </LayoutGroup>
+      </div>
+    </div>
+  )
+}
+
 // ── Left column: compact list item ────────────────────────────────
 function ListItem({
   art,
@@ -1364,6 +1648,11 @@ export function MarketplacePage() {
   const [buyArt,       setBuyArt]       = useState<MarketArtwork | null>(null)
   const [sheetOpen,    setSheetOpen]    = useState(false)
   const [lightboxArt,  setLightboxArt]  = useState<MarketArtwork | null>(null)
+  // ── Race view ──
+  const [viewMode,     setViewMode]     = useState<'list' | 'race'>('list')
+  const [priceHistory, setPriceHistory] = useState<Record<number, number[]>>(
+    () => Object.fromEntries(ARTWORKS.map(a => [a.id, [a.marketCap]])),
+  )
   // Auto-rotate
   const [listHovered,  setListHovered]  = useState(false)
   const [rotateProgress, setRotateProg] = useState(0)
@@ -1454,6 +1743,19 @@ export function MarketplacePage() {
       setSelected(filtered[0])
     }
   }, [filtered, selected.id])
+
+  // Snapshot live prices into priceHistory every tick (keep last 40 pts)
+  useEffect(() => {
+    setPriceHistory(prev => {
+      const next: Record<number, number[]> = {}
+      for (const a of ARTWORKS) {
+        const arr    = prev[a.id] ?? []
+        const newArr = [...arr, livePrices[a.id] ?? a.marketCap]
+        next[a.id]   = newArr.slice(-40)
+      }
+      return next
+    })
+  }, [livePrices])
 
   // Auto-follow rank-1: when the top-ranked item changes, snap the right
   // panel to it — unless the user manually picked something in the last 12 s.
@@ -1682,6 +1984,28 @@ export function MarketplacePage() {
             })}
           </div>
 
+          {/* Race view toggle — separator + RACE button */}
+          <div className="h-4 w-px mx-1 shrink-0"
+            style={{ background: 'rgba(255,255,255,0.1)' }}/>
+          <button
+            type="button"
+            onClick={() => setViewMode(v => v === 'race' ? 'list' : 'race')}
+            className="relative flex items-center gap-1.5 h-full px-3 shrink-0
+                       text-[9.5px] tracking-[0.2em] uppercase transition-colors duration-200"
+            style={{ color: viewMode === 'race' ? '#D4AF37' : 'rgba(255,255,255,0.32)' }}
+          >
+            {/* Pulse-line icon */}
+            <svg viewBox="0 0 24 24" className="w-3 h-3" fill="none"
+              stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+              <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>
+            </svg>
+            RACE
+            {viewMode === 'race' && (
+              <span className="absolute bottom-0 left-1 right-1 h-px"
+                style={{ background: '#D4AF37' }}/>
+            )}
+          </button>
+
           {/* Search + sort */}
           <div className="flex items-center gap-2.5 shrink-0">
             <div className="relative">
@@ -1759,8 +2083,37 @@ export function MarketplacePage() {
           </div>
         </div>
 
+        {/* ══ RACE VIEW (toggled via RACE tab) ════════════════ */}
+        <AnimatePresence mode="wait">
+          {viewMode === 'race' && (
+            <motion.div
+              key="race"
+              initial={{ opacity: 0, y: 8 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -8 }}
+              transition={{ duration: 0.22, ease: [0.25, 0.46, 0.45, 0.94] }}
+              className="w-full"
+              style={{
+                height:     'calc(100vh - 128px)',
+                overflowY:  'hidden',
+                display:    'flex',
+                flexDirection: 'column',
+              }}
+            >
+              <RaceView
+                artworks={filtered.length ? filtered : ARTWORKS}
+                livePrices={livePrices}
+                flashId={flashId}
+                priceHistory={priceHistory}
+                selectedId={selected.id}
+                onSelect={handleSelect}
+              />
+            </motion.div>
+          )}
+        </AnimatePresence>
+
         {/* ══ SPLIT PANE ══════════════════════════════════════ */}
-        <div className="flex items-start">
+        <div className={`flex items-start ${viewMode === 'race' ? 'hidden' : ''}`}>
 
           {/* ── Left: Compact List (40%) ── */}
           <div
