@@ -288,8 +288,8 @@ export function Header() {
         'px-6 md:px-12 py-5',
         'transition-all duration-500',
         scrolled
-          ? 'bg-[#FDFBF7]/90 backdrop-blur-md border-b border-[#E4DDD3]/70 shadow-sm'
-          : 'bg-[#FDFBF7]/70 backdrop-blur-sm',
+          ? 'bg-[#FDFBF7] border-b border-[#E4DDD3]/80 shadow-[0_1px_24px_rgba(0,0,0,0.06)]'
+          : 'bg-[#FDFBF7] border-b border-[#E4DDD3]/40',
       ].join(' ')}
     >
       {/* ── Logo ──────────────────────────────────────────────── */}
