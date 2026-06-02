@@ -146,8 +146,14 @@ function WalletRow({
 export function LoginModal({ onClose }: Props) {
   const connectors  = useConnectors()
   const { connect } = useConnect()
-  const [email, setEmail] = useState('')
-  const [view, setView]   = useState<View>('main')
+  const [email,    setEmail]   = useState('')
+  const [view,     setView]    = useState<View>('main')
+  const [toast,    setToast]   = useState<string | null>(null)
+
+  function showToast(msg: string) {
+    setToast(msg)
+    setTimeout(() => setToast(null), 3000)
+  }
 
   const overlayRef  = useRef<HTMLDivElement>(null)
   const cardRef     = useRef<HTMLDivElement>(null)
@@ -267,10 +273,19 @@ export function LoginModal({ onClose }: Props) {
               </p>
             </div>
 
+            {/* Toast notification */}
+            {toast && (
+              <div className="lm-row mb-3 px-3.5 py-2.5 rounded-xl text-[12px] text-center
+                              bg-[#C9A96E]/10 border border-[#C9A96E]/25 text-[#C9A96E] tracking-wide">
+                {toast}
+              </div>
+            )}
+
             {/* Socials */}
             <div className="lm-row flex flex-col gap-2.5 mb-4">
               {SOCIALS.map(({ id, label, bg, color, icon }) => (
                 <button key={id} type="button"
+                  onClick={() => showToast('🚧 Coming soon — OAuth integration in progress')}
                   className="flex items-center justify-center gap-3 w-full h-11 rounded-xl
                              text-[13px] font-medium tracking-[0.01em]
                              hover:opacity-90 active:scale-[0.99] transition-all duration-150"
@@ -294,6 +309,7 @@ export function LoginModal({ onClose }: Props) {
                   placeholder="you@example.com"
                   className="flex-1 bg-transparent text-[13px] text-white/75 placeholder:text-white/18 outline-none"/>
                 <button type="button"
+                  onClick={() => showToast('🚧 Email login coming soon')}
                   className="w-6 h-6 rounded-full flex items-center justify-center
                              bg-white/6 hover:bg-[#C9A96E]/18 text-white/30 hover:text-[#C9A96E]
                              transition-all duration-200 text-[12px]">
