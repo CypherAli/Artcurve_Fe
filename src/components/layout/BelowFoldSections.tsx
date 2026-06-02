@@ -16,14 +16,14 @@ import dynamic    from 'next/dynamic'
 import { useEffect } from 'react'
 import { ScrollTrigger } from '@/lib/gsap'
 
-const HowItWorksSection        = dynamic(() => import('@/components/sections/HowItWorksSection').then(m => ({ default: m.HowItWorksSection })),              { ssr: false })
-const CuratedGallerySection    = dynamic(() => import('@/components/sections/CuratedGallerySection').then(m => ({ default: m.CuratedGallerySection })),      { ssr: false })
-const LiveActivitySection      = dynamic(() => import('@/components/sections/LiveActivitySection').then(m => ({ default: m.LiveActivitySection })),          { ssr: false })
-const TopCreatorsSection       = dynamic(() => import('@/components/sections/TopCreatorsSection').then(m => ({ default: m.TopCreatorsSection })),            { ssr: false })
-const ConvergenceGallery       = dynamic(() => import('@/components/sections/ConvergenceGallery').then(m => ({ default: m.ConvergenceGallery })),            { ssr: false })
-const ProtocolAnalyticsSection = dynamic(() => import('@/components/sections/ProtocolAnalyticsSection').then(m => ({ default: m.ProtocolAnalyticsSection })), { ssr: false })
-const EcosystemSection         = dynamic(() => import('@/components/sections/EcosystemSection').then(m => ({ default: m.EcosystemSection })),                { ssr: false })
-const GrandCTASection          = dynamic(() => import('@/components/sections/GrandCTASection').then(m => ({ default: m.GrandCTASection })),                  { ssr: false })
+const HowItWorksSection        = dynamic(() => import('@/components/home/HowItWorksSection').then(m => ({ default: m.HowItWorksSection })),              { ssr: false })
+const CuratedGallerySection    = dynamic(() => import('@/components/home/CuratedGallerySection').then(m => ({ default: m.CuratedGallerySection })),      { ssr: false })
+const LiveActivitySection      = dynamic(() => import('@/components/home/LiveActivitySection').then(m => ({ default: m.LiveActivitySection })),          { ssr: false })
+const TopCreatorsSection       = dynamic(() => import('@/components/home/TopCreatorsSection').then(m => ({ default: m.TopCreatorsSection })),            { ssr: false })
+const ConvergenceGallery       = dynamic(() => import('@/components/home/ConvergenceGallery').then(m => ({ default: m.ConvergenceGallery })),            { ssr: false })
+const ProtocolAnalyticsSection = dynamic(() => import('@/components/home/ProtocolAnalyticsSection').then(m => ({ default: m.ProtocolAnalyticsSection })), { ssr: false })
+const EcosystemSection         = dynamic(() => import('@/components/home/EcosystemSection').then(m => ({ default: m.EcosystemSection })),                { ssr: false })
+const GrandCTASection          = dynamic(() => import('@/components/home/GrandCTASection').then(m => ({ default: m.GrandCTASection })),                  { ssr: false })
 
 const HEADER_H = 80
 

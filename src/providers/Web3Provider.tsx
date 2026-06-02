@@ -17,7 +17,7 @@ import { WagmiProvider }            from 'wagmi'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { RainbowKitProvider, darkTheme }    from '@rainbow-me/rainbowkit'
 import '@rainbow-me/rainbowkit/styles.css'
-import { wagmiConfig } from '@/lib/wagmi-config'
+import { wagmiConfig } from '@/web3/wagmi-config'
 
 // Custom RainbowKit theme matching Neo-Luxury palette
 const luxuryTheme = darkTheme({

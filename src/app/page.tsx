@@ -3,7 +3,7 @@
 // ─────────────────────────────────────────────────────────────────
 
 import { Header }             from '@/components/layout/Header'
-import { HeroSection }        from '@/components/sections/HeroSection'
+import { HeroSection }        from '@/components/home/HeroSection'
 import { BelowFoldSections }  from '@/components/layout/BelowFoldSections'
 
 export default function HomePage() {
