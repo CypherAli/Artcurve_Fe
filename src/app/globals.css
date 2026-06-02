@@ -46,9 +46,51 @@ body {
   background-image: none;
 }
 
-/* ── Grid ruler overlay — hidden ─────────────────────────────────── */
+/* ── Grid ruler overlay ───────────────────────────────────────────
+   Subtle graph-paper grid that vanishes on dark image areas
+   via mix-blend-mode: multiply (shows on white, invisible on dark)
+──────────────────────────────────────────────────────────────────── */
 .grid-overlay {
-  display: none;
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 1;
+  mix-blend-mode: multiply;
+
+  /* Horizontal ruler lines every 60px + fine lines every 20px */
+  background-image:
+    /* Fine horizontal lines every 20px */
+    repeating-linear-gradient(
+      to bottom,
+      transparent,
+      transparent 19px,
+      rgba(180, 155, 100, 0.10) 19px,
+      rgba(180, 155, 100, 0.10) 20px
+    ),
+    /* Major horizontal lines every 60px */
+    repeating-linear-gradient(
+      to bottom,
+      transparent,
+      transparent 59px,
+      rgba(150, 120, 60, 0.18) 59px,
+      rgba(150, 120, 60, 0.18) 60px
+    ),
+    /* Fine vertical lines every 20px */
+    repeating-linear-gradient(
+      to right,
+      transparent,
+      transparent 19px,
+      rgba(180, 155, 100, 0.10) 19px,
+      rgba(180, 155, 100, 0.10) 20px
+    ),
+    /* Major vertical lines every 60px */
+    repeating-linear-gradient(
+      to right,
+      transparent,
+      transparent 59px,
+      rgba(150, 120, 60, 0.18) 59px,
+      rgba(150, 120, 60, 0.18) 60px
+    );
 }
 
 /* ── Selection ──────────────────────────────────────────────────── */

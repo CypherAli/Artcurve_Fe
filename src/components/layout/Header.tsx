@@ -401,6 +401,28 @@ export function Header({ dark = false }: HeaderProps) {
           {showNotifs && <NotificationsDropdown onClose={() => setShowNotifs(false)} />}
         </div>
 
+        {/* ── Login button (shown when wallet not connected) ─────── */}
+        <ConnectButton.Custom>
+          {({ account, chain, authenticationStatus, mounted }) => {
+            const ready     = mounted && authenticationStatus !== 'loading'
+            const connected = ready && account && chain &&
+              (!authenticationStatus || authenticationStatus === 'authenticated')
+            if (connected) return null
+            return (
+              <button
+                type="button"
+                onClick={() => setShowLogin(true)}
+                className="h-10 px-4 text-sm tracking-widest uppercase transition-all duration-300 font-medium"
+                style={{ color: T.nav }}
+                onMouseEnter={e => { (e.currentTarget as HTMLElement).style.color = T.navHover }}
+                onMouseLeave={e => { (e.currentTarget as HTMLElement).style.color = T.nav }}
+              >
+                Login
+              </button>
+            )
+          }}
+        </ConnectButton.Custom>
+
         <ConnectButton.Custom>
           {({ account, chain, openAccountModal, openChainModal, openConnectModal, authenticationStatus, mounted }) => {
             const ready     = mounted && authenticationStatus !== 'loading'
