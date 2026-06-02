@@ -1,0 +1,5 @@
+export { authService }      from './auth.service'
+export { userService }      from './user.service'
+export { artworkService }   from './artwork.service'
+export { tradeService }     from './trade.service'
+export { portfolioService } from './portfolio.service'

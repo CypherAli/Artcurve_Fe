@@ -27,11 +27,14 @@ import {
 import { motion, AnimatePresence, LayoutGroup } from 'framer-motion'
 import { gsap }                    from '@/lib/gsap'
 import { PHASE_COLOR, Phase }      from './ArtCard'
-import { CandlestickChart }        from '../charts/CandlestickChart'
+import { CandlestickChart }        from '../common/CandlestickChart'
+import { useMarketplace }          from '@/hooks/useMarketplace'
+import type { Artwork }            from '@/types/api'
 
 // ── Extended artwork type ──────────────────────────────────────────
 interface MarketArtwork {
-  id:             number
+  id:             number       // numeric UI key (stable across renders)
+  artworkId:      string       // real UUID for API calls ('' for mock items)
   title:          string
   ticker:         string
   artist:         string
@@ -51,8 +54,8 @@ interface MarketArtwork {
   sparkline:      number[]    // 10-point price history
 }
 
-// ── Artwork catalogue ──────────────────────────────────────────────
-const ARTWORKS: MarketArtwork[] = [
+// ── Artwork catalogue (mock — used when backend is unreachable) ───
+const ARTWORKS_MOCK: MarketArtwork[] = ([
   {
     id: 1, title: 'Nocturne at the Bridge', ticker: '$NOCTURNE',
     artist: 'Elena Vasquez', artistAddr: '0x4f2…a91',
@@ -141,7 +144,232 @@ const ARTWORKS: MarketArtwork[] = [
     description: "Gothic spires reclaimed by fire — what remains after belief burns away. Vasquez's most ambitious work on-chain, with consistent inflow since mint.",
     sparkline: [5, 6.2, 7.8, 9.5, 8.1, 11.0, 15.5, 20.3, 29.0, 67.7],
   },
-]
+  // ── Extended catalogue using convergence imagery ──────────────
+  {
+    id: 9, title: 'Convergence I', ticker: '$CONV1',
+    artist: 'Mira Okafor', artistAddr: '0x5b8…c12',
+    phase: 'Accumulation', phaseColor: PHASE_COLOR['Accumulation'],
+    marketCap: 1.32, marketCapLabel: '1.32 ETH',
+    change24h: '+5.8%', changePositive: true, change7d: '+12.1%',
+    volume24h: '0.62 ETH', holders: 11, progress: 34,
+    image: '/convergence/img1.jpg',
+    description: 'The first in a series exploring the liminal space where digital forms bleed into organic matter. Slow accumulation phase — patient collectors are rewarded.',
+    sparkline: [3, 3.4, 3.1, 3.8, 4.2, 4.0, 4.8, 5.5, 6.1, 7.0],
+  },
+  {
+    id: 10, title: 'Dissolution Study', ticker: '$DISS',
+    artist: 'Paulo Reyes', artistAddr: '0x6c9…d23',
+    phase: 'FOMO', phaseColor: PHASE_COLOR['FOMO'],
+    marketCap: 3.88, marketCapLabel: '3.88 ETH',
+    change24h: '+22.4%', changePositive: true, change7d: '+44.0%',
+    volume24h: '2.11 ETH', holders: 22, progress: 58,
+    image: '/convergence/img2.jpg',
+    description: 'Painted erosion — identity dissolving into its constituent pigments. A meditation on impermanence with a bonding curve that mirrors the subject matter.',
+    sparkline: [2, 3.1, 2.8, 4.5, 3.9, 5.6, 7.2, 9.8, 14.0, 19.4],
+  },
+  {
+    id: 11, title: 'Threshold Fragment', ticker: '$THRESH',
+    artist: 'Yuki Tanabe', artistAddr: '0x7d0…e34',
+    phase: 'Migration', phaseColor: PHASE_COLOR['Migration'],
+    marketCap: 31.50, marketCapLabel: '31.50 ETH',
+    change24h: '+67.2%', changePositive: true, change7d: '+189.4%',
+    volume24h: '18.40 ETH', holders: 61, progress: 99,
+    image: '/convergence/img3.jpg',
+    description: 'The artwork that defines the boundary — standing at the threshold of graduated liquidity. 99% complete. Final fragment of the curve.',
+    sparkline: [1, 1.8, 3.2, 7.0, 15.0, 38.0, 95.0, 198.0, 280.0, 315.0],
+  },
+  {
+    id: 12, title: 'Signal Noise', ticker: '$SIGNAL',
+    artist: 'Kezia Adeyemi', artistAddr: '0x8e1…f45',
+    phase: 'Accumulation', phaseColor: PHASE_COLOR['Accumulation'],
+    marketCap: 0.44, marketCapLabel: '0.44 ETH',
+    change24h: '+2.3%', changePositive: true, change7d: '+3.1%',
+    volume24h: '0.09 ETH', holders: 4, progress: 8,
+    image: '/convergence/img4.jpg',
+    description: 'Radio-wave aesthetics — the beautiful noise between stations. Ultra-early accumulation. The curve has barely moved, which is the point.',
+    sparkline: [4, 4.1, 3.9, 4.3, 4.2, 4.4, 4.3, 4.5, 4.4, 4.6],
+  },
+  {
+    id: 13, title: 'Residue of Light', ticker: '$RESID',
+    artist: 'Ivan Sorokin', artistAddr: '0x9c4…e17',
+    phase: 'FOMO', phaseColor: PHASE_COLOR['FOMO'],
+    marketCap: 8.90, marketCapLabel: '8.90 ETH',
+    change24h: '+35.6%', changePositive: true, change7d: '+82.0%',
+    volume24h: '5.44 ETH', holders: 38, progress: 74,
+    image: '/convergence/img5.jpg',
+    description: 'The photographic residue of a 30-second exposure — city lights bleeding into dark matter. FOMO phase: each holder intensifies the luminosity.',
+    sparkline: [6, 5.8, 7.2, 8.9, 7.5, 10.2, 16.8, 22.4, 38.0, 89.0],
+  },
+  {
+    id: 14, title: 'Topology of Loss', ticker: '$TOPO',
+    artist: 'Soo-Ah Lim', artistAddr: '0x3f7…a04',
+    phase: 'Migration', phaseColor: PHASE_COLOR['Migration'],
+    marketCap: 14.70, marketCapLabel: '14.70 ETH',
+    change24h: '+48.9%', changePositive: true, change7d: '+124.0%',
+    volume24h: '9.20 ETH', holders: 44, progress: 91,
+    image: '/convergence/img6.jpg',
+    description: 'Topographic maps of grief — contour lines that chart emotional elevation. Migration phase, 91% to graduation.',
+    sparkline: [2, 2.5, 3.4, 5.8, 9.0, 16.0, 36.0, 76.0, 128.0, 147.0],
+  },
+  {
+    id: 15, title: 'Recursive Dream', ticker: '$RECURSE',
+    artist: 'Marcus Chen', artistAddr: '0x8d3…f44',
+    phase: 'FOMO', phaseColor: PHASE_COLOR['FOMO'],
+    marketCap: 5.22, marketCapLabel: '5.22 ETH',
+    change24h: '+26.7%', changePositive: true, change7d: '+53.0%',
+    volume24h: '3.08 ETH', holders: 27, progress: 63,
+    image: '/convergence/img7.jpg',
+    description: "A painting of a painting of a painting — recursive self-reference rendered in oil. Chen's most ambitious work since Shattered Embrace.",
+    sparkline: [4, 4.8, 6.0, 5.2, 7.1, 9.4, 12.8, 17.5, 28.0, 52.2],
+  },
+  {
+    id: 16, title: 'Entropy Protocol', ticker: '$ENTROP',
+    artist: 'Aiko Tanaka', artistAddr: '0x1a9…c33',
+    phase: 'Accumulation', phaseColor: PHASE_COLOR['Accumulation'],
+    marketCap: 1.85, marketCapLabel: '1.85 ETH',
+    change24h: '+9.4%', changePositive: true, change7d: '+16.8%',
+    volume24h: '0.88 ETH', holders: 14, progress: 42,
+    image: '/convergence/img8.jpg',
+    description: 'The protocol of decay — algorithmic systems running toward maximum disorder. Accumulation phase: entropy is being priced in.',
+    sparkline: [5, 5.3, 4.9, 5.8, 6.4, 6.1, 7.5, 8.8, 10.2, 12.4],
+  },
+  {
+    id: 17, title: 'Meridian Crossing', ticker: '$MERID',
+    artist: 'Yui Nakamura', artistAddr: '0x2b5…d81',
+    phase: 'FOMO', phaseColor: PHASE_COLOR['FOMO'],
+    marketCap: 7.43, marketCapLabel: '7.43 ETH',
+    change24h: '+31.2%', changePositive: true, change7d: '+69.5%',
+    volume24h: '4.65 ETH', holders: 35, progress: 71,
+    image: '/convergence/img9.jpg',
+    description: 'The exact cartographic moment a ship crosses longitude zero — frozen in paint. Nakamura explores navigation as existential metaphor.',
+    sparkline: [3, 4.2, 5.8, 4.9, 6.5, 8.2, 11.5, 16.8, 24.0, 43.2],
+  },
+  {
+    id: 18, title: 'Void Cartography', ticker: '$VOID',
+    artist: 'Arnold Böcklin', artistAddr: '0x7e1…b22',
+    phase: 'Migration', phaseColor: PHASE_COLOR['Migration'],
+    marketCap: 27.80, marketCapLabel: '27.80 ETH',
+    change24h: '+59.3%', changePositive: true, change7d: '+155.0%',
+    volume24h: '16.10 ETH', holders: 58, progress: 96,
+    image: '/convergence/img10.jpg',
+    description: "Mapping the territory that doesn't exist — Böcklin's late-period exploration of negative space and the cartography of absence. 96% to graduation.",
+    sparkline: [1, 1.6, 2.8, 5.5, 12.0, 28.0, 68.0, 142.0, 232.0, 278.0],
+  },
+  {
+    id: 19, title: 'Amber Protocol', ticker: '$AMBER',
+    artist: 'Kezia Adeyemi', artistAddr: '0x8e1…f45',
+    phase: 'Accumulation', phaseColor: PHASE_COLOR['Accumulation'],
+    marketCap: 2.10, marketCapLabel: '2.10 ETH',
+    change24h: '+8.1%', changePositive: true, change7d: '+18.4%',
+    volume24h: '0.94 ETH', holders: 16, progress: 38,
+    image: '/images/artworks/art1.jpg',
+    description: 'Preserved in digital amber — moments of kinetic motion frozen at their most vivid. The bonding curve is finding its first collectors.',
+    sparkline: [6, 6.4, 5.9, 7.1, 7.8, 7.3, 8.6, 9.5, 11.0, 12.8],
+  },
+  {
+    id: 20, title: 'Fracture Line', ticker: '$FRACT',
+    artist: 'Paulo Reyes', artistAddr: '0x6c9…d23',
+    phase: 'FOMO', phaseColor: PHASE_COLOR['FOMO'],
+    marketCap: 9.40, marketCapLabel: '9.40 ETH',
+    change24h: '+38.4%', changePositive: true, change7d: '+91.0%',
+    volume24h: '6.12 ETH', holders: 41, progress: 76,
+    image: '/images/artworks/art2.jpg',
+    description: 'The exact point where a material fails — rendered in hyper-detail. The fracture line between stability and collapse is exactly where the FOMO curve accelerates.',
+    sparkline: [4, 5.1, 6.8, 5.4, 8.2, 11.0, 15.8, 22.5, 42.0, 79.4],
+  },
+  {
+    id: 21, title: 'Temporal Drift', ticker: '$DRIFT',
+    artist: 'Mira Okafor', artistAddr: '0x5b8…c12',
+    phase: 'Accumulation', phaseColor: PHASE_COLOR['Accumulation'],
+    marketCap: 0.88, marketCapLabel: '0.88 ETH',
+    change24h: '+4.2%', changePositive: true, change7d: '+7.0%',
+    volume24h: '0.22 ETH', holders: 7, progress: 19,
+    image: '/images/artworks/art4.jpg',
+    description: 'Long-exposure photography of a clockface — time rendered as smear. One of the most patient bonding curves on the platform. Early.',
+    sparkline: [5, 5.2, 4.8, 5.5, 5.3, 5.7, 5.9, 6.2, 6.5, 6.9],
+  },
+  {
+    id: 22, title: 'Sovereign Geometry', ticker: '$SOVGEO',
+    artist: 'Yuki Tanabe', artistAddr: '0x7d0…e34',
+    phase: 'Migration', phaseColor: PHASE_COLOR['Migration'],
+    marketCap: 19.90, marketCapLabel: '19.90 ETH',
+    change24h: '+55.1%', changePositive: true, change7d: '+141.0%',
+    volume24h: '13.20 ETH', holders: 50, progress: 93,
+    image: '/images/artworks/art5.jpg',
+    description: 'Sacred geometries that govern — forms that predate language. Migration phase, 93% complete. The curve approaches its final inflection.',
+    sparkline: [2, 2.6, 4.0, 8.0, 17.0, 42.0, 98.0, 154.0, 188.0, 199.0],
+  },
+  {
+    id: 23, title: 'Chromatic Grief', ticker: '$CHROMA',
+    artist: 'Elena Vasquez', artistAddr: '0x4f2…a91',
+    phase: 'FOMO', phaseColor: PHASE_COLOR['FOMO'],
+    marketCap: 4.55, marketCapLabel: '4.55 ETH',
+    change24h: '+24.7%', changePositive: true, change7d: '+48.0%',
+    volume24h: '2.66 ETH', holders: 25, progress: 60,
+    image: '/convergence/img3.jpg',
+    description: "Vasquez explores the spectrum of mourning — each colour a stage, each gradient a transition. The bonding curve mirrors the non-linearity of grief itself.",
+    sparkline: [3, 3.8, 5.0, 4.2, 6.1, 8.0, 11.5, 15.8, 26.0, 45.5],
+  },
+  {
+    id: 24, title: 'Silent Architecture', ticker: '$SILENT',
+    artist: 'Ivan Sorokin', artistAddr: '0x9c4…e17',
+    phase: 'FOMO', phaseColor: PHASE_COLOR['FOMO'],
+    marketCap: 7.10, marketCapLabel: '7.10 ETH',
+    change24h: '+30.5%', changePositive: true, change7d: '+67.2%',
+    volume24h: '4.28 ETH', holders: 32, progress: 69,
+    image: '/convergence/img7.jpg',
+    description: 'Buildings that absorb sound — spaces designed for contemplation. Sorokin documents structures that resist the noise of the modern city. High FOMO phase.',
+    sparkline: [5, 5.8, 7.5, 6.3, 9.1, 12.5, 17.0, 23.8, 38.5, 71.0],
+  },
+] as Omit<MarketArtwork, 'artworkId'>[]).map(a => ({ ...a, artworkId: '' }))
+
+// ── Adapter: backend Artwork → MarketArtwork ──────────────────────
+function adaptArtwork(artwork: Artwork, index: number): MarketArtwork {
+  const price  = parseFloat(artwork.current_price)   || 0
+  const supply = parseFloat(artwork.current_supply)  || 0
+  const target = parseFloat(artwork.target_cap)      || 0
+  const mc     = price * supply || price
+
+  const progress = target > 0 ? Math.min((mc / target) * 100, 100) : 0
+  const phase: Phase =
+    progress >= 90 ? 'Migration' :
+    progress >= 50 ? 'FOMO' :
+                     'Accumulation'
+
+  // Resolve IPFS image to HTTPS gateway
+  const rawImg = artwork.ipfs_metadata_uri ?? ''
+  const image  = rawImg.startsWith('ipfs://')
+    ? `https://gateway.pinata.cloud/ipfs/${rawImg.replace('ipfs://', '')}`
+    : rawImg || '/images/artworks/art1.jpg'
+
+  // Creator display
+  const addr = artwork.creator?.wallet_address ?? '0x000000000000'
+  const artist =
+    artwork.creator?.username ??
+    `${addr.slice(0, 5)}…${addr.slice(-3)}`
+
+  return {
+    id:             index + 1,   // stable numeric key for Records
+    artworkId:      artwork.id,  // real UUID for API calls
+    title:          artwork.title,
+    ticker:         artwork.ticker ?? `$TKN${index + 1}`,
+    artist,
+    artistAddr:     `${addr.slice(0, 5)}…${addr.slice(-3)}`,
+    phase,
+    phaseColor:     PHASE_COLOR[phase],
+    marketCap:      mc,
+    marketCapLabel: `${mc.toFixed(4)} ETH`,
+    change24h:      '—',
+    changePositive: true,
+    change7d:       '—',
+    volume24h:      '—',
+    holders:        0,
+    progress,
+    image,
+    description:    artwork.description ?? '',
+    sparkline:      Array.from({ length: 10 }, (_, i) => price * (1 + i * 0.1) || 1),
+  }
+}
 
 // ── Sort / phase types ─────────────────────────────────────────────
 type SortKey = 'market_cap' | 'price_asc' | 'price_desc' | 'change' | 'newest'
@@ -159,6 +387,28 @@ const PHASE_TABS: { key: Phase | 'All'; label: string }[] = [
   { key: 'FOMO',         label: 'FOMO' },
   { key: 'Migration',    label: 'MIGRATION' },
 ]
+
+// ── Price / percentage formatters ────────────────────────────────
+/** Smart ETH formatter: 0.003 → "0.003", 1234.5 → "1.23k", 1.2M → "1.20M" */
+function fmtETH(v: number): string {
+  if (!isFinite(v) || isNaN(v)) return '—'
+  if (v >= 1e9)  return `${(v / 1e9).toFixed(2)}B`
+  if (v >= 1e6)  return `${(v / 1e6).toFixed(2)}M`
+  if (v >= 1e3)  return `${(v / 1e3).toFixed(2)}k`
+  if (v >= 100)  return v.toFixed(1)
+  if (v >= 10)   return v.toFixed(2)
+  return v.toFixed(3)
+}
+/** Smart % formatter — handles astronomical values gracefully */
+function fmtPct(pct: number): string {
+  if (!isFinite(pct) || isNaN(pct)) return '—'
+  const sign = pct >= 0 ? '+' : ''
+  const abs  = Math.abs(pct)
+  if (abs >= 1e9) return `${sign}${(pct / 1e9).toFixed(1)}B%`
+  if (abs >= 1e6) return `${sign}${(pct / 1e6).toFixed(1)}M%`
+  if (abs >= 1e3) return `${sign}${(pct / 1e3).toFixed(1)}k%`
+  return `${sign}${pct.toFixed(1)}%`
+}
 
 // ── Sparkline helpers ──────────────────────────────────────────────
 function buildSparkPath(
@@ -355,7 +605,7 @@ function HeaderChartBg() {
 
 // ── Scrolling trade ticker tape ───────────────────────────────────
 function TickerTape() {
-  const items = ARTWORKS.map(a => ({
+  const items = ARTWORKS_MOCK.map(a => ({
     ticker:   a.ticker,
     change:   a.change24h,
     positive: a.changePositive,
@@ -415,7 +665,7 @@ function ActivityFeed() {
   const [trades, setTrades] = useState<LiveTrade[]>(() =>
     [0, 1, 2, 3, 4].map(i => ({
       id:        i,
-      art:       ARTWORKS[i % ARTWORKS.length],
+      art:       ARTWORKS_MOCK[i % ARTWORKS_MOCK.length],
       addr:      FAKE_WALLETS[i % FAKE_WALLETS.length],
       action:    (i % 3 === 0 ? 'collected' : 'bought') as LiveTrade['action'],
       ethAmount: (0.12 + (i % 5) * 0.28).toFixed(2),
@@ -428,7 +678,7 @@ function ActivityFeed() {
       const c = counterRef.current++
       setTrades(prev => [{
         id:        Date.now() + c,
-        art:       ARTWORKS[c % ARTWORKS.length],
+        art:       ARTWORKS_MOCK[c % ARTWORKS_MOCK.length],
         addr:      FAKE_WALLETS[c % FAKE_WALLETS.length],
         action:    (c % 3 === 0 ? 'collected' : 'bought') as LiveTrade['action'],
         ethAmount: (0.12 + (c % 5) * 0.28).toFixed(2),
@@ -604,8 +854,10 @@ function ArtLightbox({ art, onClose }: { art: MarketArtwork; onClose: () => void
 // ── Artwork image with sparkline overlay (like homepage) ───────────
 function ArtworkWithChart({
   art,
+  livePrice,
 }: {
-  art: MarketArtwork
+  art:       MarketArtwork
+  livePrice: number
 }) {
   const W = 400, H = 200
   const { d, areaD, last } = buildSparkPath(art.sparkline, W, H, 12, 8, 28, 8)
@@ -730,7 +982,7 @@ function ArtworkWithChart({
             x={last.x + 7} y={last.y + 4}
             fill="white" fontSize="10" fontFamily="ui-monospace,monospace" fontWeight="600"
           >
-            {art.marketCapLabel}
+            {fmtETH(livePrice)} ETH
           </text>
           <text
             x={last.x + 7} y={last.y + 16}
@@ -744,12 +996,71 @@ function ArtworkWithChart({
   )
 }
 
-// ── Bonding curve chart — candlestick via ApexCharts ──────────────
+// ── Tiny pure-SVG sparkline — used when chart is collapsed (h ≤ 60) ──
+//  No ApexCharts overhead; instant render with a glow line + end dot.
+function MiniSparkline({ art, height }: { art: MarketArtwork; height: number }) {
+  const W = 800
+  const { d, areaD, last } = buildSparkPath(art.sparkline, W, height, 4, 4, 8, 4)
+  const gid = `ms-${art.id}`
+  const fid = `msf-${art.id}`
+  return (
+    <div
+      className="relative w-full overflow-hidden rounded-sm"
+      style={{
+        height,
+        background: 'rgba(0,0,0,0.55)',
+        border:     '1px solid rgba(255,255,255,0.07)',
+        transition: 'height 0.38s cubic-bezier(0.25,0.46,0.45,0.94)',
+      }}
+    >
+      <svg
+        viewBox={`0 0 ${W} ${height}`}
+        className="w-full h-full"
+        preserveAspectRatio="none"
+        aria-hidden
+      >
+        <defs>
+          <linearGradient id={gid} x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%"   stopColor={art.phaseColor} stopOpacity="0.35"/>
+            <stop offset="100%" stopColor={art.phaseColor} stopOpacity="0"/>
+          </linearGradient>
+          <filter id={fid} x="-10%" y="-80%" width="120%" height="260%">
+            <feGaussianBlur in="SourceGraphic" stdDeviation="2.5" result="blur"/>
+            <feMerge>
+              <feMergeNode in="blur"/>
+              <feMergeNode in="SourceGraphic"/>
+            </feMerge>
+          </filter>
+        </defs>
+        <path d={areaD} fill={`url(#${gid})`}/>
+        <path d={d} fill="none" stroke={art.phaseColor}
+          strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"
+          filter={`url(#${fid})`}/>
+        <circle cx={last.x} cy={last.y} r="4"
+          fill={art.phaseColor} opacity="0.3" filter={`url(#${fid})`}/>
+        <circle cx={last.x} cy={last.y} r="2.5" fill={art.phaseColor}/>
+        <circle cx={last.x} cy={last.y} r="1.4" fill="white"/>
+      </svg>
+      {/* Current price label */}
+      <span
+        className="absolute left-2 top-1 font-mono text-[7px] tracking-widest"
+        style={{ color: 'rgba(255,255,255,0.3)' }}
+      >
+        PRICE HISTORY
+      </span>
+    </div>
+  )
+}
+
+// ── Bonding curve chart — candlestick via ApexCharts (full) ──────
+//  Falls back to pure-SVG MiniSparkline when height ≤ 60 to avoid
+//  a half-rendered ApexCharts instance in the collapsed state.
 function BondingCurveChart({
   art, range, height = 160,
 }: {
   art: MarketArtwork; range: TimeRange; height?: number
 }) {
+  if (height <= 60) return <MiniSparkline art={art} height={height} />
   return (
     <CandlestickChart
       artId={art.id}
@@ -765,125 +1076,577 @@ function BondingCurveChart({
 //  RACE VIEW  ── "Leo tháp hạ tháp" live ranking visualization
 //
 //  Layout:
-//    ┌─ PriceRaceChart (180px) ─────────────────────────────────┐
-//    │  Multi-line SVG: % gain normalised to initial price      │
-//    │  Avatar circles float at right-end of each line          │
-//    └──────────────────────────────────────────────────────────┘
-//    ┌─ Race Bars (scrollable) ─────────────────────────────────┐
-//    │  #1 [img] Title   ████████████████  813 ETH  +154%       │
-//    │  #2 [img] Title   ██████████        763 ETH  +362%       │
-//    │     motion.div layout + spring → smooth rank reorder     │
-//    └──────────────────────────────────────────────────────────┘
+//    ┌─ RankTimeline (172px) ──────────────────────────────────────┐
+//    │  Y-axis = rank position (1 at top, N at bottom)             │
+//    │  Lines show each artwork climbing/falling over last 40 pts  │
+//    │  Lines spread across full height → always readable          │
+//    └─────────────────────────────────────────────────────────────┘
+//    ┌─ Race Bars (scrollable) ────────────────────────────────────┐
+//    │  #1 [img] Title   ████████████████  813 ETH  +154%          │
+//    │     motion.div layout + spring → smooth rank reorder        │
+//    └─────────────────────────────────────────────────────────────┘
 // ─────────────────────────────────────────────────────────────────
 
-// ── Multi-line percentage-gain chart ──────────────────────────────
-function PriceRaceChart({
-  artworks,
-  priceHistory,
+// ── Rank-position timeline ────────────────────────────────────────
+//  Derives rank at each historical snapshot from priceHistory.
+//  Y-axis: rank 1 (top) → rank N (bottom). Lines always spread
+//  across the full chart height regardless of price magnitude.
+//  onExpand: optional callback to open fullscreen overlay.
+// ── Shared rank-history data builder (used by both inline + fullscreen) ──
+function useRankTraces(
+  artworks:     MarketArtwork[],
+  priceHistory: Record<number, number[]>,
+) {
+  return useMemo(() => {
+    const lengths = artworks.map(a => (priceHistory[a.id] ?? []).length)
+    const ticks   = Math.max(...lengths, 1)
+    const rankAt: Record<number, number[]> = {}
+    for (const art of artworks) rankAt[art.id] = []
+    for (let t = 0; t < ticks; t++) {
+      const prices = artworks.map(art => {
+        const hist = priceHistory[art.id] ?? []
+        return { id: art.id, p: hist[t] ?? hist[hist.length - 1] ?? art.marketCap }
+      })
+      prices.sort((a, b) => b.p - a.p)
+      prices.forEach((item, idx) => { rankAt[item.id].push(idx + 1) })
+    }
+    const traces = artworks.map(art => ({ art, ranks: rankAt[art.id] ?? [1] }))
+    return { traces, ticks }
+  }, [artworks, priceHistory])
+}
+
+// ── SVG chart body — pure, no header chrome ──────────────────────
+// ── SVG-only lines (no circles — avoids preserveAspectRatio distortion) ──
+//  svgH must equal the container's actual pixel height so viewBox matches.
+function RankTimelineSVG({
+  traces, ticks, N, highlightId, svgH,
+}: {
+  traces:       { art: MarketArtwork; ranks: number[] }[]
+  ticks:        number
+  N:            number
+  highlightId?: number | null
+  svgH:         number
+}) {
+  const W   = 1000
+  const H   = svgH
+  const PAD = { t: 14, r: 8, b: 14, l: 38 }
+  const pw  = W - PAD.l - PAD.r
+  const ph  = H - PAD.t - PAD.b
+  const dim = highlightId != null
+
+  const toXY = (t: number, rank: number) => ({
+    x: PAD.l + (ticks < 2 ? pw : (t / (ticks - 1)) * pw),
+    y: PAD.t + ((rank - 1) / Math.max(N - 1, 1)) * ph,
+  })
+
+  return (
+    // viewBox = "0 0 W svgH" → Y-scale = 1 when container height = svgH
+    // circles/dots are never distorted regardless of container width
+    <svg viewBox={`0 0 ${W} ${H}`} preserveAspectRatio="none"
+      className="w-full h-full" style={{ overflow: 'visible' }} aria-hidden>
+
+      {/* Rank-lane guide lines */}
+      {Array.from({ length: N }, (_, i) => {
+        const { y } = toXY(0, i + 1)
+        const isGold = i === 0
+        return (
+          <line key={i} x1={PAD.l} x2={PAD.l + pw} y1={y} y2={y}
+            stroke={isGold ? 'rgba(212,175,55,0.06)' : 'rgba(255,255,255,0.035)'}
+            strokeWidth={isGold ? 1.5 : 1}
+            strokeDasharray={isGold ? undefined : '2 6'}
+          />
+        )
+      })}
+
+      {/* Lines — lower-ranked first so #1 renders on top */}
+      {[...traces].reverse().map(({ art, ranks }) => {
+        if (ranks.length < 2) return null
+        const isHigh = art.id === highlightId
+        const isTop  = ranks[ranks.length - 1] === 1
+        const faded  = dim && !isHigh
+
+        const d = ranks.map((r, t) => {
+          const { x, y } = toXY(t, r)
+          return `${t === 0 ? 'M' : 'L'}${x.toFixed(1)},${y.toFixed(1)}`
+        }).join(' ')
+        const { x: ex, y: ey } = toXY(ranks.length - 1, ranks[ranks.length - 1])
+
+        return (
+          <g key={art.id} opacity={faded ? 0.12 : 1}
+            style={{ transition: 'opacity 0.3s ease' }}>
+            {/* Glow halo for #1 / highlighted */}
+            {(isTop || isHigh) && (
+              <path d={d} fill="none" stroke={art.phaseColor}
+                strokeWidth={isHigh ? 10 : 7} strokeOpacity="0.1" strokeLinejoin="round"/>
+            )}
+            {/* Main line */}
+            <path d={d} fill="none" stroke={art.phaseColor}
+              strokeWidth={isHigh ? 3.2 : isTop ? 2.4 : 1.5}
+              strokeOpacity={(isHigh || isTop) ? 1 : 0.6}
+              strokeLinejoin="round" strokeLinecap="round"
+            />
+            {/* End cap dot — small, no distortion risk */}
+            <circle cx={ex} cy={ey} r="5" fill={art.phaseColor} opacity="0.18"/>
+            <circle cx={ex} cy={ey} r={(isHigh || isTop) ? 3.5 : 2.5}
+              fill={art.phaseColor} opacity={(isHigh || isTop) ? 1 : 0.8}/>
+          </g>
+        )
+      })}
+    </svg>
+  )
+}
+
+// ── HTML avatar column — plain DOM elements, zero distortion ─────
+//  Positioned absolutely on the right side of the chart container.
+//  Each artwork's thumbnail sits exactly at its current rank lane.
+function RankAvatarColumn({
+  traces, N, svgH, highlightId, avatarSize = 20,
+}: {
+  traces:       { art: MarketArtwork; ranks: number[] }[]
+  N:            number
+  svgH:         number
+  highlightId?: number | null
+  avatarSize?:  number
+}) {
+  const PAD_T = 14, PAD_B = 14
+  const ph    = svgH - PAD_T - PAD_B
+  const dim   = highlightId != null
+
+  return (
+    <div className="absolute top-0 right-0 bottom-0 pointer-events-none"
+      style={{ width: avatarSize + 8 }}>
+      {traces.map(({ art, ranks }) => {
+        const curRank = ranks[ranks.length - 1]
+        const yPx     = PAD_T + ((curRank - 1) / Math.max(N - 1, 1)) * ph
+        const isHigh  = art.id === highlightId
+        const isTop   = curRank === 1
+        const faded   = dim && !isHigh
+        const size    = (isHigh || isTop) ? avatarSize + 4 : avatarSize
+
+        return (
+          <div
+            key={art.id}
+            className="absolute overflow-hidden"
+            style={{
+              width:     size,
+              height:    size,
+              borderRadius: '50%',
+              top:       yPx,
+              right:     4,
+              transform: 'translateY(-50%)',
+              border:    `${(isHigh || isTop) ? 2 : 1}px solid ${faded ? 'rgba(255,255,255,0.1)' : art.phaseColor}`,
+              opacity:   faded ? 0.12 : 1,
+              transition: 'opacity 0.3s ease, width 0.2s ease, height 0.2s ease',
+              background: '#111',
+              boxShadow:  (isHigh || isTop) ? `0 0 8px ${art.phaseColor}60` : 'none',
+              zIndex:     isHigh ? 10 : isTop ? 5 : 1,
+            }}
+          >
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src={art.image} alt={art.title}
+              className="w-full h-full object-cover" draggable={false}/>
+          </div>
+        )
+      })}
+    </div>
+  )
+}
+
+// ── Inline rank timeline (compact, in race view) ──────────────────
+function RankTimeline({
+  artworks, priceHistory, height = 240, onExpand,
 }: {
   artworks:     MarketArtwork[]
   priceHistory: Record<number, number[]>
+  height?:      number
+  onExpand?:    () => void
 }) {
-  const W = 1000, H = 160
-  const PAD = { t: 12, r: 32, b: 20, l: 8 }
-  const pw = W - PAD.l - PAD.r
-  const ph = H - PAD.t - PAD.b
-
-  // Normalize each snapshot to ratio vs initial (1.0 = starting price)
-  const traces = useMemo(() => artworks.map(art => {
-    const init = art.marketCap
-    const pts  = (priceHistory[art.id] ?? [init]).map(p => p / init)
-    return { art, pts }
-  }), [artworks, priceHistory])
-
-  const maxRatio = useMemo(() => {
-    const all = traces.flatMap(t => t.pts)
-    return Math.max(...all, 2) // floor at 2× so chart isn't flat at start
-  }, [traces])
-
-  const toXY = (pts: number[], i: number) => {
-    const n = pts.length
-    const x = PAD.l + (n < 2 ? pw : (i / (n - 1)) * pw)
-    const y = PAD.t + ph - ((pts[i] - 1) / (maxRatio - 1 || 1)) * ph
-    return { x, y: Math.max(PAD.t, Math.min(PAD.t + ph, y)) }
-  }
+  const { traces, ticks } = useRankTraces(artworks, priceHistory)
+  const N      = artworks.length
+  const TOPBAR = 22
+  const svgH   = height - TOPBAR  // must match SVG container height
 
   return (
-    <div
-      className="relative w-full shrink-0"
-      style={{ height: H, borderBottom: '1px solid rgba(255,255,255,0.06)' }}
-    >
-      <svg
-        viewBox={`0 0 ${W} ${H}`}
-        preserveAspectRatio="none"
-        className="w-full h-full"
-        aria-hidden="true"
-      >
-        <defs>
-          {/* per-artwork avatar clip circles */}
-          {traces.map(({ art }) => (
-            <clipPath key={art.id} id={`rc-clip-${art.id}`}>
-              <circle cx="0" cy="0" r="11"/>
-            </clipPath>
-          ))}
-          {/* baseline grid line */}
-        </defs>
+    <div className="w-full shrink-0"
+      style={{ height, borderBottom: '1px solid rgba(255,255,255,0.06)' }}>
 
-        {/* Baseline at ratio=1 (no gain) */}
-        <line
-          x1={PAD.l} x2={PAD.l + pw}
-          y1={PAD.t + ph} y2={PAD.t + ph}
-          stroke="rgba(255,255,255,0.07)" strokeWidth="1" strokeDasharray="4 6"
-        />
-
-        {/* Price lines */}
-        {traces.map(({ art, pts }) => {
-          if (pts.length < 2) return null
-          const d = pts.map((_, i) => {
-            const { x, y } = toXY(pts, i)
-            return `${i === 0 ? 'M' : 'L'}${x.toFixed(1)},${y.toFixed(1)}`
-          }).join(' ')
-          const { x: ex, y: ey } = toXY(pts, pts.length - 1)
-          return (
-            <g key={art.id}>
-              {/* Line */}
-              <path
-                d={d}
-                fill="none"
-                stroke={art.phaseColor}
-                strokeWidth="1.5"
-                strokeOpacity="0.65"
-                strokeLinejoin="round"
-              />
-              {/* End dot glow */}
-              <circle cx={ex} cy={ey} r="4" fill={art.phaseColor} opacity="0.25"/>
-              <circle cx={ex} cy={ey} r="2.5" fill={art.phaseColor} opacity="0.9"/>
-              {/* Avatar image circle */}
-              <g transform={`translate(${ex + 10}, ${ey})`}>
-                <circle cx="0" cy="0" r="11"
-                  fill="#111" stroke={art.phaseColor} strokeWidth="1" strokeOpacity="0.7"/>
-                <image
-                  href={art.image}
-                  x="-11" y="-11" width="22" height="22"
-                  clipPath={`url(#rc-clip-${art.id})`}
-                  preserveAspectRatio="xMidYMid slice"
-                />
-              </g>
-            </g>
-          )
-        })}
-      </svg>
-
-      {/* Y-axis label */}
-      <div className="absolute left-2 top-2 font-mono text-[7px] tracking-widest"
-        style={{ color: 'rgba(255,255,255,0.2)' }}>
-        % GAIN
+      {/* ── Topbar: fully isolated from SVG, can never be overlapped ── */}
+      <div className="flex items-center justify-between px-3"
+        style={{ height: TOPBAR, background: 'rgba(0,0,0,0.5)', borderBottom: '1px solid rgba(255,255,255,0.04)' }}>
+        <span className="font-mono text-[7px] tracking-[0.18em] uppercase"
+          style={{ color: 'rgba(255,255,255,0.22)' }}>
+          RANK HISTORY · {ticks} pts
+        </span>
+        {onExpand && (
+          <button type="button" onClick={onExpand}
+            className="flex items-center gap-1 font-mono text-[7px] tracking-widest uppercase px-1.5 py-0.5"
+            style={{ color: 'rgba(255,255,255,0.3)', border: '1px solid rgba(255,255,255,0.1)' }}
+            onMouseEnter={e => {
+              e.currentTarget.style.color = '#D4AF37'
+              e.currentTarget.style.borderColor = 'rgba(212,175,55,0.45)'
+              e.currentTarget.style.background = 'rgba(212,175,55,0.08)'
+            }}
+            onMouseLeave={e => {
+              e.currentTarget.style.color = 'rgba(255,255,255,0.3)'
+              e.currentTarget.style.borderColor = 'rgba(255,255,255,0.1)'
+              e.currentTarget.style.background = 'transparent'
+            }}>
+            <svg viewBox="0 0 24 24" className="w-2.5 h-2.5" fill="none"
+              stroke="currentColor" strokeWidth="2" strokeLinecap="round">
+              <path d="M15 3h6v6M9 21H3v-6M21 3l-7 7M3 21l7-7"/>
+            </svg>
+            EXPAND
+          </button>
+        )}
       </div>
-      <div className="absolute right-2 top-2 font-mono text-[7px]"
-        style={{ color: 'rgba(255,255,255,0.18)' }}>
-        {maxRatio.toFixed(1)}×
+
+      {/* ── Chart body: SVG lines + HTML avatar column ── */}
+      <div className="relative" style={{ height: svgH, background: 'rgba(0,0,0,0.18)' }}>
+        {/* Y-axis rank labels */}
+        <div className="absolute top-0 bottom-0 flex flex-col justify-between pointer-events-none"
+          style={{ left: 5, paddingTop: 14, paddingBottom: 14, zIndex: 2 }}>
+          {Array.from({ length: N }, (_, i) => (
+            <span key={i} className="font-mono leading-none"
+              style={{ fontSize: Math.max(6, Math.min(8, svgH / N - 1)), color: i === 0 ? 'rgba(212,175,55,0.55)' : 'rgba(255,255,255,0.14)' }}>
+              {i + 1}
+            </span>
+          ))}
+        </div>
+        {/* SVG: lines only */}
+        <RankTimelineSVG traces={traces} ticks={ticks} N={N} svgH={svgH} />
+        {/* HTML avatars: zero distortion */}
+        <RankAvatarColumn traces={traces} N={N} svgH={svgH} avatarSize={18} />
       </div>
     </div>
+  )
+}
+
+// ── Fullscreen rank timeline overlay ─────────────────────────────
+//  Click any artwork card → highlights its line + shows its chart
+function RankTimelineFullscreen({
+  artworks,
+  priceHistory,
+  livePrices,
+  onClose,
+}: {
+  artworks:     MarketArtwork[]
+  priceHistory: Record<number, number[]>
+  livePrices:   Record<number, number>
+  onClose:      () => void
+}) {
+  const [selectedId,  setSelectedId]  = useState<number | null>(null)
+  const [chartRange,  setChartRange]  = useState<TimeRange>('1D')
+  const [svgH,        setSvgH]        = useState(400)
+  const chartRef = useRef<HTMLDivElement>(null)
+
+  const selectedArt = artworks.find(a => a.id === selectedId) ?? null
+
+  // Close on Escape
+  useEffect(() => {
+    const h = (e: KeyboardEvent) => { if (e.key === 'Escape') onClose() }
+    document.addEventListener('keydown', h)
+    return () => document.removeEventListener('keydown', h)
+  }, [onClose])
+
+  // Measure chart container height for correct SVG viewBox
+  useEffect(() => {
+    const el = chartRef.current
+    if (!el) return
+    const ro = new ResizeObserver(([entry]) => {
+      setSvgH(entry.contentRect.height || 400)
+    })
+    ro.observe(el)
+    setSvgH(el.clientHeight || 400)
+    return () => ro.disconnect()
+  }, [])
+
+  const { traces, ticks } = useRankTraces(artworks, priceHistory)
+  const N = artworks.length
+
+  // Ranked by current live price
+  const ranked = useMemo(
+    () => [...artworks].sort((a, b) =>
+      (livePrices[b.id] ?? b.marketCap) - (livePrices[a.id] ?? a.marketCap)
+    ),
+    [artworks, livePrices],
+  )
+
+  return (
+    <motion.div
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0 }}
+      transition={{ duration: 0.2 }}
+      className="fixed inset-0 z-[90] flex flex-col"
+      style={{ background: 'rgba(4,4,4,0.97)', backdropFilter: 'blur(18px)' }}
+    >
+      {/* ── Header ── */}
+      <div
+        className="flex items-center justify-between px-6 shrink-0"
+        style={{ height: 48, borderBottom: '1px solid rgba(255,255,255,0.07)', background: 'rgba(0,0,0,0.5)' }}
+      >
+        <div className="flex items-center gap-3">
+          <svg viewBox="0 0 24 24" className="w-3.5 h-3.5" fill="none"
+            stroke="#D4AF37" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+            <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>
+          </svg>
+          <span className="font-mono text-[10px] tracking-[0.26em] uppercase"
+            style={{ color: 'rgba(255,255,255,0.5)' }}>
+            RANK HISTORY
+          </span>
+          <span className="flex items-center gap-1.5 ml-1">
+            <span className="size-1.5 rounded-full animate-pulse" style={{ background: '#4ade80' }}/>
+            <span className="font-mono text-[8px] tracking-widest" style={{ color: '#4ade80' }}>LIVE</span>
+          </span>
+          {selectedArt && (
+            <span className="flex items-center gap-1.5 ml-3">
+              <span className="size-2 rounded-full" style={{ background: selectedArt.phaseColor }}/>
+              <span className="font-mono text-[9px] tracking-wide" style={{ color: selectedArt.phaseColor }}>
+                {selectedArt.ticker}
+              </span>
+              <span className="font-mono text-[9px]" style={{ color: 'rgba(255,255,255,0.4)' }}>
+                {selectedArt.title}
+              </span>
+            </span>
+          )}
+        </div>
+        <div className="flex items-center gap-3">
+          {selectedArt && (
+            <button type="button" onClick={() => setSelectedId(null)}
+              className="font-mono text-[8px] tracking-widest uppercase px-2 py-1 transition-colors"
+              style={{ color: 'rgba(255,255,255,0.3)', border: '1px solid rgba(255,255,255,0.08)' }}
+              onMouseEnter={e => e.currentTarget.style.color = 'rgba(255,255,255,0.6)'}
+              onMouseLeave={e => e.currentTarget.style.color = 'rgba(255,255,255,0.3)'}>
+              Clear
+            </button>
+          )}
+          <button type="button" onClick={onClose}
+            className="flex items-center gap-1.5 font-mono text-[9px] tracking-widest uppercase
+                       px-3 py-1.5 transition-colors duration-150"
+            style={{ color: 'rgba(255,255,255,0.35)', border: '1px solid rgba(255,255,255,0.1)' }}
+            onMouseEnter={e => {
+              e.currentTarget.style.color = 'rgba(255,255,255,0.75)'
+              e.currentTarget.style.borderColor = 'rgba(255,255,255,0.3)'
+            }}
+            onMouseLeave={e => {
+              e.currentTarget.style.color = 'rgba(255,255,255,0.35)'
+              e.currentTarget.style.borderColor = 'rgba(255,255,255,0.1)'
+            }}>
+            <svg viewBox="0 0 24 24" className="w-3 h-3" fill="none"
+              stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
+              <path d="M18 6L6 18M6 6l12 12"/>
+            </svg>
+            ESC
+          </button>
+        </div>
+      </div>
+
+      {/* ── Main area: chart left, detail panel right ── */}
+      <div className="flex flex-1 min-h-0">
+
+        {/* Left: rank timeline + legend */}
+        <div
+          className="flex flex-col min-h-0"
+          style={{ width: selectedArt ? '55%' : '100%', transition: 'width 0.3s ease', borderRight: selectedArt ? '1px solid rgba(255,255,255,0.06)' : 'none' }}
+        >
+          {/* SVG chart — fills available height */}
+          <div ref={chartRef} className="flex-1 min-h-0 relative" style={{ background: 'rgba(0,0,0,0.15)' }}>
+            {/* Y-axis labels */}
+            <div className="absolute top-0 bottom-0 flex flex-col justify-between py-4 pointer-events-none"
+              style={{ left: 6, zIndex: 1 }}>
+              {Array.from({ length: N }, (_, i) => (
+                <span key={i} className="font-mono text-[8px] leading-none"
+                  style={{ color: i === 0 ? 'rgba(212,175,55,0.6)' : 'rgba(255,255,255,0.14)' }}>
+                  #{i + 1}
+                </span>
+              ))}
+            </div>
+            <RankTimelineSVG traces={traces} ticks={ticks} N={N} highlightId={selectedId} svgH={svgH} />
+            <RankAvatarColumn traces={traces} N={N} svgH={svgH} highlightId={selectedId} avatarSize={22} />
+          </div>
+
+          {/* Legend grid — scrollable */}
+          <div
+            className="shrink-0 overflow-y-auto p-3"
+            style={{
+              maxHeight: 220,
+              background: 'rgba(0,0,0,0.3)',
+              borderTop: '1px solid rgba(255,255,255,0.05)',
+              scrollbarWidth: 'thin',
+              scrollbarColor: 'rgba(255,255,255,0.08) transparent',
+            }}
+          >
+            <div className="grid gap-1.5" style={{ gridTemplateColumns: 'repeat(auto-fill, minmax(190px, 1fr))' }}>
+              {ranked.map((art, idx) => {
+                const lp     = livePrices[art.id] ?? art.marketCap
+                const delta  = ((lp - art.marketCap) / art.marketCap) * 100
+                const up     = delta >= 0
+                const active = selectedId === art.id
+                return (
+                  <button
+                    key={art.id}
+                    type="button"
+                    onClick={() => { setSelectedId(active ? null : art.id); setChartRange('1D') }}
+                    className="flex items-center gap-2.5 px-2.5 py-2 text-left w-full transition-colors duration-150"
+                    style={{
+                      background: active
+                        ? `${art.phaseColor}12`
+                        : idx === 0 ? 'rgba(212,175,55,0.04)' : 'rgba(255,255,255,0.02)',
+                      border: `1px solid ${active ? art.phaseColor + '50' : idx === 0 ? 'rgba(212,175,55,0.2)' : 'rgba(255,255,255,0.06)'}`,
+                    }}
+                  >
+                    <span className="font-mono text-[9px] w-5 shrink-0 text-right"
+                      style={{ color: idx < 3 ? '#D4AF37' : 'rgba(255,255,255,0.22)' }}>
+                      #{idx + 1}
+                    </span>
+                    <span className="size-2 rounded-full shrink-0" style={{ background: art.phaseColor }}/>
+                    <div className="w-7 h-7 shrink-0 overflow-hidden rounded-sm">
+                      {/* eslint-disable-next-line @next/next/no-img-element */}
+                      <img src={art.image} alt="" className="w-full h-full object-cover"/>
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-[10.5px] font-light truncate leading-snug"
+                        style={{ fontFamily: "'Cormorant Garamond', serif", color: active ? '#fff' : 'rgba(255,255,255,0.8)' }}>
+                        {art.title}
+                      </p>
+                      <div className="flex items-center gap-1.5 mt-0.5">
+                        <span className="font-mono text-[8px]" style={{ color: 'rgba(255,255,255,0.4)' }}>
+                          {fmtETH(lp)} ETH
+                        </span>
+                        <span className="font-mono text-[7.5px]" style={{ color: up ? '#4ade80' : '#f87171' }}>
+                          {fmtPct(delta)}
+                        </span>
+                      </div>
+                    </div>
+                    {/* Chart icon hint */}
+                    <svg viewBox="0 0 24 24" className="w-3 h-3 shrink-0 opacity-30" fill="none"
+                      stroke="currentColor" strokeWidth="2" strokeLinecap="round">
+                      <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>
+                    </svg>
+                  </button>
+                )
+              })}
+            </div>
+            <p className="font-mono text-[7px] mt-2 tracking-[0.14em] uppercase text-center"
+              style={{ color: 'rgba(255,255,255,0.1)' }}>
+              Click an artwork to view its price chart · ESC to close
+            </p>
+          </div>
+        </div>
+
+        {/* Right: selected artwork chart panel */}
+        <AnimatePresence>
+          {selectedArt && (
+            <motion.div
+              key={selectedArt.id}
+              initial={{ opacity: 0, x: 24 }}
+              animate={{ opacity: 1, x: 0 }}
+              exit={{ opacity: 0, x: 24 }}
+              transition={{ duration: 0.22, ease: [0.25, 0.46, 0.45, 0.94] }}
+              className="flex flex-col"
+              style={{ width: '45%', background: '#0A0A0A', minHeight: 0 }}
+            >
+              {/* Panel header */}
+              <div
+                className="px-6 pt-5 pb-4 shrink-0"
+                style={{ borderBottom: '1px solid rgba(255,255,255,0.06)' }}
+              >
+                <div className="flex items-center gap-2 mb-2">
+                  <span className="font-mono text-[9px] tracking-[0.18em] uppercase px-2 py-0.5"
+                    style={{
+                      background: `${selectedArt.phaseColor}15`,
+                      border: `1px solid ${selectedArt.phaseColor}35`,
+                      color: selectedArt.phaseColor,
+                    }}>
+                    {selectedArt.phase}
+                  </span>
+                  <span className="font-mono text-[9px] tracking-wide"
+                    style={{ color: 'rgba(255,255,255,0.28)' }}>
+                    {selectedArt.ticker}
+                  </span>
+                </div>
+                <h3 className="font-light leading-tight mb-1"
+                  style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: '1.45rem', color: '#FDFBF7' }}>
+                  {selectedArt.title}
+                </h3>
+                <p className="text-[9.5px] tracking-[0.2em] uppercase" style={{ color: 'rgba(255,255,255,0.3)' }}>
+                  {selectedArt.artist}
+                </p>
+              </div>
+
+              {/* Live price stats */}
+              <div className="flex items-center gap-6 px-6 py-3 shrink-0"
+                style={{ borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
+                {(() => {
+                  const lp    = livePrices[selectedArt.id] ?? selectedArt.marketCap
+                  const delta = ((lp - selectedArt.marketCap) / selectedArt.marketCap) * 100
+                  const up    = delta >= 0
+                  return (
+                    <>
+                      <div>
+                        <p className="font-mono text-[7.5px] uppercase tracking-widest mb-0.5"
+                          style={{ color: 'rgba(255,255,255,0.28)' }}>Live Price</p>
+                        <p className="font-mono text-[1.4rem] leading-none" style={{ color: '#FDFBF7' }}>
+                          {fmtETH(lp)} <span className="text-[0.85rem] opacity-50">ETH</span>
+                        </p>
+                      </div>
+                      <div>
+                        <p className="font-mono text-[7.5px] uppercase tracking-widest mb-0.5"
+                          style={{ color: 'rgba(255,255,255,0.28)' }}>vs Seed</p>
+                        <p className="font-mono text-[1.1rem] leading-none"
+                          style={{ color: up ? '#4ade80' : '#f87171' }}>
+                          {fmtPct(delta)}
+                        </p>
+                      </div>
+                      <div>
+                        <p className="font-mono text-[7.5px] uppercase tracking-widest mb-0.5"
+                          style={{ color: 'rgba(255,255,255,0.28)' }}>Holders</p>
+                        <p className="font-mono text-[1.1rem] leading-none"
+                          style={{ color: 'rgba(255,255,255,0.7)' }}>
+                          {selectedArt.holders}
+                        </p>
+                      </div>
+                    </>
+                  )
+                })()}
+              </div>
+
+              {/* Timeframe tabs */}
+              <div className="flex items-center gap-1.5 px-6 pt-4 pb-2 shrink-0">
+                {(['1H', '6H', '1D', '7D'] as TimeRange[]).map(r => (
+                  <button key={r} type="button" onClick={() => setChartRange(r)}
+                    className="font-mono text-[8px] px-2.5 py-1 transition-colors duration-150"
+                    style={{
+                      color:      chartRange === r ? '#D4AF37' : 'rgba(255,255,255,0.3)',
+                      background: chartRange === r ? 'rgba(212,175,55,0.1)' : 'transparent',
+                      border:     `1px solid ${chartRange === r ? 'rgba(212,175,55,0.3)' : 'rgba(255,255,255,0.07)'}`,
+                    }}>
+                    {r}
+                  </button>
+                ))}
+                <span className="font-mono text-[7.5px] ml-auto tracking-widest uppercase"
+                  style={{ color: 'rgba(255,255,255,0.2)' }}>
+                  Bonding Curve
+                </span>
+              </div>
+
+              {/* Candlestick chart — fills remaining space */}
+              <div className="flex-1 min-h-0 px-4 pb-4">
+                <BondingCurveChart art={selectedArt} range={chartRange} height={220}/>
+              </div>
+
+              {/* Description */}
+              <div className="px-6 pb-5 shrink-0">
+                <p className="text-[11.5px] leading-relaxed"
+                  style={{ color: 'rgba(255,255,255,0.38)', maxWidth: '44ch' }}>
+                  {selectedArt.description}
+                </p>
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
+      </div>
+    </motion.div>
   )
 }
 
@@ -901,6 +1664,7 @@ function RaceBar({
 }) {
   const liveDelta = ((livePrice - art.marketCap) / art.marketCap) * 100
   const liveUp    = liveDelta >= 0
+  const deltaStr  = fmtPct(liveDelta)
 
   return (
     <motion.div
@@ -972,9 +1736,7 @@ function RaceBar({
           className="font-mono text-[10.5px] whitespace-nowrap shrink-0"
           style={{ color: 'rgba(255,255,255,0.8)', minWidth: 80, textAlign: 'right' }}
         >
-          {livePrice >= 1000
-            ? `${(livePrice / 1000).toFixed(1)}k`
-            : livePrice.toFixed(2)} ETH
+          {fmtETH(livePrice)} ETH
         </span>
 
         {/* % change */}
@@ -986,7 +1748,7 @@ function RaceBar({
             textAlign: 'right',
           }}
         >
-          {liveUp ? '+' : ''}{liveDelta.toFixed(1)}%
+          {deltaStr}
         </span>
       </div>
     </motion.div>
@@ -1009,6 +1771,8 @@ function RaceView({
   selectedId:   number
   onSelect:     (art: MarketArtwork) => void
 }) {
+  const [chartFullscreen, setChartFullscreen] = useState(false)
+
   const sorted = useMemo(
     () => [...artworks].sort((a, b) =>
       (livePrices[b.id] ?? b.marketCap) - (livePrices[a.id] ?? a.marketCap)
@@ -1020,8 +1784,25 @@ function RaceView({
 
   return (
     <div className="flex flex-col w-full" style={{ minHeight: 0 }}>
-      {/* ── Multi-line % gain chart ── */}
-      <PriceRaceChart artworks={artworks} priceHistory={priceHistory} />
+      {/* ── Rank-position timeline ── */}
+      <RankTimeline
+        artworks={artworks}
+        priceHistory={priceHistory}
+        onExpand={() => setChartFullscreen(true)}
+      />
+
+      {/* ── Fullscreen overlay ── */}
+      <AnimatePresence>
+        {chartFullscreen && (
+          <RankTimelineFullscreen
+            key="rt-fullscreen"
+            artworks={artworks}
+            priceHistory={priceHistory}
+            livePrices={livePrices}
+            onClose={() => setChartFullscreen(false)}
+          />
+        )}
+      </AnimatePresence>
 
       {/* ── Race bars ── */}
       <div style={{ overflowY: 'auto', flex: 1, scrollbarWidth: 'thin',
@@ -1064,9 +1845,9 @@ function ListItem({
   const [hovered, setHovered] = useState(false)
 
   // Live % change vs original seed price
-  const liveDelta = ((livePrice - art.marketCap) / art.marketCap) * 100
-  const liveUp    = liveDelta >= 0
-  const liveDeltaStr = `${liveUp ? '+' : ''}${liveDelta.toFixed(1)}%`
+  const liveDelta    = ((livePrice - art.marketCap) / art.marketCap) * 100
+  const liveUp       = liveDelta >= 0
+  const liveDeltaStr = fmtPct(liveDelta)
 
   // Mini sparkline helper (inline — no external dep needed)
   const sparkW = hovered ? 72 : 40
@@ -1145,7 +1926,7 @@ function ListItem({
           className="font-mono text-[11.5px]"
           style={{ color: active ? '#FDFBF7' : 'rgba(255,255,255,0.65)' }}
         >
-          {livePrice.toFixed(2)} ETH
+          {fmtETH(livePrice)} ETH
         </p>
         <p
           className="font-mono text-[9px] mt-0.5"
@@ -1183,10 +1964,12 @@ function ListItem({
 // ── Right column: Inspection Deck ─────────────────────────────────
 function InspectionDeck({
   art,
+  livePrice,
   onCollect,
   onLightbox,
 }: {
   art:        MarketArtwork
+  livePrice:  number
   onCollect:  (art: MarketArtwork) => void
   onLightbox: (art: MarketArtwork) => void
 }) {
@@ -1236,7 +2019,7 @@ function InspectionDeck({
             }}
             title="Click to expand"
           >
-            <ArtworkWithChart art={art}/>
+            <ArtworkWithChart art={art} livePrice={livePrice}/>
           </div>
 
           {/* Right: Typography block */}
@@ -1294,8 +2077,8 @@ function InspectionDeck({
             {/* Key metrics */}
             <div className="grid grid-cols-3 gap-2 mt-1">
               {[
-                { label: 'Market Cap',  value: art.marketCapLabel, color: '#FDFBF7' },
-                { label: '24h Change',  value: art.change24h, color: art.changePositive ? '#4ade80' : '#f87171' },
+                { label: 'Market Cap',  value: `${fmtETH(livePrice)} ETH`, color: '#FDFBF7' },
+                { label: '24h Change',  value: fmtPct(((livePrice - art.marketCap) / art.marketCap) * 100), color: livePrice >= art.marketCap ? '#4ade80' : '#f87171' },
                 { label: '7d Change',   value: art.change7d,  color: 'rgba(255,255,255,0.7)' },
               ].map(m => (
                 <div
@@ -1437,7 +2220,7 @@ function InspectionDeck({
             onMouseEnter={e => (e.currentTarget.style.backgroundPosition = '100% 0')}
             onMouseLeave={e => (e.currentTarget.style.backgroundPosition = '0% 0')}
           >
-            BUY {art.ticker} — {art.marketCapLabel}
+            BUY {art.ticker} — {fmtETH(livePrice)} ETH
           </button>
 
           <p className="text-center font-mono text-[8px] tracking-[0.14em] uppercase"
@@ -1455,7 +2238,7 @@ type TxState = 'idle' | 'pending' | 'confirming' | 'success'
 
 const QUICK_AMOUNTS = ['0.1 ETH', '0.5 ETH', '1 ETH'] as const
 
-function BuyModal({ art, onClose }: { art: MarketArtwork; onClose: () => void }) {
+function BuyModal({ art, livePrice, onClose }: { art: MarketArtwork; livePrice: number; onClose: () => void }) {
   const [tx,         setTx]         = useState<TxState>('idle')
   const [buyAmount,  setBuyAmount]   = useState<string>('0.1 ETH')
   const overlayRef  = useRef<HTMLDivElement>(null)
@@ -1533,14 +2316,14 @@ function BuyModal({ art, onClose }: { art: MarketArtwork; onClose: () => void })
             style={{ borderBottom: '1px solid rgba(255,255,255,0.07)', paddingBottom: '1.25rem' }}>
             <div>
               <p className="text-[8px] uppercase tracking-widest mb-1"
-                style={{ color: 'rgba(255,255,255,0.3)' }}>Market Cap</p>
+                style={{ color: 'rgba(255,255,255,0.3)' }}>Current Price</p>
               <p className="font-light text-white leading-none"
                 style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: '2rem' }}>
-                {art.marketCapLabel}
+                {fmtETH(livePrice)} ETH
               </p>
             </div>
-            <p className="font-mono font-semibold" style={{ color: art.phaseColor }}>
-              {art.change24h}
+            <p className="font-mono font-semibold" style={{ color: livePrice >= art.marketCap ? '#4ade80' : '#f87171' }}>
+              {fmtPct(((livePrice - art.marketCap) / art.marketCap) * 100)}
             </p>
           </div>
 
@@ -1640,7 +2423,16 @@ const ROTATE_MS = 4500
 
 // ── Main MarketplacePage ───────────────────────────────────────────
 export function MarketplacePage() {
-  const [selected,     setSelected]     = useState<MarketArtwork>(ARTWORKS[0])
+  // ── Backend data (falls back to mock when API unreachable) ────────
+  const { artworks: _rawArtworks } = useMarketplace({ initialLimit: 50 })
+  const _apiArtworks = useMemo(
+    () => _rawArtworks.map(adaptArtwork),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [_rawArtworks],
+  )
+  const ARTWORKS = _apiArtworks.length > 0 ? _apiArtworks : ARTWORKS_MOCK
+
+  const [selected,     setSelected]     = useState<MarketArtwork>(ARTWORKS_MOCK[0])
   const [activePhase,  setActivePhase]  = useState<Phase | 'All'>('All')
   const [sortKey,      setSortKey]      = useState<SortKey>('market_cap')
   const [search,       setSearch]       = useState('')
@@ -1651,7 +2443,7 @@ export function MarketplacePage() {
   // ── Race view ──
   const [viewMode,     setViewMode]     = useState<'list' | 'race'>('list')
   const [priceHistory, setPriceHistory] = useState<Record<number, number[]>>(
-    () => Object.fromEntries(ARTWORKS.map(a => [a.id, [a.marketCap]])),
+    () => Object.fromEntries(ARTWORKS_MOCK.map(a => [a.id, [a.marketCap]])),
   )
   // Auto-rotate
   const [listHovered,  setListHovered]  = useState(false)
@@ -1660,7 +2452,7 @@ export function MarketplacePage() {
 
   // Live price simulation
   const [livePrices, setLivePrices] = useState<Record<number, number>>(
-    () => Object.fromEntries(ARTWORKS.map(a => [a.id, a.marketCap]))
+    () => Object.fromEntries(ARTWORKS_MOCK.map(a => [a.id, a.marketCap]))
   )
   const [flashId,    setFlashId]    = useState<number | null>(null)
 
@@ -1671,10 +2463,26 @@ export function MarketplacePage() {
   // Tracks whether user manually picked an item (pauses top-1 auto-follow for 12 s)
   const manualPickTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
   const userPickedRef   = useRef(false)
+  // Tracks whether we've already synced to real API data once
+  const apiSyncedRef    = useRef(false)
 
-  // ── Two-tier price simulation ──────────────────────────────────
-  //  Tier 1 — micro tick every 2.4s: ±5% flash (UI noise, no rank change)
+  // ── Sync selected + price state when real data first arrives ──────
+  useEffect(() => {
+    if (_apiArtworks.length > 0 && !apiSyncedRef.current) {
+      apiSyncedRef.current = true
+      setSelected(_apiArtworks[0])
+      // Seed price simulation maps with real artwork IDs
+      setPriceHistory(Object.fromEntries(_apiArtworks.map(a => [a.id, [a.marketCap]])))
+      setLivePrices(Object.fromEntries(_apiArtworks.map(a => [a.id, a.marketCap])))
+    }
+  }, [_apiArtworks])
+
+  // ── Three-tier price simulation ────────────────────────────────
+  //  Tier 1 — micro tick every 2.4s: ±5%  (UI noise, no rank change)
   //  Tier 2 — spike event every 4.5s: +20% to +130% (causes rank jumps)
+  //  Tier 3 — mean-reversion every 9s: pulls price back toward seed × 4
+  //  Cap: no artwork exceeds 20× its seed marketCap
+  const MAX_MULT = 20
   useEffect(() => {
     const doFlash = (id: number, duration = 700) => {
       setFlashId(id)
@@ -1682,32 +2490,53 @@ export function MarketplacePage() {
       flashTimer.current = setTimeout(() => setFlashId(null), duration)
     }
 
-    // Tier 1: small ticks — just for visual activity
+    // Helper: clamp to cap
+    const cap = (id: number, raw: number) =>
+      Math.min(raw, (ARTWORKS.find(a => a.id === id)?.marketCap ?? raw) * MAX_MULT)
+
+    // Tier 1: small ticks — visual activity only
     const microTimer = setInterval(() => {
-      const art  = ARTWORKS[Math.floor(Math.random() * ARTWORKS.length)]
+      const art   = ARTWORKS[Math.floor(Math.random() * ARTWORKS.length)]
       const delta = 1 + (Math.random() * 0.08 - 0.03) // -3% to +5%
       setLivePrices(prev => ({
         ...prev,
-        [art.id]: parseFloat((prev[art.id] * delta).toFixed(3)),
+        [art.id]: parseFloat(cap(art.id, prev[art.id] * delta).toFixed(4)),
       }))
       doFlash(art.id, 600)
     }, 2400)
 
-    // Tier 2: spike events — enough to cause visible rank changes
+    // Tier 2: spike events — cause visible rank changes
     const spikeTimer = setInterval(() => {
       const art   = ARTWORKS[Math.floor(Math.random() * ARTWORKS.length)]
-      // +20% to +130% spike — can shoot a low-ranked item past multiple rows
-      const spike = 1 + (Math.random() * 1.1 + 0.20)
+      const spike = 1 + (Math.random() * 1.1 + 0.20) // +20% to +130%
       setLivePrices(prev => ({
         ...prev,
-        [art.id]: parseFloat((prev[art.id] * spike).toFixed(3)),
+        [art.id]: parseFloat(cap(art.id, prev[art.id] * spike).toFixed(4)),
       }))
       doFlash(art.id, 1200)
     }, 4500)
 
+    // Tier 3: mean-reversion — gently pull capped artwork back toward seed × 4
+    const reversionTimer = setInterval(() => {
+      setLivePrices(prev => {
+        const next = { ...prev }
+        for (const art of ARTWORKS) {
+          const seed   = art.marketCap
+          const target = seed * 4          // equilibrium = 4× seed
+          const cur    = prev[art.id] ?? seed
+          if (cur > target) {
+            // Pull 18% toward target
+            next[art.id] = parseFloat((cur * 0.82 + target * 0.18).toFixed(4))
+          }
+        }
+        return next
+      })
+    }, 9000)
+
     return () => {
       clearInterval(microTimer)
       clearInterval(spikeTimer)
+      clearInterval(reversionTimer)
       if (flashTimer.current) clearTimeout(flashTimer.current)
     }
   }, [])
@@ -1950,8 +2779,16 @@ export function MarketplacePage() {
             height:       48,
           }}
         >
-          {/* Phase tabs */}
-          <div className="flex items-center h-full overflow-x-auto" style={{ scrollbarWidth: 'none' }}>
+          {/* Phase tabs — dimmed when RACE mode is active */}
+          <div
+            className="flex items-center h-full overflow-x-auto"
+            style={{
+              scrollbarWidth: 'none',
+              opacity:       viewMode === 'race' ? 0.3 : 1,
+              pointerEvents: viewMode === 'race' ? 'none' : 'auto',
+              transition:    'opacity 0.2s ease',
+            }}
+          >
             {PHASE_TABS.map(tab => {
               const active = activePhase === tab.key
               const color  = tab.key === 'All'
@@ -2188,7 +3025,7 @@ export function MarketplacePage() {
               scrollbarWidth: 'none',
             }}
           >
-            <InspectionDeck art={selected} onCollect={setBuyArt} onLightbox={setLightboxArt}/>
+            <InspectionDeck art={selected} livePrice={livePrices[selected.id] ?? selected.marketCap} onCollect={setBuyArt} onLightbox={setLightboxArt}/>
           </div>
         </div>
       </div>
@@ -2226,7 +3063,7 @@ export function MarketplacePage() {
                 <div className="w-10 h-1 rounded-full" style={{ background: 'rgba(255,255,255,0.15)' }}/>
               </div>
               <div style={{ maxHeight: 'calc(90dvh - 24px)', overflowY: 'auto' }}>
-                <InspectionDeck art={selected} onCollect={art => { setSheetOpen(false); setBuyArt(art) }} onLightbox={setLightboxArt}/>
+                <InspectionDeck art={selected} livePrice={livePrices[selected.id] ?? selected.marketCap} onCollect={art => { setSheetOpen(false); setBuyArt(art) }} onLightbox={setLightboxArt}/>
               </div>
             </motion.div>
           </>
@@ -2234,7 +3071,7 @@ export function MarketplacePage() {
       </AnimatePresence>
 
       {/* ══ BUY MODAL ════════════════════════════════════════ */}
-      {buyArt && <BuyModal art={buyArt} onClose={() => setBuyArt(null)}/>}
+      {buyArt && <BuyModal art={buyArt} livePrice={livePrices[buyArt.id] ?? buyArt.marketCap} onClose={() => setBuyArt(null)}/>}
 
       {/* ══ ARTWORK LIGHTBOX ═════════════════════════════════ */}
       <AnimatePresence>

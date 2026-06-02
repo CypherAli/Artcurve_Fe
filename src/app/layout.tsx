@@ -11,10 +11,11 @@
 //  Both loaded via next/font/google — zero layout shift.
 // ─────────────────────────────────────────────────────────────────
 
-import type { Metadata }      from 'next'
+import type { Metadata, Viewport } from 'next'
 import { Cormorant_Garamond, Inter } from 'next/font/google'
 import { SmoothScrollProvider } from '@/providers/SmoothScrollProvider'
 import { Web3Provider }         from '@/providers/Web3Provider'
+import { ToastContainer }       from '@/components/common/Toast'
 import './globals.css'
 
 // ── Font configuration ────────────────────────────────────────────
@@ -40,26 +41,32 @@ export const metadata: Metadata = {
     process.env.NEXT_PUBLIC_SITE_URL ?? 'https://artcurve.io'
   ),
   title: {
-    default:  'ArtCurve — Where Art Meets the Blockchain',
+    default:  'ArtCurve — On-Chain Art Trading',
     template: '%s | ArtCurve',
   },
-  description:
-    'Trade unique artworks as bonding-curve tokens on Base. ' +
-    'Every brushstroke has a price. Every collector shapes the curve.',
-  keywords: ['NFT', 'art', 'blockchain', 'Base', 'DeFi', 'bonding curve', 'Web3'],
+  description: 'Trade fractionalised art on a bonding curve DEX. Discover, collect, and speculate on digital artworks tokenised on Base.',
+  keywords: ['NFT', 'art', 'bonding curve', 'DeFi', 'Base', 'Web3', 'trading'],
+  authors: [{ name: 'ArtCurve' }],
   openGraph: {
     type:        'website',
+    locale:      'en_US',
+    url:         'https://artcurve.io',
     siteName:    'ArtCurve',
-    title:       'ArtCurve — Where Art Meets the Blockchain',
-    description: 'Trade unique artworks as bonding-curve tokens on Base.',
-    images: [{ url: '/og-image.jpg', width: 1200, height: 630 }],
+    title:       'ArtCurve — On-Chain Art Trading',
+    description: 'Trade fractionalised art on a bonding curve DEX on Base.',
+    images: [{ url: '/og-image.png', width: 1200, height: 630, alt: 'ArtCurve' }],
   },
   twitter: {
     card:        'summary_large_image',
-    title:       'ArtCurve',
-    description: 'Trade unique artworks as bonding-curve tokens on Base.',
+    title:       'ArtCurve — On-Chain Art Trading',
+    description: 'Trade fractionalised art on a bonding curve DEX on Base.',
+    images:      ['/og-image.png'],
   },
   robots: { index: true, follow: true },
+}
+
+export const viewport: Viewport = {
+  themeColor: '#070707',
 }
 
 // ── Root Layout ───────────────────────────────────────────────────
@@ -89,6 +96,7 @@ export default function RootLayout({
             <main id="main-content">
               {children}
             </main>
+            <ToastContainer />
           </Web3Provider>
         </SmoothScrollProvider>
       </body>

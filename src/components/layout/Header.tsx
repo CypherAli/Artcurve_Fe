@@ -235,17 +235,70 @@ function NotificationsDropdown({ onClose }: { onClose: () => void }) {
 
 const NAV_LINKS = [
   { label: 'Marketplace', href: '/marketplace' },
-  { label: 'Trade',       href: '#trade' },
-  { label: 'Live',        href: '#live' },
-  { label: 'Vault',       href: '#vault' },
-  { label: 'Studio',      href: '#studio' },
-  { label: 'Guild',       href: '#guild' },
+  { label: 'Trade',       href: '/trade' },
+  { label: 'Live',        href: '/live' },
+  { label: 'Vault',       href: '/vault' },
+  { label: 'Studio',      href: '/studio' },
+  { label: 'Guild',       href: '/guild' },
 ]
 
-export function Header() {
+// ── Theme tokens for light ↔ dark header ─────────────────────────
+const THEMES = {
+  light: {
+    bg:          '#FDFBF7',
+    bgScrolled:  '#FDFBF7',
+    border:      'rgba(228,221,211,0.8)',
+    shadow:      '0 1px 24px rgba(0,0,0,0.06)',
+    logo:        '#1A1A1A',
+    nav:         '#7A7570',
+    navHover:    '#1A1A1A',
+    gold:        '#C9A96E',
+    bell:        '#9A9490',
+    bellHoverBg: 'rgba(228,221,211,0.5)',
+    bellActiveBg:'rgba(228,221,211,0.6)',
+    ringColor:   '#FDFBF7',
+    chainBorder: '#E4DDD3',
+    chainText:   '#7A7570',
+    btnBg:       'transparent',
+    btnBorder:   '#C9A96E',
+    btnText:     '#C9A96E',
+    btnHoverBg:  '#C9A96E',
+    btnHoverTxt: '#1A1A1A',
+    skeletonBg:  'rgba(228,221,211,0.4)',
+  },
+  dark: {
+    bg:          'rgba(7,7,7,0.88)',
+    bgScrolled:  'rgba(7,7,7,0.96)',
+    border:      'rgba(255,255,255,0.07)',
+    shadow:      '0 1px 32px rgba(0,0,0,0.5)',
+    logo:        'rgba(255,255,255,0.88)',
+    nav:         'rgba(255,255,255,0.38)',
+    navHover:    'rgba(255,255,255,0.88)',
+    gold:        '#D4AF37',
+    bell:        'rgba(255,255,255,0.38)',
+    bellHoverBg: 'rgba(255,255,255,0.06)',
+    bellActiveBg:'rgba(255,255,255,0.08)',
+    ringColor:   '#070707',
+    chainBorder: 'rgba(255,255,255,0.1)',
+    chainText:   'rgba(255,255,255,0.45)',
+    btnBg:       'transparent',
+    btnBorder:   'rgba(212,175,55,0.5)',
+    btnText:     '#D4AF37',
+    btnHoverBg:  'rgba(212,175,55,0.12)',
+    btnHoverTxt: '#D4AF37',
+    skeletonBg:  'rgba(255,255,255,0.06)',
+  },
+}
+
+interface HeaderProps { dark?: boolean }
+
+export function Header({ dark = false }: HeaderProps) {
+  const T = dark ? THEMES.dark : THEMES.light
+
   const [scrolled,   setScrolled]   = useState(false)
   const [showLogin,  setShowLogin]  = useState(false)
   const [showNotifs, setShowNotifs] = useState(false)
+  const [hoveredNav, setHoveredNav] = useState<string | null>(null)
   const headerRef                   = useRef<HTMLElement>(null)
   const unreadCount = NOTIF_DATA.filter(n => n.unread).length
 
@@ -282,21 +335,21 @@ export function Header() {
   return (
     <>
     <header ref={headerRef}
-      className={[
-        'fixed top-0 left-0 right-0 z-50',
-        'flex items-center justify-between',
-        'px-6 md:px-12 py-5',
-        'transition-all duration-500',
-        scrolled
-          ? 'bg-[#FDFBF7] border-b border-[#E4DDD3]/80 shadow-[0_1px_24px_rgba(0,0,0,0.06)]'
-          : 'bg-[#FDFBF7] border-b border-[#E4DDD3]/40',
-      ].join(' ')}
+      className="fixed top-0 left-0 right-0 z-50 flex items-center justify-between px-6 md:px-12 py-5 transition-all duration-500"
+      style={{
+        background:   scrolled ? T.bgScrolled : T.bg,
+        borderBottom: `1px solid ${T.border}`,
+        boxShadow:    scrolled ? T.shadow : 'none',
+        backdropFilter: dark ? 'blur(16px)' : 'none',
+        WebkitBackdropFilter: dark ? 'blur(16px)' : 'none',
+      }}
     >
       {/* ── Logo ──────────────────────────────────────────────── */}
       <a href="/" className="flex items-center gap-2 group" aria-label="ArtCurve home">
-        <span className="size-2 rounded-full bg-[#C9A96E] group-hover:scale-150 transition-transform duration-500" aria-hidden/>
-        <span className="text-2xl tracking-wider"
-          style={{ fontFamily:"'Cormorant Garamond',serif", fontWeight:600 }}>
+        <span className="size-2 rounded-full group-hover:scale-150 transition-transform duration-500"
+          style={{ background: T.gold }} aria-hidden/>
+        <span className="text-2xl tracking-wider transition-colors duration-300"
+          style={{ fontFamily:"'Cormorant Garamond',serif", fontWeight:600, color: T.logo }}>
           ArtCurve
         </span>
       </a>
@@ -305,15 +358,18 @@ export function Header() {
       <nav className="hidden md:flex items-center gap-8" aria-label="Main navigation">
         {NAV_LINKS.map(({ label, href }) => (
           <a key={label} href={href} data-magnetic
-            className={[
-              'relative text-sm tracking-widest uppercase',
-              'text-[#7A7570] hover:text-[#1A1A1A] transition-colors duration-300',
-              "after:content-[''] after:absolute after:bottom-0 after:left-0",
-              'after:h-px after:w-0 after:bg-[#C9A96E]',
-              'after:transition-[width] after:duration-300 hover:after:w-full',
-            ].join(' ')}
+            onMouseEnter={() => setHoveredNav(label)}
+            onMouseLeave={() => setHoveredNav(null)}
+            className="relative text-sm tracking-widest uppercase transition-colors duration-300"
+            style={{ color: hoveredNav === label ? T.navHover : T.nav }}
           >
             {label}
+            {/* Underline */}
+            <span className="absolute bottom-0 left-0 h-px transition-all duration-300"
+              style={{
+                background: T.gold,
+                width: hoveredNav === label ? '100%' : '0%',
+              }}/>
           </a>
         ))}
       </nav>
@@ -325,32 +381,25 @@ export function Header() {
         <div className="relative" data-notif-root>
           <button type="button" aria-label="Notifications"
             onClick={() => setShowNotifs(v => !v)}
-            className={[
-              'relative w-9 h-9 flex items-center justify-center rounded-full',
-              'text-[#9A9490] hover:text-[#1A1A1A] hover:bg-[#E4DDD3]/50',
-              'transition-all duration-200',
-              showNotifs ? 'bg-[#E4DDD3]/60 text-[#1A1A1A]' : '',
-            ].join(' ')}
+            className="relative w-9 h-9 flex items-center justify-center rounded-full transition-all duration-200"
+            style={{
+              color:      showNotifs ? T.navHover : T.bell,
+              background: showNotifs ? T.bellActiveBg : 'transparent',
+            }}
+            onMouseEnter={e => { (e.currentTarget as HTMLElement).style.background = T.bellHoverBg }}
+            onMouseLeave={e => { (e.currentTarget as HTMLElement).style.background = showNotifs ? T.bellActiveBg : 'transparent' }}
           >
             <svg viewBox="0 0 24 24" className="w-[22px] h-[22px]" fill="none" stroke="currentColor" strokeWidth="1.6">
               <path d="M15 17h5l-1.405-1.405A2.032 2.032 0 0 1 18 14.158V11a6 6 0 0 0-5-5.917V4a1 1 0 1 0-2 0v1.083A6 6 0 0 0 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 0 1-6 0v-1m6 0H9"
                 strokeLinecap="round" strokeLinejoin="round"/>
             </svg>
             {unreadCount > 0 && (
-              <span className="absolute top-1 right-1 w-[9px] h-[9px] rounded-full bg-[#C9A96E]
-                               ring-2 ring-[#FDFBF7] pointer-events-none"/>
+              <span className="absolute top-1 right-1 w-[9px] h-[9px] rounded-full pointer-events-none"
+                style={{ background: T.gold, boxShadow: `0 0 0 2px ${T.ringColor}` }}/>
             )}
           </button>
           {showNotifs && <NotificationsDropdown onClose={() => setShowNotifs(false)} />}
         </div>
-
-        <button type="button" onClick={() => setShowLogin(true)}
-          className="h-10 px-6 text-sm tracking-widest uppercase
-                     border border-[#C9A96E] text-[#C9A96E]
-                     hover:bg-[#C9A96E] hover:text-[#1A1A1A]
-                     transition-all duration-300">
-          Log in
-        </button>
 
         <ConnectButton.Custom>
           {({ account, chain, openAccountModal, openChainModal, openConnectModal, authenticationStatus, mounted }) => {
@@ -358,15 +407,31 @@ export function Header() {
             const connected = ready && account && chain &&
               (!authenticationStatus || authenticationStatus === 'authenticated')
 
-            if (!ready) return <div aria-hidden className="h-10 w-32 rounded bg-[#E4DDD3]/40 animate-pulse"/>
+            if (!ready) return (
+              <div aria-hidden className="h-10 w-32 rounded animate-pulse"
+                style={{ background: T.skeletonBg }}/>
+            )
 
             if (!connected) return (
               <button onClick={openConnectModal} type="button"
-                className="h-10 px-6 text-sm tracking-widest uppercase
-                           border border-[#C9A96E] text-[#C9A96E]
-                           hover:bg-[#C9A96E] hover:text-[#1A1A1A]
-                           transition-all duration-300">
-                Connect
+                className="h-10 px-6 text-sm tracking-widest uppercase transition-all duration-300 font-medium"
+                style={{
+                  background:   T.btnBg,
+                  border:       `1px solid ${T.btnBorder}`,
+                  color:        T.btnText,
+                }}
+                onMouseEnter={e => {
+                  const el = e.currentTarget as HTMLElement
+                  el.style.background = T.btnHoverBg
+                  if (!dark) { el.style.color = T.btnHoverTxt }
+                }}
+                onMouseLeave={e => {
+                  const el = e.currentTarget as HTMLElement
+                  el.style.background = T.btnBg
+                  el.style.color = T.btnText
+                }}
+              >
+                Connect Wallet
               </button>
             )
 
@@ -380,7 +445,8 @@ export function Header() {
             return (
               <div className="flex items-center gap-2">
                 <button onClick={openChainModal} type="button"
-                  className="h-10 px-3 border border-[#E4DDD3] text-xs uppercase tracking-wider text-[#7A7570] hover:border-[#C9A96E] transition-colors">
+                  className="h-10 px-3 text-xs uppercase tracking-wider transition-colors duration-200"
+                  style={{ border: `1px solid ${T.chainBorder}`, color: T.chainText }}>
                   {chain.hasIcon && (
                     <span className="inline-flex items-center gap-1.5">
                       {chain.iconUrl && <img src={chain.iconUrl} alt={chain.name} className="size-3.5 rounded-full"/>}
@@ -389,7 +455,8 @@ export function Header() {
                   )}
                 </button>
                 <button onClick={openAccountModal} type="button"
-                  className="h-10 px-4 text-sm tracking-wider bg-[#C9A96E] text-[#1A1A1A] font-medium hover:bg-[#E8D5B0] transition-colors duration-300">
+                  className="h-10 px-4 text-sm tracking-wider font-medium transition-colors duration-300"
+                  style={{ background: T.gold, color: '#1A1A1A' }}>
                   {account.displayName}
                 </button>
               </div>
