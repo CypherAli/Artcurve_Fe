@@ -285,7 +285,14 @@ export function LoginModal({ onClose }: Props) {
             <div className="lm-row flex flex-col gap-2.5 mb-4">
               {SOCIALS.map(({ id, label, bg, color, icon }) => (
                 <button key={id} type="button"
-                  onClick={() => showToast('🚧 Coming soon — OAuth integration in progress')}
+                  onClick={() => {
+                    if (id === 'github') {
+                      const api = process.env.NEXT_PUBLIC_API_URL?.replace('/api/v1', '') ?? 'https://artcurve-be.onrender.com'
+                      window.location.href = `${api}/api/v1/auth/github`
+                    } else {
+                      showToast('🚧 Coming soon')
+                    }
+                  }}
                   className="flex items-center justify-center gap-3 w-full h-11 rounded-xl
                              text-[13px] font-medium tracking-[0.01em]
                              hover:opacity-90 active:scale-[0.99] transition-all duration-150"
