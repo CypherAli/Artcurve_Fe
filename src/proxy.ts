@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 
-// Routes that require authentication
-const PROTECTED_ROUTES = ['/vault', '/studio']
+// Routes that require authentication (disabled for demo — wallet auth handles UI-level protection)
+const PROTECTED_ROUTES: string[] = []
 
 // Routes only for unauthenticated users
 const AUTH_ROUTES: string[] = []
