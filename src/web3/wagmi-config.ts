@@ -9,12 +9,11 @@
 // ─────────────────────────────────────────────────────────────────
 
 import { getDefaultConfig } from '@rainbow-me/rainbowkit'
-import { base, mainnet } from 'wagmi/chains'
+import { baseSepolia } from 'wagmi/chains'
 
 export const wagmiConfig = getDefaultConfig({
   appName:   'ArtCurve',
-  // NOTE: Replace with real WalletConnect Project ID from cloud.walletconnect.com
-  projectId: process.env.NEXT_PUBLIC_WALLETCONNECT_PROJECT_ID ?? 'artcurve-demo-id',
-  chains:    [base, mainnet],
+  projectId: process.env.NEXT_PUBLIC_WALLETCONNECT_PROJECT_ID ?? 'cc275f83791b65f859c7acb215931508',
+  chains:    [baseSepolia],
   ssr:       true, // Required for Next.js App Router SSR compatibility
 })
