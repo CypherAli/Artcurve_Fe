@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from 'react'
 import { ConnectButton }               from '@rainbow-me/rainbowkit'
+import { useAccount }                  from 'wagmi'
 import { gsap }                        from '@/lib/gsap'
 import { LoginModal }                  from './LoginModal'
 
@@ -233,13 +234,16 @@ function NotificationsDropdown({ onClose }: { onClose: () => void }) {
   )
 }
 
-const NAV_LINKS = [
+const NAV_LINKS_PUBLIC = [
   { label: 'Marketplace', href: '/marketplace' },
   { label: 'Trade',       href: '/trade' },
   { label: 'Live',        href: '/live' },
-  { label: 'Vault',       href: '/vault' },
-  { label: 'Studio',      href: '/studio' },
   { label: 'Guild',       href: '/guild' },
+]
+
+const NAV_LINKS_AUTH = [
+  { label: 'Vault',  href: '/vault'  },
+  { label: 'Studio', href: '/studio' },
 ]
 
 // ── Theme tokens for light ↔ dark header ─────────────────────────
@@ -301,6 +305,10 @@ export function Header({ dark = false }: HeaderProps) {
   const [hoveredNav, setHoveredNav] = useState<string | null>(null)
   const headerRef                   = useRef<HTMLElement>(null)
   const unreadCount = NOTIF_DATA.filter(n => n.unread).length
+  const { isConnected } = useAccount()
+  const NAV_LINKS = isConnected
+    ? [...NAV_LINKS_PUBLIC, ...NAV_LINKS_AUTH]
+    : NAV_LINKS_PUBLIC
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 80)
