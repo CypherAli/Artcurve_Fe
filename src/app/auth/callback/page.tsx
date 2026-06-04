@@ -25,6 +25,7 @@ export default function AuthCallbackPage() {
       id:             '',
       wallet_address: address,
       username:       name ?? null,
+      avatar_url:     null,
       role:           'user',
       is_verified:    false,
     })
