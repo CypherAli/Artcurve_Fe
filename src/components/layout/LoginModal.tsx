@@ -160,13 +160,15 @@ export function LoginModal({ onClose }: Props) {
   const connectors      = useConnectors()
   const { connect }     = useConnect()
   const lastGithub      = useLastGithubAccount()
-  const [email,    setEmail]   = useState('')
-  const [view,     setView]    = useState<View>('main')
-  const [toast,    setToast]   = useState<string | null>(null)
+  const [email,    setEmail]         = useState('')
+  const [view,     setView]          = useState<View>('main')
+  const [toast,    setToast]         = useState<string | null>(null)
+  const [showGhPicker, setShowGhPicker] = useState(false)
 
   const API_BASE = process.env.NEXT_PUBLIC_API_URL?.replace('/api/v1', '') ?? 'https://artcurve-be.onrender.com'
   function goGithub()          { window.location.href = `${API_BASE}/api/v1/auth/github` }
   function goGithubDifferent() { window.location.href = `https://github.com/logout?return_to=${encodeURIComponent(`${API_BASE}/api/v1/auth/github`)}` }
+  function onGithubClick()     { lastGithub ? setShowGhPicker(true) : goGithub() }
 
   function showToast(msg: string) {
     setToast(msg)
@@ -302,60 +304,15 @@ export function LoginModal({ onClose }: Props) {
             {/* Socials */}
             <div className="lm-row flex flex-col gap-2.5 mb-4">
               {SOCIALS.map(({ id, label, bg, color, icon }) => (
-                <div key={id}>
-                  {/* GitHub: show account picker if previous account exists */}
-                  {id === 'github' && lastGithub ? (
-                    <div className="rounded-xl overflow-hidden"
-                      style={{ border: '1px solid rgba(255,255,255,0.1)' }}>
-                      {/* Previously used account */}
-                      <button type="button" onClick={goGithub}
-                        className="flex items-center gap-3 w-full px-4 py-3
-                                   hover:bg-white/[0.06] active:scale-[0.99] transition-all duration-150"
-                        style={{ background: '#24292e' }}>
-                        {lastGithub.avatar_url ? (
-                          <img src={lastGithub.avatar_url} alt={lastGithub.username}
-                            className="w-8 h-8 rounded-full object-cover shrink-0"/>
-                        ) : (
-                          <div className="w-8 h-8 rounded-full flex items-center justify-center text-[12px] font-bold shrink-0"
-                            style={{ background: '#C9A96E', color: '#1A1A1A' }}>
-                            {lastGithub.username.slice(0,1).toUpperCase()}
-                          </div>
-                        )}
-                        <div className="flex-1 text-left">
-                          <p className="text-[13px] font-medium text-white/90">{lastGithub.username}</p>
-                          <p className="text-[11px] text-white/35">Continue as this account</p>
-                        </div>
-                        <svg viewBox="0 0 24 24" className="w-4 h-4 text-white/30 shrink-0"
-                          fill="none" stroke="currentColor" strokeWidth="2">
-                          <path d="M9 18l6-6-6-6" strokeLinecap="round" strokeLinejoin="round"/>
-                        </svg>
-                      </button>
-                      {/* Divider */}
-                      <div style={{ height: '1px', background: 'rgba(255,255,255,0.08)' }}/>
-                      {/* Use different account */}
-                      <button type="button" onClick={goGithubDifferent}
-                        className="flex items-center gap-3 w-full px-4 py-3
-                                   hover:bg-white/[0.04] transition-all duration-150"
-                        style={{ background: '#1c2128' }}>
-                        {icon}
-                        <span className="text-[13px] font-medium text-white/60">
-                          Use a different GitHub account
-                        </span>
-                      </button>
-                    </div>
-                  ) : (
-                    /* Normal button (no previous account) */
-                    <button type="button"
-                      onClick={() => id === 'github' ? goGithub() : showToast('🚧 Coming soon')}
-                      className="flex items-center justify-center gap-3 w-full h-11 rounded-xl
-                                 text-[13px] font-medium tracking-[0.01em]
-                                 hover:opacity-90 active:scale-[0.99] transition-all duration-150"
-                      style={{ background: bg, color }}>
-                      {icon}
-                      {label}
-                    </button>
-                  )}
-                </div>
+                <button key={id} type="button"
+                  onClick={() => id === 'github' ? onGithubClick() : showToast('🚧 Coming soon')}
+                  className="flex items-center justify-center gap-3 w-full h-11 rounded-xl
+                             text-[13px] font-medium tracking-[0.01em]
+                             hover:opacity-90 active:scale-[0.99] transition-all duration-150"
+                  style={{ background: bg, color }}>
+                  {icon}
+                  {label}
+                </button>
               ))}
             </div>
 
@@ -473,5 +430,86 @@ export function LoginModal({ onClose }: Props) {
 
       </div>
     </div>
+
+    {/* ── GitHub account picker popup ─────────────────────────── */}
+    {showGhPicker && lastGithub && (
+      <div className="fixed inset-0 z-[210] flex items-center justify-center px-4"
+        style={{ background: 'rgba(0,0,0,0.5)' }}
+        onClick={() => setShowGhPicker(false)}>
+        <div onClick={e => e.stopPropagation()}
+          className="w-full max-w-[340px] rounded-2xl overflow-hidden"
+          style={{
+            background: 'linear-gradient(160deg,#1a1a1a 0%,#111 100%)',
+            border: '1px solid rgba(255,255,255,0.1)',
+            boxShadow: '0 24px 60px rgba(0,0,0,0.7)',
+          }}>
+          {/* Header */}
+          <div className="px-5 py-4" style={{ borderBottom: '1px solid rgba(255,255,255,0.07)' }}>
+            <div className="flex items-center gap-2 mb-0.5">
+              <svg viewBox="0 0 24 24" className="w-4 h-4 text-white/50" fill="currentColor">
+                <path d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12"/>
+              </svg>
+              <span className="text-[13px] font-semibold text-white/80">Sign in with GitHub</span>
+            </div>
+            <p className="text-[11px] text-white/30 mt-1">Choose an account to continue to ArtCurve</p>
+          </div>
+
+          {/* Saved account */}
+          <button type="button" onClick={() => { setShowGhPicker(false); goGithub() }}
+            className="flex items-center gap-3.5 w-full px-5 py-4 transition-colors duration-150"
+            style={{ background: 'transparent' }}
+            onMouseEnter={e => (e.currentTarget.style.background = 'rgba(255,255,255,0.05)')}
+            onMouseLeave={e => (e.currentTarget.style.background = 'transparent')}>
+            {lastGithub.avatar_url ? (
+              <img src={lastGithub.avatar_url} alt={lastGithub.username}
+                className="w-10 h-10 rounded-full object-cover shrink-0"
+                style={{ boxShadow: '0 0 0 2px rgba(201,169,110,0.3)' }}/>
+            ) : (
+              <div className="w-10 h-10 rounded-full flex items-center justify-center text-[14px] font-bold shrink-0"
+                style={{ background: 'linear-gradient(135deg,#C9A96E,#7A5A1E)', color: '#1A1A1A' }}>
+                {lastGithub.username.slice(0,1).toUpperCase()}
+              </div>
+            )}
+            <div className="flex-1 text-left">
+              <p className="text-[14px] font-medium text-white/90">{lastGithub.username}</p>
+              <p className="text-[11.5px] text-white/35 mt-0.5">Continue as this account</p>
+            </div>
+            <svg viewBox="0 0 24 24" className="w-4 h-4 text-white/25 shrink-0"
+              fill="none" stroke="currentColor" strokeWidth="2">
+              <path d="M9 18l6-6-6-6" strokeLinecap="round" strokeLinejoin="round"/>
+            </svg>
+          </button>
+
+          {/* Divider */}
+          <div className="mx-5" style={{ height: '1px', background: 'rgba(255,255,255,0.07)' }}/>
+
+          {/* Use different account */}
+          <button type="button" onClick={() => { setShowGhPicker(false); goGithubDifferent() }}
+            className="flex items-center gap-3.5 w-full px-5 py-4 transition-colors duration-150"
+            style={{ background: 'transparent' }}
+            onMouseEnter={e => (e.currentTarget.style.background = 'rgba(255,255,255,0.04)')}
+            onMouseLeave={e => (e.currentTarget.style.background = 'transparent')}>
+            <div className="w-10 h-10 rounded-full flex items-center justify-center shrink-0"
+              style={{ border: '1px dashed rgba(255,255,255,0.2)', background: 'rgba(255,255,255,0.04)' }}>
+              <svg viewBox="0 0 24 24" className="w-4 h-4 text-white/40" fill="none" stroke="currentColor" strokeWidth="1.7">
+                <path d="M12 5v14M5 12h14" strokeLinecap="round"/>
+              </svg>
+            </div>
+            <p className="text-[14px] text-white/55">Use a different account</p>
+          </button>
+
+          {/* Cancel */}
+          <div className="px-5 pb-4 pt-1">
+            <button type="button" onClick={() => setShowGhPicker(false)}
+              className="w-full h-9 rounded-xl text-[12px] font-mono tracking-widest uppercase transition-colors duration-150"
+              style={{ border: '1px solid rgba(255,255,255,0.08)', color: 'rgba(255,255,255,0.3)' }}
+              onMouseEnter={e => (e.currentTarget.style.color = 'rgba(255,255,255,0.6)')}
+              onMouseLeave={e => (e.currentTarget.style.color = 'rgba(255,255,255,0.3)')}>
+              Cancel
+            </button>
+          </div>
+        </div>
+      </div>
+    )}
   )
 }
