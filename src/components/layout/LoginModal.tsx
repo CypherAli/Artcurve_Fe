@@ -284,7 +284,8 @@ export function LoginModal({ onClose }: Props) {
             {/* Socials */}
             <div className="lm-row flex flex-col gap-2.5 mb-4">
               {SOCIALS.map(({ id, label, bg, color, icon }) => (
-                <button key={id} type="button"
+                <div key={id} className="flex flex-col gap-1">
+                <button type="button"
                   onClick={() => {
                     if (id === 'github') {
                       const api = process.env.NEXT_PUBLIC_API_URL?.replace('/api/v1', '') ?? 'https://artcurve-be.onrender.com'
@@ -300,6 +301,21 @@ export function LoginModal({ onClose }: Props) {
                   {icon}
                   {label}
                 </button>
+                {id === 'github' && (
+                  <button type="button"
+                    onClick={() => {
+                      const api = process.env.NEXT_PUBLIC_API_URL?.replace('/api/v1', '') ?? 'https://artcurve-be.onrender.com'
+                      const oauthUrl = `${api}/api/v1/auth/github`
+                      window.location.href = `https://github.com/logout?return_to=${encodeURIComponent(oauthUrl)}`
+                    }}
+                    className="text-[11px] font-mono tracking-widest text-center transition-colors duration-200"
+                    style={{ color: 'rgba(255,255,255,0.22)' }}
+                    onMouseEnter={e => (e.currentTarget.style.color = 'rgba(255,255,255,0.55)')}
+                    onMouseLeave={e => (e.currentTarget.style.color = 'rgba(255,255,255,0.22)')}>
+                    Use a different account →
+                  </button>
+                )}
+                </div>
               ))}
             </div>
 
