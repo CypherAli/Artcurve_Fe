@@ -237,21 +237,26 @@ function NotificationsDropdown({ onClose }: { onClose: () => void }) {
 
 // ── UserMenuDropdown ─────────────────────────────────────────────
 function UserMenuDropdown({
-  user, onClose, onLogout, T,
+  user, onClose, onLogout,
 }: {
   user: { username?: string | null; wallet_address?: string; avatar_url?: string | null }
   onClose:  () => void
   onLogout: () => void
-  T: typeof THEMES.light
 }) {
   const panelRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
     const ctx = gsap.context(() => {
       gsap.fromTo(panelRef.current,
-        { autoAlpha: 0, y: -8, scale: 0.97 },
-        { autoAlpha: 1, y: 0,  scale: 1, duration: 0.26, ease: 'power3.out' },
+        { autoAlpha: 0, y: -10, scale: 0.96 },
+        { autoAlpha: 1, y: 0,   scale: 1, duration: 0.28, ease: 'power3.out' },
       )
+      const items = panelRef.current?.querySelectorAll<HTMLElement>('.um-item')
+      if (items?.length)
+        gsap.fromTo(Array.from(items),
+          { autoAlpha: 0, x: -6 },
+          { autoAlpha: 1, x: 0, duration: 0.3, ease: 'power3.out', stagger: 0.04, delay: 0.08 },
+        )
     })
     return () => ctx.revert()
   }, [])
@@ -268,74 +273,145 @@ function UserMenuDropdown({
   const displayName = user?.username ?? user?.wallet_address?.slice(0, 10) ?? 'User'
   const initials    = displayName.slice(0, 2).toUpperCase()
 
-  const MENU_ITEMS = [
-    { icon: '👤', label: 'My Profile',    href: '/vault'       },
-    { icon: '🖼️', label: 'My Artworks',   href: '/vault'       },
-    { icon: '📊', label: 'Portfolio',      href: '/vault'       },
-    { icon: '🎨', label: 'Upload Artwork', href: '/studio'      },
-    { icon: '⚙️', label: 'Settings',       href: '/vault'       },
+  const SECTIONS = [
+    {
+      items: [
+        {
+          label: 'My Portfolio',
+          desc:  'Holdings & P&L',
+          href:  '/vault',
+          icon: (
+            <svg viewBox="0 0 24 24" className="w-[17px] h-[17px]" fill="none" stroke="currentColor" strokeWidth="1.7">
+              <path d="M3 3v18h18" strokeLinecap="round" strokeLinejoin="round"/>
+              <path d="M7 16l4-4 4 4 4-4" strokeLinecap="round" strokeLinejoin="round"/>
+            </svg>
+          ),
+        },
+        {
+          label: 'Studio',
+          desc:  'Upload & manage artworks',
+          href:  '/studio',
+          icon: (
+            <svg viewBox="0 0 24 24" className="w-[17px] h-[17px]" fill="none" stroke="currentColor" strokeWidth="1.7">
+              <rect x="3" y="3" width="18" height="18" rx="2"/>
+              <circle cx="8.5" cy="8.5" r="1.5"/>
+              <path d="M21 15l-5-5L5 21" strokeLinecap="round" strokeLinejoin="round"/>
+            </svg>
+          ),
+        },
+        {
+          label: 'Marketplace',
+          desc:  'Browse artworks',
+          href:  '/marketplace',
+          icon: (
+            <svg viewBox="0 0 24 24" className="w-[17px] h-[17px]" fill="none" stroke="currentColor" strokeWidth="1.7">
+              <path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z" strokeLinecap="round" strokeLinejoin="round"/>
+              <path d="M3 6h18M16 10a4 4 0 0 1-8 0" strokeLinecap="round"/>
+            </svg>
+          ),
+        },
+        {
+          label: 'Trade',
+          desc:  'Bonding curve trading',
+          href:  '/trade',
+          icon: (
+            <svg viewBox="0 0 24 24" className="w-[17px] h-[17px]" fill="none" stroke="currentColor" strokeWidth="1.7">
+              <path d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" strokeLinecap="round" strokeLinejoin="round"/>
+            </svg>
+          ),
+        },
+      ],
+    },
   ]
 
   return (
     <div ref={panelRef}
-      className="absolute right-0 top-[calc(100%+12px)] w-[260px] rounded-2xl overflow-hidden"
+      className="absolute right-0 top-[calc(100%+14px)] w-[280px] rounded-2xl overflow-hidden"
       style={{
-        background:      '#0E0E0E',
-        border:          '1px solid rgba(201,169,110,0.14)',
-        boxShadow:       '0 24px 60px rgba(0,0,0,0.6), 0 0 0 1px rgba(255,255,255,0.03) inset',
+        background:      'linear-gradient(160deg,#141414 0%,#0D0D0D 100%)',
+        border:          '1px solid rgba(201,169,110,0.15)',
+        boxShadow:       '0 28px 70px rgba(0,0,0,0.7), 0 0 0 1px rgba(255,255,255,0.04) inset',
         transformOrigin: 'top right',
         zIndex:          60,
       }}
     >
-      {/* Gold line */}
-      <div className="h-[2px] w-full"
-        style={{ background: 'linear-gradient(90deg,#C9A96E 0%,rgba(201,169,110,0.2) 60%,transparent 100%)' }}/>
+      {/* Top gold bar */}
+      <div className="h-[2px]"
+        style={{ background: 'linear-gradient(90deg,#C9A96E 0%,rgba(201,169,110,0.25) 55%,transparent 100%)' }}/>
 
-      {/* User info */}
-      <div className="flex items-center gap-3 px-5 py-4"
-        style={{ borderBottom: '1px solid rgba(255,255,255,0.06)' }}>
-        {user?.avatar_url ? (
-          <img src={user.avatar_url} alt={displayName}
-            className="w-10 h-10 rounded-full object-cover ring-2 ring-[#C9A96E]/30"/>
-        ) : (
-          <div className="w-10 h-10 rounded-full flex items-center justify-center text-[13px] font-bold shrink-0"
-            style={{ background: 'linear-gradient(135deg,#C9A96E,#8B6914)', color: '#1A1A1A' }}>
-            {initials}
-          </div>
-        )}
-        <div className="min-w-0">
-          <p className="text-[14px] font-semibold text-white/85 truncate"
+      {/* ── User card ───────────────────────────────── */}
+      <div className="px-4 py-4 flex items-center gap-3.5"
+        style={{ borderBottom: '1px solid rgba(255,255,255,0.07)' }}>
+        <div className="relative shrink-0">
+          {user?.avatar_url ? (
+            <img src={user.avatar_url} alt={displayName}
+              className="w-11 h-11 rounded-full object-cover"
+              style={{ boxShadow: '0 0 0 2px rgba(201,169,110,0.4)' }}/>
+          ) : (
+            <div className="w-11 h-11 rounded-full flex items-center justify-center text-[15px] font-bold"
+              style={{ background: 'linear-gradient(135deg,#C9A96E 0%,#7A5A1E 100%)', color: '#1A1A1A', boxShadow: '0 0 0 2px rgba(201,169,110,0.3)' }}>
+              {initials}
+            </div>
+          )}
+          {/* Online dot */}
+          <span className="absolute bottom-0 right-0 w-3 h-3 rounded-full border-2 border-[#0D0D0D]"
+            style={{ background: '#22c55e' }}/>
+        </div>
+        <div className="flex-1 min-w-0">
+          <p className="text-[15px] font-semibold text-white/90 truncate leading-tight"
             style={{ fontFamily: "'Cormorant Garamond', serif" }}>
             {displayName}
           </p>
-          <p className="text-[10px] font-mono text-[#C9A96E]/70 mt-0.5">
-            GitHub Account
-          </p>
+          <div className="flex items-center gap-1.5 mt-1">
+            <svg viewBox="0 0 24 24" className="w-3 h-3 text-white/30 shrink-0" fill="currentColor">
+              <path d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12"/>
+            </svg>
+            <span className="text-[10.5px] font-mono text-white/30 truncate">GitHub</span>
+          </div>
         </div>
       </div>
 
-      {/* Menu items */}
-      <div className="flex flex-col py-2">
-        {MENU_ITEMS.map(({ icon, label, href }) => (
-          <a key={label} href={href}
-            onClick={onClose}
-            className="flex items-center gap-3 px-5 py-2.5 text-[13px] text-white/55
-                       hover:text-white/88 hover:bg-white/[0.04] transition-colors duration-150">
-            <span className="text-base w-5 text-center">{icon}</span>
-            {label}
+      {/* ── Menu items ──────────────────────────────── */}
+      <div className="px-2 py-2">
+        {SECTIONS[0].items.map(({ label, desc, href, icon }) => (
+          <a key={label} href={href} onClick={onClose}
+            className="um-item group flex items-center gap-3.5 px-3 py-2.5 rounded-xl
+                       transition-all duration-150 cursor-pointer"
+            style={{ color: 'rgba(255,255,255,0.55)' }}
+            onMouseEnter={e => { (e.currentTarget as HTMLElement).style.background = 'rgba(201,169,110,0.07)'; (e.currentTarget as HTMLElement).style.color = 'rgba(255,255,255,0.9)' }}
+            onMouseLeave={e => { (e.currentTarget as HTMLElement).style.background = 'transparent'; (e.currentTarget as HTMLElement).style.color = 'rgba(255,255,255,0.55)' }}
+          >
+            <div className="w-8 h-8 rounded-lg flex items-center justify-center shrink-0 transition-colors duration-150"
+              style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.07)' }}>
+              {icon}
+            </div>
+            <div className="flex-1 min-w-0">
+              <p className="text-[13px] font-medium leading-tight">{label}</p>
+              <p className="text-[11px] mt-0.5 truncate" style={{ color: 'rgba(255,255,255,0.28)' }}>{desc}</p>
+            </div>
+            <svg viewBox="0 0 24 24" className="w-3.5 h-3.5 opacity-0 group-hover:opacity-40 transition-opacity shrink-0"
+              fill="none" stroke="currentColor" strokeWidth="2">
+              <path d="M9 18l6-6-6-6" strokeLinecap="round" strokeLinejoin="round"/>
+            </svg>
           </a>
         ))}
       </div>
 
-      {/* Logout */}
-      <div style={{ borderTop: '1px solid rgba(255,255,255,0.06)' }} className="p-2">
+      {/* ── Sign out ────────────────────────────────── */}
+      <div className="px-2 pb-2" style={{ borderTop: '1px solid rgba(255,255,255,0.06)' }}>
         <button type="button" onClick={onLogout}
-          className="flex items-center gap-3 w-full px-3 py-2.5 rounded-xl
-                     text-[13px] text-red-400/60 hover:text-red-400
-                     hover:bg-red-500/[0.07] transition-all duration-150">
-          <svg viewBox="0 0 24 24" className="w-4 h-4 shrink-0" fill="none" stroke="currentColor" strokeWidth="2">
-            <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9" strokeLinecap="round" strokeLinejoin="round"/>
-          </svg>
+          className="um-item flex items-center gap-3.5 w-full px-3 py-2.5 rounded-xl mt-1
+                     transition-all duration-150 text-[13px] font-medium"
+          style={{ color: 'rgba(239,68,68,0.55)' }}
+          onMouseEnter={e => { (e.currentTarget as HTMLElement).style.background = 'rgba(239,68,68,0.08)'; (e.currentTarget as HTMLElement).style.color = 'rgba(239,68,68,0.9)' }}
+          onMouseLeave={e => { (e.currentTarget as HTMLElement).style.background = 'transparent'; (e.currentTarget as HTMLElement).style.color = 'rgba(239,68,68,0.55)' }}
+        >
+          <div className="w-8 h-8 rounded-lg flex items-center justify-center shrink-0"
+            style={{ background: 'rgba(239,68,68,0.08)', border: '1px solid rgba(239,68,68,0.12)' }}>
+            <svg viewBox="0 0 24 24" className="w-[17px] h-[17px]" fill="none" stroke="currentColor" strokeWidth="1.7">
+              <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9" strokeLinecap="round" strokeLinejoin="round"/>
+            </svg>
+          </div>
           Sign out
         </button>
       </div>
@@ -555,7 +631,6 @@ export function Header({ dark = false }: HeaderProps) {
                 user={user ?? {}}
                 onClose={() => setShowUserMenu(false)}
                 onLogout={() => { clearAuth(); setShowUserMenu(false) }}
-                T={T}
               />
             )}
           </div>

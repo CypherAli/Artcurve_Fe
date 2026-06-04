@@ -26,6 +26,7 @@ function CallbackHandler() {
     const token   = searchParams.get('token')
     const address = searchParams.get('address')
     const name    = searchParams.get('name')
+    const avatar  = searchParams.get('avatar')
     const error   = searchParams.get('auth_error')
 
     if (error || !token || !address) {
@@ -37,7 +38,7 @@ function CallbackHandler() {
       id:             '',
       wallet_address: address,
       username:       name ?? null,
-      avatar_url:     null,
+      avatar_url:     avatar || null,
       role:           'user',
       is_verified:    false,
     })
