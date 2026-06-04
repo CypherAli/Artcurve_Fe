@@ -3,6 +3,7 @@
 import { Suspense, useEffect } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { useAuthStore } from '@/store/authStore'
+import { authStore }    from '@/lib/auth-store'
 
 function Spinner() {
   return (
@@ -34,14 +35,19 @@ function CallbackHandler() {
       return
     }
 
-    useAuthStore.getState().setAuth(token, {
+    const userData = {
       id:             '',
       wallet_address: address,
       username:       name ?? null,
       avatar_url:     avatar || null,
       role:           'user',
       is_verified:    false,
-    })
+    }
+
+    // Sync both stores so http.ts (authStore) and UI (useAuthStore) both work
+    useAuthStore.getState().setAuth(token, userData)
+    authStore.setJwt(token)
+    authStore.setUser(userData)
 
     const from = sessionStorage.getItem('auth_redirect') ?? '/marketplace'
     sessionStorage.removeItem('auth_redirect')

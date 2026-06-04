@@ -6,6 +6,7 @@ import { useAccount }                  from 'wagmi'
 import { gsap }                        from '@/lib/gsap'
 import { LoginModal }                  from './LoginModal'
 import { useAuthStore }                from '@/store/authStore'
+import { authStore as legacyAuthStore } from '@/lib/auth-store'
 
 // ── Notification data ────────────────────────────────────────────
 const NOTIF_DATA = [
@@ -646,7 +647,7 @@ export function Header({ dark = false }: HeaderProps) {
               <UserMenuDropdown
                 user={user ?? {}}
                 onClose={() => setShowUserMenu(false)}
-                onLogout={() => { clearAuth(); setShowUserMenu(false) }}
+                onLogout={() => { clearAuth(); legacyAuthStore.clear(); setShowUserMenu(false) }}
               />
             )}
           </div>

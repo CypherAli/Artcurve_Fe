@@ -9,8 +9,8 @@ export const metadata: Metadata = {
 
 export default function Live() {
   return (
-    <div style={{ background:'#FDFBF7', minHeight:'100vh' }}>
-      <Header />
+    <div style={{ background:'#070707', minHeight:'100vh' }}>
+      <Header dark />
       <LivePage />
     </div>
   )
