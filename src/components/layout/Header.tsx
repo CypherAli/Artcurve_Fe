@@ -491,9 +491,25 @@ export function Header({ dark = false }: HeaderProps) {
   const [hoveredNav,  setHoveredNav] = useState<string | null>(null)
   const headerRef                   = useRef<HTMLElement>(null)
   const unreadCount = NOTIF_DATA.filter(n => n.unread).length
-  const { isConnected }              = useAccount()
-  const { isAuthenticated, user, clearAuth } = useAuthStore()
-  const loggedIn   = isConnected || isAuthenticated
+  const { isConnected }                        = useAccount()
+  const { isAuthenticated, user, clearAuth, setAuth } = useAuthStore()
+  const loggedIn = isConnected || isAuthenticated
+
+  // Fetch real profile (including avatar_url) once after OAuth login
+  useEffect(() => {
+    if (!isAuthenticated || !user || user.avatar_url) return
+    const jwt = useAuthStore.getState().jwt
+    if (!jwt) return
+    const api = process.env.NEXT_PUBLIC_API_URL ?? 'https://artcurve-be.onrender.com/api/v1'
+    fetch(`${api}/users/me`, { headers: { Authorization: `Bearer ${jwt}` } })
+      .then(r => r.ok ? r.json() : null)
+      .then((data: any) => {
+        if (data?.data?.avatar_url) {
+          setAuth(jwt, { ...user, avatar_url: data.data.avatar_url })
+        }
+      })
+      .catch(() => {})
+  }, [isAuthenticated])
   const NAV_LINKS  = loggedIn
     ? [...NAV_LINKS_PUBLIC, ...NAV_LINKS_AUTH]
     : NAV_LINKS_PUBLIC
