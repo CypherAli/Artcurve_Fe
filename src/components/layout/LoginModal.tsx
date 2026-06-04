@@ -249,6 +249,7 @@ export function LoginModal({ onClose }: Props) {
   }
 
   return (
+    <>
     <div ref={overlayRef} onClick={close}
       className="fixed inset-0 z-[200] flex items-center justify-center px-4"
       style={{ background: 'rgba(4,4,4,0.8)', backdropFilter: 'blur(6px)',
@@ -511,5 +512,6 @@ export function LoginModal({ onClose }: Props) {
         </div>
       </div>
     )}
+    </>
   )
 }
