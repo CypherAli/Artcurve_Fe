@@ -429,27 +429,29 @@ export function Header({ dark = false }: HeaderProps) {
           </div>
         )}
 
-        {/* ── Login button (shown when wallet not connected) ─────── */}
-        <ConnectButton.Custom>
-          {({ account, chain, authenticationStatus, mounted }) => {
-            const ready     = mounted && authenticationStatus !== 'loading'
-            const connected = ready && account && chain &&
-              (!authenticationStatus || authenticationStatus === 'authenticated')
-            if (connected) return null
-            return (
-              <button
-                type="button"
-                onClick={() => setShowLogin(true)}
-                className="h-10 px-4 text-sm tracking-widest uppercase transition-all duration-300 font-medium"
-                style={{ color: T.nav }}
-                onMouseEnter={e => { (e.currentTarget as HTMLElement).style.color = T.navHover }}
-                onMouseLeave={e => { (e.currentTarget as HTMLElement).style.color = T.nav }}
-              >
-                Login
-              </button>
-            )
-          }}
-        </ConnectButton.Custom>
+        {/* ── Login button (hidden when already authenticated) ──── */}
+        {!isAuthenticated && (
+          <ConnectButton.Custom>
+            {({ account, chain, authenticationStatus, mounted }) => {
+              const ready     = mounted && authenticationStatus !== 'loading'
+              const connected = ready && account && chain &&
+                (!authenticationStatus || authenticationStatus === 'authenticated')
+              if (connected) return null
+              return (
+                <button
+                  type="button"
+                  onClick={() => setShowLogin(true)}
+                  className="h-10 px-4 text-sm tracking-widest uppercase transition-all duration-300 font-medium"
+                  style={{ color: T.nav }}
+                  onMouseEnter={e => { (e.currentTarget as HTMLElement).style.color = T.navHover }}
+                  onMouseLeave={e => { (e.currentTarget as HTMLElement).style.color = T.nav }}
+                >
+                  Login
+                </button>
+              )
+            }}
+          </ConnectButton.Custom>
+        )}
 
         <ConnectButton.Custom>
           {({ account, chain, openAccountModal, openChainModal, openConnectModal, authenticationStatus, mounted }) => {
@@ -461,6 +463,9 @@ export function Header({ dark = false }: HeaderProps) {
               <div aria-hidden className="h-10 w-32 rounded animate-pulse"
                 style={{ background: T.skeletonBg }}/>
             )
+
+            // Ẩn Connect Wallet khi đã đăng nhập qua OAuth
+            if (isAuthenticated && !connected) return null
 
             if (!connected) return (
               <button onClick={openConnectModal} type="button"
