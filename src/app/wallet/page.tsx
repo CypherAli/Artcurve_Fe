@@ -10,7 +10,7 @@ export const metadata: Metadata = {
 export default function Wallet() {
   return (
     <div style={{ background: '#070707', minHeight: '100vh' }}>
-      <Header dark />
+      <Header />
       <WalletPage />
     </div>
   )
