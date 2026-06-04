@@ -40,7 +40,7 @@ function CallbackHandler() {
       wallet_address: address,
       username:       name ?? null,
       avatar_url:     avatar || null,
-      role:           'user',
+      role:           'user' as const,
       is_verified:    false,
     }
 
