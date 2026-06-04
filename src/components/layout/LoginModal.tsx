@@ -169,6 +169,7 @@ export function LoginModal({ onClose }: Props) {
   function goGithub()          { window.location.href = `${API_BASE}/api/v1/auth/github` }
   function goGithubDifferent() { window.location.href = `https://github.com/logout?return_to=${encodeURIComponent(`${API_BASE}/api/v1/auth/github`)}` }
   function onGithubClick()     { lastGithub ? setShowGhPicker(true) : goGithub() }
+  function goTwitter()         { window.location.href = `${API_BASE}/api/v1/auth/twitter` }
 
   function showToast(msg: string) {
     setToast(msg)
@@ -306,7 +307,11 @@ export function LoginModal({ onClose }: Props) {
             <div className="lm-row flex flex-col gap-2.5 mb-4">
               {SOCIALS.map(({ id, label, bg, color, icon }) => (
                 <button key={id} type="button"
-                  onClick={() => id === 'github' ? onGithubClick() : showToast('🚧 Coming soon')}
+                  onClick={() => {
+                    if (id === 'github') onGithubClick()
+                    else if (id === 'x') goTwitter()
+                    else showToast('🚧 Coming soon')
+                  }}
                   className="flex items-center justify-center gap-3 w-full h-11 rounded-xl
                              text-[13px] font-medium tracking-[0.01em]
                              hover:opacity-90 active:scale-[0.99] transition-all duration-150"
