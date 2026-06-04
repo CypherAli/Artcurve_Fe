@@ -9,7 +9,7 @@ export const metadata: Metadata = {
 
 export default function Vault() {
   return (
-    <div style={{ background:'#070707', minHeight:'100vh' }}>
+    <div style={{ background:'#FDFBF7', minHeight:'100vh' }}>
       <Header />
       <VaultPage />
     </div>
