@@ -34,7 +34,8 @@ export function WalletPage() {
   const shortAddress   = displayAddress !== '—'
     ? `${displayAddress.slice(0, 6)}…${displayAddress.slice(-4)}`
     : '—'
-  const ethBalance = balance ? `${parseFloat(balance.formatted).toFixed(4)} ETH` : '—'
+  const ethRaw     = balance ? Number(balance.value) / 1e18 : null
+  const ethBalance = ethRaw !== null ? `${ethRaw.toFixed(4)} ETH` : '—'
 
   useEffect(() => {
     const ctx = gsap.context(() => {
@@ -112,7 +113,7 @@ export function WalletPage() {
         <StatCard
           label="ETH Balance"
           value={ethBalance}
-          sub={balance ? `≈ $${(parseFloat(balance.formatted) * 3420).toLocaleString('en', { maximumFractionDigits: 0 })}` : undefined}
+          sub={ethRaw !== null ? `≈ $${(ethRaw * 3420).toLocaleString('en', { maximumFractionDigits: 0 })}` : undefined}
           icon={<svg viewBox="0 0 24 24" className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="1.7"><path d="M12 2L2 12l10 10 10-10L12 2z" strokeLinecap="round" strokeLinejoin="round"/><path d="M12 6v12M6 12h12" strokeLinecap="round"/></svg>}
         />
         <StatCard
