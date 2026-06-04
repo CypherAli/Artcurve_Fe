@@ -5,6 +5,7 @@ import { ConnectButton }               from '@rainbow-me/rainbowkit'
 import { useAccount }                  from 'wagmi'
 import { gsap }                        from '@/lib/gsap'
 import { LoginModal }                  from './LoginModal'
+import { useAuthStore }                from '@/store/authStore'
 
 // ── Notification data ────────────────────────────────────────────
 const NOTIF_DATA = [
@@ -305,8 +306,10 @@ export function Header({ dark = false }: HeaderProps) {
   const [hoveredNav, setHoveredNav] = useState<string | null>(null)
   const headerRef                   = useRef<HTMLElement>(null)
   const unreadCount = NOTIF_DATA.filter(n => n.unread).length
-  const { isConnected } = useAccount()
-  const NAV_LINKS = isConnected
+  const { isConnected }              = useAccount()
+  const { isAuthenticated, user, clearAuth } = useAuthStore()
+  const loggedIn   = isConnected || isAuthenticated
+  const NAV_LINKS  = loggedIn
     ? [...NAV_LINKS_PUBLIC, ...NAV_LINKS_AUTH]
     : NAV_LINKS_PUBLIC
 
@@ -408,6 +411,23 @@ export function Header({ dark = false }: HeaderProps) {
           </button>
           {showNotifs && <NotificationsDropdown onClose={() => setShowNotifs(false)} />}
         </div>
+
+        {/* ── GitHub auth user (shown when logged in via OAuth) ─── */}
+        {isAuthenticated && !isConnected && (
+          <div className="flex items-center gap-2">
+            <span className="text-[13px] font-medium"
+              style={{ color: T.gold }}>
+              {user?.username ?? user?.wallet_address?.slice(0, 8)}
+            </span>
+            <button onClick={() => clearAuth()} type="button"
+              className="text-[10px] font-mono tracking-widest uppercase px-3 h-8 rounded-lg transition-colors duration-200"
+              style={{ border: `1px solid ${T.chainBorder}`, color: T.chainText }}
+              onMouseEnter={e => (e.currentTarget.style.color = 'rgba(255,80,80,0.7)')}
+              onMouseLeave={e => (e.currentTarget.style.color = T.chainText)}>
+              Logout
+            </button>
+          </div>
+        )}
 
         {/* ── Login button (shown when wallet not connected) ─────── */}
         <ConnectButton.Custom>

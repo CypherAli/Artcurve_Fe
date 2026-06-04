@@ -2,7 +2,7 @@
 
 import { Suspense, useEffect } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
-import { authStore } from '@/lib/auth-store'
+import { useAuthStore } from '@/store/authStore'
 
 function Spinner() {
   return (
@@ -33,8 +33,7 @@ function CallbackHandler() {
       return
     }
 
-    authStore.setJwt(token)
-    authStore.setUser({
+    useAuthStore.getState().setAuth(token, {
       id:             '',
       wallet_address: address,
       username:       name ?? null,
