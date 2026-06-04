@@ -49,8 +49,10 @@ function CallbackHandler() {
     authStore.setJwt(token)
     authStore.setUser(userData)
 
-    // Remember last GitHub account for account picker in LoginModal
-    localStorage.setItem('artcurve_github_account', JSON.stringify({
+    // Remember last social account for account picker in LoginModal
+    const provider = searchParams.get('provider') ?? 'github'
+    const storageKey = provider === 'twitter' ? 'artcurve_twitter_account' : 'artcurve_github_account'
+    localStorage.setItem(storageKey, JSON.stringify({
       username:   name ?? '',
       avatar_url: avatar ?? '',
     }))
