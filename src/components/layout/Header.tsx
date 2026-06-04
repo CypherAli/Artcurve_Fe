@@ -281,7 +281,7 @@ function UserMenuDropdown({
         {
           label: 'Edit Profile',
           desc:  'Username, bio, avatar',
-          href:  '/vault?tab=profile',
+          href:  '/settings',
           icon: (
             <svg viewBox="0 0 24 24" className="w-[17px] h-[17px]" fill="none" stroke="currentColor" strokeWidth="1.7">
               <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" strokeLinecap="round" strokeLinejoin="round"/>
