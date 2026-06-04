@@ -49,6 +49,12 @@ function CallbackHandler() {
     authStore.setJwt(token)
     authStore.setUser(userData)
 
+    // Remember last GitHub account for account picker in LoginModal
+    localStorage.setItem('artcurve_github_account', JSON.stringify({
+      username:   name ?? '',
+      avatar_url: avatar ?? '',
+    }))
+
     const from = sessionStorage.getItem('auth_redirect') ?? '/marketplace'
     sessionStorage.removeItem('auth_redirect')
     router.replace(from)

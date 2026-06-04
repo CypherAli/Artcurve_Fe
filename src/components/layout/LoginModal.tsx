@@ -4,6 +4,19 @@ import { useEffect, useRef, useState } from 'react'
 import { useConnect, useConnectors }    from 'wagmi'
 import { gsap }                         from '@/lib/gsap'
 
+interface GithubAccount { username: string; avatar_url: string }
+
+function useLastGithubAccount(): GithubAccount | null {
+  const [account, setAccount] = useState<GithubAccount | null>(null)
+  useEffect(() => {
+    try {
+      const raw = localStorage.getItem('artcurve_github_account')
+      if (raw) setAccount(JSON.parse(raw))
+    } catch { /* ignore */ }
+  }, [])
+  return account
+}
+
 interface Props { onClose: () => void }
 
 type View = 'main' | 'wallets'
@@ -144,11 +157,16 @@ function WalletRow({
 
 // ─────────────────────────────────────────────────────────────────
 export function LoginModal({ onClose }: Props) {
-  const connectors  = useConnectors()
-  const { connect } = useConnect()
+  const connectors      = useConnectors()
+  const { connect }     = useConnect()
+  const lastGithub      = useLastGithubAccount()
   const [email,    setEmail]   = useState('')
   const [view,     setView]    = useState<View>('main')
   const [toast,    setToast]   = useState<string | null>(null)
+
+  const API_BASE = process.env.NEXT_PUBLIC_API_URL?.replace('/api/v1', '') ?? 'https://artcurve-be.onrender.com'
+  function goGithub()          { window.location.href = `${API_BASE}/api/v1/auth/github` }
+  function goGithubDifferent() { window.location.href = `https://github.com/logout?return_to=${encodeURIComponent(`${API_BASE}/api/v1/auth/github`)}` }
 
   function showToast(msg: string) {
     setToast(msg)
@@ -284,37 +302,59 @@ export function LoginModal({ onClose }: Props) {
             {/* Socials */}
             <div className="lm-row flex flex-col gap-2.5 mb-4">
               {SOCIALS.map(({ id, label, bg, color, icon }) => (
-                <div key={id} className="flex flex-col gap-1">
-                <button type="button"
-                  onClick={() => {
-                    if (id === 'github') {
-                      const api = process.env.NEXT_PUBLIC_API_URL?.replace('/api/v1', '') ?? 'https://artcurve-be.onrender.com'
-                      window.location.href = `${api}/api/v1/auth/github`
-                    } else {
-                      showToast('🚧 Coming soon')
-                    }
-                  }}
-                  className="flex items-center justify-center gap-3 w-full h-11 rounded-xl
-                             text-[13px] font-medium tracking-[0.01em]
-                             hover:opacity-90 active:scale-[0.99] transition-all duration-150"
-                  style={{ background: bg, color }}>
-                  {icon}
-                  {label}
-                </button>
-                {id === 'github' && (
-                  <button type="button"
-                    onClick={() => {
-                      const api = process.env.NEXT_PUBLIC_API_URL?.replace('/api/v1', '') ?? 'https://artcurve-be.onrender.com'
-                      const oauthUrl = `${api}/api/v1/auth/github`
-                      window.location.href = `https://github.com/logout?return_to=${encodeURIComponent(oauthUrl)}`
-                    }}
-                    className="text-[11px] font-mono tracking-widest text-center transition-colors duration-200"
-                    style={{ color: 'rgba(255,255,255,0.22)' }}
-                    onMouseEnter={e => (e.currentTarget.style.color = 'rgba(255,255,255,0.55)')}
-                    onMouseLeave={e => (e.currentTarget.style.color = 'rgba(255,255,255,0.22)')}>
-                    Use a different account →
-                  </button>
-                )}
+                <div key={id}>
+                  {/* GitHub: show account picker if previous account exists */}
+                  {id === 'github' && lastGithub ? (
+                    <div className="rounded-xl overflow-hidden"
+                      style={{ border: '1px solid rgba(255,255,255,0.1)' }}>
+                      {/* Previously used account */}
+                      <button type="button" onClick={goGithub}
+                        className="flex items-center gap-3 w-full px-4 py-3
+                                   hover:bg-white/[0.06] active:scale-[0.99] transition-all duration-150"
+                        style={{ background: '#24292e' }}>
+                        {lastGithub.avatar_url ? (
+                          <img src={lastGithub.avatar_url} alt={lastGithub.username}
+                            className="w-8 h-8 rounded-full object-cover shrink-0"/>
+                        ) : (
+                          <div className="w-8 h-8 rounded-full flex items-center justify-center text-[12px] font-bold shrink-0"
+                            style={{ background: '#C9A96E', color: '#1A1A1A' }}>
+                            {lastGithub.username.slice(0,1).toUpperCase()}
+                          </div>
+                        )}
+                        <div className="flex-1 text-left">
+                          <p className="text-[13px] font-medium text-white/90">{lastGithub.username}</p>
+                          <p className="text-[11px] text-white/35">Continue as this account</p>
+                        </div>
+                        <svg viewBox="0 0 24 24" className="w-4 h-4 text-white/30 shrink-0"
+                          fill="none" stroke="currentColor" strokeWidth="2">
+                          <path d="M9 18l6-6-6-6" strokeLinecap="round" strokeLinejoin="round"/>
+                        </svg>
+                      </button>
+                      {/* Divider */}
+                      <div style={{ height: '1px', background: 'rgba(255,255,255,0.08)' }}/>
+                      {/* Use different account */}
+                      <button type="button" onClick={goGithubDifferent}
+                        className="flex items-center gap-3 w-full px-4 py-3
+                                   hover:bg-white/[0.04] transition-all duration-150"
+                        style={{ background: '#1c2128' }}>
+                        {icon}
+                        <span className="text-[13px] font-medium text-white/60">
+                          Use a different GitHub account
+                        </span>
+                      </button>
+                    </div>
+                  ) : (
+                    /* Normal button (no previous account) */
+                    <button type="button"
+                      onClick={() => id === 'github' ? goGithub() : showToast('🚧 Coming soon')}
+                      className="flex items-center justify-center gap-3 w-full h-11 rounded-xl
+                                 text-[13px] font-medium tracking-[0.01em]
+                                 hover:opacity-90 active:scale-[0.99] transition-all duration-150"
+                      style={{ background: bg, color }}>
+                      {icon}
+                      {label}
+                    </button>
+                  )}
                 </div>
               ))}
             </div>
