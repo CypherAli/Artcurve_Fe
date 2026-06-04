@@ -235,6 +235,114 @@ function NotificationsDropdown({ onClose }: { onClose: () => void }) {
   )
 }
 
+// ── UserMenuDropdown ─────────────────────────────────────────────
+function UserMenuDropdown({
+  user, onClose, onLogout, T,
+}: {
+  user: { username?: string | null; wallet_address?: string; avatar_url?: string | null }
+  onClose:  () => void
+  onLogout: () => void
+  T: typeof THEMES.light
+}) {
+  const panelRef = useRef<HTMLDivElement>(null)
+
+  useEffect(() => {
+    const ctx = gsap.context(() => {
+      gsap.fromTo(panelRef.current,
+        { autoAlpha: 0, y: -8, scale: 0.97 },
+        { autoAlpha: 1, y: 0,  scale: 1, duration: 0.26, ease: 'power3.out' },
+      )
+    })
+    return () => ctx.revert()
+  }, [])
+
+  useEffect(() => {
+    const handler = (e: MouseEvent) => {
+      const root = panelRef.current?.closest('[data-user-menu-root]')
+      if (!root?.contains(e.target as Node)) onClose()
+    }
+    const t = setTimeout(() => document.addEventListener('mousedown', handler), 0)
+    return () => { clearTimeout(t); document.removeEventListener('mousedown', handler) }
+  }, [onClose])
+
+  const displayName = user?.username ?? user?.wallet_address?.slice(0, 10) ?? 'User'
+  const initials    = displayName.slice(0, 2).toUpperCase()
+
+  const MENU_ITEMS = [
+    { icon: '👤', label: 'My Profile',    href: '/vault'       },
+    { icon: '🖼️', label: 'My Artworks',   href: '/vault'       },
+    { icon: '📊', label: 'Portfolio',      href: '/vault'       },
+    { icon: '🎨', label: 'Upload Artwork', href: '/studio'      },
+    { icon: '⚙️', label: 'Settings',       href: '/vault'       },
+  ]
+
+  return (
+    <div ref={panelRef}
+      className="absolute right-0 top-[calc(100%+12px)] w-[260px] rounded-2xl overflow-hidden"
+      style={{
+        background:      '#0E0E0E',
+        border:          '1px solid rgba(201,169,110,0.14)',
+        boxShadow:       '0 24px 60px rgba(0,0,0,0.6), 0 0 0 1px rgba(255,255,255,0.03) inset',
+        transformOrigin: 'top right',
+        zIndex:          60,
+      }}
+    >
+      {/* Gold line */}
+      <div className="h-[2px] w-full"
+        style={{ background: 'linear-gradient(90deg,#C9A96E 0%,rgba(201,169,110,0.2) 60%,transparent 100%)' }}/>
+
+      {/* User info */}
+      <div className="flex items-center gap-3 px-5 py-4"
+        style={{ borderBottom: '1px solid rgba(255,255,255,0.06)' }}>
+        {user?.avatar_url ? (
+          <img src={user.avatar_url} alt={displayName}
+            className="w-10 h-10 rounded-full object-cover ring-2 ring-[#C9A96E]/30"/>
+        ) : (
+          <div className="w-10 h-10 rounded-full flex items-center justify-center text-[13px] font-bold shrink-0"
+            style={{ background: 'linear-gradient(135deg,#C9A96E,#8B6914)', color: '#1A1A1A' }}>
+            {initials}
+          </div>
+        )}
+        <div className="min-w-0">
+          <p className="text-[14px] font-semibold text-white/85 truncate"
+            style={{ fontFamily: "'Cormorant Garamond', serif" }}>
+            {displayName}
+          </p>
+          <p className="text-[10px] font-mono text-[#C9A96E]/70 mt-0.5">
+            GitHub Account
+          </p>
+        </div>
+      </div>
+
+      {/* Menu items */}
+      <div className="flex flex-col py-2">
+        {MENU_ITEMS.map(({ icon, label, href }) => (
+          <a key={label} href={href}
+            onClick={onClose}
+            className="flex items-center gap-3 px-5 py-2.5 text-[13px] text-white/55
+                       hover:text-white/88 hover:bg-white/[0.04] transition-colors duration-150">
+            <span className="text-base w-5 text-center">{icon}</span>
+            {label}
+          </a>
+        ))}
+      </div>
+
+      {/* Logout */}
+      <div style={{ borderTop: '1px solid rgba(255,255,255,0.06)' }} className="p-2">
+        <button type="button" onClick={onLogout}
+          className="flex items-center gap-3 w-full px-3 py-2.5 rounded-xl
+                     text-[13px] text-red-400/60 hover:text-red-400
+                     hover:bg-red-500/[0.07] transition-all duration-150">
+          <svg viewBox="0 0 24 24" className="w-4 h-4 shrink-0" fill="none" stroke="currentColor" strokeWidth="2">
+            <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9" strokeLinecap="round" strokeLinejoin="round"/>
+          </svg>
+          Sign out
+        </button>
+      </div>
+    </div>
+  )
+}
+
 const NAV_LINKS_PUBLIC = [
   { label: 'Marketplace', href: '/marketplace' },
   { label: 'Trade',       href: '/trade' },
@@ -300,10 +408,11 @@ interface HeaderProps { dark?: boolean }
 export function Header({ dark = false }: HeaderProps) {
   const T = dark ? THEMES.dark : THEMES.light
 
-  const [scrolled,   setScrolled]   = useState(false)
-  const [showLogin,  setShowLogin]  = useState(false)
-  const [showNotifs, setShowNotifs] = useState(false)
-  const [hoveredNav, setHoveredNav] = useState<string | null>(null)
+  const [scrolled,    setScrolled]   = useState(false)
+  const [showLogin,   setShowLogin]  = useState(false)
+  const [showNotifs,  setShowNotifs] = useState(false)
+  const [showUserMenu,setShowUserMenu] = useState(false)
+  const [hoveredNav,  setHoveredNav] = useState<string | null>(null)
   const headerRef                   = useRef<HTMLElement>(null)
   const unreadCount = NOTIF_DATA.filter(n => n.unread).length
   const { isConnected }              = useAccount()
@@ -412,20 +521,43 @@ export function Header({ dark = false }: HeaderProps) {
           {showNotifs && <NotificationsDropdown onClose={() => setShowNotifs(false)} />}
         </div>
 
-        {/* ── GitHub auth user (shown when logged in via OAuth) ─── */}
+        {/* ── GitHub auth user avatar button + dropdown ────────── */}
         {isAuthenticated && !isConnected && (
-          <div className="flex items-center gap-2">
-            <span className="text-[13px] font-medium"
-              style={{ color: T.gold }}>
-              {user?.username ?? user?.wallet_address?.slice(0, 8)}
-            </span>
-            <button onClick={() => clearAuth()} type="button"
-              className="text-[10px] font-mono tracking-widest uppercase px-3 h-8 rounded-lg transition-colors duration-200"
-              style={{ border: `1px solid ${T.chainBorder}`, color: T.chainText }}
-              onMouseEnter={e => (e.currentTarget.style.color = 'rgba(255,80,80,0.7)')}
-              onMouseLeave={e => (e.currentTarget.style.color = T.chainText)}>
-              Logout
+          <div className="relative" data-user-menu-root>
+            <button type="button"
+              onClick={() => setShowUserMenu(v => !v)}
+              className="flex items-center gap-2.5 h-10 px-3 rounded-xl transition-all duration-200"
+              style={{
+                border:     `1px solid ${showUserMenu ? 'rgba(201,169,110,0.4)' : T.chainBorder}`,
+                background: showUserMenu ? 'rgba(201,169,110,0.06)' : 'transparent',
+              }}>
+              {user?.avatar_url ? (
+                <img src={user.avatar_url} alt="avatar"
+                  className="w-6 h-6 rounded-full object-cover"/>
+              ) : (
+                <div className="w-6 h-6 rounded-full flex items-center justify-center text-[10px] font-bold"
+                  style={{ background: 'linear-gradient(135deg,#C9A96E,#8B6914)', color: '#1A1A1A' }}>
+                  {(user?.username ?? 'U').slice(0, 1).toUpperCase()}
+                </div>
+              )}
+              <span className="text-[13px] font-medium max-w-[80px] truncate"
+                style={{ color: T.gold }}>
+                {user?.username ?? 'Account'}
+              </span>
+              <svg viewBox="0 0 24 24" className="w-3 h-3 shrink-0 transition-transform duration-200"
+                style={{ color: T.chainText, transform: showUserMenu ? 'rotate(180deg)' : 'rotate(0deg)' }}
+                fill="none" stroke="currentColor" strokeWidth="2.5">
+                <path d="M6 9l6 6 6-6" strokeLinecap="round" strokeLinejoin="round"/>
+              </svg>
             </button>
+            {showUserMenu && (
+              <UserMenuDropdown
+                user={user ?? {}}
+                onClose={() => setShowUserMenu(false)}
+                onLogout={() => { clearAuth(); setShowUserMenu(false) }}
+                T={T}
+              />
+            )}
           </div>
         )}
 
