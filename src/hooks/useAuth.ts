@@ -23,6 +23,7 @@ import { useAccount, useSignMessage, useDisconnect } from 'wagmi'
 import { authService } from '@/services/auth.service'
 import { ApiError } from '@/lib/http'
 import { authStore } from '@/lib/auth-store'
+import { useAuthStore } from '@/store/authStore'
 import type { AuthUser } from '@/types/api'
 
 export type AuthStatus = 'idle' | 'signing' | 'verifying' | 'authenticated' | 'error'
@@ -66,9 +67,10 @@ export function useAuth() {
       setState(s => ({ ...s, status: 'verifying' }))
       const auth = await authService.verify(address, signature, message)
 
-      // 4. Persist
+      // 4. Persist — sync cả 2 stores
       authStore.setJwt(auth.access_token)
       authStore.setUser(auth.user)
+      useAuthStore.getState().setAuth(auth.access_token, auth.user)
 
       setState({ status: 'authenticated', user: auth.user, error: null })
     } catch (err) {
@@ -86,6 +88,7 @@ export function useAuth() {
     // Best-effort — revoke JWT on server (adds it to Redis blacklist)
     await authService.logout().catch(() => {})
     authStore.clear()
+    useAuthStore.getState().clearAuth()
     disconnect()
     setState({ status: 'idle', user: null, error: null })
   }, [disconnect])

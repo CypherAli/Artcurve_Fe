@@ -95,7 +95,7 @@ export function WalletPage() {
               )}
             </button>
             {displayAddress !== '—' && (
-              <a href={`https://sepolia.basescan.org/address/${displayAddress}`} target="_blank" rel="noopener noreferrer"
+              <a href={`https://basescan.org/address/${displayAddress}`} target="_blank" rel="noopener noreferrer"
                 className="flex items-center gap-2 px-4 h-9 rounded-xl text-[12px] font-mono tracking-widest uppercase transition-all duration-200"
                 style={{ border: '1px solid rgba(255,255,255,0.1)', color: 'rgba(255,255,255,0.45)', background: 'transparent' }}>
                 <svg viewBox="0 0 24 24" className="w-3.5 h-3.5" fill="none" stroke="currentColor" strokeWidth="2">

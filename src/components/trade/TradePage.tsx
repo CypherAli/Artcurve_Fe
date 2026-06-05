@@ -26,26 +26,29 @@ import {
 import { CandlestickChart, CandleRange } from '../common/CandlestickChart'
 import { PHASE_COLOR, Phase }            from '../marketplace/ArtCard'
 import { useMarketplace }               from '@/hooks/useMarketplace'
+import { useBuyTokens, useSellTokens, useTokenBalance, useEthBalance, toWei } from '@/web3/hooks/useContract'
+import { parseEther } from 'viem'
 import type { Artwork }                 from '@/types/api'
 
 // ─────────────────────────────────────────────────────────────────
 //  Types
 // ─────────────────────────────────────────────────────────────────
 interface TradeArtwork {
-  id:          number   // stable numeric UI key
-  artworkId:   string   // real UUID for API calls
-  title:       string
-  ticker:      string
-  artist:      string
-  artistAddr:  string
-  phase:       Phase
-  phaseColor:  string
-  basePrice:   number
-  image:       string
-  sparkline:   number[]
-  progress:    number
-  holders:     number
-  volume24h:   number
+  id:              number   // stable numeric UI key
+  artworkId:       string   // real UUID for API calls
+  contractAddress: string | null  // on-chain contract address (null = not deployed)
+  title:           string
+  ticker:          string
+  artist:          string
+  artistAddr:      string
+  phase:           Phase
+  phaseColor:      string
+  basePrice:       number
+  image:           string
+  sparkline:       number[]
+  progress:        number
+  holders:         number
+  volume24h:       number
 }
 
 interface OrderLevel {
@@ -93,7 +96,7 @@ const ARTWORKS_MOCK: TradeArtwork[] = ([
   { id:22, title:'Sovereign Geometry',       ticker:'$SOVGEO',   artist:'Yuki Tanabe',     artistAddr:'0x7d0…e34', phase:'Migration',     phaseColor:PHASE_COLOR['Migration'],     basePrice:19.90, progress:93, holders:50, volume24h:13.20, image:'/images/artworks/art5.jpg',    sparkline:[2,2.6,4,8,17,42,98,154,188,199] },
   { id:23, title:'Chromatic Grief',          ticker:'$CHROMA',   artist:'Elena Vasquez',   artistAddr:'0x4f2…a91', phase:'FOMO',          phaseColor:PHASE_COLOR['FOMO'],          basePrice:4.55,  progress:60, holders:25, volume24h:2.66,  image:'/convergence/img3.jpg',         sparkline:[3,3.8,5,4.2,6.1,8,11.5,15.8,26,45.5] },
   { id:24, title:'Silent Architecture',      ticker:'$SILENT',   artist:'Ivan Sorokin',    artistAddr:'0x9c4…e17', phase:'FOMO',          phaseColor:PHASE_COLOR['FOMO'],          basePrice:7.10,  progress:69, holders:32, volume24h:4.28,  image:'/convergence/img7.jpg',         sparkline:[5,5.8,7.5,6.3,9.1,12.5,17,23.8,38.5,71] },
-] as Omit<TradeArtwork, 'artworkId'>[]).map(a => ({ ...a, artworkId: '' }))
+] as Omit<TradeArtwork, 'artworkId' | 'contractAddress'>[]).map((a, i) => ({ ...a, artworkId: '', contractAddress: null }))
 
 // ── Adapter: backend Artwork → TradeArtwork ───────────────────────
 function adaptTradeArtwork(artwork: Artwork, index: number): TradeArtwork {
@@ -113,10 +116,11 @@ function adaptTradeArtwork(artwork: Artwork, index: number): TradeArtwork {
     ? `https://gateway.pinata.cloud/ipfs/${rawImg.replace('ipfs://', '')}`
     : rawImg || '/images/artworks/art1.jpg'
   return {
-    id:        index + 1,
-    artworkId: artwork.id,
-    title:     artwork.title,
-    ticker:    artwork.ticker ?? `$TKN${index + 1}`,
+    id:              index + 1,
+    artworkId:       artwork.id,
+    contractAddress: artwork.contract_address ?? null,
+    title:           artwork.title,
+    ticker:          artwork.ticker ?? `$TKN${index + 1}`,
     artist,
     artistAddr: `${addr.slice(0,5)}…${addr.slice(-3)}`,
     phase,
@@ -682,9 +686,14 @@ function TradePanel({ art, livePrice }: { art:TradeArtwork; livePrice:number }) 
   const glowColor = side==='buy' ? '34,197,94' : '239,68,68'
   const glowBg    = useMotionTemplate`radial-gradient(280px circle at ${mouseX}px ${mouseY}px, rgba(${glowColor},0.06), transparent 70%)`
 
-  // Fake balances
-  const WALLET_ETH   = 4.20
-  const WALLET_TOKEN = 0.4518   // tokens held of this artwork
+  // Real on-chain balances via wagmi
+  const contractAddr = art.contractAddress as `0x${string}` | undefined
+  const { formatted: WALLET_ETH }   = useEthBalance()
+  const { formatted: WALLET_TOKEN } = useTokenBalance(contractAddr)
+
+  // Trade hooks
+  const { buy, isPending: isBuying, isConfirming: buyConfirming, isSuccess: buySuccess } = useBuyTokens(contractAddr)
+  const { sell, isPending: isSelling, isConfirming: sellConfirming, isSuccess: sellSuccess } = useSellTokens(contractAddr)
 
   // ── BUY calculations ────────────────────────────────────────────
   const ethAmt      = Math.max(0, parseFloat(ethInput)  || 0)
@@ -707,18 +716,42 @@ function TradePanel({ art, livePrice }: { art:TradeArtwork; livePrice:number }) 
   const canSell = tokenAmt > 0 && tokenAmt <= WALLET_TOKEN && txState === 'idle'
   const canTrade = side === 'buy' ? canBuy : canSell
 
+  // Sync wagmi tx state into local txState
+  useEffect(() => {
+    if (isBuying || isSelling || buyConfirming || sellConfirming) setTxState('pending')
+  }, [isBuying, isSelling, buyConfirming, sellConfirming])
+
+  useEffect(() => {
+    if (buySuccess || sellSuccess) {
+      setTxState('success')
+      setTimeout(() => { setTxState('idle'); setEthInput(''); setTokenInput('') }, 2200)
+    }
+  }, [buySuccess, sellSuccess])
+
   const handleExecute = useCallback(() => {
     if (!canTrade) return
-    setTxState('pending')
-    setTimeout(() => {
-      setTxState('success')
-      setTimeout(() => {
-        setTxState('idle')
-        setEthInput('')
-        setTokenInput('')
-      }, 2200)
-    }, 1700)
-  }, [canTrade])
+    if (side === 'buy') {
+      if (contractAddr) {
+        // Real on-chain buy — slippage applied
+        const ethWei  = toWei(ethInput)
+        const minToks = BigInt(Math.floor(tokensOut * (1 - parseFloat(slippage) / 100) * 1e18))
+        buy(ethWei, minToks)
+      } else {
+        // Contract not deployed yet — show pending UI
+        setTxState('pending')
+        setTimeout(() => { setTxState('success'); setTimeout(() => { setTxState('idle'); setEthInput('') }, 2200) }, 1700)
+      }
+    } else {
+      if (contractAddr) {
+        const tokenWei = parseEther(tokenInput || '0')
+        const minEthWei = BigInt(Math.floor(minEthOut * 1e18))
+        sell(tokenWei, minEthWei)
+      } else {
+        setTxState('pending')
+        setTimeout(() => { setTxState('success'); setTimeout(() => { setTxState('idle'); setTokenInput('') }, 2200) }, 1700)
+      }
+    }
+  }, [canTrade, side, contractAddr, ethInput, tokenInput, tokensOut, minEthOut, slippage, buy, sell])
 
   useEffect(() => {
     setEthInput('')

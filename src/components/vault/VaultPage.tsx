@@ -8,6 +8,7 @@ import { useState, useMemo } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { PHASE_COLOR, Phase } from '../marketplace/ArtCard'
 import { usePortfolio } from '@/hooks/usePortfolio'
+import { useEthBalance } from '@/web3/hooks/useContract'
 import type { PortfolioHolding } from '@/types/api'
 
 // ── Types ─────────────────────────────────────────────────────────
@@ -53,7 +54,9 @@ function adaptHolding(h: PortfolioHolding, index: number): Holding {
                    'Accumulation'
   return {
     id:       index + 1,
-    ticker:   `$TKN${index + 1}`,
+    ticker:   h.artwork_title
+                ? '$' + h.artwork_title.split(' ').map(w => w[0]).join('').toUpperCase().slice(0,6)
+                : `$TKN${index + 1}`,
     title:    h.artwork_title,
     phase,
     qty:      parseFloat(h.share_balance),
@@ -321,7 +324,8 @@ const TABLE_V = {
 // ─────────────────────────────────────────────────────────────────
 export function VaultPage() {
   // ── Backend portfolio data ────────────────────────────────────────
-  const portfolio = usePortfolio()
+  const portfolio  = usePortfolio()
+  const { formatted: walletEthBalance } = useEthBalance()
   const _apiHoldings = useMemo(
     () => portfolio.holdings.map(adaptHolding),
     [portfolio.holdings],
@@ -344,7 +348,7 @@ export function VaultPage() {
     { label: 'PORTFOLIO VALUE', value: fmtETH(totalValue) + ' ETH', sub: fmtUSD(totalValue),         up: true          },
     { label: 'UNREALIZED P&L',  value: (unrealPnL >= 0 ? '+' : '') + fmtETH(unrealPnL) + ' ETH',    sub: (unrealPct >= 0 ? '+' : '') + unrealPct.toFixed(1) + '%', up: unrealPnL >= 0 },
     { label: 'REALIZED P&L',    value: '+' + fmtETH(REALIZED_PNL)  + ' ETH',                         sub: '+' + fmtUSD(REALIZED_PNL), up: true              },
-    { label: 'ETH BALANCE',     value: ETH_BALANCE.toFixed(2) + ' ETH',                               sub: fmtUSD(ETH_BALANCE),        up: true              },
+    { label: 'ETH BALANCE',     value: walletEthBalance.toFixed(4) + ' ETH',                          sub: fmtUSD(walletEthBalance),   up: true              },
   ]
 
   function handleSort(k: SortKey) {

@@ -7,6 +7,8 @@
 import { useState, useCallback, useMemo, useRef } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { api } from '@/lib/api'
+import { useEthBalance } from '@/web3/hooks/useContract'
+import { useAccount } from 'wagmi'
 
 // ── Types ─────────────────────────────────────────────────────────
 type StepStatus = 'pending' | 'active' | 'done' | 'error'
@@ -620,12 +622,16 @@ const INITIAL_STEPS: Step[] = [
   { id:'category',  label:'Choose Category',           status:'pending' },
   { id:'curve',     label:'Configure Bonding Curve',   status:'pending' },
   { id:'moderation',label:'AI Moderation Check',       status:'pending' },
-  { id:'wallet',    label:'Connect Wallet',            status:'done', note:'0x4f2…a91 connected' },
-  { id:'gas',       label:'Sufficient Gas Balance',    status:'done', note:'4.20 ETH available' },
+  { id:'wallet',    label:'Connect Wallet',            status:'pending' },
+  { id:'gas',       label:'Sufficient Gas Balance',    status:'pending' },
   { id:'deploy',    label:'Deploy to Base',            status:'pending' },
 ]
 
 export function StudioPage() {
+  const { address, isConnected }        = useAccount()
+  const { formatted: ethBal }           = useEthBalance()
+  const shortAddr = address ? `${address.slice(0,5)}…${address.slice(-4)}` : null
+
   const [form, setForm] = useState<FormData>({
     title: '', ticker: '$TOKEN', description: '',
     category: 'Digital', supply: 100_000,
@@ -676,6 +682,10 @@ export function StudioPage() {
       if (s.id === 'moderation')
         return { ...s,
           status: modStatus==='approved'?'done':modStatus==='checking'?'active':modStatus==='rejected'?'error':'pending' }
+      if (s.id === 'wallet')
+        return { ...s, status: isConnected ? 'done' : 'error', note: isConnected && shortAddr ? `${shortAddr} connected` : 'Not connected' }
+      if (s.id === 'gas')
+        return { ...s, status: isConnected && ethBal >= 0.005 ? 'done' : 'error', note: isConnected ? `${ethBal.toFixed(4)} ETH available` : '—' }
       if (s.id === 'deploy')
         return { ...s, status: modStatus==='approved'?'active':'pending' }
       return s
@@ -740,8 +750,10 @@ export function StudioPage() {
           </motion.span>
         )}
         <div className="ml-auto flex items-center gap-3">
-          <span className="font-mono text-[7px]" style={{ color:'rgba(255,255,255,0.16)' }}>Connected: 0x4f2…a91</span>
-          <span className="size-1.5 rounded-full" style={{ background:'#22c55e' }}/>
+          <span className="font-mono text-[7px]" style={{ color:'rgba(255,255,255,0.16)' }}>
+            {isConnected && shortAddr ? `Connected: ${shortAddr}` : 'Not connected'}
+          </span>
+          <span className="size-1.5 rounded-full" style={{ background: isConnected ? '#22c55e' : '#ef4444' }}/>
         </div>
       </motion.div>
 
