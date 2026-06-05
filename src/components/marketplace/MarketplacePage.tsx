@@ -1544,34 +1544,26 @@ function RankTimelineFullscreen({
           </div>
         </div>
 
-        {/* Right: selected artwork chart panel */}
-        <AnimatePresence>
-          {selectedArt && (
+        {/* Right panel — single view OR comparison view */}
+        <AnimatePresence mode="wait">
+          {selectedIds.length === 1 && selectedArt && (
+            /* ── SINGLE VIEW ─────────────────────────────────────── */
             <motion.div
-              key={selectedArt.id + '-' + selectedIds.length}
-              initial={{ opacity: 0, x: 24 }}
-              animate={{ opacity: 1, x: 0 }}
+              key="single"
+              initial={{ opacity: 0, x: 24 }} animate={{ opacity: 1, x: 0 }}
               exit={{ opacity: 0, x: 24 }}
               transition={{ duration: 0.22, ease: [0.25, 0.46, 0.45, 0.94] }}
               className="flex flex-col"
               style={{ width: '45%', background: '#0A0A0A', minHeight: 0 }}
             >
-              {/* Panel header */}
-              <div
-                className="px-6 pt-5 pb-4 shrink-0"
-                style={{ borderBottom: '1px solid rgba(255,255,255,0.06)' }}
-              >
+              <div className="px-6 pt-5 pb-4 shrink-0"
+                style={{ borderBottom: '1px solid rgba(255,255,255,0.06)' }}>
                 <div className="flex items-center gap-2 mb-2">
                   <span className="font-mono text-[9px] tracking-[0.18em] uppercase px-2 py-0.5"
-                    style={{
-                      background: `${selectedArt.phaseColor}15`,
-                      border: `1px solid ${selectedArt.phaseColor}35`,
-                      color: selectedArt.phaseColor,
-                    }}>
+                    style={{ background: `${selectedArt.phaseColor}15`, border: `1px solid ${selectedArt.phaseColor}35`, color: selectedArt.phaseColor }}>
                     {selectedArt.phase}
                   </span>
-                  <span className="font-mono text-[9px] tracking-wide"
-                    style={{ color: 'rgba(255,255,255,0.28)' }}>
+                  <span className="font-mono text-[9px] tracking-wide" style={{ color: 'rgba(255,255,255,0.28)' }}>
                     {selectedArt.ticker}
                   </span>
                 </div>
@@ -1582,94 +1574,185 @@ function RankTimelineFullscreen({
                 <p className="text-[9.5px] tracking-[0.2em] uppercase" style={{ color: 'rgba(255,255,255,0.3)' }}>
                   {selectedArt.artist}
                 </p>
-                {selectedIds.length > 1 && (
-                  <div className="flex flex-wrap gap-1.5 mt-2.5">
-                    {artworks.filter(a => selectedIds.includes(a.id)).map(a => (
-                      <span key={a.id}
-                        className="flex items-center gap-1 font-mono text-[8px] px-1.5 py-0.5 cursor-pointer"
-                        style={{
-                          background: `${a.phaseColor}14`,
-                          border: `1px solid ${a.phaseColor}40`,
-                          color: a.phaseColor,
-                          opacity: a.id === selectedArt.id ? 1 : 0.65,
-                        }}
-                        onClick={() => setSelectedIds(prev => prev.filter(id => id !== a.id))}
-                        title={`Remove ${a.title}`}
-                      >
-                        {a.ticker}
-                        <span style={{ opacity: 0.5 }}>×</span>
-                      </span>
-                    ))}
-                  </div>
-                )}
               </div>
-
-              {/* Live price stats */}
               <div className="flex items-center gap-6 px-6 py-3 shrink-0"
                 style={{ borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
                 {(() => {
-                  const lp    = livePrices[selectedArt.id] ?? selectedArt.marketCap
+                  const lp = livePrices[selectedArt.id] ?? selectedArt.marketCap
                   const delta = ((lp - selectedArt.marketCap) / selectedArt.marketCap) * 100
-                  const up    = delta >= 0
-                  return (
-                    <>
-                      <div>
-                        <p className="font-mono text-[7.5px] uppercase tracking-widest mb-0.5"
-                          style={{ color: 'rgba(255,255,255,0.28)' }}>Live Price</p>
-                        <p className="font-mono text-[1.4rem] leading-none" style={{ color: '#FDFBF7' }}>
-                          {fmtETH(lp)} <span className="text-[0.85rem] opacity-50">ETH</span>
-                        </p>
-                      </div>
-                      <div>
-                        <p className="font-mono text-[7.5px] uppercase tracking-widest mb-0.5"
-                          style={{ color: 'rgba(255,255,255,0.28)' }}>vs Seed</p>
-                        <p className="font-mono text-[1.1rem] leading-none"
-                          style={{ color: up ? '#4ade80' : '#f87171' }}>
-                          {fmtPct(delta)}
-                        </p>
-                      </div>
-                      <div>
-                        <p className="font-mono text-[7.5px] uppercase tracking-widest mb-0.5"
-                          style={{ color: 'rgba(255,255,255,0.28)' }}>Holders</p>
-                        <p className="font-mono text-[1.1rem] leading-none"
-                          style={{ color: 'rgba(255,255,255,0.7)' }}>
-                          {selectedArt.holders}
-                        </p>
-                      </div>
-                    </>
-                  )
+                  const up = delta >= 0
+                  return (<>
+                    <div>
+                      <p className="font-mono text-[7.5px] uppercase tracking-widest mb-0.5" style={{ color: 'rgba(255,255,255,0.28)' }}>Live Price</p>
+                      <p className="font-mono text-[1.4rem] leading-none" style={{ color: '#FDFBF7' }}>
+                        {fmtETH(lp)} <span className="text-[0.85rem] opacity-50">ETH</span>
+                      </p>
+                    </div>
+                    <div>
+                      <p className="font-mono text-[7.5px] uppercase tracking-widest mb-0.5" style={{ color: 'rgba(255,255,255,0.28)' }}>vs Seed</p>
+                      <p className="font-mono text-[1.1rem] leading-none" style={{ color: up ? '#4ade80' : '#f87171' }}>{fmtPct(delta)}</p>
+                    </div>
+                    <div>
+                      <p className="font-mono text-[7.5px] uppercase tracking-widest mb-0.5" style={{ color: 'rgba(255,255,255,0.28)' }}>Holders</p>
+                      <p className="font-mono text-[1.1rem] leading-none" style={{ color: 'rgba(255,255,255,0.7)' }}>{selectedArt.holders}</p>
+                    </div>
+                  </>)
                 })()}
               </div>
-
-              {/* Timeframe tabs */}
               <div className="flex items-center gap-1.5 px-6 pt-4 pb-2 shrink-0">
                 {(['1H', '6H', '1D', '7D'] as TimeRange[]).map(r => (
                   <button key={r} type="button" onClick={() => setChartRange(r)}
                     className="font-mono text-[8px] px-2.5 py-1 transition-colors duration-150"
-                    style={{
-                      color:      chartRange === r ? '#D4AF37' : 'rgba(255,255,255,0.3)',
-                      background: chartRange === r ? 'rgba(212,175,55,0.1)' : 'transparent',
-                      border:     `1px solid ${chartRange === r ? 'rgba(212,175,55,0.3)' : 'rgba(255,255,255,0.07)'}`,
-                    }}>
+                    style={{ color: chartRange === r ? '#D4AF37' : 'rgba(255,255,255,0.3)', background: chartRange === r ? 'rgba(212,175,55,0.1)' : 'transparent', border: `1px solid ${chartRange === r ? 'rgba(212,175,55,0.3)' : 'rgba(255,255,255,0.07)'}` }}>
                     {r}
                   </button>
                 ))}
-                <span className="font-mono text-[7.5px] ml-auto tracking-widest uppercase"
-                  style={{ color: 'rgba(255,255,255,0.2)' }}>
-                  Bonding Curve
-                </span>
+                <span className="font-mono text-[7.5px] ml-auto tracking-widest uppercase" style={{ color: 'rgba(255,255,255,0.2)' }}>Bonding Curve</span>
               </div>
-
-              {/* Candlestick chart — fills remaining space */}
               <div className="flex-1 min-h-0 px-4 pb-4">
                 <BondingCurveChart art={selectedArt} range={chartRange} height={220}/>
               </div>
-
-              {/* Description */}
               <div className="px-6 pb-5 shrink-0">
-                <p className="text-[11.5px] leading-relaxed"
-                  style={{ color: 'rgba(255,255,255,0.38)', maxWidth: '44ch' }}>
+                <p className="text-[11.5px] leading-relaxed" style={{ color: 'rgba(255,255,255,0.38)', maxWidth: '44ch' }}>
                   {selectedArt.description}
+                </p>
+              </div>
+            </motion.div>
+          )}
+
+          {selectedIds.length > 1 && (
+            /* ── COMPARISON VIEW ─────────────────────────────────── */
+            <motion.div
+              key="compare"
+              initial={{ opacity: 0, x: 24 }} animate={{ opacity: 1, x: 0 }}
+              exit={{ opacity: 0, x: 24 }}
+              transition={{ duration: 0.22, ease: [0.25, 0.46, 0.45, 0.94] }}
+              className="flex flex-col overflow-hidden"
+              style={{ width: '45%', background: '#0A0A0A', minHeight: 0 }}
+            >
+              {/* Header */}
+              <div className="px-6 pt-5 pb-4 shrink-0"
+                style={{ borderBottom: '1px solid rgba(255,255,255,0.06)' }}>
+                <p className="font-mono text-[8px] tracking-[0.22em] uppercase mb-1.5"
+                  style={{ color: 'rgba(255,255,255,0.28)' }}>Comparing</p>
+                <h3 className="font-light"
+                  style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: '1.35rem', color: '#FDFBF7' }}>
+                  {selectedIds.length} Artworks
+                </h3>
+                <div className="flex flex-wrap gap-1.5 mt-2.5">
+                  {artworks.filter(a => selectedIds.includes(a.id)).map(a => (
+                    <button key={a.id} type="button"
+                      onClick={() => setSelectedIds(prev => prev.filter(id => id !== a.id))}
+                      className="flex items-center gap-1 font-mono text-[8px] px-1.5 py-0.5 transition-opacity hover:opacity-70"
+                      style={{ background: `${a.phaseColor}14`, border: `1px solid ${a.phaseColor}50`, color: a.phaseColor }}>
+                      {a.ticker} <span className="opacity-50 ml-0.5">×</span>
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {/* Comparison table */}
+              <div className="flex-1 overflow-y-auto"
+                style={{ scrollbarWidth: 'thin', scrollbarColor: 'rgba(255,255,255,0.06) transparent' }}>
+                {/* Table header */}
+                <div className="grid px-5 py-2 font-mono text-[7.5px] tracking-[0.16em] uppercase sticky top-0"
+                  style={{ gridTemplateColumns: '1fr 70px 70px 44px', background: '#0A0A0A', borderBottom: '1px solid rgba(255,255,255,0.05)', color: 'rgba(255,255,255,0.22)' }}>
+                  <span>Artwork</span>
+                  <span className="text-right">Price</span>
+                  <span className="text-right">vs Seed</span>
+                  <span className="text-right">Rank</span>
+                </div>
+
+                {/* Rows — sorted by live price desc */}
+                {artworks
+                  .filter(a => selectedIds.includes(a.id))
+                  .sort((a, b) => (livePrices[b.id] ?? b.marketCap) - (livePrices[a.id] ?? a.marketCap))
+                  .map((art, idx) => {
+                    const lp    = livePrices[art.id] ?? art.marketCap
+                    const delta = ((lp - art.marketCap) / art.marketCap) * 100
+                    const up    = delta >= 0
+                    const spark = art.sparkline ?? []
+                    // mini sparkline path
+                    const sparkPath = (() => {
+                      if (spark.length < 2) return ''
+                      const min = Math.min(...spark), max = Math.max(...spark)
+                      const range = max - min || 1
+                      const W = 48, H = 20
+                      return spark.map((v, i) => {
+                        const x = (i / (spark.length - 1)) * W
+                        const y = H - ((v - min) / range) * H
+                        return `${i === 0 ? 'M' : 'L'}${x.toFixed(1)},${y.toFixed(1)}`
+                      }).join(' ')
+                    })()
+
+                    return (
+                      <div key={art.id}
+                        className="grid items-center px-5 py-3.5 transition-colors duration-100 cursor-pointer"
+                        style={{
+                          gridTemplateColumns: '1fr 70px 70px 44px',
+                          borderBottom: '1px solid rgba(255,255,255,0.04)',
+                          background: idx === 0 ? 'rgba(212,175,55,0.03)' : 'transparent',
+                        }}
+                        onClick={() => setSelectedIds([art.id])}
+                      >
+                        {/* Artwork info */}
+                        <div className="flex items-center gap-2.5 min-w-0">
+                          <div className="w-8 h-8 shrink-0 overflow-hidden rounded-sm"
+                            style={{ border: `1px solid ${art.phaseColor}40` }}>
+                            {/* eslint-disable-next-line @next/next/no-img-element */}
+                            <img src={art.image} alt="" className="w-full h-full object-cover"/>
+                          </div>
+                          <div className="min-w-0">
+                            <p className="font-light text-[11px] truncate leading-tight"
+                              style={{ fontFamily: "'Cormorant Garamond', serif", color: '#FDFBF7' }}>
+                              {art.title}
+                            </p>
+                            <div className="flex items-center gap-1.5 mt-0.5">
+                              <span className="size-1.5 rounded-full shrink-0" style={{ background: art.phaseColor }}/>
+                              <span className="font-mono text-[7.5px]" style={{ color: art.phaseColor }}>{art.ticker}</span>
+                            </div>
+                          </div>
+                        </div>
+
+                        {/* Price + mini spark */}
+                        <div className="text-right">
+                          <p className="font-mono text-[11px] leading-none" style={{ color: '#FDFBF7' }}>{fmtETH(lp)}</p>
+                          {sparkPath && (
+                            <svg viewBox="0 0 48 20" className="w-12 h-5 ml-auto mt-1" style={{ overflow: 'visible' }}>
+                              <path d={sparkPath} fill="none" stroke={up ? '#4ade80' : '#f87171'}
+                                strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" opacity="0.7"/>
+                            </svg>
+                          )}
+                        </div>
+
+                        {/* % change */}
+                        <div className="text-right">
+                          <p className="font-mono text-[11px] leading-none font-medium"
+                            style={{ color: up ? '#4ade80' : '#f87171' }}>
+                            {fmtPct(delta)}
+                          </p>
+                          <p className="font-mono text-[8px] mt-0.5" style={{ color: 'rgba(255,255,255,0.22)' }}>
+                            {art.holders} holders
+                          </p>
+                        </div>
+
+                        {/* Current rank */}
+                        <div className="text-right">
+                          <p className="font-mono text-[13px] leading-none"
+                            style={{ color: idx === 0 ? '#D4AF37' : 'rgba(255,255,255,0.35)' }}>
+                            #{ranked.findIndex(r => r.id === art.id) + 1}
+                          </p>
+                        </div>
+                      </div>
+                    )
+                  })}
+              </div>
+
+              {/* Footer hint */}
+              <div className="px-5 py-3 shrink-0" style={{ borderTop: '1px solid rgba(255,255,255,0.05)' }}>
+                <p className="font-mono text-[7.5px] tracking-[0.14em] uppercase text-center"
+                  style={{ color: 'rgba(255,255,255,0.14)' }}>
+                  Click a row to view single chart · Click ticker tag to remove
                 </p>
               </div>
             </motion.div>
