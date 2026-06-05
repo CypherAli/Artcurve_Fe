@@ -40,6 +40,15 @@ function timeAgo(d: Date) {
 }
 type Trade = ReturnType<typeof normalize>
 const MAX_TRADES = 6
+
+const MOCK_TRADES: Trade[] = [
+  { id: 'mt1', type: 'BUY',  wallet: '0xA1b2…9B0', artwork: 'Self-Portrait with Death', img: '/images/artworks/art4.jpg', amount: '1000 $SPDTH', time: 'Just now' },
+  { id: 'mt2', type: 'BUY',  wallet: '0xC9d0…c7D8', artwork: 'Sakura Overload',          img: '/images/artworks/art2.jpg', amount: '2000 $SAKOL', time: '12s ago'  },
+  { id: 'mt3', type: 'SELL', wallet: '0xD0e1…d8E9', artwork: 'Genesis Protocol #7',      img: '/images/artworks/art1.jpg', amount: '500 $GENP7',  time: '28s ago'  },
+  { id: 'mt4', type: 'BUY',  wallet: '0xE1f2…e9F0', artwork: 'Neon Seoul 2077',          img: '/images/artworks/art3.jpg', amount: '1500 $NSL77', time: '45s ago'  },
+  { id: 'mt5', type: 'BUY',  wallet: '0xF2a3…f0A1', artwork: 'The Last March',           img: '/images/artworks/art5.jpg', amount: '800 $TMRCH',  time: '1m ago'   },
+  { id: 'mt6', type: 'SELL', wallet: '0xA1b2…9B0', artwork: 'Entropy Garden',            img: '/images/artworks/art1.jpg', amount: '300 $ENTGD',  time: '2m ago'   },
+]
 const ROW_H      = 76   // px per row — used for fixed container height
 
 // ── TradeRow ───────────────────────────────────────────────────────
@@ -152,10 +161,10 @@ export function LiveActivitySection() {
 
   // ── Client-only state ─────────────────────────────────────────
   const [mounted,    setMounted]    = useState(false)
-  const [trades,     setTrades]     = useState<Trade[]>([])
+  const [trades,     setTrades]     = useState<Trade[]>(MOCK_TRADES)
   const [newId,      setNewId]      = useState<string | null>(null)
-  const [totalToday, setTotalToday] = useState(0)
-  const [volume,     setVolume]     = useState('0.00')
+  const [totalToday, setTotalToday] = useState(342)
+  const [volume,     setVolume]     = useState('2.84')
 
   useEffect(() => {
     tradeService.recent(MAX_TRADES).then(data => {
@@ -166,7 +175,8 @@ export function LiveActivitySection() {
         setVolume(vol.toFixed(2))
         setTotalToday(data.length)
       }
-    }).catch(() => {})
+      // else: keep MOCK_TRADES
+    }).catch(() => { /* keep MOCK_TRADES */ })
     setMounted(true)
   }, [])
 

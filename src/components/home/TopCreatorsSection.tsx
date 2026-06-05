@@ -20,6 +20,13 @@ import { gsap }                         from '@/lib/gsap'
 import { userService }                  from '@/services/user.service'
 import type { UserProfile }             from '@/types/api'
 
+const MOCK_CREATORS: UserProfile[] = [
+  { id: 'm1', wallet_address: '0xA1b2C3D4e5F6a7B8c9D0e1F2a3B4c5D6e7F8a9B0', username: 'aiko_tanaka',   bio: 'Neo-surrealism meets kawaii. Tokyo-based illustrator.',              avatar_url: 'https://api.dicebear.com/7.x/personas/svg?seed=aiko',   twitter_handle: null, is_verified: true,  role: 'artist', created_at: '' },
+  { id: 'm2', wallet_address: '0xE5f6A7B8c9D0e1F2a3B4c5D6e7F8a9B0c1D2e3F4', username: 'arnold_b',      bio: 'Dark romanticism for the blockchain era.',                           avatar_url: 'https://api.dicebear.com/7.x/personas/svg?seed=arnold', twitter_handle: null, is_verified: true,  role: 'artist', created_at: '' },
+  { id: 'm3', wallet_address: '0xA7b8C9D0e1F2a3B4c5D6e7F8a9B0c1D2e3F4a5B6', username: 'kai_storm',     bio: 'Cyberpunk visions from Seoul. Neon never sleeps.',                   avatar_url: 'https://api.dicebear.com/7.x/personas/svg?seed=kai',    twitter_handle: null, is_verified: true,  role: 'artist', created_at: '' },
+  { id: 'm4', wallet_address: '0xB2c3D4E5f6A7b8C9d0E1f2A3b4C5d6E7f8A9b0C1', username: 'marcus_chen',   bio: 'Generative art pioneer. Ex-Google engineer.',                        avatar_url: 'https://api.dicebear.com/7.x/personas/svg?seed=marcus', twitter_handle: null, is_verified: true,  role: 'artist', created_at: '' },
+]
+
 // ── ArtistRow ─────────────────────────────────────────────────────
 function ArtistRow({ artist, rank }: { artist: UserProfile; rank: number }) {
   const rowRef  = useRef<HTMLDivElement>(null)
@@ -148,7 +155,7 @@ function ArtistRow({ artist, rank }: { artist: UserProfile; rank: number }) {
 
 // ── Main Section ──────────────────────────────────────────────────
 export function TopCreatorsSection() {
-  const [creators, setCreators] = useState<UserProfile[]>([])
+  const [creators, setCreators] = useState<UserProfile[]>(MOCK_CREATORS)
   const sectionRef  = useRef<HTMLElement>(null)
   const labelRef    = useRef<HTMLParagraphElement>(null)
   const titleRef    = useRef<HTMLHeadingElement>(null)
@@ -158,7 +165,7 @@ export function TopCreatorsSection() {
   useEffect(() => {
     userService.topCreators(4).then(data => {
       if (Array.isArray(data) && data.length) setCreators(data)
-    }).catch(() => {})
+    }).catch(() => setCreators(MOCK_CREATORS))
   }, [])
 
   useEffect(() => {
