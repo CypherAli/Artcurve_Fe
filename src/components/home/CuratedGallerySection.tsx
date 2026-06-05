@@ -187,58 +187,60 @@ export function CuratedGallerySection() {
     }
   }, [])
 
-  // ── GSAP scroll animations ─────────────────────────────────────
+  // ── GSAP header reveal (chạy 1 lần, không phụ thuộc cards) ──────
   useEffect(() => {
     const titleWords = Array.from(
       titleRef.current?.querySelectorAll<HTMLElement>('.cg-word') ?? []
     )
-
-    // ── Initial states ────────────────────────────────────────────
     gsap.set(labelRef.current,  { autoAlpha: 0, x: -20 })
     gsap.set(titleWords,        { yPercent: 115, opacity: 0, scale: 1.04 })
     gsap.set(lineRef.current,   { scaleX: 0, transformOrigin: 'left center' })
     gsap.set(viewAllRef.current,{ autoAlpha: 0, x: 16 })
-    gsap.set(cardsRef.current.filter(Boolean), {
-      y: 28, autoAlpha: 0,
-    })
 
     const ctx = gsap.context(() => {
-
-      // ── Header: cinematic multi-layer reveal ──────────────────
       gsap.timeline({
         scrollTrigger: { trigger: sectionRef.current, start: 'top 78%', once: true, invalidateOnRefresh: true },
       })
-      // 1. Label slides in from left
-      .to(labelRef.current,
-        { autoAlpha: 1, x: 0, duration: 0.55, ease: 'power3.out' }, 0)
-      // 2. Words: scale + blur + rise — stagger 0.14s
-      .to(titleWords,
-        { yPercent: 0, opacity: 1, scale: 1,
-          duration: 1.1, ease: 'expo.out', stagger: 0.14 }, 0.15)
-      // 3. Gold divider draws left→right
-      .to(lineRef.current,
-        { scaleX: 1, duration: 0.8, ease: 'power3.inOut' }, 0.55)
-      // 4. "View All" slides in from right
-      .to(viewAllRef.current,
-        { autoAlpha: 1, x: 0, duration: 0.5, ease: 'power3.out' }, 0.7)
-
-      // ── Cards: fast fade+rise, pure transform — no clip-path repaint
-      gsap.to(cardsRef.current.filter(Boolean), {
-        y: 0,
-        autoAlpha: 1,
-        duration: 0.55,
-        ease: 'power3.out',
-        stagger: 0.055,
-        scrollTrigger: {
-          trigger: trackRef.current,
-          start: 'top 85%',
-          once: true,
-        },
-      })
+      .to(labelRef.current,  { autoAlpha: 1, x: 0, duration: 0.55, ease: 'power3.out' }, 0)
+      .to(titleWords,        { yPercent: 0, opacity: 1, scale: 1, duration: 1.1, ease: 'expo.out', stagger: 0.14 }, 0.15)
+      .to(lineRef.current,   { scaleX: 1, duration: 0.8, ease: 'power3.inOut' }, 0.55)
+      .to(viewAllRef.current,{ autoAlpha: 1, x: 0, duration: 0.5, ease: 'power3.out' }, 0.7)
     })
-
     return () => ctx.revert()
   }, [])
+
+  // ── GSAP cards — re-run mỗi khi artworks thay đổi ─────────────
+  useEffect(() => {
+    const cards = cardsRef.current.filter(Boolean)
+    if (!cards.length) return
+
+    // Set hidden trước, rồi animate in khi scroll vào view
+    gsap.set(cards, { y: 28, autoAlpha: 0 })
+
+    const ctx = gsap.context(() => {
+      gsap.to(cards, {
+        y: 0, autoAlpha: 1,
+        duration: 0.55, ease: 'power3.out', stagger: 0.055,
+        scrollTrigger: {
+          trigger: trackRef.current,
+          start:   'top 90%',
+          once:    true,
+          invalidateOnRefresh: true,
+          onEnter: () => gsap.to(cards, {
+            y: 0, autoAlpha: 1,
+            duration: 0.55, ease: 'power3.out', stagger: 0.055,
+          }),
+        },
+      })
+      // Nếu section đã trong viewport khi mount → fire ngay
+      const rect = trackRef.current?.getBoundingClientRect()
+      if (rect && rect.top < window.innerHeight * 0.9) {
+        gsap.to(cards, { y: 0, autoAlpha: 1, duration: 0.55, ease: 'power3.out', stagger: 0.055 })
+      }
+    })
+    return () => ctx.revert()
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [artworks])
 
   return (
     <section
@@ -317,7 +319,6 @@ export function CuratedGallerySection() {
             key={art.id}
             ref={el => { cardsRef.current[i] = el }}
             className="group relative flex-none w-[260px] md:w-[280px] bg-white border border-[#E4DDD3] hover:border-[#C9A96E] transition-[border-color] duration-300 cursor-pointer"
-            style={{ opacity: 0 }}
             onClick={() => router.push(`/trade?id=${art.id}`)}
           >
             {/* Artwork image */}

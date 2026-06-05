@@ -168,53 +168,57 @@ export function TopCreatorsSection() {
     }).catch(() => setCreators(MOCK_CREATORS))
   }, [])
 
+  // ── GSAP header (1 lần) ───────────────────────────────────────
   useEffect(() => {
     const titleWords = Array.from(
       titleRef.current?.querySelectorAll<HTMLElement>('.tc-word') ?? []
     )
-
-    // ── Initial states ────────────────────────────────────────────
     gsap.set(labelRef.current, { autoAlpha: 0, y: 14 })
     gsap.set(titleWords,       { yPercent: 110, opacity: 0 })
-    gsap.set(linesRef.current.filter(Boolean), {
-      scaleX: 0, transformOrigin: 'left center',
-    })
-    gsap.set(rowsRef.current.filter(Boolean), {
-      clipPath: 'inset(0 100% 0 0)',
-      autoAlpha: 0,
-    })
 
     const ctx = gsap.context(() => {
-
-      // ── Header: eyebrow + word-mask title ─────────────────────
       gsap.timeline({
         scrollTrigger: { trigger: sectionRef.current, start: 'top 78%', once: true, invalidateOnRefresh: true },
       })
-      .to(labelRef.current,
-        { autoAlpha: 1, y: 0, duration: 0.55, ease: 'power3.out' }, 0)
-      .to(titleWords,
-        { yPercent: 0, opacity: 1,
-          duration: 1.05, ease: 'expo.out', stagger: 0.14 }, 0.1)
-
-      // ── Rows: divider line scaleX then clip-path reveal ────────
-      rowsRef.current.forEach((row, i) => {
-        if (!row) return
-        const line = linesRef.current[i]
-
-        gsap.timeline({
-          scrollTrigger: { trigger: row, start: 'top 90%', once: true },
-          delay: i * 0.07,
-        })
-        .to(line,
-          { scaleX: 1, duration: 0.55, ease: 'power3.inOut' }, 0)
-        .to(row,
-          { clipPath: 'inset(0 0% 0 0)', autoAlpha: 1,
-            duration: 0.85, ease: 'expo.out' }, 0.12)
-      })
+      .to(labelRef.current, { autoAlpha: 1, y: 0, duration: 0.55, ease: 'power3.out' }, 0)
+      .to(titleWords,        { yPercent: 0, opacity: 1, duration: 1.05, ease: 'expo.out', stagger: 0.14 }, 0.1)
     })
-
     return () => ctx.revert()
   }, [])
+
+  // ── GSAP rows — re-run khi creators thay đổi ─────────────────
+  useEffect(() => {
+    const rows  = rowsRef.current.filter(Boolean)
+    const lines = linesRef.current.filter(Boolean)
+    if (!rows.length) return
+
+    // Nếu đã trong viewport → show ngay không cần scroll
+    const sectionRect = sectionRef.current?.getBoundingClientRect()
+    const alreadyVisible = sectionRect && sectionRect.top < window.innerHeight
+
+    if (alreadyVisible) {
+      gsap.set(lines, { scaleX: 1, transformOrigin: 'left center' })
+      gsap.to(rows, { clipPath: 'inset(0 0% 0 0)', autoAlpha: 1, duration: 0.6, stagger: 0.1, ease: 'expo.out' })
+      return
+    }
+
+    gsap.set(lines, { scaleX: 0, transformOrigin: 'left center' })
+    gsap.set(rows,  { clipPath: 'inset(0 100% 0 0)', autoAlpha: 0 })
+
+    const ctx = gsap.context(() => {
+      rows.forEach((row, i) => {
+        const line = lines[i]
+        gsap.timeline({
+          scrollTrigger: { trigger: row, start: 'top 90%', once: true, invalidateOnRefresh: true },
+          delay: i * 0.07,
+        })
+        .to(line, { scaleX: 1, duration: 0.55, ease: 'power3.inOut' }, 0)
+        .to(row,  { clipPath: 'inset(0 0% 0 0)', autoAlpha: 1, duration: 0.85, ease: 'expo.out' }, 0.12)
+      })
+    })
+    return () => ctx.revert()
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [creators])
 
   return (
     <section
@@ -268,7 +272,7 @@ export function TopCreatorsSection() {
           </h2>
 
           <a
-            href="#marketplace"
+            href="/marketplace"
             className="text-[11px] tracking-[0.2em] uppercase text-[#C9A96E]
                        border-b border-[#C9A96E]/40 pb-0.5
                        hover:border-[#C9A96E] transition-colors duration-300 shrink-0"
