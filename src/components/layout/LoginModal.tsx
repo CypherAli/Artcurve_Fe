@@ -36,15 +36,6 @@ const SOCIALS = [
     ),
   },
   {
-    id: 'apple', label: 'Continue with Apple',
-    bg: '#000000', color: '#ffffff',
-    icon: (
-      <svg viewBox="0 0 24 24" className="w-[17px] h-[17px] shrink-0" fill="currentColor">
-        <path d="M17.05 20.28c-.98.95-2.05.8-3.08.35-1.09-.46-2.09-.48-3.24 0-1.44.62-2.2.44-3.06-.35C2.79 15.25 3.51 7.7 9.05 7.43c1.35.07 2.29.74 3.08.8 1.18-.24 2.31-.93 3.57-.84 1.51.12 2.65.72 3.4 1.8-3.12 1.87-2.38 5.98.48 7.13-.57 1.56-1.32 3.1-2.54 3.96zM12.03 7.25c-.15-2.23 1.66-4.07 3.74-4.25.29 2.58-2.34 4.5-3.74 4.25z"/>
-      </svg>
-    ),
-  },
-  {
     id: 'github', label: 'Continue with GitHub',
     bg: '#24292e', color: '#ffffff',
     icon: (
@@ -182,7 +173,6 @@ export function LoginModal({ onClose }: Props) {
   function onGithubClick()     { lastGithub ? setShowGhPicker(true) : goGithub() }
   function goTwitter()         { window.location.href = `${API_BASE}/api/v1/auth/twitter` }
   function onTwitterClick()    { lastTwitter ? setShowXPicker(true) : goTwitter() }
-  function goApple()           { window.location.href = `${API_BASE}/api/v1/auth/apple` }
   function goTelegram()        { window.location.href = `${API_BASE}/api/v1/auth/telegram` }
 
   function showToast(msg: string) {
@@ -324,7 +314,6 @@ export function LoginModal({ onClose }: Props) {
                   onClick={() => {
                     if (id === 'github')   onGithubClick()
                     else if (id === 'x')        onTwitterClick()
-                    else if (id === 'apple')    goApple()
                     else if (id === 'telegram') goTelegram()
                     else showToast('🚧 Coming soon')
                   }}
