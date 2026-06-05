@@ -6,7 +6,8 @@ import { useAccount }                  from 'wagmi'
 import { gsap }                        from '@/lib/gsap'
 import { LoginModal }                  from './LoginModal'
 import { useAuthStore }                from '@/store/authStore'
-import { authStore as legacyAuthStore } from '@/lib/auth-store'
+import { authStore }                   from '@/lib/auth-store'
+import { userService }                 from '@/services/user.service'
 
 // ── Notification data ────────────────────────────────────────────
 const NOTIF_DATA = [
@@ -527,18 +528,23 @@ export function Header({ dark = false }: HeaderProps) {
   const { isAuthenticated, user, clearAuth, setAuth } = useAuthStore()
   const loggedIn = isConnected || isAuthenticated
 
-  // Fetch real profile (including avatar_url) once after OAuth login
+  // Chỉ chạy khi user.id vẫn là wallet_address (placeholder sau OAuth login)
   useEffect(() => {
-    if (!isAuthenticated || !user || user.avatar_url) return
+    if (!isAuthenticated || !user || user.id !== user.wallet_address) return
     const jwt = useAuthStore.getState().jwt
     if (!jwt) return
-    const api = process.env.NEXT_PUBLIC_API_URL ?? 'https://artcurve-be.onrender.com/api/v1'
-    fetch(`${api}/users/me`, { headers: { Authorization: `Bearer ${jwt}` } })
-      .then(r => r.ok ? r.json() : null)
-      .then((data: any) => {
-        if (data?.data?.avatar_url) {
-          setAuth(jwt, { ...user, avatar_url: data.data.avatar_url })
+    userService.me()
+      .then(profile => {
+        const fullUser = {
+          ...user,
+          id:          profile.id,
+          avatar_url:  profile.avatar_url ?? user.avatar_url,
+          username:    profile.username   ?? user.username,
+          role:        profile.role,
+          is_verified: profile.is_verified,
         }
+        setAuth(jwt, fullUser)
+        authStore.setUser(fullUser)
       })
       .catch(() => {})
   }, [isAuthenticated])
@@ -678,7 +684,7 @@ export function Header({ dark = false }: HeaderProps) {
               <UserMenuDropdown
                 user={user ?? {}}
                 onClose={() => setShowUserMenu(false)}
-                onLogout={() => { clearAuth(); legacyAuthStore.clear(); setShowUserMenu(false) }}
+                onLogout={() => { clearAuth(); authStore.clear(); setShowUserMenu(false) }}
               />
             )}
           </div>

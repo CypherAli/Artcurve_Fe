@@ -75,7 +75,7 @@ export function useEthBalance() {
   const result = useBalance({ address, query: { enabled: !!address, refetchInterval: 10000 } })
   return {
     ...result,
-    formatted: result.data ? parseFloat(result.data.formatted) : 0,
+    formatted: result.data ? parseFloat(formatEther(result.data.value)) : 0,
   }
 }
 
