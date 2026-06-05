@@ -1119,20 +1119,21 @@ function useRankTraces(
 // ── SVG-only lines (no circles — avoids preserveAspectRatio distortion) ──
 //  svgH must equal the container's actual pixel height so viewBox matches.
 function RankTimelineSVG({
-  traces, ticks, N, highlightId, svgH,
+  traces, ticks, N, highlightIds, svgH,
 }: {
-  traces:       { art: MarketArtwork; ranks: number[] }[]
-  ticks:        number
-  N:            number
-  highlightId?: number | null
-  svgH:         number
+  traces:        { art: MarketArtwork; ranks: number[] }[]
+  ticks:         number
+  N:             number
+  highlightIds?: number[]
+  svgH:          number
 }) {
   const W   = 1000
   const H   = svgH
   const PAD = { t: 14, r: 8, b: 14, l: 38 }
   const pw  = W - PAD.l - PAD.r
   const ph  = H - PAD.t - PAD.b
-  const dim = highlightId != null
+  const hasHighlight = !!highlightIds?.length
+  const isHighlighted = (id: number) => !!(highlightIds?.includes(id))
 
   const toXY = (t: number, rank: number) => ({
     x: PAD.l + (ticks < 2 ? pw : (t / (ticks - 1)) * pw),
@@ -1140,12 +1141,9 @@ function RankTimelineSVG({
   })
 
   return (
-    // viewBox = "0 0 W svgH" → Y-scale = 1 when container height = svgH
-    // circles/dots are never distorted regardless of container width
     <svg viewBox={`0 0 ${W} ${H}`} preserveAspectRatio="none"
       className="w-full h-full" style={{ overflow: 'visible' }} aria-hidden>
 
-      {/* Rank-lane guide lines */}
       {Array.from({ length: N }, (_, i) => {
         const { y } = toXY(0, i + 1)
         const isGold = i === 0
@@ -1158,12 +1156,11 @@ function RankTimelineSVG({
         )
       })}
 
-      {/* Lines — lower-ranked first so #1 renders on top */}
       {[...traces].reverse().map(({ art, ranks }) => {
         if (ranks.length < 2) return null
-        const isHigh = art.id === highlightId
+        const isHigh = isHighlighted(art.id)
         const isTop  = ranks[ranks.length - 1] === 1
-        const faded  = dim && !isHigh
+        const faded  = hasHighlight && !isHigh
 
         const d = ranks.map((r, t) => {
           const { x, y } = toXY(t, r)
@@ -1172,20 +1169,17 @@ function RankTimelineSVG({
         const { x: ex, y: ey } = toXY(ranks.length - 1, ranks[ranks.length - 1])
 
         return (
-          <g key={art.id} opacity={faded ? 0.12 : 1}
-            style={{ transition: 'opacity 0.3s ease' }}>
-            {/* Glow halo for #1 / highlighted */}
+          <g key={art.id} opacity={faded ? 0.1 : 1}
+            style={{ transition: 'opacity 0.25s ease' }}>
             {(isTop || isHigh) && (
               <path d={d} fill="none" stroke={art.phaseColor}
-                strokeWidth={isHigh ? 10 : 7} strokeOpacity="0.1" strokeLinejoin="round"/>
+                strokeWidth={isHigh ? 10 : 7} strokeOpacity="0.12" strokeLinejoin="round"/>
             )}
-            {/* Main line */}
             <path d={d} fill="none" stroke={art.phaseColor}
-              strokeWidth={isHigh ? 3.2 : isTop ? 2.4 : 1.5}
+              strokeWidth={isHigh ? 3.5 : isTop ? 2.4 : 1.5}
               strokeOpacity={(isHigh || isTop) ? 1 : 0.6}
               strokeLinejoin="round" strokeLinecap="round"
             />
-            {/* End cap dot — small, no distortion risk */}
             <circle cx={ex} cy={ey} r="5" fill={art.phaseColor} opacity="0.18"/>
             <circle cx={ex} cy={ey} r={(isHigh || isTop) ? 3.5 : 2.5}
               fill={art.phaseColor} opacity={(isHigh || isTop) ? 1 : 0.8}/>
@@ -1200,17 +1194,17 @@ function RankTimelineSVG({
 //  Positioned absolutely on the right side of the chart container.
 //  Each artwork's thumbnail sits exactly at its current rank lane.
 function RankAvatarColumn({
-  traces, N, svgH, highlightId, avatarSize = 20,
+  traces, N, svgH, highlightIds, avatarSize = 20,
 }: {
-  traces:       { art: MarketArtwork; ranks: number[] }[]
-  N:            number
-  svgH:         number
-  highlightId?: number | null
-  avatarSize?:  number
+  traces:        { art: MarketArtwork; ranks: number[] }[]
+  N:             number
+  svgH:          number
+  highlightIds?: number[]
+  avatarSize?:   number
 }) {
   const PAD_T = 14, PAD_B = 14
   const ph    = svgH - PAD_T - PAD_B
-  const dim   = highlightId != null
+  const hasHighlight = !!highlightIds?.length
 
   return (
     <div className="absolute top-0 right-0 bottom-0 pointer-events-none"
@@ -1218,9 +1212,9 @@ function RankAvatarColumn({
       {traces.map(({ art, ranks }) => {
         const curRank = ranks[ranks.length - 1]
         const yPx     = PAD_T + ((curRank - 1) / Math.max(N - 1, 1)) * ph
-        const isHigh  = art.id === highlightId
+        const isHigh  = !!(highlightIds?.includes(art.id))
         const isTop   = curRank === 1
-        const faded   = dim && !isHigh
+        const faded   = hasHighlight && !isHigh
         const size    = (isHigh || isTop) ? avatarSize + 4 : avatarSize
 
         return (
@@ -1235,8 +1229,8 @@ function RankAvatarColumn({
               right:     4,
               transform: 'translateY(-50%)',
               border:    `${(isHigh || isTop) ? 2 : 1}px solid ${faded ? 'rgba(255,255,255,0.1)' : art.phaseColor}`,
-              opacity:   faded ? 0.12 : 1,
-              transition: 'opacity 0.3s ease, width 0.2s ease, height 0.2s ease',
+              opacity:   faded ? 0.1 : 1,
+              transition: 'opacity 0.25s ease, width 0.2s ease, height 0.2s ease',
               background: '#111',
               boxShadow:  (isHigh || isTop) ? `0 0 8px ${art.phaseColor}60` : 'none',
               zIndex:     isHigh ? 10 : isTop ? 5 : 1,
@@ -1334,12 +1328,13 @@ function RankTimelineFullscreen({
   livePrices:   Record<number, number>
   onClose:      () => void
 }) {
-  const [selectedId,  setSelectedId]  = useState<number | null>(null)
+  const [selectedIds, setSelectedIds] = useState<number[]>([])
   const [chartRange,  setChartRange]  = useState<TimeRange>('1D')
   const [svgH,        setSvgH]        = useState(400)
   const chartRef = useRef<HTMLDivElement>(null)
 
-  const selectedArt = artworks.find(a => a.id === selectedId) ?? null
+  // Artwork hiển thị ở right panel = cái được chọn gần nhất
+  const selectedArt = artworks.find(a => a.id === selectedIds[selectedIds.length - 1]) ?? null
 
   // Close on Escape
   useEffect(() => {
@@ -1398,7 +1393,7 @@ function RankTimelineFullscreen({
             <span className="size-1.5 rounded-full animate-pulse" style={{ background: '#4ade80' }}/>
             <span className="font-mono text-[8px] tracking-widest" style={{ color: '#4ade80' }}>LIVE</span>
           </span>
-          {selectedArt && (
+          {selectedIds.length === 1 && selectedArt && (
             <span className="flex items-center gap-1.5 ml-3">
               <span className="size-2 rounded-full" style={{ background: selectedArt.phaseColor }}/>
               <span className="font-mono text-[9px] tracking-wide" style={{ color: selectedArt.phaseColor }}>
@@ -1409,15 +1404,23 @@ function RankTimelineFullscreen({
               </span>
             </span>
           )}
+          {selectedIds.length > 1 && (
+            <span className="flex items-center gap-1.5 ml-3">
+              <span className="font-mono text-[9px] px-2 py-0.5"
+                style={{ color: '#D4AF37', background: 'rgba(212,175,55,0.1)', border: '1px solid rgba(212,175,55,0.25)' }}>
+                {selectedIds.length} SELECTED
+              </span>
+            </span>
+          )}
         </div>
         <div className="flex items-center gap-3">
-          {selectedArt && (
-            <button type="button" onClick={() => setSelectedId(null)}
+          {selectedIds.length > 0 && (
+            <button type="button" onClick={() => setSelectedIds([])}
               className="font-mono text-[8px] tracking-widest uppercase px-2 py-1 transition-colors"
               style={{ color: 'rgba(255,255,255,0.3)', border: '1px solid rgba(255,255,255,0.08)' }}
               onMouseEnter={e => e.currentTarget.style.color = 'rgba(255,255,255,0.6)'}
               onMouseLeave={e => e.currentTarget.style.color = 'rgba(255,255,255,0.3)'}>
-              Clear
+              Clear {selectedIds.length > 1 ? `(${selectedIds.length})` : ''}
             </button>
           )}
           <button type="button" onClick={onClose}
@@ -1461,8 +1464,8 @@ function RankTimelineFullscreen({
                 </span>
               ))}
             </div>
-            <RankTimelineSVG traces={traces} ticks={ticks} N={N} highlightId={selectedId} svgH={svgH} />
-            <RankAvatarColumn traces={traces} N={N} svgH={svgH} highlightId={selectedId} avatarSize={22} />
+            <RankTimelineSVG traces={traces} ticks={ticks} N={N} highlightIds={selectedIds} svgH={svgH} />
+            <RankAvatarColumn traces={traces} N={N} svgH={svgH} highlightIds={selectedIds} avatarSize={22} />
           </div>
 
           {/* Legend grid — scrollable */}
@@ -1481,12 +1484,19 @@ function RankTimelineFullscreen({
                 const lp     = livePrices[art.id] ?? art.marketCap
                 const delta  = ((lp - art.marketCap) / art.marketCap) * 100
                 const up     = delta >= 0
-                const active = selectedId === art.id
+                const active = selectedIds.includes(art.id)
                 return (
                   <button
                     key={art.id}
                     type="button"
-                    onClick={() => { setSelectedId(active ? null : art.id); setChartRange('1D') }}
+                    onClick={() => {
+                      setSelectedIds(prev =>
+                        prev.includes(art.id)
+                          ? prev.filter(id => id !== art.id)
+                          : [...prev, art.id]
+                      )
+                      setChartRange('1D')
+                    }}
                     className="flex items-center gap-2.5 px-2.5 py-2 text-left w-full transition-colors duration-150"
                     style={{
                       background: active
@@ -1538,7 +1548,7 @@ function RankTimelineFullscreen({
         <AnimatePresence>
           {selectedArt && (
             <motion.div
-              key={selectedArt.id}
+              key={selectedArt.id + '-' + selectedIds.length}
               initial={{ opacity: 0, x: 24 }}
               animate={{ opacity: 1, x: 0 }}
               exit={{ opacity: 0, x: 24 }}
@@ -1572,6 +1582,26 @@ function RankTimelineFullscreen({
                 <p className="text-[9.5px] tracking-[0.2em] uppercase" style={{ color: 'rgba(255,255,255,0.3)' }}>
                   {selectedArt.artist}
                 </p>
+                {selectedIds.length > 1 && (
+                  <div className="flex flex-wrap gap-1.5 mt-2.5">
+                    {artworks.filter(a => selectedIds.includes(a.id)).map(a => (
+                      <span key={a.id}
+                        className="flex items-center gap-1 font-mono text-[8px] px-1.5 py-0.5 cursor-pointer"
+                        style={{
+                          background: `${a.phaseColor}14`,
+                          border: `1px solid ${a.phaseColor}40`,
+                          color: a.phaseColor,
+                          opacity: a.id === selectedArt.id ? 1 : 0.65,
+                        }}
+                        onClick={() => setSelectedIds(prev => prev.filter(id => id !== a.id))}
+                        title={`Remove ${a.title}`}
+                      >
+                        {a.ticker}
+                        <span style={{ opacity: 0.5 }}>×</span>
+                      </span>
+                    ))}
+                  </div>
+                )}
               </div>
 
               {/* Live price stats */}
