@@ -215,6 +215,26 @@ export interface LeaderboardEntry {
   trade_count:   number
 }
 
+export interface RecentTrade {
+  id:              string
+  tx_type:         TxType
+  share_amount:    string
+  eth_amount:      string
+  price_per_share: string
+  timestamp:       string
+  user: {
+    wallet_address: string
+    username:       string | null
+    avatar_url:     string | null
+  }
+  artwork: {
+    id:                string
+    title:             string
+    ticker:            string | null
+    ipfs_metadata_uri: string | null
+  }
+}
+
 // ── Portfolio ─────────────────────────────────────────────────────
 export interface PortfolioHolding {
   artwork_id:          string

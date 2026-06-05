@@ -14,47 +14,31 @@
 import { useEffect, useRef, useState } from 'react'
 import { AnimatePresence, motion }      from 'framer-motion'
 import { gsap }                         from '@/lib/gsap'
+import { tradeService }                 from '@/services/trade.service'
+import type { RecentTrade }             from '@/types/api'
 
-
-
-// ── Mock data pools ───────────────────────────────────────────────
-const ARTWORKS: { name: string; img: string }[] = [
-  { name: 'Nocturne at the Bridge',   img: '/images/artworks/art1.jpg' },
-  { name: 'Shattered Embrace',        img: '/images/artworks/art2.jpg' },
-  { name: 'Bloom & Blade',            img: '/images/artworks/art3.jpg' },
-  { name: 'Self-Portrait with Death', img: '/images/artworks/art4.jpg' },
-  { name: 'The Last March',           img: '/images/artworks/art5.jpg' },
-  { name: 'Golden Ratio',             img: '/images/artworks/art1.jpg' },
-  { name: 'Vermillion Dusk',          img: '/images/artworks/art2.jpg' },
-  { name: 'The Quiet Storm',          img: '/images/artworks/art3.jpg' },
-  { name: 'Ode to Entropy',           img: '/images/artworks/art4.jpg' },
-  { name: 'Meridian Blue',            img: '/images/artworks/art5.jpg' },
-]
-const WALLETS = [
-  '0x3F…9aB1', '0xA8…4Ec2', '0x7F…3A2b', '0xD1…77fF',
-  '0x5C…0031', '0xBE…A944', '0x92…C3d8', '0x1A…5512', '0x6E…8bC0',
-]
-const AMOUNTS = [
-  '1.0 TOKEN', '2.5 TOKENS', '5.0 TOKENS', '0.5 TOKEN',
-  '10 TOKENS', '3.3 TOKENS', '7.0 TOKENS', '1.8 TOKENS', '4.2 TOKENS',
-]
-
-function randomFrom<T>(arr: T[]): T {
-  return arr[Math.floor(Math.random() * arr.length)]
-}
-function generateTrade(timeLabel = 'Just now') {
-  const art = randomFrom(ARTWORKS)
+// Normalize RecentTrade → display format
+function normalize(r: RecentTrade, idx: number) {
+  const w = r.user.wallet_address
   return {
-    id:      `${Date.now()}-${Math.random().toString(36).slice(2, 7)}`,
-    type:    (Math.random() > 0.42 ? 'BUY' : 'SELL') as 'BUY' | 'SELL',
-    wallet:  randomFrom(WALLETS),
-    artwork: art.name,
-    img:     art.img,
-    amount:  randomFrom(AMOUNTS),
-    time:    timeLabel,
+    id:      r.id,
+    type:    (r.tx_type === 'BUY' || r.tx_type === 'MINT' ? 'BUY' : 'SELL') as 'BUY' | 'SELL',
+    wallet:  `${w.slice(0, 4)}…${w.slice(-4)}`,
+    artwork: r.artwork.title,
+    img:     r.artwork.ipfs_metadata_uri
+      ? `https://ipfs.io/ipfs/${r.artwork.ipfs_metadata_uri.replace('ipfs://', '')}`
+      : `/images/artworks/art${(idx % 5) + 1}.jpg`,
+    amount:  `${parseFloat(r.share_amount).toFixed(2)} ${r.artwork.ticker ?? 'TOKEN'}`,
+    time:    idx === 0 ? 'Just now' : timeAgo(new Date(r.timestamp)),
   }
 }
-type Trade = ReturnType<typeof generateTrade>
+function timeAgo(d: Date) {
+  const s = Math.floor((Date.now() - d.getTime()) / 1000)
+  if (s < 60)  return `${s}s ago`
+  if (s < 3600) return `${Math.floor(s / 60)}m ago`
+  return `${Math.floor(s / 3600)}h ago`
+}
+type Trade = ReturnType<typeof normalize>
 const MAX_TRADES = 6
 const ROW_H      = 76   // px per row — used for fixed container height
 
@@ -148,7 +132,7 @@ function TradeRow({ trade, isNew }: { trade: Trade; isNew: boolean }) {
       {/* Timestamp */}
       <div className="shrink-0 text-right">
         <span className="text-[10px] tracking-wide text-[#7A7570] tabular-nums"
-          style={{ opacity: trade.time === 'Just now' ? 1 : 0.5 }}>
+          style={{ opacity: trade.time === 'Just now' ? 1 : 0.6 }}>
           {trade.time}
         </span>
         {trade.time === 'Just now' && (
@@ -174,11 +158,15 @@ export function LiveActivitySection() {
   const [volume,     setVolume]     = useState('0.00')
 
   useEffect(() => {
-    setTotalToday(Math.floor(Math.random() * 200) + 340)
-    setVolume((Math.random() * 2 + 1.2).toFixed(2))
-    setTrades(Array.from({ length: MAX_TRADES }, (_, i) =>
-      generateTrade(i === 0 ? 'Just now' : `${i * 4}s ago`)
-    ))
+    tradeService.recent(MAX_TRADES).then(data => {
+      if (Array.isArray(data) && data.length) {
+        const normalized = data.map(normalize)
+        setTrades(normalized)
+        const vol = data.reduce((s, t) => s + parseFloat(t.eth_amount), 0)
+        setVolume(vol.toFixed(2))
+        setTotalToday(data.length)
+      }
+    }).catch(() => {})
     setMounted(true)
   }, [])
 
@@ -227,32 +215,32 @@ export function LiveActivitySection() {
     return () => io.disconnect()
   }, [mounted])
 
+  // Refresh timestamps every 30s
   useEffect(() => {
     if (!mounted) return
     const age = setInterval(() => {
-      if (!visibleRef.current) return
-      setTrades(prev => prev.map((t, i) => ({
-        ...t, time: i === 0 ? 'Just now' : `${(i + 1) * 4}s ago`,
-      })))
-    }, 4000)
+      setTrades(prev => prev.map((t, i) => ({ ...t, time: i === 0 ? 'Just now' : t.time })))
+    }, 30000)
     return () => clearInterval(age)
   }, [mounted])
 
+  // Poll for new trades every 15s
   useEffect(() => {
     if (!mounted) return
-    let timer: ReturnType<typeof setTimeout>
-    const schedule = () => {
-      timer = setTimeout(() => {
-        if (visibleRef.current) {
-          const t = generateTrade()
-          setNewId(t.id)
-          setTrades(prev => [t, ...prev].slice(0, MAX_TRADES))
-        }
-        schedule()
-      }, 3000 + Math.random() * 2000)
-    }
-    schedule()
-    return () => clearTimeout(timer)
+    const poll = setInterval(() => {
+      if (!visibleRef.current) return
+      tradeService.recent(MAX_TRADES).then(data => {
+        if (!Array.isArray(data) || !data.length) return
+        const normalized = data.map(normalize)
+        const firstId = normalized[0]?.id
+        setTrades(prev => {
+          if (prev[0]?.id === firstId) return prev
+          setNewId(firstId ?? null)
+          return normalized
+        })
+      }).catch(() => {})
+    }, 15000)
+    return () => clearInterval(poll)
   }, [mounted])
 
   return (

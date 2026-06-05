@@ -15,57 +15,13 @@
 //    • Large rank watermark per row for depth
 // ─────────────────────────────────────────────────────────────────
 
-import { useEffect, useRef } from 'react'
-import { gsap }              from '@/lib/gsap'
-
-
-
-// ── Artist data ───────────────────────────────────────────────────
-const ARTISTS = [
-  {
-    id:     1,
-    name:   'Elena Vasquez',
-    handle: '@elena.v',
-    avatar: '/images/artworks/art1.jpg',
-    volume: '12.84',
-    works:  14,
-    tag:    'Nocturne Series',
-    rank:   '01',
-  },
-  {
-    id:     2,
-    name:   'Marcus Chen',
-    handle: '@m.chen',
-    avatar: '/images/artworks/art2.jpg',
-    volume: '9.21',
-    works:  9,
-    tag:    'Fracture Studies',
-    rank:   '02',
-  },
-  {
-    id:     3,
-    name:   'Aiko Tanaka',
-    handle: '@aiko.t',
-    avatar: '/images/artworks/art3.jpg',
-    volume: '18.47',
-    works:  21,
-    tag:    'Bloom & Chaos',
-    rank:   '03',
-  },
-  {
-    id:     4,
-    name:   'Yui Nakamura',
-    handle: '@yui.n',
-    avatar: '/images/artworks/art5.jpg',
-    volume: '7.65',
-    works:  7,
-    tag:    'March Variations',
-    rank:   '04',
-  },
-]
+import { useEffect, useRef, useState } from 'react'
+import { gsap }                         from '@/lib/gsap'
+import { userService }                  from '@/services/user.service'
+import type { UserProfile }             from '@/types/api'
 
 // ── ArtistRow ─────────────────────────────────────────────────────
-function ArtistRow({ artist }: { artist: typeof ARTISTS[0] }) {
+function ArtistRow({ artist, rank }: { artist: UserProfile; rank: number }) {
   const rowRef  = useRef<HTMLDivElement>(null)
   const nameRef = useRef<HTMLHeadingElement>(null)
   const imgRef  = useRef<HTMLDivElement>(null)
@@ -121,40 +77,27 @@ function ArtistRow({ artist }: { artist: typeof ARTISTS[0] }) {
         }}
         aria-hidden="true"
       >
-        {artist.rank}
+        {String(rank).padStart(2, '0')}
       </span>
 
       <div className="relative flex items-center gap-5 md:gap-8
                       px-6 md:px-16 lg:px-24 py-7">
 
         {/* Rank label */}
-        <span
-          className="shrink-0 font-mono text-[10px] tracking-[0.25em] text-white/25 w-7"
-        >
-          {artist.rank}
+        <span className="shrink-0 font-mono text-[10px] tracking-[0.25em] text-white/25 w-7">
+          {String(rank).padStart(2, '0')}
         </span>
 
-        {/* Avatar — subtle parallax */}
-        <div
-          ref={imgRef}
-          className="shrink-0"
-          style={{ willChange: 'transform' }}
-        >
-          <div
-            className="size-14 rounded-sm overflow-hidden
-                       ring-1 ring-white/10
-                       group-hover:ring-[#C9A96E]/50
-                       transition-all duration-500"
-          >
+        {/* Avatar */}
+        <div ref={imgRef} className="shrink-0" style={{ willChange: 'transform' }}>
+          <div className="size-14 rounded-sm overflow-hidden ring-1 ring-white/10 group-hover:ring-[#C9A96E]/50 transition-all duration-500">
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
-              src={artist.avatar}
-              alt={artist.name}
+              src={artist.avatar_url ?? '/images/artworks/art1.jpg'}
+              alt={artist.username ?? artist.wallet_address}
               loading="lazy"
               decoding="async"
-              className="w-full h-full object-cover
-                         transition-transform duration-700
-                         group-hover:scale-110"
+              className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
               draggable={false}
             />
           </div>
@@ -166,48 +109,25 @@ function ArtistRow({ artist }: { artist: typeof ARTISTS[0] }) {
             <h3
               ref={nameRef}
               className="font-light text-white leading-none"
-              style={{
-                fontFamily: "'Cormorant Garamond', serif",
-                fontSize:   'clamp(1.6rem, 2.8vw, 2.5rem)',
-                willChange: 'transform',
-              }}
+              style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: 'clamp(1.6rem, 2.8vw, 2.5rem)', willChange: 'transform' }}
             >
-              {artist.name}
+              {artist.username ?? artist.wallet_address.slice(0, 10) + '…'}
             </h3>
-
-            {/* Tag badge — slides in on hover */}
-            <span
-              className="hidden sm:inline-block text-[9px] tracking-[0.3em] uppercase
-                         px-2 py-0.5 border border-[#C9A96E]/30 text-[#C9A96E]
-                         opacity-0 group-hover:opacity-100
-                         translate-y-1 group-hover:translate-y-0
-                         transition-all duration-400"
-            >
-              {artist.tag}
-            </span>
+            {artist.is_verified && (
+              <span className="hidden sm:inline-block text-[9px] tracking-[0.3em] uppercase px-2 py-0.5 border border-[#C9A96E]/30 text-[#C9A96E] opacity-0 group-hover:opacity-100 translate-y-1 group-hover:translate-y-0 transition-all duration-400">
+                Verified
+              </span>
+            )}
           </div>
-
           <p className="font-mono text-[11px] text-white/30 mt-1.5">
-            {artist.handle}
+            {artist.wallet_address.slice(0, 6)}…{artist.wallet_address.slice(-4)}
           </p>
         </div>
 
-        {/* Volume stat */}
-        <div
-          className="shrink-0 text-right
-                     opacity-40 group-hover:opacity-100
-                     transition-opacity duration-400
-                     hidden md:block"
-        >
-          <p
-            className="font-light text-white leading-none"
-            style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: '1.7rem' }}
-          >
-            {artist.volume}
-            <span className="text-[#C9A96E] text-sm ml-1.5">ETH</span>
-          </p>
+        {/* Role badge */}
+        <div className="shrink-0 text-right opacity-40 group-hover:opacity-100 transition-opacity duration-400 hidden md:block">
           <p className="text-[9px] tracking-[0.2em] uppercase text-white/30 mt-1">
-            {artist.works} works
+            {artist.role}
           </p>
         </div>
 
@@ -228,11 +148,18 @@ function ArtistRow({ artist }: { artist: typeof ARTISTS[0] }) {
 
 // ── Main Section ──────────────────────────────────────────────────
 export function TopCreatorsSection() {
+  const [creators, setCreators] = useState<UserProfile[]>([])
   const sectionRef  = useRef<HTMLElement>(null)
   const labelRef    = useRef<HTMLParagraphElement>(null)
   const titleRef    = useRef<HTMLHeadingElement>(null)
   const rowsRef     = useRef<(HTMLDivElement | null)[]>([])
   const linesRef    = useRef<(HTMLDivElement | null)[]>([])
+
+  useEffect(() => {
+    userService.topCreators(4).then(data => {
+      if (Array.isArray(data) && data.length) setCreators(data)
+    }).catch(() => {})
+  }, [])
 
   useEffect(() => {
     const titleWords = Array.from(
@@ -346,20 +273,15 @@ export function TopCreatorsSection() {
 
       {/* ── Artist ranking rows ───────────────────────────────────── */}
       <div className="relative">
-        {ARTISTS.map((artist, i) => (
+        {creators.map((artist, i) => (
           <div key={artist.id}>
-            {/* Divider line — scaleX entrance */}
             <div
               ref={el => { linesRef.current[i] = el }}
               className="mx-6 md:mx-16 lg:mx-24 h-px"
               style={{ background: 'rgba(255,255,255,0.09)' }}
             />
-
-            {/* Row wrapper — clip-path entrance */}
-            <div
-              ref={el => { rowsRef.current[i] = el }}
-            >
-              <ArtistRow artist={artist} />
+            <div ref={el => { rowsRef.current[i] = el }}>
+              <ArtistRow artist={artist} rank={i + 1} />
             </div>
           </div>
         ))}

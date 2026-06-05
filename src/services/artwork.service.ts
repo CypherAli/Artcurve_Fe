@@ -39,6 +39,7 @@ export const artworkService = {
     fd.append('file', file); fd.append('title', title); fd.append('description', description)
     return postForm<IpfsUploadResult>('/artworks/upload', fd)
   },
+  platformStats: () => get<{ artworkCount: number; totalVolumeEth: string; collectorCount: number }>('/artworks/stats'),
   createDraft:  (dto: CreateArtworkDto)         => post<Artwork>('/artworks', dto, true),
   updateStatus: (id: string, dto: UpdateArtworkStatusDto) =>
     request<Artwork>(`/artworks/${id}/status`, { method: 'PATCH', body: JSON.stringify(dto), auth: true }),
