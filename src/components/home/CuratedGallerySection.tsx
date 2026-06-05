@@ -11,79 +11,25 @@
 //    • Hover: image scale + gold border reveal
 // ─────────────────────────────────────────────────────────────────
 
-import { useEffect, useRef } from 'react'
-import { gsap }              from '@/lib/gsap'
+import { useEffect, useRef, useState } from 'react'
+import { useRouter }                    from 'next/navigation'
+import { gsap }                         from '@/lib/gsap'
+import { artworkService }               from '@/services/artwork.service'
+import type { Artwork }                 from '@/types/api'
 
+// Phase badge mapping dựa trên % target_cap đã đạt
+function getPhase(art: Artwork): { label: string; color: string } {
+  const supply = parseFloat(art.current_supply)
+  const cap    = parseFloat(art.target_cap)
+  const pct    = cap > 0 ? supply / cap : 0
+  if (pct >= 0.9) return { label: 'Migration', color: '#f87171' }
+  if (pct >= 0.6) return { label: 'FOMO',      color: '#C9A96E' }
+  if (pct >= 0.3) return { label: 'Growth',    color: '#60a5fa' }
+  return { label: 'Accumulation', color: '#4ade80' }
+}
 
-
-// ── Mock artwork data ──────────────────────────────────────────────
-const ARTWORKS = [
-  {
-    id: 1,
-    title: 'Nocturne at the Bridge',
-    artist: 'Elena Vasquez',
-    price: '0.0234',
-    change: '+18.4%',
-    phase: 'FOMO',
-    phaseColor: '#C9A96E',
-    progress: 62,
-    // Steady rise → dip → strong breakout
-    sparkline: [4, 5.2, 6.8, 6.1, 5.4, 7.0, 9.5, 14.2, 19.8, 23.4],
-    image: '/images/artworks/art1.jpg',
-  },
-  {
-    id: 2,
-    title: 'Shattered Embrace',
-    artist: 'Marcus Chen',
-    price: '0.0089',
-    change: '+7.2%',
-    phase: 'Accumulation',
-    phaseColor: '#4ade80',
-    progress: 28,
-    // Flat accumulation with tiny bumps
-    sparkline: [5, 4.8, 5.3, 5.1, 5.6, 5.4, 6.2, 7.1, 7.8, 8.9],
-    image: '/images/artworks/art2.jpg',
-  },
-  {
-    id: 3,
-    title: 'Bloom & Blade',
-    artist: 'Aiko Tanaka',
-    price: '0.0412',
-    change: '+29.3%',
-    phase: 'FOMO',
-    phaseColor: '#C9A96E',
-    progress: 71,
-    // Volatile: sharp pump → crash → recovery → new high
-    sparkline: [3, 7.5, 14.0, 9.2, 6.8, 10.5, 16.0, 12.4, 28.0, 41.2],
-    image: '/images/artworks/art3.jpg',
-  },
-  {
-    id: 4,
-    title: 'Self-Portrait with Death',
-    artist: 'Arnold Böcklin',
-    price: '0.1820',
-    change: '+44.1%',
-    phase: 'Migration',
-    phaseColor: '#f87171',
-    progress: 94,
-    // Slow then parabolic explosion at end
-    sparkline: [2, 2.3, 2.8, 3.5, 5.0, 9.0, 22.0, 58.0, 120.0, 182.0],
-    image: '/images/artworks/art4.jpg',
-  },
-  {
-    id: 5,
-    title: 'The Last March',
-    artist: 'Yui Nakamura',
-    price: '0.0551',
-    change: '+33.7%',
-    phase: 'FOMO',
-    phaseColor: '#C9A96E',
-    progress: 78,
-    // W-shape: dip → recovery → dip → strong rally
-    sparkline: [8, 6.0, 4.2, 5.8, 8.5, 6.5, 9.0, 14.5, 22.0, 55.1],
-    image: '/images/artworks/art5.jpg',
-  },
-]
+// Placeholder sparkline (5 points) khi chưa có OHLCV
+const PLACEHOLDER_SPARK = [5, 6, 5.5, 7, 8]
 
 // ── Sparkline helpers ──────────────────────────────────────────────
 function buildSparkPath(data: number[], w: number, h: number, pad: number) {
@@ -183,6 +129,8 @@ function SparklineLarge({ data, color, id, price, change }: {
 
 // ── Component ──────────────────────────────────────────────────────
 export function CuratedGallerySection() {
+  const router      = useRouter()
+  const [artworks, setArtworks] = useState<Artwork[]>([])
   const sectionRef  = useRef<HTMLElement>(null)
   const labelRef    = useRef<HTMLParagraphElement>(null)
   const titleRef    = useRef<HTMLHeadingElement>(null)
@@ -190,6 +138,13 @@ export function CuratedGallerySection() {
   const viewAllRef  = useRef<HTMLAnchorElement>(null)
   const cardsRef    = useRef<(HTMLDivElement | null)[]>([])
   const trackRef    = useRef<HTMLDivElement>(null)
+
+  // ── Fetch artworks from API ────────────────────────────────────
+  useEffect(() => {
+    artworkService.list({ sortBy: 'view_count', limit: 8 })
+      .then(res => { if (res.data?.length) setArtworks(res.data) })
+      .catch(() => { /* keep empty, section hides gracefully */ })
+  }, [])
 
   // ── Drag-to-scroll on carousel ─────────────────────────────────
   useEffect(() => {
@@ -337,18 +292,27 @@ export function CuratedGallerySection() {
         {/* Left spacer — mirrors right spacer for equal padding */}
         <div className="shrink-0 w-0 md:w-0 lg:w-0" aria-hidden="true" />
 
-        {ARTWORKS.map((art, i) => (
+        {artworks.map((art, i) => {
+          const phase = getPhase(art)
+          const artistName = art.creator?.username ?? art.creator?.wallet_address?.slice(0, 8) ?? 'Unknown'
+          // Resolve image: try IPFS gateway, fallback to placeholder
+          const imgSrc = art.ipfs_metadata_uri
+            ? `https://ipfs.io/ipfs/${art.ipfs_metadata_uri.replace('ipfs://', '')}`
+            : `/images/artworks/art${(i % 5) + 1}.jpg`
+
+          return (
           <div
             key={art.id}
             ref={el => { cardsRef.current[i] = el }}
             className="group relative flex-none w-[260px] md:w-[280px] bg-white border border-[#E4DDD3] hover:border-[#C9A96E] transition-[border-color] duration-300 cursor-pointer"
             style={{ opacity: 0 }}
+            onClick={() => router.push(`/trade?id=${art.id}`)}
           >
             {/* Artwork image */}
             <div className="relative overflow-hidden" style={{ aspectRatio: '3/4' }}>
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img
-                src={art.image}
+                src={imgSrc}
                 alt={art.title}
                 loading="lazy"
                 decoding="async"
@@ -363,42 +327,35 @@ export function CuratedGallerySection() {
               >
                 <span
                   className="shrink-0 size-[5px] rounded-full"
-                  style={{ background: art.phaseColor }}
+                  style={{ background: phase.color }}
                 />
-                {art.phase}
+                {phase.label}
               </div>
 
-              {/* ── Mini sparkline — bottom-right corner, always visible ── */}
-              <div
-                className="absolute bottom-3 right-3
-                           opacity-100 group-hover:opacity-0
-                           transition-opacity duration-300 pointer-events-none"
-              >
-                <SparklineMini data={art.sparkline} color="#4ade80" id={art.id} />
+              {/* ── Mini sparkline ── */}
+              <div className="absolute bottom-3 right-3 opacity-100 group-hover:opacity-0 transition-opacity duration-300 pointer-events-none">
+                <SparklineMini data={PLACEHOLDER_SPARK} color="#4ade80" id={i} />
               </div>
 
-              {/* ── Large chart overlay — slides up on hover ── */}
+              {/* ── Large chart overlay on hover ── */}
               <div
-                className="absolute inset-x-0 bottom-0 h-[46%]
-                           translate-y-full group-hover:translate-y-0
-                           transition-transform duration-500 ease-out pointer-events-none"
+                className="absolute inset-x-0 bottom-0 h-[46%] translate-y-full group-hover:translate-y-0 transition-transform duration-500 ease-out pointer-events-none"
                 style={{ background: 'none' }}
               >
                 <SparklineLarge
-                  data={art.sparkline}
+                  data={PLACEHOLDER_SPARK}
                   color="#4ade80"
-                  id={art.id}
-                  price={art.price}
-                  change={art.change}
+                  id={i}
+                  price={parseFloat(art.current_price).toFixed(4)}
+                  change=""
                 />
               </div>
-
             </div>
 
             {/* Card info */}
             <div className="p-4">
               <p className="text-[10px] tracking-[0.22em] uppercase text-[#7A7570] mb-1">
-                {art.artist}
+                {artistName}
               </p>
               <h3
                 className="text-[1.05rem] font-light text-[#1A1A1A] mb-3 leading-tight"
@@ -415,27 +372,29 @@ export function CuratedGallerySection() {
                     className="text-[1.25rem] font-light text-[#1A1A1A] leading-none"
                     style={{ fontFamily: "'Cormorant Garamond', serif" }}
                   >
-                    {art.price}
+                    {parseFloat(art.current_price).toFixed(4)}
                     <span className="text-[#C9A96E] text-xs ml-1">ETH</span>
                   </p>
-                  <p className="text-[10px] mt-0.5" style={{ color: art.phaseColor }}>
-                    {art.change}
+                  <p className="text-[10px] mt-0.5" style={{ color: phase.color }}>
+                    {art.ticker ?? ''}
                   </p>
                 </div>
               </div>
 
               {/* Collect button */}
               <div className="mt-3 overflow-hidden h-0 group-hover:h-9 transition-all duration-400">
-                <button
-                  type="button"
-                  className="w-full h-9 text-[10px] tracking-[0.2em] uppercase bg-[#1A1A1A] text-white hover:bg-[#C9A96E] hover:text-[#1A1A1A] transition-colors duration-300"
+                <a
+                  href={`/trade?id=${art.id}`}
+                  className="w-full h-9 text-[10px] tracking-[0.2em] uppercase bg-[#1A1A1A] text-white hover:bg-[#C9A96E] hover:text-[#1A1A1A] transition-colors duration-300 flex items-center justify-center"
+                  onClick={e => e.stopPropagation()}
                 >
                   Collect Now
-                </button>
+                </a>
               </div>
             </div>
           </div>
-        ))}
+          )
+        })}
 
         {/* Right spacer — makes last card fully visible when scrolled to end */}
         <div className="shrink-0 w-6 md:w-16 lg:w-24" aria-hidden="true" />
@@ -443,7 +402,7 @@ export function CuratedGallerySection() {
 
       {/* Scroll hint */}
       <div className="flex justify-center mt-6 gap-1.5" aria-hidden="true">
-        {ARTWORKS.map((_, i) => (
+        {artworks.map((_, i) => (
           <div
             key={i}
             className="h-px w-6 bg-[#C9A96E] opacity-30 first:opacity-80"

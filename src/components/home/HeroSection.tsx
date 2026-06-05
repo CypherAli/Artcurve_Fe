@@ -16,20 +16,33 @@
 //    Right 52%  — looping video, bleeds top + bottom 7.5%
 // ─────────────────────────────────────────────────────────────────
 
-import { useEffect, useRef } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { gsap, ScrollTrigger } from '@/lib/gsap'
-
-
+import { artworkService } from '@/services/artwork.service'
 
 const HERO_LINES = ['Where Art', 'Meets the', 'Blockchain.']
 
-const STATS = [
+const DEFAULT_STATS = [
   { num: '10K+',  label: 'Artworks'     },
   { num: '$2.4M', label: 'Total Volume' },
   { num: '3.2K',  label: 'Collectors'  },
 ]
 
 export function HeroSection() {
+  const [stats, setStats] = useState(DEFAULT_STATS)
+
+  useEffect(() => {
+    artworkService.platformStats().then(data => {
+      const vol = parseFloat(data.totalVolumeEth)
+      const volLabel = vol >= 1000 ? `$${(vol / 1000).toFixed(1)}K` : `$${vol.toFixed(2)}`
+      setStats([
+        { num: data.artworkCount > 999 ? `${(data.artworkCount / 1000).toFixed(0)}K+` : String(data.artworkCount), label: 'Artworks' },
+        { num: volLabel, label: 'Total Volume' },
+        { num: data.collectorCount > 999 ? `${(data.collectorCount / 1000).toFixed(1)}K` : String(data.collectorCount), label: 'Collectors' },
+      ])
+    }).catch(() => { /* keep defaults on error */ })
+  }, [])
+
   const headingRef  = useRef<HTMLHeadingElement>(null)
   const subRef      = useRef<HTMLParagraphElement>(null)
   const ctaRef      = useRef<HTMLDivElement>(null)
@@ -165,7 +178,7 @@ export function HeroSection() {
           style={{ opacity: 0 }}
         >
           <a
-            href="#marketplace"
+            href="/marketplace"
             className="h-12 px-7 inline-flex items-center gap-2.5
                        bg-[#1A1A1A] text-white text-[11px] tracking-[0.18em] uppercase font-medium
                        hover:bg-[#333] transition-colors duration-300 group"
@@ -181,7 +194,7 @@ export function HeroSection() {
             </svg>
           </a>
           <a
-            href="#about"
+            href="#how-it-works"
             className="h-12 px-7 inline-flex items-center
                        border border-[#D5CCC2] text-[#1A1A1A] text-[11px] tracking-[0.18em] uppercase
                        hover:border-[#C9A96E] hover:text-[#C9A96E] transition-all duration-300"
@@ -199,7 +212,7 @@ export function HeroSection() {
                    flex gap-10 pt-7 border-t border-[#E4DDD3]"
         style={{ opacity: 0 }}
       >
-        {STATS.map(({ num, label }) => (
+        {stats.map(({ num, label }) => (
           <div key={label}>
             <p
               className="text-[1.65rem] font-light text-[#1A1A1A] leading-none"

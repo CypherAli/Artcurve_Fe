@@ -54,7 +54,7 @@ export function BelowFoldSections() {
   return (
     <>
       {/* ── 2. How It Works ────────────────────────────────────── */}
-      <div>
+      <div id="how-it-works">
         <StickyLine />
         <HowItWorksSection />
       </div>
