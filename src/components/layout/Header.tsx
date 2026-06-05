@@ -11,27 +11,27 @@ import { userService }                 from '@/services/user.service'
 
 // ── Notification data ────────────────────────────────────────────
 const NOTIF_DATA = [
-  { id: 1, type: 'bid',   unread: true,
-    title: '"Starry Night #042" received a bid',
-    desc: '2.4 ETH from 0x4f2…a91', time: '2m ago' },
-  { id: 2, type: 'sale',  unread: true,
-    title: '"Blue Horizon" sold',
-    desc: 'Sold for 1.8 ETH', time: '15m ago' },
+  { id: 1, type: 'price', unread: true,
+    title: '"Self-Portrait with Death" tăng 44.1%',
+    desc: 'Giá hiện tại: 0.0182 ETH · Phase Migration', time: '3m ago' },
+  { id: 2, type: 'trade', unread: true,
+    title: 'Lệnh BUY đã khớp',
+    desc: 'Mua 2,000 $SAKOL — Sakura Overload · 0.00412 ETH/token', time: '18m ago' },
   { id: 3, type: 'price', unread: true,
-    title: '"Solitude #007" price up 24%',
-    desc: 'New price: 3.2 ETH', time: '1h ago' },
+    title: '"Sakura Overload" tăng 29.3%',
+    desc: 'Giá hiện tại: 0.00412 ETH · Phase FOMO', time: '1h ago' },
   { id: 4, type: 'follow', unread: true,
-    title: '0x8d3…f44 started following you',
-    desc: 'View their collection', time: '2h ago' },
+    title: 'aiko_tanaka đã follow bạn',
+    desc: 'Xem bộ sưu tập của họ', time: '2h ago' },
   { id: 5, type: 'trade', unread: false,
-    title: 'Trade executed',
-    desc: 'Bought "Abstract Flow" for 0.5 ETH', time: '3h ago' },
-  { id: 6, type: 'bid',   unread: false,
-    title: '"Crimson Tide #003" outbid',
-    desc: 'You were outbid — new: 4.1 ETH', time: '5h ago' },
+    title: 'Lệnh SELL đã khớp',
+    desc: 'Bán 500 $GENP7 — Genesis Protocol #7 · 0.00089 ETH/token', time: '4h ago' },
+  { id: 6, type: 'sale',  unread: false,
+    title: '"Entropy Garden" đạt milestone',
+    desc: 'Đã bán 12,100/20,000 token · 60% target cap', time: '6h ago' },
   { id: 7, type: 'price', unread: false,
-    title: '"Dawn Fragment #11" price down 8%',
-    desc: 'New price: 0.95 ETH', time: '8h ago' },
+    title: '"Neon Seoul 2077" tăng 12.8%',
+    desc: 'Giá hiện tại: 0.00178 ETH · Phase Growth', time: '9h ago' },
 ]
 
 function NotifTypeIcon({ type }: { type: string }) {
@@ -63,9 +63,14 @@ function NotifTypeIcon({ type }: { type: string }) {
     </svg>)
 }
 
-function NotificationsDropdown({ onClose }: { onClose: () => void }) {
+function NotificationsDropdown({
+  onClose, notifs, setNotifs,
+}: {
+  onClose: () => void
+  notifs: typeof NOTIF_DATA
+  setNotifs: React.Dispatch<React.SetStateAction<typeof NOTIF_DATA>>
+}) {
   const panelRef               = useRef<HTMLDivElement>(null)
-  const [notifs, setNotifs]    = useState(NOTIF_DATA)
   const [tab, setTab]          = useState<'all' | 'unread'>('all')
   const unread                 = notifs.filter(n => n.unread).length
   const displayed              = tab === 'unread' ? notifs.filter(n => n.unread) : notifs
@@ -523,7 +528,8 @@ export function Header({ dark = false }: HeaderProps) {
   const [showUserMenu,setShowUserMenu] = useState(false)
   const [hoveredNav,  setHoveredNav] = useState<string | null>(null)
   const headerRef                   = useRef<HTMLElement>(null)
-  const unreadCount = NOTIF_DATA.filter(n => n.unread).length
+  const [notifData, setNotifData] = useState(NOTIF_DATA)
+  const unreadCount = notifData.filter(n => n.unread).length
   const { isConnected }                        = useAccount()
   const { isAuthenticated, user, clearAuth, setAuth } = useAuthStore()
   const loggedIn = isConnected || isAuthenticated
@@ -644,11 +650,27 @@ export function Header({ dark = false }: HeaderProps) {
                 strokeLinecap="round" strokeLinejoin="round"/>
             </svg>
             {unreadCount > 0 && (
-              <span className="absolute top-1 right-1 w-[9px] h-[9px] rounded-full pointer-events-none"
-                style={{ background: T.gold, boxShadow: `0 0 0 2px ${T.ringColor}` }}/>
+              <span
+                className="absolute -top-0.5 -right-0.5 min-w-[17px] h-[17px] px-1 rounded-full
+                           flex items-center justify-center pointer-events-none
+                           text-[9px] font-bold leading-none"
+                style={{
+                  background: T.gold,
+                  color:      '#1A1A1A',
+                  boxShadow:  `0 0 0 2px ${T.ringColor}`,
+                }}
+              >
+                {unreadCount > 9 ? '9+' : unreadCount}
+              </span>
             )}
           </button>
-          {showNotifs && <NotificationsDropdown onClose={() => setShowNotifs(false)} />}
+          {showNotifs && (
+            <NotificationsDropdown
+              onClose={() => setShowNotifs(false)}
+              notifs={notifData}
+              setNotifs={setNotifData}
+            />
+          )}
         </div>
 
         {/* ── GitHub auth user avatar button + dropdown ────────── */}
