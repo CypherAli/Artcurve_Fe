@@ -311,18 +311,25 @@ export function LoginModal({ onClose }: Props) {
             <div className="lm-row flex flex-col gap-2.5 mb-4">
               {SOCIALS.map(({ id, label, bg, color, icon }) => (
                 <button key={id} type="button"
+                  disabled={id === 'google'}
                   onClick={() => {
-                    if (id === 'github')   onGithubClick()
+                    if (id === 'github')        onGithubClick()
                     else if (id === 'x')        onTwitterClick()
                     else if (id === 'telegram') goTelegram()
-                    else showToast('🚧 Coming soon')
                   }}
                   className="flex items-center justify-center gap-3 w-full h-11 rounded-xl
                              text-[13px] font-medium tracking-[0.01em]
-                             hover:opacity-90 active:scale-[0.99] transition-all duration-150"
+                             hover:opacity-90 active:scale-[0.99] transition-all duration-150
+                             disabled:opacity-35 disabled:cursor-not-allowed disabled:active:scale-100"
+                  title={id === 'google' ? 'Google login chưa khả dụng' : undefined}
                   style={{ background: bg, color }}>
                   {icon}
                   {label}
+                  {id === 'google' && (
+                    <span className="ml-auto text-[10px] opacity-50 font-normal tracking-normal">
+                      coming soon
+                    </span>
+                  )}
                 </button>
               ))}
             </div>
@@ -339,13 +346,11 @@ export function LoginModal({ onClose }: Props) {
                 <input type="email" value={email} onChange={e => setEmail(e.target.value)}
                   placeholder="you@example.com"
                   className="flex-1 bg-transparent text-[13px] text-white/75 placeholder:text-white/18 outline-none"/>
-                <button type="button"
-                  onClick={() => showToast('🚧 Email login coming soon')}
+                <span title="Email login chưa khả dụng"
                   className="w-6 h-6 rounded-full flex items-center justify-center
-                             bg-white/6 hover:bg-[#C9A96E]/18 text-white/30 hover:text-[#C9A96E]
-                             transition-all duration-200 text-[12px]">
+                             bg-white/4 text-white/15 cursor-not-allowed text-[12px] select-none">
                   →
-                </button>
+                </span>
               </div>
             </div>
 

@@ -4,6 +4,7 @@ import { Suspense, useEffect } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { useAuthStore } from '@/store/authStore'
 import { authStore }    from '@/lib/auth-store'
+import { userService }  from '@/services/user.service'
 
 function Spinner() {
   return (
@@ -35,10 +36,8 @@ function CallbackHandler() {
       return
     }
 
-    // id không được trả về trong callback params → dùng wallet_address làm key tạm thời.
-    // useAuthStore.user.id sẽ được làm giàu sau khi GET /users/me với JWT mới.
-    const userData = {
-      id:             address,   // placeholder — sẽ được replace khi /users/me trả về UUID thật
+    const tempUser = {
+      id:             address,
       wallet_address: address,
       username:       name ?? null,
       avatar_url:     avatar || null,
@@ -47,9 +46,25 @@ function CallbackHandler() {
     }
 
     // Sync both stores so http.ts (authStore) and UI (useAuthStore) both work
-    useAuthStore.getState().setAuth(token, userData)
+    useAuthStore.getState().setAuth(token, tempUser)
     authStore.setJwt(token)
-    authStore.setUser(userData)
+    authStore.setUser(tempUser)
+
+    // Hydrate with real UUID and full profile from backend
+    userService.me()
+      .then(profile => {
+        const fullUser = {
+          ...tempUser,
+          id:          profile.id,
+          avatar_url:  profile.avatar_url ?? tempUser.avatar_url,
+          username:    profile.username   ?? tempUser.username,
+          role:        profile.role       ?? tempUser.role,
+          is_verified: profile.is_verified ?? tempUser.is_verified,
+        }
+        useAuthStore.getState().setAuth(token, fullUser)
+        authStore.setUser(fullUser)
+      })
+      .catch(() => { /* giữ nguyên tempUser nếu request fail */ })
 
     // Remember last social account for account picker in LoginModal
     const provider = searchParams.get('provider') ?? 'github'
