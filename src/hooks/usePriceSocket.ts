@@ -64,15 +64,21 @@ export function usePriceSocket(artworkId: string | null) {
 
       socket.on('disconnect', () => setConnected(false))
 
-      socket.on('price_update', (evt: PriceUpdateEvent) => {
+      // price_snapshot: giá hiện tại gửi ngay khi subscribe (từ Redis cache)
+      // price_update:   giá mới sau mỗi trade
+      // Cả 2 event đều có cùng shape {artwork_id, current_price, current_supply, volume_24h}
+      const handlePriceEvent = (evt: any) => {
         if (evt.artwork_id !== artworkId) return
         setPriceState({
-          price:     evt.price,
-          supply:    evt.supply,
+          price:     evt.current_price  ?? evt.price,
+          supply:    evt.current_supply ?? evt.supply,
           volume24h: evt.volume_24h,
-          timestamp: evt.timestamp,
+          timestamp: String(evt.timestamp ?? Date.now()),
         })
-      })
+      }
+
+      socket.on('price_snapshot', handlePriceEvent)
+      socket.on('price_update',   handlePriceEvent)
     }).catch(err => {
       console.warn('[usePriceSocket] socket.io-client not installed:', err.message)
     })

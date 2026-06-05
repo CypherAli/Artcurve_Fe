@@ -35,8 +35,10 @@ function CallbackHandler() {
       return
     }
 
+    // id không được trả về trong callback params → dùng wallet_address làm key tạm thời.
+    // useAuthStore.user.id sẽ được làm giàu sau khi GET /users/me với JWT mới.
     const userData = {
-      id:             '',
+      id:             address,   // placeholder — sẽ được replace khi /users/me trả về UUID thật
       wallet_address: address,
       username:       name ?? null,
       avatar_url:     avatar || null,

@@ -27,8 +27,9 @@ import { CandlestickChart, CandleRange } from '../common/CandlestickChart'
 import { PHASE_COLOR, Phase }            from '../marketplace/ArtCard'
 import { useMarketplace }               from '@/hooks/useMarketplace'
 import { useBuyTokens, useSellTokens, useTokenBalance, useEthBalance, toWei } from '@/web3/hooks/useContract'
-import { parseEther } from 'viem'
-import type { Artwork }                 from '@/types/api'
+import { tradeService }                 from '@/services/trade.service'
+import { parseEther }                   from 'viem'
+import type { Artwork, OhlcvCandle, OhlcvTimeframe } from '@/types/api'
 
 // ─────────────────────────────────────────────────────────────────
 //  Types
@@ -1144,6 +1145,7 @@ export function TradePage() {
 
   const [selectedId,  setSelectedId]  = useState(1)   // first artwork
   const [chartRange,  setChartRange]  = useState<CandleRange>('1D')
+  const [ohlcvData,   setOhlcvData]   = useState<OhlcvCandle[] | null>(null)
   const [livePrices,  setLivePrices]  = useState<Record<number,number>>(
     () => Object.fromEntries(ARTWORKS_MOCK.map(a => [a.id, a.basePrice]))
   )
@@ -1185,6 +1187,21 @@ export function TradePage() {
 
   const selectedArt = ARTWORKS.find(a => a.id===selectedId) ?? ARTWORKS[0]
   const livePrice   = livePrices[selectedId] ?? selectedArt.basePrice
+
+  // Fetch OHLCV từ BE khi artwork có UUID thật hoặc range thay đổi
+  useEffect(() => {
+    const artworkUuid = selectedArt.artworkId
+    if (!artworkUuid) { setOhlcvData(null); return }
+
+    const tfMap: Record<CandleRange, OhlcvTimeframe> = {
+      '1H': '1m', '6H': '15m', '1D': '1h', '7D': '4h',
+    }
+    const timeframe = tfMap[chartRange]
+
+    tradeService.ohlcv(artworkUuid, { timeframe, limit: 200 })
+      .then(candles => setOhlcvData(candles.length > 0 ? candles : null))
+      .catch(() => setOhlcvData(null))
+  }, [selectedArt.artworkId, chartRange])
 
   // ── Price simulation (3-tier) ────────────────────────────────────
   useEffect(() => {
@@ -1336,6 +1353,7 @@ export function TradePage() {
                   phaseColor={selectedArt.phaseColor}
                   range={chartRange}
                   height={chartH}
+                  apiCandles={ohlcvData ?? undefined}
                 />
               </motion.div>
             </AnimatePresence>

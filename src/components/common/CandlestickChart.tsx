@@ -12,6 +12,7 @@
 import dynamic   from 'next/dynamic'
 import { useMemo } from 'react'
 import type { ApexOptions } from 'apexcharts'
+import type { OhlcvCandle } from '@/types/api'
 
 // ── Dynamic import — ApexCharts needs the browser ─────────────────
 const ReactApexChart = dynamic(() => import('react-apexcharts'), {
@@ -108,13 +109,28 @@ function buildCandles(
   return pts
 }
 
+// Chuyển OhlcvCandle[] (BE format) → OHLCPoint[] (ApexCharts format)
+function fromApiCandles(apiCandles: OhlcvCandle[]): OHLCPoint[] {
+  return apiCandles.map(c => ({
+    x: new Date(c.time * 1000),
+    y: [
+      parseFloat(c.open),
+      parseFloat(c.high),
+      parseFloat(c.low),
+      parseFloat(c.close),
+    ] as [number, number, number, number],
+  }))
+}
+
 // ── Component ──────────────────────────────────────────────────────
 export interface CandlestickChartProps {
-  artId:      number
-  sparkline:  number[]
-  phaseColor: string
-  range:      CandleRange
-  height?:    number
+  artId:       number
+  sparkline:   number[]
+  phaseColor:  string
+  range:       CandleRange
+  height?:     number
+  // Real OHLCV data từ BE — nếu có thì dùng, không thì fallback mock
+  apiCandles?: OhlcvCandle[]
 }
 
 export function CandlestickChart({
@@ -123,12 +139,17 @@ export function CandlestickChart({
   phaseColor,
   range,
   height = 160,
+  apiCandles,
 }: CandlestickChartProps) {
 
-  const candles      = useMemo(
-    () => buildCandles(sparkline, range, artId),
-    [sparkline, range, artId],
-  )
+  // Ưu tiên dữ liệu thật từ BE; fallback về mock khi chưa có data
+  const candles = useMemo(() => {
+    if (apiCandles && apiCandles.length > 0) {
+      return fromApiCandles(apiCandles)
+    }
+    return buildCandles(sparkline, range, artId)
+  }, [apiCandles, sparkline, range, artId])
+
   const currentPrice = candles[candles.length - 1]?.y[3] ?? 0
   const series       = useMemo(() => [{ data: candles }], [candles])
 

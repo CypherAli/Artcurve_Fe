@@ -1,19 +1,23 @@
 'use client'
 
 // ─────────────────────────────────────────────────────────────────
-//  wagmi-config.ts  — Wagmi v3 + RainbowKit v2 configuration
+//  wagmi-config.ts  — Single source of truth cho wagmi + RainbowKit
 //
-//  Uses RainbowKit's `getDefaultConfig` helper which wraps
-//  WagmiConfig + WalletConnect setup in one call.
-//  Chains: Base (primary for ArtCurve) + Ethereum mainnet (fallback)
+//  Chain: Base Mainnet (chainId 8453) — khớp với:
+//    - BE SIWE_CHAIN_ID = 8453
+//    - BE CHAIN_ID      = 8453
+//    - Indexer          = base (viem/chains)
+//
+//  QUAN TRỌNG: baseSepolia (84532) bị xóa — nếu dùng testnet thì
+//  đổi CẢ BE env SIWE_CHAIN_ID + CHAIN_ID đồng thời.
 // ─────────────────────────────────────────────────────────────────
 
 import { getDefaultConfig } from '@rainbow-me/rainbowkit'
-import { baseSepolia } from 'wagmi/chains'
+import { base } from 'wagmi/chains'
 
 export const wagmiConfig = getDefaultConfig({
   appName:   'ArtCurve',
   projectId: process.env.NEXT_PUBLIC_WALLETCONNECT_PROJECT_ID ?? 'cc275f83791b65f859c7acb215931508',
-  chains:    [baseSepolia],
-  ssr:       true, // Required for Next.js App Router SSR compatibility
+  chains:    [base],
+  ssr:       true,
 })

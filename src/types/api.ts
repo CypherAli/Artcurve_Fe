@@ -147,13 +147,39 @@ export interface UpdateArtworkStatusDto {
 }
 
 // ── Trades / OHLCV ────────────────────────────────────────────────
+// Raw candle từ BE (ClickHouse bucket = ISO-8601 string)
+export interface OhlcvCandleRaw {
+  bucket:      string  // ISO-8601, e.g. "2024-01-01T00:00:00.000Z"
+  open:        string
+  high:        string
+  low:         string
+  close:       string
+  volume:      string
+  trade_count: string
+}
+
+// Normalized candle cho chart (time = Unix seconds)
 export interface OhlcvCandle {
-  time:   number    // Unix timestamp (seconds)
-  open:   string
-  high:   string
-  low:    string
-  close:  string
-  volume: string
+  time:        number  // Unix timestamp (seconds) — converted from bucket
+  open:        string
+  high:        string
+  low:         string
+  close:       string
+  volume:      string
+  trade_count: string
+}
+
+// Helper: chuyển OhlcvCandleRaw (BE) → OhlcvCandle (FE chart)
+export function normalizeCandle(raw: OhlcvCandleRaw): OhlcvCandle {
+  return {
+    time:        Math.floor(new Date(raw.bucket).getTime() / 1000),
+    open:        raw.open,
+    high:        raw.high,
+    low:         raw.low,
+    close:       raw.close,
+    volume:      raw.volume,
+    trade_count: raw.trade_count,
+  }
 }
 
 export interface OhlcvResponse {
@@ -227,12 +253,18 @@ export interface IpfsUploadResult {
 }
 
 // ── WebSocket events ──────────────────────────────────────────────
+// Khớp với PriceUpdatedEvent trong BE redis.service.ts + price.gateway.ts
 export interface PriceUpdateEvent {
-  artwork_id:   string
-  price:        string
-  supply:       string
-  volume_24h:   string
-  timestamp:    string
+  artwork_id:     string
+  current_price:  string
+  current_supply: string
+  volume_24h:     string
+  tx_hash:        string
+  timestamp:      number   // unix ms
+  // Optional trade metadata (từ events.gateway trade_updated)
+  is_buy?:      boolean
+  user_wallet?: string
+  share_amount?: string
 }
 
 // ── Generic API error ─────────────────────────────────────────────

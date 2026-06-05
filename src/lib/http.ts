@@ -32,7 +32,25 @@ export async function request<T>(path: string, options: RequestInit & { auth?: b
     throw new ApiError(res.status, msg)
   }
   if (res.status === 204) return undefined as unknown as T
-  return res.json() as Promise<T>
+
+  const json = await res.json()
+
+  // TransformInterceptor bọc response: { data: T }
+  // Ngoại lệ: list responses đã có key "data" (ArtworkListResponse {data,total,page})
+  // → interceptor pass-through → FE nhận nguyên {data,total,page}
+  // Với các response khác (user, pnl, ohlcv array...) → interceptor bọc → { data: T }
+  // → cần unwrap về T
+  if (
+    json !== null &&
+    typeof json === 'object' &&
+    'data' in json &&
+    !('total' in json) &&   // list response có total → không unwrap
+    !('candles' in json)    // ohlcv response shape
+  ) {
+    return json.data as T
+  }
+
+  return json as T
 }
 
 export const get  = <T>(path: string, auth = false)               => request<T>(path, { method: 'GET', auth })
