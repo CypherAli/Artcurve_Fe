@@ -51,7 +51,11 @@ function CallbackHandler() {
 
     // Remember last social account for account picker in LoginModal
     const provider = searchParams.get('provider') ?? 'github'
-    const storageKey = provider === 'twitter' ? 'artcurve_twitter_account' : 'artcurve_github_account'
+    const storageKey =
+      provider === 'twitter'  ? 'artcurve_twitter_account'  :
+      provider === 'telegram' ? 'artcurve_telegram_account' :
+      provider === 'apple'    ? 'artcurve_apple_account'    :
+      'artcurve_github_account'
     localStorage.setItem(storageKey, JSON.stringify({
       username:   name ?? '',
       avatar_url: avatar ?? '',
