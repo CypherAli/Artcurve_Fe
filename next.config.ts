@@ -2,8 +2,15 @@ import type { NextConfig } from 'next'
 
 const isDev = process.env.NODE_ENV === 'development'
 
+// Fallback sang Railway khi NEXT_PUBLIC_API_URL chưa được set trên Vercel
+const PROD_API = 'https://artcurve-be-production.up.railway.app/api/v1'
+const rawApiUrl = process.env.NEXT_PUBLIC_API_URL ?? (isDev ? 'http://localhost:3001/api/v1' : PROD_API)
+
+// Override env ở build time — baked into bundle
+process.env.NEXT_PUBLIC_API_URL = rawApiUrl
+
 // API URL để CSP connect-src cho phép WebSocket + REST
-const apiUrl = process.env.NEXT_PUBLIC_API_URL?.replace('/api/v1', '') ?? 'http://localhost:3001'
+const apiUrl = rawApiUrl.replace('/api/v1', '')
 
 const securityHeaders = [
   // Chống clickjacking
@@ -45,6 +52,8 @@ const securityHeaders = [
         'https://gateway.pinata.cloud',
         'https://*.infura.io',
         'https://*.alchemy.com',
+        'https://artcurve-be-production.up.railway.app',
+        'wss://artcurve-be-production.up.railway.app',
       ].join(' '),
       "frame-src 'none'",
       "frame-ancestors 'none'",
@@ -57,6 +66,12 @@ const securityHeaders = [
 ]
 
 const nextConfig: NextConfig = {
+  // ── Bake env vars vào bundle (override Vercel nếu chưa set) ───
+  env: {
+    NEXT_PUBLIC_API_URL:  rawApiUrl,
+    NEXT_PUBLIC_CHAIN_ID: process.env.NEXT_PUBLIC_CHAIN_ID ?? '8453',
+  },
+
   // ── Three.js / R3F: transpile ESM-only packages ───────────────
   transpilePackages: ['three'],
 
@@ -68,6 +83,8 @@ const nextConfig: NextConfig = {
       { protocol: 'https', hostname: '**.ipfs.dweb.link' },
       { protocol: 'https', hostname: 'avatars.githubusercontent.com' },
       { protocol: 'https', hostname: 'pbs.twimg.com' },
+      { protocol: 'https', hostname: 'api.dicebear.com' },
+      { protocol: 'https', hostname: 'ipfs.io' },
     ],
   },
 
