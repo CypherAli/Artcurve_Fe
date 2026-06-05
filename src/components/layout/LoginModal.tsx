@@ -167,7 +167,16 @@ export function LoginModal({ onClose }: Props) {
   const [showGhPicker, setShowGhPicker] = useState(false)
   const [showXPicker,  setShowXPicker]  = useState(false)
 
-  const API_BASE = process.env.NEXT_PUBLIC_API_URL?.replace('/api/v1', '') ?? 'https://artcurve-be.onrender.com'
+  const API_BASE = (() => {
+    const raw = process.env.NEXT_PUBLIC_API_URL?.replace('/api/v1', '')
+    if (!raw) {
+      if (process.env.NODE_ENV === 'production') {
+        console.error('[LoginModal] NEXT_PUBLIC_API_URL is not set — OAuth will fail')
+      }
+      return 'http://localhost:3001'
+    }
+    return raw
+  })()
   function goGithub()          { window.location.href = `${API_BASE}/api/v1/auth/github` }
   function goGithubDifferent() { window.location.href = `https://github.com/logout?return_to=${encodeURIComponent(`${API_BASE}/api/v1/auth/github`)}` }
   function onGithubClick()     { lastGithub ? setShowGhPicker(true) : goGithub() }

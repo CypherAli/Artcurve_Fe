@@ -45,6 +45,11 @@ function CallbackHandler() {
       is_verified:    false,
     }
 
+    // Xóa token khỏi URL ngay lập tức — tránh JWT lộ qua browser history / Referer header
+    if (typeof window !== 'undefined') {
+      window.history.replaceState({}, '', '/auth/callback')
+    }
+
     // Sync both stores so http.ts (authStore) and UI (useAuthStore) both work
     useAuthStore.getState().setAuth(token, tempUser)
     authStore.setJwt(token)

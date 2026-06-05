@@ -3,26 +3,20 @@
 //  hooks/usePriceSocket.ts  —  Real-time price updates via Socket.IO
 //
 //  Connects to backend WebSocket gateway:
-//    ws://localhost:3001/prices  (PriceGateway namespace)
+//    /prices  (PriceGateway namespace)
 //
 //  Flow:
 //    socket.emit('subscribe_artwork',   { artwork_id })
 //    socket.on('price_update', handler)
 //    socket.emit('unsubscribe_artwork', { artwork_id })
-//
-//  Install dependency:
-//    npm install socket.io-client
-//
-//  Usage:
-//    const { price, supply, volume24h, connected } = usePriceSocket(artworkId)
 // ─────────────────────────────────────────────────────────────────
 
 import { useState, useEffect, useRef } from 'react'
-import type { PriceUpdateEvent } from '@/types/api'
+import type { PriceUpdateEvent }       from '@/types/api'
 
 const WS_URL =
   (process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:3001/api/v1')
-    .replace('/api/v1', '')  // strip API path — socket connects to root
+    .replace('/api/v1', '')
 
 interface PriceState {
   price:     string | null
@@ -31,73 +25,95 @@ interface PriceState {
   timestamp: string | null
 }
 
-const INIT: PriceState = {
-  price: null, supply: null, volume24h: null, timestamp: null,
-}
+const INIT: PriceState = { price: null, supply: null, volume24h: null, timestamp: null }
 
 export function usePriceSocket(artworkId: string | null) {
-  const [connected, setConnected] = useState(false)
-  const [priceState, setPriceState] = useState<PriceState>(INIT)
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const socketRef = useRef<any>(null)
+  const [connected,   setConnected]   = useState(false)
+  const [priceState,  setPriceState]  = useState<PriceState>(INIT)
+  const [socketError, setSocketError] = useState<string | null>(null)
+
+  // Ref để cleanup type-safe — không cần `any`
+  const socketRef  = useRef<{ emit: (e: string, d?: unknown) => void; disconnect: () => void } | null>(null)
+  const mountedRef = useRef(true)
 
   useEffect(() => {
+    mountedRef.current = true
+
     if (!artworkId) return
 
     let socket: ReturnType<typeof import('socket.io-client')['io']> | null = null
 
-    // Dynamic import so SSR doesn't bundle socket.io-client
     import('socket.io-client').then(({ io }) => {
+      // Nếu component đã unmount trước khi import hoàn thành — bỏ qua
+      if (!mountedRef.current) return
+
       socket = io(`${WS_URL}/prices`, {
-        transports: ['websocket'],
-        reconnection: true,
+        transports:           ['websocket'],
+        reconnection:         true,
         reconnectionAttempts: 5,
-        reconnectionDelay: 2000,
+        reconnectionDelay:    2000,
       })
 
       socketRef.current = socket
 
       socket.on('connect', () => {
+        if (!mountedRef.current) return
         setConnected(true)
+        setSocketError(null)
         socket!.emit('subscribe_artwork', { artwork_id: artworkId })
       })
 
-      socket.on('disconnect', () => setConnected(false))
+      socket.on('disconnect', () => {
+        if (!mountedRef.current) return
+        setConnected(false)
+      })
 
-      // price_snapshot: giá hiện tại gửi ngay khi subscribe (từ Redis cache)
-      // price_update:   giá mới sau mỗi trade
-      // Cả 2 event đều có cùng shape {artwork_id, current_price, current_supply, volume_24h}
-      const handlePriceEvent = (evt: any) => {
+      socket.on('connect_error', (err: Error) => {
+        if (!mountedRef.current) return
+        setSocketError(err.message)
+        setConnected(false)
+      })
+
+      const handlePriceEvent = (evt: PriceUpdateEvent & { price?: string; supply?: string }) => {
+        if (!mountedRef.current) return
         if (evt.artwork_id !== artworkId) return
         setPriceState({
-          price:     evt.current_price  ?? evt.price,
-          supply:    evt.current_supply ?? evt.supply,
-          volume24h: evt.volume_24h,
+          price:     evt.current_price  ?? evt.price ?? null,
+          supply:    evt.current_supply ?? evt.supply ?? null,
+          volume24h: evt.volume_24h     ?? null,
           timestamp: String(evt.timestamp ?? Date.now()),
         })
       }
 
       socket.on('price_snapshot', handlePriceEvent)
       socket.on('price_update',   handlePriceEvent)
+
     }).catch(err => {
-      console.warn('[usePriceSocket] socket.io-client not installed:', err.message)
+      if (!mountedRef.current) return
+      setSocketError(`socket.io-client load failed: ${err.message}`)
     })
 
     return () => {
-      if (socket) {
+      mountedRef.current = false
+      if (socket?.connected) {
         socket.emit('unsubscribe_artwork', { artwork_id: artworkId })
         socket.disconnect()
-        socketRef.current = null
       }
+      socketRef.current = null
       setConnected(false)
       setPriceState(INIT)
     }
   }, [artworkId])
 
+  // Cleanup on unmount
+  useEffect(() => {
+    return () => { mountedRef.current = false }
+  }, [])
+
   return {
     ...priceState,
     connected,
-    // Format helpers
+    socketError,
     priceFloat:     priceState.price     ? parseFloat(priceState.price)     : null,
     volume24hFloat: priceState.volume24h ? parseFloat(priceState.volume24h) : null,
   }
