@@ -29,6 +29,7 @@ import { gsap }                    from '@/lib/gsap'
 import { PHASE_COLOR, Phase }      from './ArtCard'
 import { CandlestickChart }        from '../common/CandlestickChart'
 import { useMarketplace }          from '@/hooks/useMarketplace'
+import { artworkService }          from '@/services/artwork.service'
 import type { Artwork }            from '@/types/api'
 
 // ── Extended artwork type ──────────────────────────────────────────
@@ -604,14 +605,63 @@ function HeaderChartBg() {
 }
 
 // ── Scrolling trade ticker tape ───────────────────────────────────
+interface TickItem {
+  ticker:   string
+  change:   string
+  positive: boolean
+  color:    string
+  price:    string   // "0.00412 ETH" — live current_price
+}
+
+function buildTickItems(artworks: Artwork[]): TickItem[] {
+  return artworks.map(a => {
+    const cur   = parseFloat(a.current_price) || 0
+    const init  = parseFloat(a.init_price)    || 0
+    const pct   = init > 0 ? ((cur - init) / init) * 100 : 0
+    const supply = parseFloat(a.current_supply || '0')
+    const cap    = parseFloat(a.target_cap)    || 0
+    const prog   = cap > 0 ? supply / cap : 0
+    const color  = prog >= 0.9 ? PHASE_COLOR['Migration'] : prog >= 0.5 ? PHASE_COLOR['FOMO'] : PHASE_COLOR['Accumulation']
+    return {
+      ticker:   a.ticker ?? '$TOKEN',
+      change:   `${pct >= 0 ? '+' : ''}${pct.toFixed(1)}%`,
+      positive: pct >= 0,
+      color,
+      price:    cur > 0 ? `${cur.toFixed(cur < 0.01 ? 5 : 4)} ETH` : '—',
+    }
+  })
+}
+
 function TickerTape() {
-  const items = ARTWORKS_MOCK.map(a => ({
-    ticker:   a.ticker,
-    change:   a.change24h,
-    positive: a.changePositive,
-    color:    a.phaseColor,
-    vol:      a.volume24h,
-  }))
+  const [items, setItems] = useState<TickItem[]>(() =>
+    ARTWORKS_MOCK.map(a => ({
+      ticker:   a.ticker,
+      change:   a.change24h,
+      positive: a.changePositive,
+      color:    a.phaseColor,
+      price:    a.volume24h,   // fallback: use vol as price display
+    }))
+  )
+
+  useEffect(() => {
+    let cancelled = false
+
+    async function refresh() {
+      try {
+        const res = await artworkService.list({ limit: 24, sortBy: 'view_count' })
+        const data = res.data ?? []
+        if (cancelled || !data.length) return
+        setItems(buildTickItems(data))
+      } catch {
+        // keep current items (mock or previous fetch)
+      }
+    }
+
+    refresh()
+    const id = setInterval(refresh, 15_000)  // refresh every 15 s
+    return () => { cancelled = true; clearInterval(id) }
+  }, [])
+
   return (
     <div
       className="overflow-hidden"
@@ -624,7 +674,7 @@ function TickerTape() {
       <motion.div
         className="flex items-center h-full"
         animate={{ x: ['0%', '-50%'] }}
-        transition={{ duration: 34, ease: 'linear', repeat: Infinity, repeatType: 'loop' as const }}
+        transition={{ duration: 60, ease: 'linear', repeat: Infinity, repeatType: 'loop' as const }}
         style={{ width: 'max-content', willChange: 'transform' }}
       >
         {[...items, ...items].map((item, i) => (
@@ -633,21 +683,17 @@ function TickerTape() {
             className="flex items-center gap-2 px-5 h-full shrink-0"
             style={{ borderRight: '1px solid rgba(255,255,255,0.04)' }}
           >
-            <span
-              className="font-mono text-[8.5px] tracking-wide"
-              style={{ color: 'rgba(255,255,255,0.3)' }}
-            >
+            <span className="font-mono text-[8.5px] tracking-wide"
+              style={{ color: 'rgba(255,255,255,0.3)' }}>
               {item.ticker}
             </span>
-            <span
-              className="font-mono text-[8.5px] font-semibold"
-              style={{ color: item.positive ? '#4ade80' : '#f87171' }}
-            >
+            <span className="font-mono text-[8.5px] font-semibold"
+              style={{ color: item.positive ? '#4ade80' : '#f87171' }}>
               {item.change}
             </span>
             <span className="font-mono text-[7.5px]"
               style={{ color: 'rgba(255,255,255,0.18)' }}>
-              VOL {item.vol}
+              {item.price}
             </span>
             <span
               className="size-[5px] rounded-full shrink-0"
