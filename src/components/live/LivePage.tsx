@@ -208,7 +208,7 @@ function Sidebar() {
 
   return (
     <aside
-      className="fixed z-20 flex flex-col items-center pt-2 pb-4"
+      className="fixed z-20 flex flex-col items-center pt-8 pb-4"
       style={{
         top: 68,
         left: 0,
@@ -628,7 +628,7 @@ export function LivePage() {
         {/* ── Sticky chip bar ── */}
         <div className="sticky z-10"
           style={{ top: 68, background: 'rgba(13,13,13,0.98)', backdropFilter: 'blur(20px)', borderBottom: '1px solid rgba(255,255,255,0.07)' }}>
-          <div className="flex items-center px-6" style={{ height: 64 }}>
+          <div className="flex items-center px-6" style={{ height: 72, paddingTop: 10, paddingBottom: 10 }}>
 
             {/* Chips */}
             <div ref={chipsRef}
@@ -700,10 +700,13 @@ export function LivePage() {
                   <VideoCard
                     key={item.id}
                     item={item}
-                    onClick={() => item.type === 'live' && item.roomName
-                      ? router.push(`/live/${item.roomName}`)
-                      : undefined
-                    }/>
+                    onClick={() => {
+                      if (item.type === 'live' && item.roomName) {
+                        router.push(`/live/${item.roomName}`)
+                      } else if (item.type === 'video') {
+                        router.push('/marketplace')
+                      }
+                    }}/>
                 ))}
               </motion.div>
             ) : (
