@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { useAccount, useBalance, useConnect, useConnectors } from 'wagmi'
+import { useConnectModal } from '@rainbow-me/rainbowkit'
 import { useAuthStore }    from '@/store/authStore'
 import { usePortfolio }    from '@/hooks/usePortfolio'
 import { gsap }            from '@/lib/gsap'
@@ -184,6 +185,7 @@ export function WalletPage() {
   const { data: balance }                = useBalance({ address })
   const { user, isAuthenticated, clearAuth } = useAuthStore()
   const { connect }                      = useConnect()
+  const { openConnectModal }             = useConnectModal()
   const connectors                       = useConnectors()
   const { holdings, totalValue, pnlEth, pnlPct, isLoading: pfLoading } = usePortfolio()
   const authMethod                       = useDetectedAuthMethod()
@@ -507,7 +509,16 @@ export function WalletPage() {
               <>
                 {visibleConnectors.map(connector => (
                   <button key={connector.uid} type="button"
-                    onClick={() => connect({ connector })}
+                    onClick={() => {
+                      // Injected wallets (MetaMask etc.) can connect directly.
+                      // All others (WalletConnect, Safe, Coinbase Smart Wallet…)
+                      // need the RainbowKit modal to handle QR / deep-link flow.
+                      if (connector.type === 'injected') {
+                        connect({ connector })
+                      } else {
+                        openConnectModal?.()
+                      }
+                    }}
                     className="group flex items-center gap-3.5 w-full h-[58px] px-4 rounded-xl transition-all duration-150"
                     style={{ border: '1px solid rgba(255,255,255,0.07)', background: 'rgba(255,255,255,0.03)' }}
                     onMouseEnter={e => {
