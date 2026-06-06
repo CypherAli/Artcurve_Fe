@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect, useCallback } from 'react'
+import { useRouter }                         from 'next/navigation'
 import { motion, AnimatePresence }           from 'framer-motion'
 import Link                                  from 'next/link'
 import { reviewService }                     from '@/services/review.service'
@@ -235,6 +236,7 @@ function ReviewCard({
 // ── Main Component ────────────────────────────────────────────────────
 
 export function ArtworkDetailPage({ artworkId }: { artworkId: string }) {
+  const router = useRouter()
   const [artwork,    setArtwork]    = useState<StoredArtwork | null>(null)
   const [reviews,    setReviews]    = useState<Review[]>(MOCK_REVIEWS)
   const [rating,     setRating]     = useState(0)
@@ -367,9 +369,9 @@ export function ArtworkDetailPage({ artworkId }: { artworkId: string }) {
       </div>
 
       {/* ── HERO — 2-column ──────────────────────────────────────── */}
-      <div className="grid grid-cols-1 lg:grid-cols-2" style={{ minHeight: '72vh' }}>
+      <div className="grid grid-cols-1 lg:grid-cols-2">
 
-        {/* Left: artwork image */}
+        {/* Left: artwork image — sticky, fills full viewport */}
         <motion.div
           initial={{ opacity: 0, x: -24 }}
           animate={{ opacity: 1, x: 0 }}
@@ -377,7 +379,7 @@ export function ArtworkDetailPage({ artworkId }: { artworkId: string }) {
           className="relative"
           style={{ borderRight: '1px solid rgba(255,255,255,0.05)' }}
         >
-          <div className="sticky top-0 w-full h-[72vh] overflow-hidden">
+          <div className="sticky top-0 w-full overflow-hidden" style={{ height: '100dvh' }}>
             {/* Phase left accent */}
             <span
               className="absolute left-0 top-0 bottom-0 w-[3px] z-10"
@@ -515,6 +517,7 @@ export function ArtworkDetailPage({ artworkId }: { artworkId: string }) {
           {/* BUY CTA */}
           <motion.button
             type="button"
+            onClick={() => router.push('/marketplace')}
             whileHover={{ scale: 1.01, filter: 'brightness(1.08)' }}
             whileTap={{ scale: 0.985 }}
             transition={{ type: 'spring', stiffness: 400, damping: 20 }}
@@ -543,247 +546,173 @@ export function ArtworkDetailPage({ artworkId }: { artworkId: string }) {
 
       {/* ── REVIEWS SECTION ──────────────────────────────────────── */}
       <div style={{ borderTop: '1px solid rgba(255,255,255,0.06)' }}>
-        <div className="max-w-5xl mx-auto px-8 py-20">
+        <div className="max-w-4xl mx-auto px-8 py-20">
 
-          {/* Section header */}
+          {/* ── Header ── */}
           <motion.div
-            initial={{ opacity: 0, y: 24 }}
+            initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true, margin: '-80px' }}
-            transition={{ duration: 0.65, ease: [0.25, 0.46, 0.45, 0.94] }}
-            className="mb-14"
+            viewport={{ once: true }}
+            transition={{ duration: 0.6 }}
+            className="flex items-baseline justify-between mb-3"
           >
-            <p
-              className="font-mono text-[8px] uppercase tracking-[0.32em] mb-3"
-              style={{ color: 'rgba(255,255,255,0.22)' }}
-            >
-              Collector Reviews
+            <p className="font-mono text-[8px] uppercase tracking-[0.32em]"
+              style={{ color: 'rgba(255,255,255,0.22)' }}>
+              Collector Voices
             </p>
-            <div className="flex flex-wrap items-end gap-4">
-              <h2
-                className="font-light"
-                style={{
-                  fontFamily: "'Cormorant Garamond', serif",
-                  fontSize:   'clamp(1.8rem, 3vw, 2.6rem)',
-                  color:      '#FDFBF7',
-                }}
-              >
-                What collectors say
-              </h2>
-              {totalReviews > 0 && (
-                <div className="flex items-center gap-2 mb-1">
-                  <StarDisplay value={avgRating} size={15} />
-                  <span className="font-mono text-[10px]" style={{ color: 'rgba(255,255,255,0.35)' }}>
-                    {avgRating.toFixed(1)} · {totalReviews} review{totalReviews !== 1 ? 's' : ''}
-                  </span>
-                </div>
-              )}
-            </div>
+            {totalReviews > 0 && (
+              <span className="font-mono text-[10px] flex items-center gap-2"
+                style={{ color: 'rgba(255,255,255,0.3)' }}>
+                <StarDisplay value={avgRating} size={12} />
+                {avgRating.toFixed(1)} · {totalReviews}
+              </span>
+            )}
           </motion.div>
 
-          {/* 2-column: distribution + write form */}
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-16">
+          {/* ── Gold rule ── */}
+          <div className="mb-12 h-px" style={{ background: 'linear-gradient(90deg, rgba(212,175,55,0.5), transparent)' }} />
 
-            {/* Rating distribution */}
-            <motion.div
-              initial={{ opacity: 0, x: -16 }}
-              whileInView={{ opacity: 1, x: 0 }}
-              viewport={{ once: true, margin: '-60px' }}
-              transition={{ duration: 0.5, ease: 'easeOut' }}
-              className="p-7 rounded-sm"
-              style={{
-                background: 'rgba(255,255,255,0.05)',
-                border:     '1px solid rgba(255,255,255,0.12)',
-              }}
+          {/* ── Write form ── */}
+          {currentUser ? (
+            <motion.form
+              onSubmit={handleSubmit}
+              initial={{ opacity: 0 }}
+              whileInView={{ opacity: 1 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.5 }}
+              className="mb-16"
             >
-              <div className="flex items-start gap-8">
-                {/* Big number */}
-                <div className="text-center shrink-0">
-                  <p
-                    className="font-mono leading-none mb-1"
-                    style={{ fontSize: '3.2rem', color: '#D4AF37' }}
-                  >
-                    {avgRating > 0 ? avgRating.toFixed(1) : '—'}
-                  </p>
-                  <StarDisplay value={avgRating} size={15} />
-                  <p
-                    className="font-mono text-[8.5px] mt-2"
-                    style={{ color: 'rgba(255,255,255,0.28)' }}
-                  >
-                    {totalReviews} review{totalReviews !== 1 ? 's' : ''}
-                  </p>
-                </div>
-
-                {/* Distribution bars */}
-                <div className="flex-1 flex flex-col gap-2.5 pt-1">
-                  {distribution.map(({ star, count }) => (
-                    <RatingBar key={star} star={star} count={count} maxCount={maxCount} />
-                  ))}
-                </div>
+              <div className="flex items-center justify-between mb-4">
+                <StarSelector value={rating} onChange={setRating} />
+                {rating > 0 && (
+                  <span className="font-mono text-[9px] tracking-widest" style={{ color: '#D4AF37' }}>
+                    {['', 'Poor', 'Fair', 'Good', 'Great', 'Exceptional'][rating]}
+                  </span>
+                )}
               </div>
-            </motion.div>
-
-            {/* Write review form */}
-            <motion.div
-              initial={{ opacity: 0, x: 16 }}
-              whileInView={{ opacity: 1, x: 0 }}
-              viewport={{ once: true, margin: '-60px' }}
-              transition={{ duration: 0.5, ease: 'easeOut', delay: 0.07 }}
-              className="p-7 rounded-sm"
-              style={{
-                background: 'rgba(255,255,255,0.05)',
-                border:     '1px solid rgba(255,255,255,0.12)',
-              }}
-            >
-              <p
-                className="font-mono text-[9px] uppercase tracking-[0.22em] mb-5"
-                style={{ color: 'rgba(255,255,255,0.28)' }}
-              >
-                Write a Review
-              </p>
-
-              {currentUser ? (
-                <form onSubmit={handleSubmit}>
-                  {/* Star selector */}
-                  <div className="mb-4">
-                    <StarSelector value={rating} onChange={setRating} />
-                    {rating > 0 && (
-                      <motion.p
-                        initial={{ opacity: 0 }}
-                        animate={{ opacity: 1 }}
-                        className="font-mono text-[8.5px] mt-1.5"
-                        style={{ color: 'rgba(255,255,255,0.28)' }}
-                      >
-                        {['', 'Poor', 'Fair', 'Good', 'Great', 'Exceptional'][rating]}
-                      </motion.p>
-                    )}
-                  </div>
-
-                  {/* Textarea */}
-                  <textarea
-                    value={comment}
-                    onChange={e => setComment(e.target.value)}
-                    placeholder="Your thoughts on this artwork…"
-                    maxLength={1000}
-                    rows={4}
-                    className="w-full bg-transparent resize-none outline-none p-3 rounded-sm"
-                    style={{
-                      border:     '1px solid rgba(255,255,255,0.09)',
-                      color:      'rgba(255,255,255,0.65)',
-                      fontFamily: "'Cormorant Garamond', serif",
-                      fontSize:   '1.05rem',
-                      lineHeight: 1.65,
-                      transition: 'border-color 0.15s ease',
-                    }}
-                    onFocus={e  => (e.currentTarget.style.borderColor = 'rgba(212,175,55,0.38)')}
-                    onBlur={e   => (e.currentTarget.style.borderColor = 'rgba(255,255,255,0.09)')}
-                  />
-
-                  {/* Char count */}
-                  <p className="font-mono text-[8px] text-right mt-1" style={{ color: 'rgba(255,255,255,0.2)' }}>
-                    {comment.length} / 1000
-                  </p>
-
-                  {/* Error / success */}
-                  {submitErr && (
-                    <p className="font-mono text-[9px] mt-2" style={{ color: '#f87171' }}>{submitErr}</p>
-                  )}
+              <textarea
+                value={comment}
+                onChange={e => setComment(e.target.value)}
+                placeholder="Share your perspective on this work…"
+                maxLength={1000}
+                rows={3}
+                className="w-full bg-transparent resize-none outline-none pb-3"
+                style={{
+                  borderBottom:  '1px solid rgba(255,255,255,0.12)',
+                  color:         'rgba(255,255,255,0.75)',
+                  fontFamily:    "'Cormorant Garamond', serif",
+                  fontSize:      '1.15rem',
+                  lineHeight:    1.7,
+                  transition:    'border-color 0.15s ease',
+                }}
+                onFocus={e => (e.currentTarget.style.borderBottomColor = 'rgba(212,175,55,0.5)')}
+                onBlur={e  => (e.currentTarget.style.borderBottomColor = 'rgba(255,255,255,0.12)')}
+              />
+              <div className="flex items-center justify-between mt-3">
+                <span className="font-mono text-[8px]" style={{ color: 'rgba(255,255,255,0.18)' }}>
+                  {comment.length} / 1000
+                </span>
+                <div className="flex items-center gap-4">
+                  {submitErr && <span className="font-mono text-[9px]" style={{ color: '#f87171' }}>{submitErr}</span>}
                   <AnimatePresence>
                     {success && (
-                      <motion.p
-                        initial={{ opacity: 0, y: -4 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        exit={{ opacity: 0 }}
-                        className="font-mono text-[9px] mt-2"
-                        style={{ color: '#4ade80' }}
-                      >
-                        ✦ Review submitted. Thank you.
-                      </motion.p>
+                      <motion.span initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+                        className="font-mono text-[9px]" style={{ color: '#4ade80' }}>
+                        ✦ Submitted
+                      </motion.span>
                     )}
                   </AnimatePresence>
-
-                  {/* Submit button */}
-                  <motion.button
+                  <button
                     type="submit"
-                    whileHover={rating && comment.trim() ? { scale: 1.01 } : {}}
-                    whileTap={rating && comment.trim()  ? { scale: 0.98 } : {}}
                     disabled={!rating || !comment.trim() || submitting}
-                    className="w-full mt-4 py-3 font-mono text-[9px] tracking-[0.28em] uppercase transition-all duration-150"
+                    className="font-mono text-[9px] tracking-[0.28em] uppercase px-5 py-2 transition-all duration-150"
                     style={{
-                      background: (rating && comment.trim())
-                        ? 'rgba(212,175,55,0.1)'
-                        : 'rgba(255,255,255,0.03)',
-                      border: `1px solid ${(rating && comment.trim())
-                        ? 'rgba(212,175,55,0.38)'
-                        : 'rgba(255,255,255,0.07)'}`,
-                      color: (rating && comment.trim())
-                        ? '#D4AF37'
-                        : 'rgba(255,255,255,0.2)',
-                      cursor: (rating && comment.trim()) ? 'pointer' : 'not-allowed',
+                      background: (rating && comment.trim()) ? 'rgba(212,175,55,0.1)' : 'transparent',
+                      border:     `1px solid ${(rating && comment.trim()) ? 'rgba(212,175,55,0.45)' : 'rgba(255,255,255,0.1)'}`,
+                      color:      (rating && comment.trim()) ? '#D4AF37' : 'rgba(255,255,255,0.2)',
+                      cursor:     (rating && comment.trim()) ? 'pointer' : 'not-allowed',
                     }}
                   >
-                    {submitting ? 'Submitting…' : 'Submit Review'}
-                  </motion.button>
-                </form>
-              ) : (
-                /* Not logged in */
-                <div className="flex flex-col items-center justify-center py-8 gap-4">
-                  <p
-                    style={{
-                      fontSize:   '1rem',
-                      color:      'rgba(255,255,255,0.32)',
-                      fontFamily: "'Cormorant Garamond', serif",
-                      textAlign:  'center',
-                    }}
-                  >
-                    Connect your wallet to leave a review
-                  </p>
-                  <Link
-                    href="/"
-                    className="font-mono text-[9px] tracking-widest uppercase px-5 py-2.5 transition-colors duration-150"
-                    style={{ border: '1px solid rgba(212,175,55,0.38)', color: '#D4AF37' }}
-                    onMouseEnter={e => ((e.currentTarget as HTMLElement).style.background = 'rgba(212,175,55,0.08)')}
-                    onMouseLeave={e => ((e.currentTarget as HTMLElement).style.background = 'transparent')}
-                  >
-                    Connect Wallet
-                  </Link>
+                    {submitting ? 'Posting…' : 'Post'}
+                  </button>
                 </div>
-              )}
-            </motion.div>
-          </div>
-
-          {/* ── Reviews list ─────────────────────────────────────── */}
-          {reviews.length === 0 ? (
-            <motion.p
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              className="font-mono text-[10px] tracking-[0.2em] uppercase text-center py-12"
-              style={{ color: 'rgba(255,255,255,0.18)' }}
-            >
-              No reviews yet — be the first collector to share your thoughts.
-            </motion.p>
+              </div>
+            </motion.form>
           ) : (
-            <div className="flex flex-col gap-4">
-              <AnimatePresence initial={false}>
-                {reviews.map((review, i) => (
+            <div className="flex items-center gap-6 mb-16 pb-8"
+              style={{ borderBottom: '1px solid rgba(255,255,255,0.06)' }}>
+              <p style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: '1.1rem', color: 'rgba(255,255,255,0.35)' }}>
+                Connect your wallet to share a perspective.
+              </p>
+              <Link href="/"
+                className="shrink-0 font-mono text-[9px] tracking-widest uppercase px-4 py-2 transition-colors duration-150"
+                style={{ border: '1px solid rgba(212,175,55,0.38)', color: '#D4AF37' }}
+                onMouseEnter={e => ((e.currentTarget as HTMLElement).style.background = 'rgba(212,175,55,0.08)')}
+                onMouseLeave={e => ((e.currentTarget as HTMLElement).style.background = 'transparent')}>
+                Connect Wallet
+              </Link>
+            </div>
+          )}
+
+          {/* ── Reviews list — editorial style ── */}
+          {reviews.length === 0 ? (
+            <p className="font-mono text-[10px] tracking-[0.2em] uppercase py-8"
+              style={{ color: 'rgba(255,255,255,0.15)' }}>
+              No perspectives yet.
+            </p>
+          ) : (
+            <AnimatePresence initial={false}>
+              {reviews.map((review, i) => {
+                const name = review.user?.username ?? shortAddr(review.user?.wallet_address ?? review.user_id)
+                const isOwn = currentUser?.id === review.user_id
+                return (
                   <motion.div
                     key={review.id}
-                    initial={{ opacity: 0, y: 18 }}
+                    initial={{ opacity: 0, y: 16 }}
                     animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0, y: -8, transition: { duration: 0.2 } }}
-                    transition={{ duration: 0.38, delay: i * 0.05, ease: [0.25, 0.46, 0.45, 0.94] }}
+                    exit={{ opacity: 0, transition: { duration: 0.18 } }}
+                    transition={{ duration: 0.4, delay: i * 0.04 }}
+                    className="py-10"
+                    style={{ borderBottom: '1px solid rgba(255,255,255,0.06)' }}
                   >
-                    <ReviewCard
-                      review={review}
-                      isOwn={currentUser?.id === review.user_id}
-                      onDelete={currentUser?.id === review.user_id
-                        ? () => handleDelete(review.id)
-                        : undefined}
-                    />
+                    {/* Quote */}
+                    <p style={{
+                      fontFamily: "'Cormorant Garamond', serif",
+                      fontSize:   'clamp(1.1rem, 1.8vw, 1.35rem)',
+                      lineHeight: 1.75,
+                      color:      'rgba(255,255,255,0.82)',
+                      fontStyle:  'italic',
+                      marginBottom: '1.25rem',
+                    }}>
+                      "{review.content}"
+                    </p>
+
+                    {/* Attribution */}
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-4">
+                        <StarDisplay value={review.rating ?? 0} size={12} />
+                        <span className="font-mono text-[10px]" style={{ color: 'rgba(255,255,255,0.4)' }}>
+                          {name}
+                        </span>
+                        <span className="font-mono text-[9px]" style={{ color: 'rgba(255,255,255,0.2)' }}>
+                          {fmtDate(review.created_at)}
+                        </span>
+                      </div>
+                      {isOwn && (
+                        <button type="button"
+                          onClick={() => handleDelete(review.id)}
+                          className="font-mono text-[8px] px-2 py-0.5 transition-colors"
+                          style={{ color: 'rgba(248,113,113,0.5)', border: '1px solid rgba(248,113,113,0.2)' }}
+                          onMouseEnter={e => (e.currentTarget.style.color = '#f87171')}
+                          onMouseLeave={e => (e.currentTarget.style.color = 'rgba(248,113,113,0.5)')}>
+                          delete
+                        </button>
+                      )}
+                    </div>
                   </motion.div>
-                ))}
-              </AnimatePresence>
-            </div>
+                )
+              })}
+            </AnimatePresence>
           )}
         </div>
       </div>
