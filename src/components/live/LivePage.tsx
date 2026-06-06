@@ -1,8 +1,7 @@
 'use client'
 
 import { useState, useMemo, useCallback, useRef } from 'react'
-import { useRouter, usePathname } from 'next/navigation'
-import Link from 'next/link'
+import { useRouter } from 'next/navigation'
 import { motion, AnimatePresence, type Variants } from 'framer-motion'
 import { authStore } from '@/lib/auth-store'
 
@@ -151,15 +150,27 @@ const ALL_ITEMS: Item[] = [
   },
 ]
 
-const CHIPS = ['All', 'Live', 'Videos', 'Painting', 'Drawing', 'Digital', 'Sculpture', 'Mixed Media', 'Trending']
+// Chips shown in the bar (Following added for Artists tab)
+const CHIPS = ['All', 'Live', 'Following', 'Videos', 'Painting', 'Drawing', 'Digital', 'Sculpture', 'Mixed Media', 'Trending']
 
 // ─────────────────────────────────────────────────────────────────
-// Sidebar nav items  (YouTube mini-sidebar equivalents)
+// Sidebar — items control chip filter, not page navigation
+// Home   → chip "All"       (recommended feed like YT home)
+// Live   → chip "Live"      (live streams only)
+// Artists→ chip "Following" (channels you subscribed to)
+// You    → navigates to /wallet
 // ─────────────────────────────────────────────────────────────────
-const NAV_ITEMS = [
+interface SidebarItem {
+  label: string
+  chip?: string   // sets chip filter (stays on live page)
+  href?: string   // navigates away (You only)
+  icon: React.ReactNode
+}
+
+const NAV_ITEMS: SidebarItem[] = [
   {
     label: 'Home',
-    href: '/',
+    chip: 'All',
     icon: (
       <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor">
         <path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/>
@@ -168,7 +179,7 @@ const NAV_ITEMS = [
   },
   {
     label: 'Live',
-    href: '/live',
+    chip: 'Live',
     icon: (
       <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
         <circle cx="12" cy="12" r="2"/>
@@ -179,7 +190,7 @@ const NAV_ITEMS = [
   },
   {
     label: 'Artists',
-    href: '/guild',
+    chip: 'Following',
     icon: (
       <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
         <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
@@ -200,45 +211,43 @@ const NAV_ITEMS = [
   },
 ]
 
-// ─────────────────────────────────────────────────────────────────
-// Sidebar
-// ─────────────────────────────────────────────────────────────────
-function Sidebar() {
-  const pathname = usePathname()
+function Sidebar({ chip, setChip }: { chip: string; setChip: (c: string) => void }) {
+  const router = useRouter()
 
   return (
     <aside
       className="fixed z-20 flex flex-col items-center pt-8 pb-4"
       style={{
-        top: 68,
-        left: 0,
-        width: 80,
+        top: 68, left: 0, width: 80,
         height: 'calc(100vh - 68px)',
         background: '#0f0f0f',
         borderRight: '1px solid rgba(255,255,255,0.05)',
       }}>
       {NAV_ITEMS.map(item => {
-        const active = pathname === item.href || (item.href === '/live' && pathname.startsWith('/live'))
+        const active = item.chip ? chip === item.chip : false
         return (
-          <Link key={item.href} href={item.href}>
-            <motion.div
-              className="flex flex-col items-center justify-center gap-1.5 cursor-pointer"
-              style={{
-                width: 68,
-                padding: '10px 6px',
-                borderRadius: 12,
-                color: active ? 'rgba(255,255,255,0.95)' : 'rgba(255,255,255,0.42)',
-              }}
-              whileHover={{ background: 'rgba(255,255,255,0.08)', color: 'rgba(255,255,255,0.88)' }}
-              whileTap={{ scale: 0.93 }}
-              animate={{ background: active ? 'rgba(255,255,255,0.11)' : 'transparent' }}
-              transition={{ duration: 0.13 }}>
-              {item.icon}
-              <span style={{ fontSize: 10, fontWeight: 500, textAlign: 'center', lineHeight: 1.2 }}>
-                {item.label}
-              </span>
-            </motion.div>
-          </Link>
+          <motion.button
+            key={item.label}
+            type="button"
+            className="flex flex-col items-center justify-center gap-1.5 cursor-pointer"
+            style={{
+              width: 68, padding: '10px 6px', borderRadius: 12,
+              color: active ? 'rgba(255,255,255,0.95)' : 'rgba(255,255,255,0.42)',
+              background: 'transparent', border: 'none',
+            }}
+            whileHover={{ background: 'rgba(255,255,255,0.08)', color: 'rgba(255,255,255,0.88)' }}
+            whileTap={{ scale: 0.93 }}
+            animate={{ background: active ? 'rgba(255,255,255,0.11)' : 'transparent' }}
+            transition={{ duration: 0.13 }}
+            onClick={() => {
+              if (item.chip) setChip(item.chip)
+              else if (item.href) router.push(item.href)
+            }}>
+            {item.icon}
+            <span style={{ fontSize: 10, fontWeight: 500, textAlign: 'center', lineHeight: 1.2 }}>
+              {item.label}
+            </span>
+          </motion.button>
         )
       })}
     </aside>
@@ -605,10 +614,11 @@ export function LivePage() {
   const filtered = useMemo(() => {
     switch (chip) {
       case 'Live':     return ALL_ITEMS.filter(i => i.type === 'live')
-      case 'Videos':   return ALL_ITEMS.filter(i => i.type === 'video')
-      case 'Trending': return [...ALL_ITEMS].sort((a, b) => (b.viewers ?? 0) - (a.viewers ?? 0))
-      case 'All':      return ALL_ITEMS
-      default:         return ALL_ITEMS.filter(i => i.category === chip)
+      case 'Videos':    return ALL_ITEMS.filter(i => i.type === 'video')
+      case 'Trending':  return [...ALL_ITEMS].sort((a, b) => (b.viewers ?? 0) - (a.viewers ?? 0))
+      case 'Following': return ALL_ITEMS.filter(i => i.verified)   // artists you follow (verified = subscribed)
+      case 'All':       return ALL_ITEMS
+      default:          return ALL_ITEMS.filter(i => i.category === chip)
     }
   }, [chip])
 
@@ -621,7 +631,7 @@ export function LivePage() {
       </AnimatePresence>
 
       {/* ── YouTube-style left sidebar ── */}
-      <Sidebar/>
+      <Sidebar chip={chip} setChip={setChip}/>
 
       <div className="min-h-dvh" style={{ marginTop: 68, marginLeft: 80, background: '#0f0f0f' }}>
 
