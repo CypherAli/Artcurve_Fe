@@ -2,7 +2,7 @@
 
 import { useState, useMemo, useCallback, useRef } from 'react'
 import { useRouter } from 'next/navigation'
-import { motion, AnimatePresence } from 'framer-motion'
+import { motion, AnimatePresence, type Variants } from 'framer-motion'
 import { authStore } from '@/lib/auth-store'
 
 const API = process.env.NEXT_PUBLIC_API_URL ?? 'https://artcurve-be-production.up.railway.app/api/v1'
@@ -161,14 +161,16 @@ function fmtViewers(n: number) {
 // ─────────────────────────────────────────────────────────────────
 // Animation variants (cinematic timing from skill)
 // ─────────────────────────────────────────────────────────────────
-const gridVariants = {
+const EASE_OUT_CUBIC: [number, number, number, number] = [0.215, 0.61, 0.355, 1.0]
+
+const gridVariants: Variants = {
   hidden: {},
   show: { transition: { staggerChildren: 0.07, delayChildren: 0.05 } },
 }
 
-const cardVariants = {
+const cardVariants: Variants = {
   hidden: { opacity: 0, y: 18 },
-  show:   { opacity: 1, y: 0, transition: { duration: 0.55, ease: [0.215, 0.61, 0.355, 1.0] } },
+  show:   { opacity: 1, y: 0, transition: { duration: 0.55, ease: EASE_OUT_CUBIC } },
 }
 
 // ─────────────────────────────────────────────────────────────────
