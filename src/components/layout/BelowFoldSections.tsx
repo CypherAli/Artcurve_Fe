@@ -23,6 +23,7 @@ const TopCreatorsSection       = dynamic(() => import('@/components/home/TopCrea
 const ConvergenceGallery       = dynamic(() => import('@/components/home/ConvergenceGallery').then(m => ({ default: m.ConvergenceGallery })),            { ssr: false })
 const ProtocolAnalyticsSection = dynamic(() => import('@/components/home/ProtocolAnalyticsSection').then(m => ({ default: m.ProtocolAnalyticsSection })), { ssr: false })
 const EcosystemSection         = dynamic(() => import('@/components/home/EcosystemSection').then(m => ({ default: m.EcosystemSection })),                { ssr: false })
+const CryptoCarousel           = dynamic(() => import('@/components/home/CryptoCarousel').then(m => ({ default: m.CryptoCarousel })),                    { ssr: false })
 const GrandCTASection          = dynamic(() => import('@/components/home/GrandCTASection').then(m => ({ default: m.GrandCTASection })),                  { ssr: false })
 
 const HEADER_H = 80
@@ -94,6 +95,9 @@ export function BelowFoldSections() {
           <EcosystemSection />
         </div>
       </div>
+
+      {/* ── 7b. Live Crypto Carousel ────────────────────────────── */}
+      <CryptoCarousel />
 
       {/* ── 8. Grand CTA + Footer ──────────────────────────────── */}
       <div>

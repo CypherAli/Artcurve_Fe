@@ -30,6 +30,7 @@ import { PHASE_COLOR, Phase }      from './ArtCard'
 import { CandlestickChart }        from '../common/CandlestickChart'
 import { useMarketplace }          from '@/hooks/useMarketplace'
 import { artworkService }          from '@/services/artwork.service'
+import { useBinanceTicker, fmtUSD, fmtChange, TICKER_COINS } from '@/hooks/useBinanceTicker'
 import type { Artwork }            from '@/types/api'
 
 // ── Extended artwork type ──────────────────────────────────────────
@@ -604,101 +605,78 @@ function HeaderChartBg() {
   )
 }
 
-// ── Scrolling trade ticker tape ───────────────────────────────────
-interface TickItem {
-  ticker:   string
-  change:   string
-  positive: boolean
-  color:    string
-  price:    string   // "0.00412 ETH" — live current_price
-}
+// ── Scrolling trade ticker tape — Binance realtime ────────────────
+function TickerTape() {
+  const { ticks, connected } = useBinanceTicker()
 
-function buildTickItems(artworks: Artwork[]): TickItem[] {
-  return artworks.map(a => {
-    const cur   = parseFloat(a.current_price) || 0
-    const init  = parseFloat(a.init_price)    || 0
-    const pct   = init > 0 ? ((cur - init) / init) * 100 : 0
-    const supply = parseFloat(a.current_supply || '0')
-    const cap    = parseFloat(a.target_cap)    || 0
-    const prog   = cap > 0 ? supply / cap : 0
-    const color  = prog >= 0.9 ? PHASE_COLOR['Migration'] : prog >= 0.5 ? PHASE_COLOR['FOMO'] : PHASE_COLOR['Accumulation']
+  // Build ordered list: coins that have arrived first, rest padded with skeleton
+  const items = TICKER_COINS.map(coin => {
+    const t = ticks[coin.symbol]
     return {
-      ticker:   a.ticker ?? '$TOKEN',
-      change:   `${pct >= 0 ? '+' : ''}${pct.toFixed(1)}%`,
-      positive: pct >= 0,
-      color,
-      price:    cur > 0 ? `${cur.toFixed(cur < 0.01 ? 5 : 4)} ETH` : '—',
+      symbol:   coin.symbol,
+      name:     coin.name,
+      price:    t ? fmtUSD(t.price)     : '…',
+      change:   t ? fmtChange(t.change) : '—',
+      positive: t ? t.change >= 0       : true,
     }
   })
-}
-
-function TickerTape() {
-  const [items, setItems] = useState<TickItem[]>(() =>
-    ARTWORKS_MOCK.map(a => ({
-      ticker:   a.ticker,
-      change:   a.change24h,
-      positive: a.changePositive,
-      color:    a.phaseColor,
-      price:    a.volume24h,   // fallback: use vol as price display
-    }))
-  )
-
-  useEffect(() => {
-    let cancelled = false
-
-    async function refresh() {
-      try {
-        const res = await artworkService.list({ limit: 24, sortBy: 'view_count' })
-        const data = res.data ?? []
-        if (cancelled || !data.length) return
-        setItems(buildTickItems(data))
-      } catch {
-        // keep current items (mock or previous fetch)
-      }
-    }
-
-    refresh()
-    const id = setInterval(refresh, 15_000)  // refresh every 15 s
-    return () => { cancelled = true; clearInterval(id) }
-  }, [])
 
   return (
     <div
-      className="overflow-hidden"
+      className="overflow-hidden relative"
       style={{
-        height:       26,
+        height:       28,
         borderBottom: '1px solid rgba(255,255,255,0.05)',
-        background:   'rgba(0,0,0,0.5)',
+        background:   'rgba(0,0,0,0.55)',
       }}
     >
+      {/* live indicator */}
+      <div className="absolute left-3 top-1/2 -translate-y-1/2 z-10 flex items-center gap-1.5 pointer-events-none">
+        <span
+          className="size-[5px] rounded-full"
+          style={{
+            background: connected ? '#4ade80' : '#f87171',
+            boxShadow:  connected ? '0 0 6px #4ade80' : 'none',
+            animation:  connected ? 'pulse 1.4s ease-in-out infinite' : 'none',
+          }}
+        />
+        <span className="font-mono text-[7px] tracking-widest"
+          style={{ color: connected ? 'rgba(74,222,128,0.5)' : 'rgba(248,113,113,0.5)' }}>
+          {connected ? 'LIVE' : 'CONNECTING'}
+        </span>
+      </div>
+
+      {/* scrolling strip */}
       <motion.div
-        className="flex items-center h-full"
+        className="flex items-center h-full pl-20"
         animate={{ x: ['0%', '-50%'] }}
-        transition={{ duration: 60, ease: 'linear', repeat: Infinity, repeatType: 'loop' as const }}
+        transition={{ duration: 80, ease: 'linear', repeat: Infinity, repeatType: 'loop' as const }}
         style={{ width: 'max-content', willChange: 'transform' }}
       >
         {[...items, ...items].map((item, i) => (
           <span
             key={i}
-            className="flex items-center gap-2 px-5 h-full shrink-0"
+            className="inline-flex items-center gap-2 px-5 h-full shrink-0"
             style={{ borderRight: '1px solid rgba(255,255,255,0.04)' }}
           >
-            <span className="font-mono text-[8.5px] tracking-wide"
-              style={{ color: 'rgba(255,255,255,0.3)' }}>
-              {item.ticker}
+            {/* Symbol */}
+            <span className="font-mono text-[8px] font-bold tracking-wide"
+              style={{ color: 'rgba(255,255,255,0.55)' }}>
+              {item.symbol}
             </span>
-            <span className="font-mono text-[8.5px] font-semibold"
+            {/* Price */}
+            <span className="font-mono text-[8.5px]"
+              style={{ color: 'rgba(255,255,255,0.85)' }}>
+              {item.price}
+            </span>
+            {/* % change */}
+            <span className="font-mono text-[8px] font-semibold"
               style={{ color: item.positive ? '#4ade80' : '#f87171' }}>
               {item.change}
             </span>
-            <span className="font-mono text-[7.5px]"
-              style={{ color: 'rgba(255,255,255,0.18)' }}>
-              {item.price}
-            </span>
-            <span
-              className="size-[5px] rounded-full shrink-0"
-              style={{ background: item.color }}
-            />
+            {/* dot separator */}
+            <span className="size-[4px] rounded-full shrink-0 opacity-30"
+              style={{ background: item.positive ? '#4ade80' : '#f87171' }}/>
           </span>
         ))}
       </motion.div>
