@@ -7,7 +7,9 @@ import { authStore } from '@/lib/auth-store'
 
 const API = process.env.NEXT_PUBLIC_API_URL ?? 'https://artcurve-be-production.up.railway.app/api/v1'
 
-// ── Types ──────────────────────────────────────────────────────────
+// ─────────────────────────────────────────────────────────────────
+// Types
+// ─────────────────────────────────────────────────────────────────
 interface Item {
   id: string
   type: 'live' | 'video'
@@ -27,11 +29,12 @@ interface Item {
   glow1: string
   glow2: string
   base: string
-  spark: number[]
   roomName?: string
 }
 
-// ── Data ───────────────────────────────────────────────────────────
+// ─────────────────────────────────────────────────────────────────
+// Data
+// ─────────────────────────────────────────────────────────────────
 const ALL_ITEMS: Item[] = [
   {
     id:'s1', type:'live', artist:'Soo-ah Kim', handle:'soo_ah.eth', verified:true,
@@ -39,25 +42,22 @@ const ALL_ITEMS: Item[] = [
     ticker:'$PALE', category:'Painting', viewers:3420, liveFor:'1h 23m', marketCap:'$84.2K',
     color:'#a78bfa', glow1:'rgba(139,92,246,0.38)', glow2:'rgba(91,33,182,0.20)',
     base:'linear-gradient(158deg,#09091e 0%,#0f0f2a 60%,#0a0a1c 100%)',
-    spark:[.42,.44,.40,.47,.52,.50,.57,.62,.59,.66,.71,.68,.73,.76,.72,.79,.83,.80,.86,.90],
     roomName:'soo-ah-2024',
   },
   {
     id:'s2', type:'live', artist:'Marcus Adler', handle:'markus.eth', verified:true,
-    title:'Threshold Fragment — oil painting, live session',
+    title:'Threshold Fragment — oil painting, live session from Berlin',
     ticker:'$THRESH', category:'Painting', viewers:1890, liveFor:'42m', marketCap:'$31.5K',
     color:'#f87171', glow1:'rgba(239,68,68,0.32)', glow2:'rgba(185,28,28,0.16)',
     base:'linear-gradient(158deg,#1a0808 0%,#220d0d 60%,#160606 100%)',
-    spark:[.60,.55,.58,.52,.50,.54,.48,.45,.50,.52,.55,.52,.50,.48,.45,.46,.44,.42,.40,.38],
     roomName:'marcus-2024',
   },
   {
     id:'s3', type:'live', artist:'Aiko Tanaka', handle:'aiko.base', verified:false,
-    title:'Generative bloom — live coding in p5.js, open canvas session',
+    title:'Generative Bloom — live coding in p5.js, open canvas session',
     ticker:'$BLOOM', category:'Digital', viewers:970, liveFor:'18m', marketCap:'$4.1K',
     color:'#4ade80', glow1:'rgba(74,222,128,0.28)', glow2:'rgba(22,163,74,0.15)',
     base:'linear-gradient(158deg,#040f08 0%,#07180d 60%,#040d07 100%)',
-    spark:[.30,.35,.40,.38,.42,.46,.51,.49,.53,.56,.61,.59,.63,.66,.69,.71,.73,.76,.79,.83],
     roomName:'aiko-2024',
   },
   {
@@ -66,7 +66,6 @@ const ALL_ITEMS: Item[] = [
     ticker:'$BÖCKLIN', category:'Drawing', viewers:2340, liveFor:'3h 1m', marketCap:'$18.2K',
     color:'#D4AF37', glow1:'rgba(212,175,55,0.30)', glow2:'rgba(161,120,24,0.15)',
     base:'linear-gradient(158deg,#0f0a03 0%,#180f05 60%,#0d0903 100%)',
-    spark:[.50,.52,.55,.60,.63,.66,.69,.73,.76,.79,.81,.83,.86,.89,.91,.89,.86,.91,.93,.96],
     roomName:'bocklin-2024',
   },
   {
@@ -75,16 +74,14 @@ const ALL_ITEMS: Item[] = [
     ticker:'$DISS', category:'Drawing', viewers:560, liveFor:'31m', marketCap:'$3.9K',
     color:'#60a5fa', glow1:'rgba(96,165,250,0.25)', glow2:'rgba(37,99,235,0.12)',
     base:'linear-gradient(158deg,#050810 0%,#080c18 60%,#050810 100%)',
-    spark:[.50,.48,.45,.42,.44,.40,.38,.42,.45,.48,.50,.52,.50,.48,.45,.42,.40,.38,.35,.32],
     roomName:'lena-2024',
   },
   {
     id:'s6', type:'live', artist:'Ivan Sorokin', handle:'ivan_sorokin.eth', verified:true,
-    title:'Nocturne at the Bridge — watercolor, live from Warsaw',
+    title:'Nocturne at the Bridge — watercolor session, live from Warsaw',
     ticker:'$NOCTURNE', category:'Painting', viewers:1430, liveFor:'2h 7m', marketCap:'$2.4K',
     color:'#38bdf8', glow1:'rgba(56,189,248,0.28)', glow2:'rgba(14,116,144,0.14)',
     base:'linear-gradient(158deg,#030c14 0%,#05121e 60%,#030c14 100%)',
-    spark:[.30,.32,.35,.38,.36,.34,.38,.40,.42,.46,.49,.51,.53,.56,.59,.61,.63,.66,.69,.72],
     roomName:'ivan-2024',
   },
   {
@@ -93,93 +90,99 @@ const ALL_ITEMS: Item[] = [
     ticker:'$AMBER', category:'Mixed Media', viewers:780, liveFor:'55m', marketCap:'$3.2K',
     color:'#fb923c', glow1:'rgba(251,146,60,0.28)', glow2:'rgba(194,65,12,0.14)',
     base:'linear-gradient(158deg,#100804 0%,#180f05 60%,#100804 100%)',
-    spark:[.40,.45,.42,.48,.51,.56,.53,.59,.61,.63,.66,.69,.66,.71,.73,.76,.73,.79,.81,.83],
     roomName:'yui-2024',
   },
   {
     id:'s8', type:'live', artist:'Paulo Rodrigues', handle:'paulo_r.base', verified:false,
-    title:'Convergence I — sculpture live, clay session vol.3',
+    title:'Convergence I — live sculpture, clay session vol.3',
     ticker:'$CONV1', category:'Sculpture', viewers:410, liveFor:'22m', marketCap:'$1.3K',
     color:'#94a3b8', glow1:'rgba(148,163,184,0.20)', glow2:'rgba(71,85,105,0.12)',
     base:'linear-gradient(158deg,#080a0e 0%,#0c0f14 60%,#080a0e 100%)',
-    spark:[.50,.52,.50,.48,.50,.52,.54,.52,.50,.48,.50,.52,.50,.52,.54,.56,.58,.60,.62,.64],
     roomName:'paulo-2024',
   },
-  // ── VODs ──────────────────────────────────────────────────────────
   {
     id:'v1', type:'video', artist:'Böcklin', handle:'böcklin.eth', verified:true,
     title:'Self-Portrait with Death — full 4-hour process timelapse',
     ticker:'$BÖCKLIN', category:'Painting',
-    views:'12.4K', duration:'4:02:11', uploadedAt:'3 ngày trước', marketCap:'$18.2K',
+    views:'12.4K', duration:'4:02:11', uploadedAt:'3 days ago', marketCap:'$18.2K',
     color:'#D4AF37', glow1:'rgba(212,175,55,0.30)', glow2:'rgba(161,120,24,0.15)',
     base:'linear-gradient(158deg,#0f0a03 0%,#180f05 60%,#0d0903 100%)',
-    spark:[.50,.52,.55,.60,.63,.66,.69,.73,.76,.79,.81,.83,.86,.89,.91,.89,.86,.91,.93,.96],
   },
   {
     id:'v2', type:'video', artist:'Lena Volkov', handle:'lena_v.base', verified:false,
     title:'Dissolution Study No.1 — charcoal technique full walkthrough',
     ticker:'$DISS', category:'Drawing',
-    views:'5.8K', duration:'38:22', uploadedAt:'1 tuần trước', marketCap:'$3.9K',
+    views:'5.8K', duration:'38:22', uploadedAt:'1 week ago', marketCap:'$3.9K',
     color:'#60a5fa', glow1:'rgba(96,165,250,0.25)', glow2:'rgba(37,99,235,0.12)',
     base:'linear-gradient(158deg,#050810 0%,#080c18 60%,#050810 100%)',
-    spark:[.50,.48,.45,.42,.44,.40,.38,.42,.45,.48,.50,.52,.50,.48,.45,.42,.40,.38,.35,.32],
   },
   {
     id:'v3', type:'video', artist:'Ivan Sorokin', handle:'ivan_sorokin.eth', verified:true,
-    title:'Nocturne at the Bridge — full watercolor from sketch to finish',
+    title:'Nocturne at the Bridge — full watercolor, sketch to finish',
     ticker:'$NOCTURNE', category:'Painting',
-    views:'8.1K', duration:'1:14:39', uploadedAt:'2 ngày trước', marketCap:'$2.4K',
+    views:'8.1K', duration:'1:14:39', uploadedAt:'2 days ago', marketCap:'$2.4K',
     color:'#38bdf8', glow1:'rgba(56,189,248,0.28)', glow2:'rgba(14,116,144,0.14)',
     base:'linear-gradient(158deg,#030c14 0%,#05121e 60%,#030c14 100%)',
-    spark:[.30,.32,.35,.38,.36,.34,.38,.40,.42,.46,.49,.51,.53,.56,.59,.61,.63,.66,.69,.72],
   },
   {
     id:'v4', type:'video', artist:'Yui Nakamura', handle:'yui_n.base', verified:false,
-    title:'Amber Protocol — process video, mixed media on digital canvas',
+    title:'Amber Protocol — full process recording, mixed media on digital canvas',
     ticker:'$AMBER', category:'Mixed Media',
-    views:'3.2K', duration:'55:40', uploadedAt:'5 ngày trước', marketCap:'$3.2K',
+    views:'3.2K', duration:'55:40', uploadedAt:'5 days ago', marketCap:'$3.2K',
     color:'#fb923c', glow1:'rgba(251,146,60,0.28)', glow2:'rgba(194,65,12,0.14)',
     base:'linear-gradient(158deg,#100804 0%,#180f05 60%,#100804 100%)',
-    spark:[.40,.45,.42,.48,.51,.56,.53,.59,.61,.63,.66,.69,.66,.71,.73,.76,.73,.79,.81,.83],
   },
   {
     id:'v5', type:'video', artist:'Soo-ah Kim', handle:'soo_ah.eth', verified:true,
-    title:'Pale Architecture — panel 1 & 2 completed, full recording',
+    title:'Pale Architecture — panels 1 & 2 completed, full session recording',
     ticker:'$PALE', category:'Painting',
-    views:'9.7K', duration:'2:33:05', uploadedAt:'1 tuần trước', marketCap:'$84.2K',
+    views:'9.7K', duration:'2:33:05', uploadedAt:'1 week ago', marketCap:'$84.2K',
     color:'#a78bfa', glow1:'rgba(139,92,246,0.38)', glow2:'rgba(91,33,182,0.20)',
     base:'linear-gradient(158deg,#09091e 0%,#0f0f2a 60%,#0a0a1c 100%)',
-    spark:[.42,.44,.40,.47,.52,.50,.57,.62,.59,.66,.71,.68,.73,.76,.72,.79,.83,.80,.86,.90],
   },
   {
     id:'v6', type:'video', artist:'Aiko Tanaka', handle:'aiko.base', verified:false,
-    title:'p5.js generative art workshop — full 3-hour session recording',
+    title:'Generative Art Workshop — full 3-hour p5.js session recording',
     ticker:'$BLOOM', category:'Digital',
-    views:'4.4K', duration:'3:01:18', uploadedAt:'3 ngày trước', marketCap:'$4.1K',
+    views:'4.4K', duration:'3:01:18', uploadedAt:'3 days ago', marketCap:'$4.1K',
     color:'#4ade80', glow1:'rgba(74,222,128,0.28)', glow2:'rgba(22,163,74,0.15)',
     base:'linear-gradient(158deg,#040f08 0%,#07180d 60%,#040d07 100%)',
-    spark:[.30,.35,.40,.38,.42,.46,.51,.49,.53,.56,.61,.59,.63,.66,.69,.71,.73,.76,.79,.83],
   },
 ]
 
-// ── Category chips ─────────────────────────────────────────────────
-const CHIPS = ['Tất cả', 'Trực tiếp', 'Video', 'Painting', 'Drawing', 'Digital', 'Sculpture', 'Mixed Media', 'Trending', 'Mới phát hành']
+const CHIPS = ['All', 'Live', 'Videos', 'Painting', 'Drawing', 'Digital', 'Sculpture', 'Mixed Media', 'Trending']
 
-function fmt(n: number) {
+function fmtViewers(n: number) {
   if (n >= 10000) return `${(n / 1000).toFixed(0)}K`
   if (n >= 1000)  return `${(n / 1000).toFixed(1)}K`
   return String(n)
 }
 
-// ── Thumbnail background ───────────────────────────────────────────
+// ─────────────────────────────────────────────────────────────────
+// Animation variants (cinematic timing from skill)
+// ─────────────────────────────────────────────────────────────────
+const gridVariants = {
+  hidden: {},
+  show: { transition: { staggerChildren: 0.07, delayChildren: 0.05 } },
+}
+
+const cardVariants = {
+  hidden: { opacity: 0, y: 18 },
+  show:   { opacity: 1, y: 0, transition: { duration: 0.55, ease: [0.215, 0.61, 0.355, 1.0] } },
+}
+
+// ─────────────────────────────────────────────────────────────────
+// Thumbnail background
+// ─────────────────────────────────────────────────────────────────
 function ThumbBg({ item }: { item: Item }) {
   return (
     <>
-      <div style={{ position:'absolute', inset:0, background: item.base }}/>
-      <div style={{ position:'absolute', inset:0, background:`radial-gradient(ellipse 65% 55% at 25% 30%, ${item.glow1} 0%, transparent 65%)` }}/>
-      <div style={{ position:'absolute', inset:0, background:`radial-gradient(ellipse 45% 40% at 75% 70%, ${item.glow2} 0%, transparent 60%)` }}/>
-      <div style={{ position:'absolute', inset:0, display:'flex', alignItems:'center', justifyContent:'center' }}>
-        <span style={{ fontFamily:'monospace', fontWeight:900, color:'rgba(255,255,255,0.045)', transform:'rotate(-12deg)', fontSize: item.ticker.length > 7 ? 28 : 38, whiteSpace:'nowrap', userSelect:'none' }}>
+      <div className="absolute inset-0" style={{ background: item.base }}/>
+      <div className="absolute inset-0" style={{ background: `radial-gradient(ellipse 65% 55% at 25% 30%, ${item.glow1} 0%, transparent 65%)` }}/>
+      <div className="absolute inset-0" style={{ background: `radial-gradient(ellipse 45% 40% at 75% 70%, ${item.glow2} 0%, transparent 60%)` }}/>
+      <div className="absolute inset-0 flex items-center justify-center select-none pointer-events-none">
+        <span className="font-mono font-black rotate-[-12deg] whitespace-nowrap"
+          style={{ color: 'rgba(255,255,255,0.04)', fontSize: item.ticker.length > 7 ? 30 : 40 }}>
           {item.ticker}
         </span>
       </div>
@@ -187,142 +190,175 @@ function ThumbBg({ item }: { item: Item }) {
   )
 }
 
-// ── Video Card — YouTube style ─────────────────────────────────────
+// ─────────────────────────────────────────────────────────────────
+// Verified checkmark
+// ─────────────────────────────────────────────────────────────────
+function CheckMark() {
+  return (
+    <svg width="13" height="13" viewBox="0 0 24 24" aria-hidden="true">
+      <circle cx="12" cy="12" r="12" fill="rgba(255,255,255,0.15)"/>
+      <path d="M8 12l3 3 5-5" stroke="rgba(255,255,255,0.7)" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"/>
+    </svg>
+  )
+}
+
+// ─────────────────────────────────────────────────────────────────
+// Three-dot context menu
+// ─────────────────────────────────────────────────────────────────
+const MENU_ACTIONS = ['Save to playlist', 'Share', 'Report']
+
+function ContextMenu({ visible, open, onToggle }: { visible: boolean; open: boolean; onToggle: () => void }) {
+  return (
+    <div className="relative" onClick={e => e.stopPropagation()}>
+      <motion.button
+        type="button"
+        aria-label="More options"
+        onClick={onToggle}
+        className="size-8 flex items-center justify-center rounded-full"
+        animate={{ opacity: visible || open ? 1 : 0 }}
+        transition={{ duration: 0.15 }}
+        whileHover={{ backgroundColor: 'rgba(255,255,255,0.1)' }}
+        whileTap={{ scale: 0.92 }}
+        style={{ color: 'rgba(255,255,255,0.6)' }}>
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+          <circle cx="12" cy="5" r="2"/><circle cx="12" cy="12" r="2"/><circle cx="12" cy="19" r="2"/>
+        </svg>
+      </motion.button>
+
+      <AnimatePresence>
+        {open && (
+          <motion.div
+            className="absolute right-0 top-9 w-44 z-50 overflow-hidden rounded-lg py-1"
+            style={{ background: '#282828', boxShadow: '0 4px 24px rgba(0,0,0,0.6)', border: '1px solid rgba(255,255,255,0.07)' }}
+            initial={{ opacity: 0, y: -6, scale: 0.96 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, y: -4, scale: 0.96 }}
+            transition={{ duration: 0.14, ease: 'easeOut' }}>
+            {MENU_ACTIONS.map(action => (
+              <button key={action} type="button"
+                className="w-full text-left px-4 py-2.5 text-sm transition-colors"
+                style={{ color: 'rgba(255,255,255,0.8)' }}
+                onMouseEnter={e => (e.currentTarget.style.background = 'rgba(255,255,255,0.07)')}
+                onMouseLeave={e => (e.currentTarget.style.background = 'transparent')}>
+                {action}
+              </button>
+            ))}
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </div>
+  )
+}
+
+// ─────────────────────────────────────────────────────────────────
+// Video card
+// ─────────────────────────────────────────────────────────────────
 function VideoCard({ item, onClick }: { item: Item; onClick: () => void }) {
+  const [hovered,  setHovered]  = useState(false)
   const [menuOpen, setMenuOpen] = useState(false)
-  const [hovered, setHovered]  = useState(false)
 
   return (
-    <div
+    <motion.article
+      variants={cardVariants}
       className="cursor-pointer group"
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => { setHovered(false); setMenuOpen(false) }}
       onClick={onClick}>
 
       {/* Thumbnail */}
-      <div className="relative overflow-hidden" style={{ aspectRatio:'16/9', borderRadius: 8, background:'#1a1a1a' }}>
+      <div className="relative overflow-hidden rounded-xl" style={{ aspectRatio: '16/9', background: '#1a1a1a' }}>
         <ThumbBg item={item}/>
 
-        {/* Hover darken */}
-        <motion.div style={{ position:'absolute', inset:0, background:'rgba(0,0,0,0.18)' }}
-          animate={{ opacity: hovered ? 1 : 0 }} transition={{ duration: 0.12 }}/>
+        {/* Hover veil */}
+        <motion.div
+          className="absolute inset-0"
+          animate={{ opacity: hovered ? 1 : 0 }}
+          transition={{ duration: 0.12 }}
+          style={{ background: 'rgba(0,0,0,0.2)' }}/>
 
         {/* LIVE badge */}
         {item.type === 'live' && (
-          <div className="absolute bottom-2 left-2 flex items-center gap-1 px-2 py-0.5"
-            style={{ background:'#dc2626', borderRadius: 3 }}>
-            <motion.span className="size-[5px] rounded-full" style={{ background:'white', display:'inline-block' }}
-              animate={{ opacity:[1,0.2,1] }} transition={{ duration:1.1, repeat:Infinity }}/>
-            <span className="font-sans text-[10px] font-bold text-white tracking-wide">TRỰC TIẾP</span>
+          <div className="absolute bottom-2 left-2 flex items-center gap-1 px-2 py-0.5 rounded-sm"
+            style={{ background: '#dc2626' }}>
+            <motion.span
+              className="size-[5px] rounded-full bg-white"
+              animate={{ opacity: [1, 0.2, 1] }}
+              transition={{ duration: 1.1, repeat: Infinity }}/>
+            <span className="text-[10px] font-bold text-white tracking-wide font-sans">LIVE</span>
           </div>
         )}
 
-        {/* Viewer count for live */}
+        {/* Viewer pill (live) */}
         {item.type === 'live' && item.viewers !== undefined && (
-          <div className="absolute bottom-2 right-2 font-sans text-[10px] font-medium px-1.5 py-0.5 text-white"
-            style={{ background:'rgba(0,0,0,0.75)', borderRadius:3 }}>
-            {fmt(item.viewers)} người xem
+          <div className="absolute bottom-2 right-2 px-1.5 py-0.5 rounded-sm text-[10px] font-medium text-white font-sans"
+            style={{ background: 'rgba(0,0,0,0.78)' }}>
+            {fmtViewers(item.viewers)} watching
           </div>
         )}
 
-        {/* Duration for VOD */}
+        {/* Duration (VOD) */}
         {item.type === 'video' && item.duration && (
-          <div className="absolute bottom-2 right-2 font-sans text-[11px] font-semibold text-white px-1.5 py-0.5"
-            style={{ background:'rgba(0,0,0,0.82)', borderRadius:3 }}>
+          <div className="absolute bottom-2 right-2 px-1.5 py-0.5 rounded-sm text-[11px] font-semibold text-white font-sans"
+            style={{ background: 'rgba(0,0,0,0.82)' }}>
             {item.duration}
           </div>
         )}
       </div>
 
-      {/* Meta — YouTube style */}
-      <div className="flex gap-3 mt-3" onClick={e => e.stopPropagation()}>
+      {/* Meta row */}
+      <div className="flex gap-3 mt-3">
+
         {/* Channel avatar */}
-        <div className="shrink-0 cursor-pointer"
-          onClick={() => {}}>
-          <div className="size-9 rounded-full flex items-center justify-center font-sans text-[13px] font-bold"
-            style={{ background:`${item.color}20`, border:`2px solid ${item.color}40`, color: item.color }}>
-            {item.artist[0]}
-          </div>
+        <div className="size-9 rounded-full shrink-0 flex items-center justify-center font-sans text-sm font-bold"
+          style={{ background: `${item.color}20`, border: `2px solid ${item.color}40`, color: item.color }}>
+          {item.artist[0]}
         </div>
 
-        {/* Right info */}
-        <div className="flex-1 min-w-0 relative" onClick={onClick}>
-          {/* Title */}
-          <p className="font-sans font-semibold leading-snug line-clamp-2 pr-6"
-            style={{ fontSize:13, color:'rgba(255,255,255,0.92)', letterSpacing:'-0.01em' }}>
-            {item.title}
-          </p>
+        {/* Info + menu */}
+        <div className="flex-1 min-w-0 flex gap-1">
 
-          {/* Channel name */}
-          <div className="flex items-center gap-1 mt-1">
-            <span className="font-sans text-[12px]" style={{ color:'rgba(255,255,255,0.5)' }}>
-              {item.artist}
-            </span>
-            {item.verified && (
-              <svg width="12" height="12" viewBox="0 0 24 24" fill="none">
-                <circle cx="12" cy="12" r="12" fill="rgba(255,255,255,0.15)"/>
-                <path d="M9 12l2 2 4-4" stroke="rgba(255,255,255,0.6)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-              </svg>
-            )}
+          {/* Text block */}
+          <div className="flex-1 min-w-0">
+            <p className="text-sm font-semibold leading-snug line-clamp-2"
+              style={{ color: 'rgba(255,255,255,0.92)', letterSpacing: '-0.01em' }}>
+              {item.title}
+            </p>
+
+            <div className="flex items-center gap-1 mt-1">
+              <span className="text-xs" style={{ color: 'rgba(255,255,255,0.48)' }}>
+                {item.artist}
+              </span>
+              {item.verified && <CheckMark/>}
+            </div>
+
+            <p className="text-xs mt-0.5" style={{ color: 'rgba(255,255,255,0.32)' }}>
+              {item.type === 'live'
+                ? `${fmtViewers(item.viewers ?? 0)} viewers · ${item.ticker}`
+                : `${item.views} views · ${item.uploadedAt}`
+              }
+            </p>
           </div>
 
-          {/* Stats */}
-          <p className="font-sans text-[12px] mt-0.5" style={{ color:'rgba(255,255,255,0.35)' }}>
-            {item.type === 'live'
-              ? `${fmt(item.viewers ?? 0)} người đang xem • ${item.ticker}`
-              : `${item.views} lượt xem • ${item.uploadedAt}`
-            }
-          </p>
-        </div>
-
-        {/* 3-dot menu */}
-        <div className="absolute top-0 right-0 shrink-0 relative" onClick={e => e.stopPropagation()}>
-          <motion.button
-            type="button"
-            onClick={e => { e.stopPropagation(); setMenuOpen(v => !v) }}
-            className="size-8 flex items-center justify-center rounded-full"
-            style={{ color:'rgba(255,255,255,0.5)' }}
-            animate={{ opacity: hovered || menuOpen ? 1 : 0 }}
-            whileHover={{ background:'rgba(255,255,255,0.1)' }}>
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
-              <circle cx="12" cy="5" r="2"/><circle cx="12" cy="12" r="2"/><circle cx="12" cy="19" r="2"/>
-            </svg>
-          </motion.button>
-
-          <AnimatePresence>
-            {menuOpen && (
-              <motion.div
-                className="absolute right-0 top-9 w-44 z-50 overflow-hidden"
-                style={{ background:'#282828', border:'1px solid rgba(255,255,255,0.08)', borderRadius:8 }}
-                initial={{ opacity:0, y:-4, scale:0.97 }}
-                animate={{ opacity:1, y:0, scale:1 }}
-                exit={{ opacity:0, scale:0.97 }}
-                transition={{ duration:0.12 }}>
-                {['Lưu vào danh sách', 'Chia sẻ', 'Báo cáo'].map(action => (
-                  <button key={action} type="button"
-                    className="w-full text-left px-4 py-2.5 font-sans text-[12px] transition-colors"
-                    style={{ color:'rgba(255,255,255,0.78)' }}
-                    onMouseEnter={e => (e.currentTarget.style.background = 'rgba(255,255,255,0.08)')}
-                    onMouseLeave={e => (e.currentTarget.style.background = 'transparent')}>
-                    {action}
-                  </button>
-                ))}
-              </motion.div>
-            )}
-          </AnimatePresence>
+          {/* 3-dot menu */}
+          <div className="shrink-0">
+            <ContextMenu
+              visible={hovered}
+              open={menuOpen}
+              onToggle={() => setMenuOpen(v => !v)}/>
+          </div>
         </div>
       </div>
-    </div>
+    </motion.article>
   )
 }
 
 // ─────────────────────────────────────────────────────────────────
-//  Go Live Modal
+// Go Live modal
 // ─────────────────────────────────────────────────────────────────
-const CATS_LIVE = ['Painting', 'Drawing', 'Digital', 'Sculpture', 'Mixed Media']
+const LIVE_CATEGORIES = ['Painting', 'Drawing', 'Digital', 'Sculpture', 'Mixed Media']
 
 function GoLiveModal({ onClose }: { onClose: () => void }) {
-  const router = useRouter()
+  const router  = useRouter()
   const [title,   setTitle]   = useState('')
   const [cat,     setCat]     = useState('Painting')
   const [loading, setLoading] = useState(false)
@@ -335,14 +371,11 @@ function GoLiveModal({ onClose }: { onClose: () => void }) {
     try {
       const jwt = authStore.getJwt()
       const res = await fetch(`${API}/live/create`, {
-        method: 'POST',
-        headers: { 'Content-Type':'application/json', 'Authorization':`Bearer ${jwt}` },
-        body: JSON.stringify({ title: title.trim(), category: cat }),
+        method:  'POST',
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${jwt}` },
+        body:    JSON.stringify({ title: title.trim(), category: cat }),
       })
-      if (!res.ok) {
-        const msg = await res.text()
-        throw new Error(msg || 'Failed to create stream')
-      }
+      if (!res.ok) throw new Error((await res.text()) || 'Failed to create stream')
       const data = await res.json()
       sessionStorage.setItem(`livekit_host_token_${data.roomName}`, data.token)
       router.push(`/studio/stream/${data.roomName}`)
@@ -353,89 +386,112 @@ function GoLiveModal({ onClose }: { onClose: () => void }) {
   }, [title, cat, loading, router])
 
   return (
-    <motion.div className="fixed inset-0 z-50 flex items-center justify-center"
-      style={{ background:'rgba(0,0,0,0.8)', backdropFilter:'blur(8px)' }}
-      initial={{ opacity:0 }} animate={{ opacity:1 }} exit={{ opacity:0 }}
+    <motion.div
+      className="fixed inset-0 z-50 flex items-center justify-center"
+      style={{ background: 'rgba(0,0,0,0.82)', backdropFilter: 'blur(10px)' }}
+      initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
       onClick={e => { if (e.target === e.currentTarget) onClose() }}>
-      <motion.div className="w-[460px] overflow-hidden"
-        style={{ background:'#212121', borderRadius:12, border:'1px solid rgba(255,255,255,0.08)' }}
-        initial={{ opacity:0, scale:0.96, y:16 }}
-        animate={{ opacity:1, scale:1, y:0 }}
-        exit={{ opacity:0, scale:0.96 }}
-        transition={{ type:'tween', duration:0.2 }}>
+
+      <motion.div
+        className="w-[460px] rounded-xl overflow-hidden"
+        style={{ background: '#212121', border: '1px solid rgba(255,255,255,0.08)' }}
+        initial={{ opacity: 0, scale: 0.95, y: 20 }}
+        animate={{ opacity: 1, scale: 1, y: 0 }}
+        exit={{ opacity: 0, scale: 0.95, y: 10 }}
+        transition={{ type: 'spring', stiffness: 380, damping: 28 }}>
 
         {/* Header */}
         <div className="flex items-center justify-between px-5 py-4"
-          style={{ borderBottom:'1px solid rgba(255,255,255,0.07)' }}>
+          style={{ borderBottom: '1px solid rgba(255,255,255,0.07)' }}>
           <div className="flex items-center gap-2.5">
-            <div className="size-7 rounded-full flex items-center justify-center"
-              style={{ background:'#dc2626' }}>
-              <motion.span className="size-2 rounded-full" style={{ background:'white', display:'inline-block' }}
-                animate={{ opacity:[1,0.3,1] }} transition={{ duration:1.1, repeat:Infinity }}/>
+            <div className="size-7 rounded-full flex items-center justify-center bg-red-600">
+              <motion.span className="size-2 rounded-full bg-white"
+                animate={{ opacity: [1, 0.3, 1] }} transition={{ duration: 1.1, repeat: Infinity }}/>
             </div>
-            <span className="font-sans font-semibold text-[15px]" style={{ color:'rgba(255,255,255,0.9)' }}>
-              Phát trực tiếp
+            <span className="font-sans font-semibold text-base" style={{ color: 'rgba(255,255,255,0.92)' }}>
+              Go Live
             </span>
           </div>
-          <button type="button" onClick={onClose}
-            className="size-8 flex items-center justify-center rounded-full font-sans text-[16px] transition-colors"
-            style={{ color:'rgba(255,255,255,0.5)' }}
-            onMouseEnter={e => (e.currentTarget.style.background = 'rgba(255,255,255,0.1)')}
-            onMouseLeave={e => (e.currentTarget.style.background = 'transparent')}>
+          <motion.button
+            type="button" onClick={onClose}
+            className="size-8 flex items-center justify-center rounded-full text-base"
+            style={{ color: 'rgba(255,255,255,0.45)' }}
+            whileHover={{ backgroundColor: 'rgba(255,255,255,0.1)', color: 'rgba(255,255,255,0.8)' }}
+            whileTap={{ scale: 0.92 }}>
             ✕
-          </button>
+          </motion.button>
         </div>
 
         <div className="px-5 py-5 flex flex-col gap-4">
-          {/* Title */}
+          {/* Stream title */}
           <div>
-            <label className="font-sans text-[12px] font-medium block mb-2"
-              style={{ color:'rgba(255,255,255,0.55)' }}>
-              Tiêu đề buổi phát
+            <label className="block text-xs font-medium mb-2" style={{ color: 'rgba(255,255,255,0.48)' }}>
+              Stream Title
             </label>
             <input
               value={title}
               onChange={e => setTitle(e.target.value)}
               onKeyDown={e => e.key === 'Enter' && handleStart()}
-              placeholder="Hôm nay bạn đang sáng tác gì?"
-              className="w-full bg-transparent font-sans text-[13px] px-3.5 py-2.5 outline-none"
-              style={{ border:`1px solid rgba(255,255,255,${title ? '0.25' : '0.1'})`, borderRadius:6, color:'rgba(255,255,255,0.85)', caretColor:'#dc2626', transition:'border-color 0.15s' }}/>
+              placeholder="What are you creating today?"
+              className="w-full bg-transparent text-sm px-3.5 py-2.5 rounded-md outline-hidden"
+              style={{
+                border: `1px solid rgba(255,255,255,${title ? '0.22' : '0.1'})`,
+                color: 'rgba(255,255,255,0.88)',
+                caretColor: '#dc2626',
+                transition: 'border-color 0.15s',
+              }}/>
           </div>
 
           {/* Category */}
           <div>
-            <label className="font-sans text-[12px] font-medium block mb-2"
-              style={{ color:'rgba(255,255,255,0.55)' }}>
-              Danh mục
+            <label className="block text-xs font-medium mb-2" style={{ color: 'rgba(255,255,255,0.48)' }}>
+              Category
             </label>
             <div className="flex flex-wrap gap-2">
-              {CATS_LIVE.map(c => (
-                <button key={c} type="button" onClick={() => setCat(c)}
-                  className="px-3 py-1.5 font-sans text-[12px] font-medium transition-all"
-                  style={{ borderRadius:20, border:`1px solid ${cat === c ? 'rgba(220,38,38,0.5)' : 'rgba(255,255,255,0.12)'}`, background: cat === c ? 'rgba(220,38,38,0.12)' : 'transparent', color: cat === c ? '#f87171' : 'rgba(255,255,255,0.45)' }}>
+              {LIVE_CATEGORIES.map(c => (
+                <motion.button
+                  key={c} type="button" onClick={() => setCat(c)}
+                  className="px-3 py-1.5 text-xs font-medium rounded-full"
+                  animate={{
+                    background: cat === c ? 'rgba(220,38,38,0.15)' : 'rgba(255,255,255,0.06)',
+                    borderColor: cat === c ? 'rgba(220,38,38,0.5)' : 'rgba(255,255,255,0.1)',
+                    color: cat === c ? '#f87171' : 'rgba(255,255,255,0.42)',
+                  }}
+                  style={{ border: '1px solid' }}
+                  whileTap={{ scale: 0.95 }}>
                   {c}
-                </button>
+                </motion.button>
               ))}
             </div>
           </div>
 
-          {error && (
-            <div className="px-3.5 py-2.5 font-sans text-[12px]"
-              style={{ background:'rgba(239,68,68,0.08)', border:'1px solid rgba(239,68,68,0.2)', borderRadius:6, color:'#f87171' }}>
-              {error}
-            </div>
-          )}
+          {/* Error */}
+          <AnimatePresence>
+            {error && (
+              <motion.div
+                initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: 'auto' }} exit={{ opacity: 0, height: 0 }}
+                className="px-3.5 py-2.5 text-xs rounded-md"
+                style={{ background: 'rgba(239,68,68,0.08)', border: '1px solid rgba(239,68,68,0.2)', color: '#f87171' }}>
+                {error}
+              </motion.div>
+            )}
+          </AnimatePresence>
 
-          <button
+          {/* CTA */}
+          <motion.button
             type="button"
             onClick={handleStart}
             disabled={!title.trim() || loading}
-            className="w-full py-3 font-sans text-[13px] font-semibold transition-all mt-1"
-            style={{ borderRadius:6, background: title.trim() ? '#dc2626' : 'rgba(255,255,255,0.08)', color: title.trim() ? 'white' : 'rgba(255,255,255,0.25)', cursor: title.trim() && !loading ? 'pointer' : 'default', opacity: loading ? 0.7 : 1 }}
-            onMouseEnter={e => { if (title.trim() && !loading) e.currentTarget.style.background = '#b91c1c' }}
-            onMouseLeave={e => { if (title.trim() && !loading) e.currentTarget.style.background = '#dc2626' }}>
-            {loading ? 'Đang khởi động...' : '● Bắt đầu phát trực tiếp'}
-          </button>
+            className="w-full py-3 text-sm font-semibold rounded-md mt-1"
+            animate={{
+              background: title.trim() ? '#dc2626' : 'rgba(255,255,255,0.07)',
+              color: title.trim() ? '#ffffff' : 'rgba(255,255,255,0.22)',
+            }}
+            whileHover={title.trim() && !loading ? { background: '#b91c1c' } : {}}
+            whileTap={title.trim() && !loading ? { scale: 0.98 } : {}}
+            style={{ opacity: loading ? 0.65 : 1, cursor: title.trim() && !loading ? 'pointer' : 'default' }}>
+            {loading ? 'Starting…' : '● Start Streaming'}
+          </motion.button>
         </div>
       </motion.div>
     </motion.div>
@@ -443,27 +499,22 @@ function GoLiveModal({ onClose }: { onClose: () => void }) {
 }
 
 // ─────────────────────────────────────────────────────────────────
-//  Main LivePage
+// Live Page
 // ─────────────────────────────────────────────────────────────────
 export function LivePage() {
   const router = useRouter()
-  const [chip,       setChip]       = useState('Tất cả')
+  const [chip,       setChip]       = useState('All')
   const [goLiveOpen, setGoLiveOpen] = useState(false)
   const chipsRef = useRef<HTMLDivElement>(null)
 
-  const handleCardClick = (item: Item) => {
-    if (item.type === 'live' && item.roomName) {
-      router.push(`/live/${item.roomName}`)
-    }
-  }
-
   const filtered = useMemo(() => {
-    if (chip === 'Tất cả')   return ALL_ITEMS
-    if (chip === 'Trực tiếp') return ALL_ITEMS.filter(i => i.type === 'live')
-    if (chip === 'Video')     return ALL_ITEMS.filter(i => i.type === 'video')
-    if (chip === 'Trending')  return [...ALL_ITEMS].sort((a,b) => (b.viewers ?? 0) - (a.viewers ?? 0))
-    if (chip === 'Mới phát hành') return ALL_ITEMS.filter(i => i.type === 'video')
-    return ALL_ITEMS.filter(i => i.category === chip)
+    switch (chip) {
+      case 'Live':     return ALL_ITEMS.filter(i => i.type === 'live')
+      case 'Videos':   return ALL_ITEMS.filter(i => i.type === 'video')
+      case 'Trending': return [...ALL_ITEMS].sort((a, b) => (b.viewers ?? 0) - (a.viewers ?? 0))
+      case 'All':      return ALL_ITEMS
+      default:         return ALL_ITEMS.filter(i => i.category === chip)
+    }
   }, [chip])
 
   const totalLive = ALL_ITEMS.filter(i => i.type === 'live').length
@@ -474,67 +525,91 @@ export function LivePage() {
         {goLiveOpen && <GoLiveModal key="golive" onClose={() => setGoLiveOpen(false)}/>}
       </AnimatePresence>
 
-      <div style={{ marginTop:68, background:'#0f0f0f', minHeight:'calc(100vh - 68px)' }}>
+      <div className="min-h-dvh" style={{ marginTop: 68, background: '#0f0f0f' }}>
 
-        {/* ── Category chips + Go Live button ── */}
-        <div className="sticky z-10 flex items-center gap-0"
-          style={{ top:68, background:'rgba(15,15,15,0.98)', backdropFilter:'blur(16px)', borderBottom:'1px solid rgba(255,255,255,0.06)' }}>
+        {/* ── Sticky chip bar ── */}
+        <div className="sticky z-10 flex items-center"
+          style={{ top: 68, background: 'rgba(15,15,15,0.97)', backdropFilter: 'blur(16px)', borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
 
-          {/* Chips scroll area */}
-          <div ref={chipsRef} className="flex items-center gap-2 px-4 py-2.5 overflow-x-auto flex-1"
-            style={{ scrollbarWidth:'none' }}>
+          {/* Chips */}
+          <div ref={chipsRef}
+            className="flex items-center gap-2 px-4 py-3 overflow-x-auto flex-1"
+            style={{ scrollbarWidth: 'none' }}>
             {CHIPS.map(c => (
-              <button key={c} type="button" onClick={() => setChip(c)}
-                className="shrink-0 px-3 py-1 font-sans text-[12px] font-medium transition-all"
-                style={{
-                  borderRadius: 20,
-                  background:   chip === c ? 'rgba(255,255,255,0.9)' : 'rgba(255,255,255,0.08)',
-                  color:        chip === c ? '#0f0f0f' : 'rgba(255,255,255,0.72)',
-                  whiteSpace:   'nowrap',
-                }}>
+              <motion.button
+                key={c} type="button"
+                onClick={() => setChip(c)}
+                className="shrink-0 px-3 py-1 text-xs font-medium rounded-full whitespace-nowrap"
+                animate={{
+                  background: chip === c ? 'rgba(255,255,255,0.9)' : 'rgba(255,255,255,0.08)',
+                  color:      chip === c ? '#0f0f0f'               : 'rgba(255,255,255,0.68)',
+                }}
+                whileHover={{ background: chip === c ? 'rgba(255,255,255,0.9)' : 'rgba(255,255,255,0.13)' }}
+                whileTap={{ scale: 0.95 }}
+                transition={{ duration: 0.12 }}>
                 {c}
-                {c === 'Trực tiếp' && (
-                  <span className="ml-1.5 inline-flex items-center justify-center font-sans text-[10px] font-bold w-4 h-4 rounded-full"
-                    style={{ background: chip === c ? '#dc2626' : 'rgba(220,38,38,0.8)', color:'white', verticalAlign:'middle' }}>
+                {c === 'Live' && (
+                  <span className="ml-1.5 inline-flex items-center justify-center size-[18px] rounded-full text-[9px] font-bold"
+                    style={{ background: chip === c ? '#dc2626' : 'rgba(220,38,38,0.85)', color: 'white', verticalAlign: 'middle' }}>
                     {totalLive}
                   </span>
                 )}
-              </button>
+              </motion.button>
             ))}
           </div>
 
-          {/* Go Live */}
-          <div className="shrink-0 px-4 py-2.5">
-            <button type="button" onClick={() => setGoLiveOpen(true)}
-              className="flex items-center gap-2 px-4 py-2 font-sans text-[12px] font-semibold transition-all"
-              style={{ borderRadius:20, background:'rgba(220,38,38,0.15)', border:'1px solid rgba(220,38,38,0.4)', color:'#f87171' }}
-              onMouseEnter={e => (e.currentTarget.style.background = 'rgba(220,38,38,0.25)')}
-              onMouseLeave={e => (e.currentTarget.style.background = 'rgba(220,38,38,0.15)')}>
-              <motion.span className="size-2 rounded-full" style={{ background:'#f87171', display:'inline-block' }}
-                animate={{ opacity:[1,0.3,1] }} transition={{ duration:1.1, repeat:Infinity }}/>
-              Phát trực tiếp
-            </button>
+          {/* Go Live button */}
+          <div className="shrink-0 px-4 py-3">
+            <motion.button
+              type="button"
+              onClick={() => setGoLiveOpen(true)}
+              className="flex items-center gap-2 px-4 py-1.5 text-xs font-semibold rounded-full"
+              style={{ background: 'rgba(220,38,38,0.14)', border: '1px solid rgba(220,38,38,0.38)', color: '#f87171' }}
+              whileHover={{ background: 'rgba(220,38,38,0.24)' }}
+              whileTap={{ scale: 0.96 }}>
+              <motion.span
+                className="size-2 rounded-full"
+                style={{ background: '#f87171', display: 'inline-block' }}
+                animate={{ opacity: [1, 0.3, 1] }}
+                transition={{ duration: 1.1, repeat: Infinity }}/>
+              Go Live
+            </motion.button>
           </div>
         </div>
 
-        {/* ── Video grid ── */}
-        <div className="px-6 py-5">
-          {filtered.length > 0 ? (
-            <div className="grid grid-cols-3 gap-x-4 gap-y-8">
-              {filtered.map(item => (
-                <VideoCard key={item.id} item={item} onClick={() => handleCardClick(item)}/>
-              ))}
-            </div>
-          ) : (
-            <div className="flex flex-col items-center justify-center py-40 gap-3">
-              <svg width="48" height="48" viewBox="0 0 24 24" fill="none" style={{ opacity:0.15 }}>
-                <path d="M15 10l4.553-2.276A1 1 0 0121 8.723v6.554a1 1 0 01-1.447.894L15 14M3 8a2 2 0 012-2h10a2 2 0 012 2v8a2 2 0 01-2 2H5a2 2 0 01-2-2V8z" stroke="white" strokeWidth="1.5" strokeLinecap="round"/>
-              </svg>
-              <p className="font-sans text-[13px]" style={{ color:'rgba(255,255,255,0.25)' }}>
-                Không có nội dung nào
-              </p>
-            </div>
-          )}
+        {/* ── Grid ── */}
+        <div className="px-6 py-6">
+          <AnimatePresence mode="wait">
+            {filtered.length > 0 ? (
+              <motion.div
+                key={chip}
+                className="grid grid-cols-3 gap-x-4 gap-y-8"
+                variants={gridVariants}
+                initial="hidden"
+                animate="show">
+                {filtered.map(item => (
+                  <VideoCard
+                    key={item.id}
+                    item={item}
+                    onClick={() => item.type === 'live' && item.roomName
+                      ? router.push(`/live/${item.roomName}`)
+                      : undefined
+                    }/>
+                ))}
+              </motion.div>
+            ) : (
+              <motion.div
+                key="empty"
+                initial={{ opacity: 0 }} animate={{ opacity: 1 }}
+                className="flex flex-col items-center justify-center py-40 gap-3">
+                <svg width="52" height="52" viewBox="0 0 24 24" fill="none" style={{ opacity: 0.12 }}>
+                  <path d="M15 10l4.553-2.276A1 1 0 0121 8.723v6.554a1 1 0 01-1.447.894L15 14M3 8a2 2 0 012-2h10a2 2 0 012 2v8a2 2 0 01-2 2H5a2 2 0 01-2-2V8z"
+                    stroke="white" strokeWidth="1.5" strokeLinecap="round"/>
+                </svg>
+                <p className="text-sm" style={{ color: 'rgba(255,255,255,0.22)' }}>No content in this category</p>
+              </motion.div>
+            )}
+          </AnimatePresence>
         </div>
 
       </div>
