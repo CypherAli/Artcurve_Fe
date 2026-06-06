@@ -3186,7 +3186,10 @@ export function MarketplacePage() {
         </AnimatePresence>
 
         {/* ══ SPLIT PANE ══════════════════════════════════════ */}
-        <div className={`flex items-start ${viewMode === 'race' ? 'hidden' : ''}`}>
+        <div
+          className={`flex ${viewMode === 'race' ? 'hidden' : ''}`}
+          style={{ height: `calc(100vh - ${STICKY_TOP}px)` }}
+        >
 
           {/* ── Left: Compact List (40%) ── */}
           <div
@@ -3194,20 +3197,18 @@ export function MarketplacePage() {
             onMouseLeave={onListLeave}
             style={{
               width:          '40%',
-              position:       'sticky',
-              top:            STICKY_TOP,
-              height:         `calc(100vh - ${STICKY_TOP}px)`,
+              height:         '100%',
               overflowY:      'auto',
               borderRight:    '1px solid rgba(255,255,255,0.07)',
               scrollbarWidth: 'thin',
               scrollbarColor: 'rgba(212,175,55,0.15) transparent',
             }}
           >
-            {/* List header */}
+            {/* List header — sticky at top of this scroll container */}
             <div
               className="grid gap-3 sticky z-10 px-4 py-2"
               style={{
-                top:                 128, /* 80px header + 48px nav */
+                top:                 0,
                 gridTemplateColumns: '40px 1fr 80px 48px',
                 background:          '#0A0A0A',
                 borderBottom:        '1px solid rgba(255,255,255,0.06)',
@@ -3253,15 +3254,13 @@ export function MarketplacePage() {
             <ActivityFeed />
           </div>
 
-          {/* ── Right: Inspection Deck (60%) — hidden on mobile, sticky ── */}
+          {/* ── Right: Inspection Deck (60%) ── */}
           <div
             className="hidden md:block flex-1 min-w-0"
             style={{
-              position:   'sticky',
-              top:        STICKY_TOP,
-              height:     `calc(100vh - ${STICKY_TOP}px)`,
-              overflowY:  'auto',
-              background: '#0A0A0A',
+              height:         '100%',
+              overflowY:      'auto',
+              background:     '#0A0A0A',
               scrollbarWidth: 'none',
             }}
           >
