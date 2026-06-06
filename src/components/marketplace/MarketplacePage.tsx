@@ -2363,36 +2363,16 @@ function InspectionDeck({
             ))}
           </div>
 
-          {/* Bonding curve chart + timeframe switcher — collapses to 52px, expand on hover */}
-          <div
-            onMouseEnter={() => setChartHovered(true)}
-            onMouseLeave={() => setChartHovered(false)}
-            className="cursor-ns-resize"
-          >
-            {/* Header row — always visible */}
+          {/* Bonding curve chart + timeframe switcher — always expanded */}
+          <div>
             <div className="flex items-center justify-between mb-2.5">
-              <div className="flex items-center gap-2">
-                <p
-                  className="font-mono text-[9px] tracking-[0.22em] uppercase"
-                  style={{ color: 'rgba(255,255,255,0.28)' }}
-                >
-                  Bonding Curve · Price History
-                </p>
-                {/* Expand hint — only shown when collapsed */}
-                {!chartHovered && (
-                  <span
-                    className="font-mono text-[7.5px] tracking-wide transition-opacity duration-300"
-                    style={{ color: 'rgba(255,255,255,0.18)' }}
-                  >
-                    hover to expand
-                  </span>
-                )}
-              </div>
-              {/* Timeframe tabs — fade in when expanded */}
-              <div
-                className="flex items-center gap-1 transition-opacity duration-300"
-                style={{ opacity: chartHovered ? 1 : 0, pointerEvents: chartHovered ? 'auto' : 'none' }}
+              <p
+                className="font-mono text-[9px] tracking-[0.22em] uppercase"
+                style={{ color: 'rgba(255,255,255,0.28)' }}
               >
+                Bonding Curve · Price History
+              </p>
+              <div className="flex items-center gap-1">
                 {(['1H', '6H', '1D', '7D'] as TimeRange[]).map(r => (
                   <button
                     key={r}
@@ -2410,13 +2390,7 @@ function InspectionDeck({
                 ))}
               </div>
             </div>
-
-            {/* Chart — 52px collapsed, 160px expanded */}
-            <BondingCurveChart
-              art={art}
-              range={chartRange}
-              height={chartHovered ? 160 : 52}
-            />
+            <BondingCurveChart art={art} range={chartRange} height={160} />
           </div>
 
           {/* Progress bar */}
