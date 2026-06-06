@@ -54,6 +54,11 @@ const securityHeaders = [
         'https://*.alchemy.com',
         'https://artcurve-be-production.up.railway.app',
         'wss://artcurve-be-production.up.railway.app',
+        // Binance public WebSocket — real-time crypto prices
+        'wss://stream.binance.com:9443',
+        'wss://stream.binance.com:443',
+        'https://stream.binance.com',
+        'https://api.binance.com',
       ].join(' '),
       "frame-src 'none'",
       "frame-ancestors 'none'",
