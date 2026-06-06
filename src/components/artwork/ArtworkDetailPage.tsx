@@ -130,10 +130,10 @@ function RatingBar({ star, count, maxCount }: { star: number; count: number; max
   const pct = maxCount > 0 ? (count / maxCount) * 100 : 0
   return (
     <div className="flex items-center gap-2">
-      <span className="font-mono text-[9px] shrink-0 w-5 text-right" style={{ color: 'rgba(255,255,255,0.3)' }}>
+      <span className="font-mono text-[10px] shrink-0 w-5 text-right" style={{ color: 'rgba(255,255,255,0.55)' }}>
         {star}★
       </span>
-      <div className="flex-1 h-[3px] rounded-full overflow-hidden" style={{ background: 'rgba(255,255,255,0.07)' }}>
+      <div className="flex-1 h-[4px] rounded-full overflow-hidden" style={{ background: 'rgba(255,255,255,0.12)' }}>
         <motion.div
           className="h-full rounded-full"
           initial={{ width: 0 }}
@@ -143,7 +143,7 @@ function RatingBar({ star, count, maxCount }: { star: number; count: number; max
           style={{ background: pct > 0 ? 'linear-gradient(90deg, #B8960C, #D4AF37)' : 'transparent' }}
         />
       </div>
-      <span className="font-mono text-[9px] shrink-0 w-4" style={{ color: 'rgba(255,255,255,0.28)' }}>
+      <span className="font-mono text-[10px] shrink-0 w-4" style={{ color: 'rgba(255,255,255,0.55)' }}>
         {count}
       </span>
     </div>
@@ -164,10 +164,10 @@ function ReviewCard({
   return (
     <motion.div
       layout
-      className="p-5 rounded-sm"
+      className="p-6 rounded-sm"
       style={{
-        background: 'rgba(255,255,255,0.022)',
-        border:     '1px solid rgba(255,255,255,0.07)',
+        background: 'rgba(255,255,255,0.05)',
+        border:     '1px solid rgba(255,255,255,0.12)',
       }}
     >
       {/* Header */}
@@ -175,37 +175,37 @@ function ReviewCard({
         <div className="flex items-center gap-3">
           {/* Avatar initials */}
           <div
-            className="w-8 h-8 rounded-full flex items-center justify-center shrink-0 font-mono text-[10px] font-bold"
+            className="w-10 h-10 rounded-full flex items-center justify-center shrink-0 font-mono text-[11px] font-bold"
             style={{
-              background: 'rgba(212,175,55,0.1)',
-              border:     '1px solid rgba(212,175,55,0.22)',
+              background: 'rgba(212,175,55,0.15)',
+              border:     '1px solid rgba(212,175,55,0.4)',
               color:      '#D4AF37',
             }}
           >
             {name.slice(0, 2).toUpperCase()}
           </div>
           <div>
-            <p className="font-mono text-[10px] leading-tight" style={{ color: 'rgba(255,255,255,0.55)' }}>
+            <p className="font-mono text-[11px] font-semibold leading-tight" style={{ color: 'rgba(255,255,255,0.85)' }}>
               {name}
             </p>
-            <div className="mt-0.5">
-              <StarDisplay value={review.rating ?? 0} size={11} />
+            <div className="mt-1">
+              <StarDisplay value={review.rating ?? 0} size={13} />
             </div>
           </div>
         </div>
 
         <div className="flex items-center gap-2 shrink-0">
-          <span className="font-mono text-[8.5px]" style={{ color: 'rgba(255,255,255,0.2)' }}>
+          <span className="font-mono text-[10px]" style={{ color: 'rgba(255,255,255,0.45)' }}>
             {fmtDate(review.created_at)}
           </span>
           {isOwn && onDelete && (
             <button
               type="button"
               onClick={onDelete}
-              className="font-mono text-[8px] px-1.5 py-0.5 transition-colors duration-150"
-              style={{ color: 'rgba(248,113,113,0.45)', border: '1px solid rgba(248,113,113,0.18)' }}
+              className="font-mono text-[9px] px-2 py-0.5 transition-colors duration-150"
+              style={{ color: 'rgba(248,113,113,0.6)', border: '1px solid rgba(248,113,113,0.3)' }}
               onMouseEnter={e => (e.currentTarget.style.color = '#f87171')}
-              onMouseLeave={e => (e.currentTarget.style.color = 'rgba(248,113,113,0.45)')}
+              onMouseLeave={e => (e.currentTarget.style.color = 'rgba(248,113,113,0.6)')}
             >
               delete
             </button>
@@ -217,8 +217,8 @@ function ReviewCard({
       <p
         className="leading-relaxed"
         style={{
-          fontSize:   '1.05rem',
-          color:      'rgba(255,255,255,0.6)',
+          fontSize:   '1.1rem',
+          color:      'rgba(255,255,255,0.82)',
           fontFamily: "'Cormorant Garamond', serif",
         }}
       >
@@ -373,7 +373,7 @@ export function ArtworkDetailPage({ artworkId }: { artworkId: string }) {
           className="relative"
           style={{ borderRight: '1px solid rgba(255,255,255,0.05)' }}
         >
-          <div className="sticky top-0 aspect-square w-full max-h-[72vh] overflow-hidden">
+          <div className="sticky top-0 w-full h-[72vh] overflow-hidden">
             {/* Phase left accent */}
             <span
               className="absolute left-0 top-0 bottom-0 w-[3px] z-10"
@@ -588,8 +588,8 @@ export function ArtworkDetailPage({ artworkId }: { artworkId: string }) {
               transition={{ duration: 0.5, ease: 'easeOut' }}
               className="p-7 rounded-sm"
               style={{
-                background: 'rgba(255,255,255,0.02)',
-                border:     '1px solid rgba(255,255,255,0.07)',
+                background: 'rgba(255,255,255,0.05)',
+                border:     '1px solid rgba(255,255,255,0.12)',
               }}
             >
               <div className="flex items-start gap-8">
@@ -627,8 +627,8 @@ export function ArtworkDetailPage({ artworkId }: { artworkId: string }) {
               transition={{ duration: 0.5, ease: 'easeOut', delay: 0.07 }}
               className="p-7 rounded-sm"
               style={{
-                background: 'rgba(255,255,255,0.02)',
-                border:     '1px solid rgba(255,255,255,0.07)',
+                background: 'rgba(255,255,255,0.05)',
+                border:     '1px solid rgba(255,255,255,0.12)',
               }}
             >
               <p

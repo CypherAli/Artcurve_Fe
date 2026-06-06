@@ -3195,6 +3195,10 @@ export function MarketplacePage() {
             onMouseLeave={onListLeave}
             style={{
               width:          '40%',
+              position:       'sticky',
+              top:            STICKY_TOP,
+              height:         `calc(100vh - ${STICKY_TOP}px)`,
+              overflowY:      'auto',
               borderRight:    '1px solid rgba(255,255,255,0.07)',
               scrollbarWidth: 'thin',
               scrollbarColor: 'rgba(212,175,55,0.15) transparent',
