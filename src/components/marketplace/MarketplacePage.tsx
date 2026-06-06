@@ -2185,8 +2185,7 @@ function InspectionDeck({
         animate={{ opacity: 1, x: 0 }}
         exit={{ opacity: 0, x: -8 }}
         transition={{ duration: 0.28, ease: [0.25, 0.46, 0.45, 0.94] }}
-        className="h-full overflow-y-auto p-8 flex flex-col gap-7"
-        style={{ scrollbarWidth: 'none' }}
+        className="p-8 flex flex-col gap-7"
       >
         {/* ── Top Half: Art + Typography ── */}
         <div className="flex gap-6">
