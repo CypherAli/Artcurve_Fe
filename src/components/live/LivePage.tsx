@@ -531,28 +531,28 @@ export function LivePage() {
 
         {/* ── Sticky chip bar ── */}
         <div className="sticky z-10 flex items-center"
-          style={{ top: 68, background: 'rgba(15,15,15,0.97)', backdropFilter: 'blur(16px)', borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
+          style={{ top: 68, height: 56, background: 'rgba(15,15,15,0.97)', backdropFilter: 'blur(16px)', borderBottom: '1px solid rgba(255,255,255,0.06)' }}>
 
           {/* Chips */}
           <div ref={chipsRef}
-            className="flex items-center gap-2 px-4 py-3 overflow-x-auto flex-1"
+            className="flex items-center gap-2.5 px-6 overflow-x-auto flex-1 h-full"
             style={{ scrollbarWidth: 'none' }}>
             {CHIPS.map(c => (
               <motion.button
                 key={c} type="button"
                 onClick={() => setChip(c)}
-                className="shrink-0 px-3 py-1 text-xs font-medium rounded-full whitespace-nowrap"
+                className="shrink-0 px-4 py-1.5 text-sm font-medium rounded-full whitespace-nowrap"
                 animate={{
-                  background: chip === c ? 'rgba(255,255,255,0.9)' : 'rgba(255,255,255,0.08)',
-                  color:      chip === c ? '#0f0f0f'               : 'rgba(255,255,255,0.68)',
+                  background: chip === c ? 'rgba(255,255,255,0.92)' : 'rgba(255,255,255,0.09)',
+                  color:      chip === c ? '#0f0f0f'                : 'rgba(255,255,255,0.72)',
                 }}
-                whileHover={{ background: chip === c ? 'rgba(255,255,255,0.9)' : 'rgba(255,255,255,0.13)' }}
+                whileHover={{ background: chip === c ? 'rgba(255,255,255,0.92)' : 'rgba(255,255,255,0.14)' }}
                 whileTap={{ scale: 0.95 }}
                 transition={{ duration: 0.12 }}>
                 {c}
                 {c === 'Live' && (
-                  <span className="ml-1.5 inline-flex items-center justify-center size-[18px] rounded-full text-[9px] font-bold"
-                    style={{ background: chip === c ? '#dc2626' : 'rgba(220,38,38,0.85)', color: 'white', verticalAlign: 'middle' }}>
+                  <span className="ml-2 inline-flex items-center justify-center w-5 h-5 rounded-full text-[10px] font-bold"
+                    style={{ background: chip === c ? '#dc2626' : 'rgba(220,38,38,0.88)', color: 'white', verticalAlign: 'middle' }}>
                     {totalLive}
                   </span>
                 )}
@@ -561,13 +561,13 @@ export function LivePage() {
           </div>
 
           {/* Go Live button */}
-          <div className="shrink-0 px-4 py-3">
+          <div className="shrink-0 px-6">
             <motion.button
               type="button"
               onClick={() => setGoLiveOpen(true)}
-              className="flex items-center gap-2 px-4 py-1.5 text-xs font-semibold rounded-full"
-              style={{ background: 'rgba(220,38,38,0.14)', border: '1px solid rgba(220,38,38,0.38)', color: '#f87171' }}
-              whileHover={{ background: 'rgba(220,38,38,0.24)' }}
+              className="flex items-center gap-2 px-5 py-2 text-sm font-semibold rounded-full"
+              style={{ background: 'rgba(220,38,38,0.15)', border: '1px solid rgba(220,38,38,0.4)', color: '#f87171' }}
+              whileHover={{ background: 'rgba(220,38,38,0.26)' }}
               whileTap={{ scale: 0.96 }}>
               <motion.span
                 className="size-2 rounded-full"
