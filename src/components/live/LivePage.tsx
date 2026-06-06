@@ -1,7 +1,8 @@
 'use client'
 
 import { useState, useMemo, useCallback, useRef } from 'react'
-import { useRouter } from 'next/navigation'
+import { useRouter, usePathname } from 'next/navigation'
+import Link from 'next/link'
 import { motion, AnimatePresence, type Variants } from 'framer-motion'
 import { authStore } from '@/lib/auth-store'
 
@@ -151,6 +152,98 @@ const ALL_ITEMS: Item[] = [
 ]
 
 const CHIPS = ['All', 'Live', 'Videos', 'Painting', 'Drawing', 'Digital', 'Sculpture', 'Mixed Media', 'Trending']
+
+// ─────────────────────────────────────────────────────────────────
+// Sidebar nav items  (YouTube mini-sidebar equivalents)
+// ─────────────────────────────────────────────────────────────────
+const NAV_ITEMS = [
+  {
+    label: 'Home',
+    href: '/',
+    icon: (
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor">
+        <path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/>
+      </svg>
+    ),
+  },
+  {
+    label: 'Live',
+    href: '/live',
+    icon: (
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <circle cx="12" cy="12" r="2"/>
+        <path d="M16.24 7.76a6 6 0 0 1 0 8.49M7.76 7.76a6 6 0 0 0 0 8.49"/>
+        <path d="M19.07 4.93a10 10 0 0 1 0 14.14M4.93 4.93a10 10 0 0 0 0 14.14"/>
+      </svg>
+    ),
+  },
+  {
+    label: 'Artists',
+    href: '/guild',
+    icon: (
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
+        <circle cx="9" cy="7" r="4"/>
+        <path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/>
+      </svg>
+    ),
+  },
+  {
+    label: 'Vault',
+    href: '/vault',
+    icon: (
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <rect x="3" y="3" width="18" height="18" rx="2"/>
+        <path d="M3 9h18"/>
+        <circle cx="12" cy="15" r="2"/>
+        <path d="M12 13v-1M12 17v1M10.27 14l-.87-.5M13.6 16l.87.5M10.27 16l-.87.5M13.6 14l.87-.5"/>
+      </svg>
+    ),
+  },
+]
+
+// ─────────────────────────────────────────────────────────────────
+// Sidebar
+// ─────────────────────────────────────────────────────────────────
+function Sidebar() {
+  const pathname = usePathname()
+
+  return (
+    <aside
+      className="fixed z-20 flex flex-col items-center pt-2 pb-4"
+      style={{
+        top: 68,
+        left: 0,
+        width: 80,
+        height: 'calc(100vh - 68px)',
+        background: '#0f0f0f',
+        borderRight: '1px solid rgba(255,255,255,0.05)',
+      }}>
+      {NAV_ITEMS.map(item => {
+        const active = pathname === item.href || (item.href === '/live' && pathname.startsWith('/live'))
+        return (
+          <Link key={item.href} href={item.href}>
+            <motion.div
+              className="flex flex-col items-center justify-center gap-1 w-full px-1 py-3 rounded-xl mx-1 cursor-pointer"
+              style={{
+                width: 64,
+                color: active ? 'rgba(255,255,255,0.95)' : 'rgba(255,255,255,0.45)',
+              }}
+              whileHover={{ background: 'rgba(255,255,255,0.08)', color: 'rgba(255,255,255,0.9)' }}
+              whileTap={{ scale: 0.94 }}
+              animate={{ background: active ? 'rgba(255,255,255,0.1)' : 'transparent' }}
+              transition={{ duration: 0.13 }}>
+              {item.icon}
+              <span className="text-[10px] font-medium text-center leading-tight">
+                {item.label}
+              </span>
+            </motion.div>
+          </Link>
+        )
+      })}
+    </aside>
+  )
+}
 
 function fmtViewers(n: number) {
   if (n >= 10000) return `${(n / 1000).toFixed(0)}K`
@@ -527,12 +620,15 @@ export function LivePage() {
         {goLiveOpen && <GoLiveModal key="golive" onClose={() => setGoLiveOpen(false)}/>}
       </AnimatePresence>
 
-      <div className="min-h-dvh" style={{ marginTop: 68, background: '#0f0f0f' }}>
+      {/* ── YouTube-style left sidebar ── */}
+      <Sidebar/>
+
+      <div className="min-h-dvh" style={{ marginTop: 68, marginLeft: 80, background: '#0f0f0f' }}>
 
         {/* ── Sticky chip bar ── */}
         <div className="sticky z-10"
           style={{ top: 68, background: 'rgba(13,13,13,0.98)', backdropFilter: 'blur(20px)', borderBottom: '1px solid rgba(255,255,255,0.07)' }}>
-          <div className="flex items-center max-w-screen-2xl mx-auto px-8" style={{ height: 64 }}>
+          <div className="flex items-center px-6" style={{ height: 64 }}>
 
             {/* Chips */}
             <div ref={chipsRef}
@@ -582,7 +678,7 @@ export function LivePage() {
         </div>
 
         {/* ── Grid ── */}
-        <div className="max-w-screen-2xl mx-auto px-8 py-8">
+        <div className="px-6 py-8">
           <AnimatePresence mode="wait">
             {filtered.length > 0 ? (
               <motion.div
