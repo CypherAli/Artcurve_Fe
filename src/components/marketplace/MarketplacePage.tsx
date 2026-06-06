@@ -2281,6 +2281,58 @@ function InspectionDeck({
                 </div>
               ))}
             </div>
+
+            {/* View Detail & Reviews — right below stats */}
+            <Link
+              href={`/artwork/${art.artworkId || `mock-${art.id}`}`}
+              onClick={() => {
+                const payload: StoredArtwork = {
+                  id:             art.id,
+                  artworkId:      art.artworkId,
+                  title:          art.title,
+                  ticker:         art.ticker,
+                  artist:         art.artist,
+                  phase:          art.phase,
+                  phaseColor:     art.phaseColor,
+                  marketCap:      art.marketCap,
+                  marketCapLabel: art.marketCapLabel,
+                  change24h:      art.change24h,
+                  changePositive: art.changePositive,
+                  progress:       art.progress,
+                  image:          art.image,
+                  description:    art.description,
+                  volume24h:      art.volume24h,
+                  holders:        art.holders,
+                }
+                sessionStorage.setItem('artcurve_detail', JSON.stringify(payload))
+              }}
+              className="flex items-center justify-center gap-2 w-full py-2.5
+                         font-mono text-[9px] tracking-[0.22em] uppercase
+                         transition-all duration-150"
+              style={{
+                border:     '1px solid rgba(212,175,55,0.3)',
+                color:      'rgba(212,175,55,0.7)',
+                background: 'rgba(212,175,55,0.04)',
+              }}
+              onMouseEnter={e => {
+                const el = e.currentTarget as HTMLElement
+                el.style.background   = 'rgba(212,175,55,0.1)'
+                el.style.borderColor  = 'rgba(212,175,55,0.55)'
+                el.style.color        = '#D4AF37'
+              }}
+              onMouseLeave={e => {
+                const el = e.currentTarget as HTMLElement
+                el.style.background   = 'rgba(212,175,55,0.04)'
+                el.style.borderColor  = 'rgba(212,175,55,0.3)'
+                el.style.color        = 'rgba(212,175,55,0.7)'
+              }}
+            >
+              <svg viewBox="0 0 24 24" className="w-3 h-3" fill="none"
+                stroke="currentColor" strokeWidth="2" strokeLinecap="round">
+                <path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/>
+              </svg>
+              View Detail &amp; Reviews
+            </Link>
           </div>
         </div>
 
@@ -2411,58 +2463,6 @@ function InspectionDeck({
             style={{ color: 'rgba(255,255,255,0.16)' }}>
             Base Network · Bonding Curve · {art.holders} current holders
           </p>
-
-          {/* View Full Detail & Reviews */}
-          <Link
-            href={`/artwork/${art.artworkId || `mock-${art.id}`}`}
-            onClick={() => {
-              const payload: StoredArtwork = {
-                id:             art.id,
-                artworkId:      art.artworkId,
-                title:          art.title,
-                ticker:         art.ticker,
-                artist:         art.artist,
-                phase:          art.phase,
-                phaseColor:     art.phaseColor,
-                marketCap:      art.marketCap,
-                marketCapLabel: art.marketCapLabel,
-                change24h:      art.change24h,
-                changePositive: art.changePositive,
-                progress:       art.progress,
-                image:          art.image,
-                description:    art.description,
-                volume24h:      art.volume24h,
-                holders:        art.holders,
-              }
-              sessionStorage.setItem('artcurve_detail', JSON.stringify(payload))
-            }}
-            className="flex items-center justify-center gap-2 w-full py-3
-                       font-mono text-[9px] tracking-[0.22em] uppercase
-                       transition-all duration-150"
-            style={{
-              border:     '1px solid rgba(212,175,55,0.3)',
-              color:      'rgba(212,175,55,0.7)',
-              background: 'rgba(212,175,55,0.04)',
-            }}
-            onMouseEnter={e => {
-              const el = e.currentTarget as HTMLElement
-              el.style.background   = 'rgba(212,175,55,0.1)'
-              el.style.borderColor  = 'rgba(212,175,55,0.55)'
-              el.style.color        = '#D4AF37'
-            }}
-            onMouseLeave={e => {
-              const el = e.currentTarget as HTMLElement
-              el.style.background   = 'rgba(212,175,55,0.04)'
-              el.style.borderColor  = 'rgba(212,175,55,0.3)'
-              el.style.color        = 'rgba(212,175,55,0.7)'
-            }}
-          >
-            <svg viewBox="0 0 24 24" className="w-3 h-3" fill="none"
-              stroke="currentColor" strokeWidth="2" strokeLinecap="round">
-              <path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/>
-            </svg>
-            View Detail &amp; Reviews
-          </Link>
         </div>
       </motion.div>
     </AnimatePresence>
