@@ -642,7 +642,7 @@ export function LivePage() {
                   style={{
                     fontSize: 14,
                     padding: '7px 16px',
-                    borderRadius: 999,
+                    borderRadius: 8,
                     border: chip === c ? 'none' : '1px solid rgba(255,255,255,0.15)',
                   }}
                   animate={{
