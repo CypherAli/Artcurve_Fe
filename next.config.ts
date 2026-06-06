@@ -46,6 +46,7 @@ const securityHeaders = [
         'wss://*.walletconnect.com',
         'https://*.walletconnect.org',
         'https://api.web3modal.com',
+        'https://api.web3modal.org',
         'https://rpc.walletconnect.com',
         'https://mainnet.base.org',
         'https://sepolia.base.org',
@@ -54,6 +55,9 @@ const securityHeaders = [
         'https://*.alchemy.com',
         'https://artcurve-be-production.up.railway.app',
         'wss://artcurve-be-production.up.railway.app',
+        // LiveKit Cloud
+        'wss://artcurve-3el8ft2f.livekit.cloud',
+        'https://artcurve-3el8ft2f.livekit.cloud',
         // Binance public WebSocket — real-time crypto prices
         'wss://stream.binance.com:9443',
         'wss://stream.binance.com:443',
