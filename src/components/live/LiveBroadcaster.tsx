@@ -57,8 +57,7 @@ export function LiveBroadcaster({ roomName }: { roomName: string }) {
   const handleEndStream = useCallback(async () => {
     setEnding(true)
     try {
-      const user = authStore.getUser()
-      const jwt  = authStore.getToken()
+      const jwt  = authStore.getJwt()
       await fetch(`${API}/live/${roomName}`, {
         method:  'DELETE',
         headers: { Authorization: `Bearer ${jwt}` },
