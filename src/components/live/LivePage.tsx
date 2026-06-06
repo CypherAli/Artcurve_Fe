@@ -189,14 +189,12 @@ const NAV_ITEMS = [
     ),
   },
   {
-    label: 'Vault',
-    href: '/vault',
+    label: 'My Account',
+    href: '/settings',
     icon: (
       <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-        <rect x="3" y="3" width="18" height="18" rx="2"/>
-        <path d="M3 9h18"/>
-        <circle cx="12" cy="15" r="2"/>
-        <path d="M12 13v-1M12 17v1M10.27 14l-.87-.5M13.6 16l.87.5M10.27 16l-.87.5M13.6 14l.87-.5"/>
+        <circle cx="12" cy="8" r="4"/>
+        <path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/>
       </svg>
     ),
   },
