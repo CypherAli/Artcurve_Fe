@@ -4,8 +4,12 @@
 //  Added: category filter, Go Live button, chat panel, upcoming streams
 // ─────────────────────────────────────────────────────────────────
 
-import { useState, useMemo, useEffect } from 'react'
+import { useState, useMemo, useEffect, useCallback } from 'react'
+import { useRouter } from 'next/navigation'
 import { motion, AnimatePresence } from 'framer-motion'
+import { authStore } from '@/lib/auth-store'
+
+const API = process.env.NEXT_PUBLIC_API_URL ?? 'https://artcurve-be-production.up.railway.app/api/v1'
 
 // ── Types ─────────────────────────────────────────────────────────
 interface Stream {
@@ -523,8 +527,40 @@ function Upcoming() {
 //  Go Live modal (simple)
 // ─────────────────────────────────────────────────────────────────
 function GoLiveModal({ onClose }: { onClose: () => void }) {
-  const [title, setTitle] = useState('')
-  const [cat, setCat] = useState('Painting')
+  const router = useRouter()
+  const [title,   setTitle]   = useState('')
+  const [cat,     setCat]     = useState('Painting')
+  const [loading, setLoading] = useState(false)
+  const [error,   setError]   = useState('')
+
+  const handleStart = useCallback(async () => {
+    if (!title.trim() || loading) return
+    setLoading(true)
+    setError('')
+    try {
+      const jwt  = authStore.getToken()
+      const res  = await fetch(`${API}/live/create`, {
+        method:  'POST',
+        headers: {
+          'Content-Type':  'application/json',
+          'Authorization': `Bearer ${jwt}`,
+        },
+        body: JSON.stringify({ title: title.trim(), category: cat }),
+      })
+      if (!res.ok) {
+        const msg = await res.text()
+        throw new Error(msg || 'Failed to create stream')
+      }
+      const data = await res.json()
+      // Lưu host token vào sessionStorage trước khi redirect
+      sessionStorage.setItem(`livekit_host_token_${data.roomName}`, data.token)
+      router.push(`/studio/stream/${data.roomName}`)
+    } catch (err: unknown) {
+      setError((err as Error).message ?? 'Could not start stream. Try again.')
+      setLoading(false)
+    }
+  }, [title, cat, loading, router])
+
   return (
     <motion.div className="fixed inset-0 z-50 flex items-center justify-center"
       style={{ background: 'rgba(0,0,0,0.7)', backdropFilter: 'blur(6px)' }}
@@ -547,7 +583,10 @@ function GoLiveModal({ onClose }: { onClose: () => void }) {
           <div>
             <label className="font-mono text-[7px] tracking-wider uppercase block mb-1.5"
               style={{ color: 'rgba(255,255,255,0.28)' }}>Stream Title</label>
-            <input value={title} onChange={e => setTitle(e.target.value)}
+            <input
+              value={title}
+              onChange={e => setTitle(e.target.value)}
+              onKeyDown={e => e.key === 'Enter' && handleStart()}
               placeholder="What are you creating today?"
               className="w-full bg-transparent font-sans text-[11px] px-3 py-2 outline-none"
               style={{ border: '1px solid rgba(255,255,255,0.1)', color: 'rgba(255,255,255,0.78)', caretColor: '#D4AF37' }}/>
@@ -560,24 +599,32 @@ function GoLiveModal({ onClose }: { onClose: () => void }) {
                 <button key={c} type="button" onClick={() => setCat(c)}
                   className="py-1.5 font-mono text-[7px]"
                   style={{
-                    border: `1px solid ${cat === c ? 'rgba(212,175,55,0.4)' : 'rgba(255,255,255,0.07)'}`,
+                    border:     `1px solid ${cat === c ? 'rgba(212,175,55,0.4)' : 'rgba(255,255,255,0.07)'}`,
                     background: cat === c ? 'rgba(212,175,55,0.08)' : 'transparent',
-                    color: cat === c ? '#D4AF37' : 'rgba(255,255,255,0.3)',
+                    color:      cat === c ? '#D4AF37' : 'rgba(255,255,255,0.3)',
                   }}>{c}</button>
               ))}
             </div>
           </div>
-          <motion.button type="button"
+
+          {error && (
+            <p className="font-mono text-[8px]" style={{ color: '#f87171' }}>{error}</p>
+          )}
+
+          <motion.button
+            type="button"
+            onClick={handleStart}
+            disabled={!title.trim() || loading}
             className="w-full py-2.5 font-mono text-[8.5px] tracking-widest font-semibold mt-1"
             style={{
               background: title ? 'rgba(212,175,55,0.14)' : 'rgba(255,255,255,0.03)',
-              border: `1px solid ${title ? 'rgba(212,175,55,0.38)' : 'rgba(255,255,255,0.07)'}`,
-              color: title ? '#D4AF37' : 'rgba(255,255,255,0.18)',
-              cursor: title ? 'pointer' : 'default',
+              border:     `1px solid ${title ? 'rgba(212,175,55,0.38)' : 'rgba(255,255,255,0.07)'}`,
+              color:      title ? '#D4AF37' : 'rgba(255,255,255,0.18)',
+              cursor:     title && !loading ? 'pointer' : 'default',
             }}
-            whileHover={title ? { background: 'rgba(212,175,55,0.22)' } : {}}
-            whileTap={title ? { scale: 0.98 } : {}}>
-            START STREAMING
+            whileHover={title && !loading ? { background: 'rgba(212,175,55,0.22)' } : {}}
+            whileTap={title && !loading ? { scale: 0.98 } : {}}>
+            {loading ? 'STARTING…' : 'START STREAMING'}
           </motion.button>
         </div>
       </motion.div>
