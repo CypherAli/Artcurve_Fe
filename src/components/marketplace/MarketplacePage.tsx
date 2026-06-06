@@ -3185,6 +3185,7 @@ export function MarketplacePage() {
 
           {/* ── Left: Compact List (40%) ── */}
           <div
+            data-lenis-prevent
             onMouseEnter={onListEnter}
             onMouseLeave={onListLeave}
             style={{
@@ -3248,6 +3249,7 @@ export function MarketplacePage() {
 
           {/* ── Right: Inspection Deck (60%) ── */}
           <div
+            data-lenis-prevent
             className="hidden md:block flex-1 min-w-0"
             style={{
               height:         '100%',
