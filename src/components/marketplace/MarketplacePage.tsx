@@ -2940,7 +2940,7 @@ export function MarketplacePage() {
 
   return (
     <>
-      <div style={{ paddingTop: 80, background: '#0A0A0A', minHeight: '100dvh' }}>
+      <div style={{ paddingTop: 80, height: '100dvh', overflow: 'hidden', display: 'flex', flexDirection: 'column', background: '#0A0A0A' }}>
 
         {/* ══ TICKER TAPE ═════════════════════════════════════ */}
         <TickerTape />
@@ -3007,9 +3007,8 @@ export function MarketplacePage() {
 
         {/* ══ FLOW NAVIGATOR ══════════════════════════════════ */}
         <div
-          className="sticky z-30 flex items-center justify-between gap-4 px-6"
+          className="shrink-0 z-30 flex items-center justify-between gap-4 px-6"
           style={{
-            top:          80,
             borderBottom: '1px solid rgba(255,255,255,0.08)',
             background:   'rgba(10,10,10,0.98)',
             height:       48,
@@ -3165,13 +3164,7 @@ export function MarketplacePage() {
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -8 }}
               transition={{ duration: 0.22, ease: [0.25, 0.46, 0.45, 0.94] }}
-              className="w-full"
-              style={{
-                height:     'calc(100vh - 128px)',
-                overflowY:  'hidden',
-                display:    'flex',
-                flexDirection: 'column',
-              }}
+              className="w-full flex-1 min-h-0 flex flex-col"
             >
               <RaceView
                 artworks={filtered.length ? filtered : ARTWORKS}
@@ -3187,8 +3180,7 @@ export function MarketplacePage() {
 
         {/* ══ SPLIT PANE ══════════════════════════════════════ */}
         <div
-          className={`flex ${viewMode === 'race' ? 'hidden' : ''}`}
-          style={{ height: `calc(100vh - ${STICKY_TOP}px)` }}
+          className={`flex flex-1 min-h-0 ${viewMode === 'race' ? 'hidden' : ''}`}
         >
 
           {/* ── Left: Compact List (40%) ── */}
