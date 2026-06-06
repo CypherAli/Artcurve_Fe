@@ -164,10 +164,13 @@ function ReviewCard({
   return (
     <motion.div
       layout
-      className="p-6 rounded-sm"
+      className="relative overflow-hidden"
       style={{
-        background: 'rgba(255,255,255,0.05)',
-        border:     '1px solid rgba(255,255,255,0.12)',
+        background:   '#141414',
+        border:       '1px solid rgba(255,255,255,0.15)',
+        borderLeft:   '3px solid rgba(212,175,55,0.6)',
+        borderRadius: 2,
+        padding:      '20px 24px',
       }}
     >
       {/* Header */}
@@ -175,27 +178,27 @@ function ReviewCard({
         <div className="flex items-center gap-3">
           {/* Avatar initials */}
           <div
-            className="w-10 h-10 rounded-full flex items-center justify-center shrink-0 font-mono text-[11px] font-bold"
+            className="w-10 h-10 rounded-full flex items-center justify-center shrink-0 font-mono text-xs font-bold"
             style={{
-              background: 'rgba(212,175,55,0.15)',
-              border:     '1px solid rgba(212,175,55,0.4)',
+              background: 'rgba(212,175,55,0.18)',
+              border:     '1.5px solid rgba(212,175,55,0.55)',
               color:      '#D4AF37',
             }}
           >
             {name.slice(0, 2).toUpperCase()}
           </div>
           <div>
-            <p className="font-mono text-[11px] font-semibold leading-tight" style={{ color: 'rgba(255,255,255,0.85)' }}>
+            <p className="font-mono text-xs font-semibold leading-tight" style={{ color: '#FDFBF7' }}>
               {name}
             </p>
             <div className="mt-1">
-              <StarDisplay value={review.rating ?? 0} size={13} />
+              <StarDisplay value={review.rating ?? 0} size={14} />
             </div>
           </div>
         </div>
 
         <div className="flex items-center gap-2 shrink-0">
-          <span className="font-mono text-[10px]" style={{ color: 'rgba(255,255,255,0.45)' }}>
+          <span className="font-mono text-[10px]" style={{ color: 'rgba(255,255,255,0.5)' }}>
             {fmtDate(review.created_at)}
           </span>
           {isOwn && onDelete && (
@@ -203,9 +206,9 @@ function ReviewCard({
               type="button"
               onClick={onDelete}
               className="font-mono text-[9px] px-2 py-0.5 transition-colors duration-150"
-              style={{ color: 'rgba(248,113,113,0.6)', border: '1px solid rgba(248,113,113,0.3)' }}
-              onMouseEnter={e => (e.currentTarget.style.color = '#f87171')}
-              onMouseLeave={e => (e.currentTarget.style.color = 'rgba(248,113,113,0.6)')}
+              style={{ color: '#f87171', border: '1px solid rgba(248,113,113,0.4)' }}
+              onMouseEnter={e => (e.currentTarget.style.background = 'rgba(248,113,113,0.1)')}
+              onMouseLeave={e => (e.currentTarget.style.background = 'transparent')}
             >
               delete
             </button>
@@ -217,9 +220,10 @@ function ReviewCard({
       <p
         className="leading-relaxed"
         style={{
-          fontSize:   '1.1rem',
-          color:      'rgba(255,255,255,0.82)',
+          fontSize:   '1.05rem',
+          color:      'rgba(255,255,255,0.88)',
           fontFamily: "'Cormorant Garamond', serif",
+          lineHeight: 1.8,
         }}
       >
         "{review.content}"
