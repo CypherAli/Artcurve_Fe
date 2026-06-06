@@ -189,8 +189,8 @@ const NAV_ITEMS = [
     ),
   },
   {
-    label: 'My Account',
-    href: '/settings',
+    label: 'You',
+    href: '/wallet',
     icon: (
       <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
         <circle cx="12" cy="8" r="4"/>
@@ -222,17 +222,19 @@ function Sidebar() {
         return (
           <Link key={item.href} href={item.href}>
             <motion.div
-              className="flex flex-col items-center justify-center gap-1 w-full px-1 py-3 rounded-xl mx-1 cursor-pointer"
+              className="flex flex-col items-center justify-center gap-1.5 cursor-pointer"
               style={{
-                width: 64,
-                color: active ? 'rgba(255,255,255,0.95)' : 'rgba(255,255,255,0.45)',
+                width: 68,
+                padding: '10px 6px',
+                borderRadius: 12,
+                color: active ? 'rgba(255,255,255,0.95)' : 'rgba(255,255,255,0.42)',
               }}
-              whileHover={{ background: 'rgba(255,255,255,0.08)', color: 'rgba(255,255,255,0.9)' }}
-              whileTap={{ scale: 0.94 }}
-              animate={{ background: active ? 'rgba(255,255,255,0.1)' : 'transparent' }}
+              whileHover={{ background: 'rgba(255,255,255,0.08)', color: 'rgba(255,255,255,0.88)' }}
+              whileTap={{ scale: 0.93 }}
+              animate={{ background: active ? 'rgba(255,255,255,0.11)' : 'transparent' }}
               transition={{ duration: 0.13 }}>
               {item.icon}
-              <span className="text-[10px] font-medium text-center leading-tight">
+              <span style={{ fontSize: 10, fontWeight: 500, textAlign: 'center', lineHeight: 1.2 }}>
                 {item.label}
               </span>
             </motion.div>
@@ -636,12 +638,21 @@ export function LivePage() {
                 <motion.button
                   key={c} type="button"
                   onClick={() => setChip(c)}
-                  className="shrink-0 px-4 py-2 text-sm font-medium rounded-full whitespace-nowrap"
-                  animate={{
-                    background: chip === c ? 'rgba(255,255,255,0.93)' : 'rgba(255,255,255,0.08)',
-                    color:      chip === c ? '#0d0d0d'                : 'rgba(255,255,255,0.7)',
+                  className="shrink-0 whitespace-nowrap font-medium"
+                  style={{
+                    fontSize: 14,
+                    padding: '7px 16px',
+                    borderRadius: 999,
+                    border: chip === c ? 'none' : '1px solid rgba(255,255,255,0.15)',
                   }}
-                  whileHover={{ background: chip === c ? 'rgba(255,255,255,0.93)' : 'rgba(255,255,255,0.13)' }}
+                  animate={{
+                    background: chip === c ? 'rgba(255,255,255,0.93)' : 'transparent',
+                    color:      chip === c ? '#0d0d0d'                : 'rgba(255,255,255,0.72)',
+                  }}
+                  whileHover={{
+                    background: chip === c ? 'rgba(255,255,255,0.93)' : 'rgba(255,255,255,0.08)',
+                    borderColor: 'rgba(255,255,255,0.3)',
+                  }}
                   whileTap={{ scale: 0.95 }}
                   transition={{ duration: 0.13 }}>
                   {c}
