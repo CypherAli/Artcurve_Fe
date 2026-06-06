@@ -2940,7 +2940,7 @@ export function MarketplacePage() {
 
   return (
     <>
-      <div style={{ paddingTop: 80, height: '100dvh', overflow: 'hidden', display: 'flex', flexDirection: 'column', background: '#0A0A0A' }}>
+      <div data-lenis-prevent style={{ paddingTop: 80, height: '100dvh', overflow: 'hidden', display: 'flex', flexDirection: 'column', background: '#0A0A0A' }}>
 
         {/* ══ TICKER TAPE ═════════════════════════════════════ */}
         <TickerTape />
