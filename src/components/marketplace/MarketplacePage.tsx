@@ -25,6 +25,7 @@ import {
   useEffect, useRef, useState, useMemo, useCallback,
 } from 'react'
 import { motion, AnimatePresence, LayoutGroup } from 'framer-motion'
+import Link                        from 'next/link'
 import { gsap }                    from '@/lib/gsap'
 import { PHASE_COLOR, Phase }      from './ArtCard'
 import { CandlestickChart }        from '../common/CandlestickChart'
@@ -32,6 +33,7 @@ import { useMarketplace }          from '@/hooks/useMarketplace'
 import { artworkService }          from '@/services/artwork.service'
 import { useBinanceTicker, fmtUSD, fmtChange, TICKER_COINS } from '@/hooks/useBinanceTicker'
 import type { Artwork }            from '@/types/api'
+import type { StoredArtwork }      from '@/components/artwork/ArtworkDetailPage'
 
 // ── Extended artwork type ──────────────────────────────────────────
 interface MarketArtwork {
@@ -1637,9 +1639,55 @@ function RankTimelineFullscreen({
                 <BondingCurveChart art={selectedArt} range={chartRange} height={220}/>
               </div>
               <div className="px-6 pb-5 shrink-0">
-                <p className="text-[11.5px] leading-relaxed" style={{ color: 'rgba(255,255,255,0.38)', maxWidth: '44ch' }}>
+                <p className="text-[11.5px] leading-relaxed mb-5" style={{ color: 'rgba(255,255,255,0.38)', maxWidth: '44ch' }}>
                   {selectedArt.description}
                 </p>
+                <Link
+                  href={`/artwork/${selectedArt.artworkId || `mock-${selectedArt.id}`}`}
+                  onClick={() => {
+                    const payload: StoredArtwork = {
+                      id:             selectedArt.id,
+                      artworkId:      selectedArt.artworkId,
+                      title:          selectedArt.title,
+                      ticker:         selectedArt.ticker,
+                      artist:         selectedArt.artist,
+                      phase:          selectedArt.phase,
+                      phaseColor:     selectedArt.phaseColor,
+                      marketCap:      selectedArt.marketCap,
+                      marketCapLabel: selectedArt.marketCapLabel,
+                      change24h:      selectedArt.change24h,
+                      changePositive: selectedArt.changePositive,
+                      progress:       selectedArt.progress,
+                      image:          selectedArt.image,
+                      description:    selectedArt.description,
+                      volume24h:      selectedArt.volume24h,
+                      holders:        selectedArt.holders,
+                    }
+                    sessionStorage.setItem('artcurve_detail', JSON.stringify(payload))
+                  }}
+                  className="inline-flex items-center gap-2 font-mono text-[9px] tracking-[0.2em] uppercase
+                             px-4 py-2.5 transition-all duration-150"
+                  style={{
+                    border:     '1px solid rgba(212,175,55,0.35)',
+                    color:      '#D4AF37',
+                    background: 'rgba(212,175,55,0.05)',
+                  }}
+                  onMouseEnter={e => {
+                    const el = e.currentTarget as HTMLElement
+                    el.style.background = 'rgba(212,175,55,0.12)'
+                    el.style.borderColor = 'rgba(212,175,55,0.6)'
+                  }}
+                  onMouseLeave={e => {
+                    const el = e.currentTarget as HTMLElement
+                    el.style.background = 'rgba(212,175,55,0.05)'
+                    el.style.borderColor = 'rgba(212,175,55,0.35)'
+                  }}
+                >
+                  <svg viewBox="0 0 24 24" className="w-3 h-3" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
+                    <path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6M15 3h6v6M10 14L21 3"/>
+                  </svg>
+                  View Full Detail &amp; Reviews
+                </Link>
               </div>
             </motion.div>
           )}

@@ -287,6 +287,29 @@ export interface PriceUpdateEvent {
   share_amount?: string
 }
 
+// ── Reviews / Comments ───────────────────────────────────────────
+export interface ReviewUser {
+  wallet_address: string
+  username:       string | null
+  avatar_url:     string | null
+}
+
+export interface Review {
+  id:               string
+  artwork_id:       string
+  user_id:          string
+  interaction_type: 'COMMENT'
+  content:          string
+  rating:           number | null  // 1-5
+  created_at:       string
+  user?:            ReviewUser
+}
+
+export interface CreateReviewDto {
+  content: string
+  rating?: number
+}
+
 // ── Generic API error ─────────────────────────────────────────────
 export interface ApiErrorBody {
   statusCode: number
