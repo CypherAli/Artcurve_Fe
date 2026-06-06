@@ -530,49 +530,51 @@ export function LivePage() {
       <div className="min-h-dvh" style={{ marginTop: 68, background: '#0f0f0f' }}>
 
         {/* ── Sticky chip bar ── */}
-        <div className="sticky z-10 flex items-center"
-          style={{ top: 68, height: 56, background: 'rgba(15,15,15,0.97)', backdropFilter: 'blur(16px)', borderBottom: '1px solid rgba(255,255,255,0.06)' }}>
+        <div className="sticky z-10"
+          style={{ top: 68, background: 'rgba(13,13,13,0.98)', backdropFilter: 'blur(20px)', borderBottom: '1px solid rgba(255,255,255,0.07)' }}>
+          <div className="flex items-center max-w-screen-2xl mx-auto px-8" style={{ height: 64 }}>
 
-          {/* Chips */}
-          <div ref={chipsRef}
-            className="flex items-center gap-2.5 px-6 overflow-x-auto flex-1 h-full"
-            style={{ scrollbarWidth: 'none' }}>
-            {CHIPS.map(c => (
-              <motion.button
-                key={c} type="button"
-                onClick={() => setChip(c)}
-                className="shrink-0 px-4 py-1.5 text-sm font-medium rounded-full whitespace-nowrap"
-                animate={{
-                  background: chip === c ? 'rgba(255,255,255,0.92)' : 'rgba(255,255,255,0.09)',
-                  color:      chip === c ? '#0f0f0f'                : 'rgba(255,255,255,0.72)',
-                }}
-                whileHover={{ background: chip === c ? 'rgba(255,255,255,0.92)' : 'rgba(255,255,255,0.14)' }}
-                whileTap={{ scale: 0.95 }}
-                transition={{ duration: 0.12 }}>
-                {c}
-                {c === 'Live' && (
-                  <span className="ml-2 inline-flex items-center justify-center w-5 h-5 rounded-full text-[10px] font-bold"
-                    style={{ background: chip === c ? '#dc2626' : 'rgba(220,38,38,0.88)', color: 'white', verticalAlign: 'middle' }}>
-                    {totalLive}
-                  </span>
-                )}
-              </motion.button>
-            ))}
-          </div>
+            {/* Chips */}
+            <div ref={chipsRef}
+              className="flex items-center gap-3 overflow-x-auto flex-1"
+              style={{ scrollbarWidth: 'none' }}>
+              {CHIPS.map(c => (
+                <motion.button
+                  key={c} type="button"
+                  onClick={() => setChip(c)}
+                  className="shrink-0 px-4 py-2 text-sm font-medium rounded-full whitespace-nowrap"
+                  animate={{
+                    background: chip === c ? 'rgba(255,255,255,0.93)' : 'rgba(255,255,255,0.08)',
+                    color:      chip === c ? '#0d0d0d'                : 'rgba(255,255,255,0.7)',
+                  }}
+                  whileHover={{ background: chip === c ? 'rgba(255,255,255,0.93)' : 'rgba(255,255,255,0.13)' }}
+                  whileTap={{ scale: 0.95 }}
+                  transition={{ duration: 0.13 }}>
+                  {c}
+                  {c === 'Live' && (
+                    <span className="ml-2 inline-flex items-center justify-center w-5 h-5 rounded-full text-[10px] font-bold"
+                      style={{ background: chip === c ? '#dc2626' : 'rgba(220,38,38,0.9)', color: 'white', verticalAlign: 'middle' }}>
+                      {totalLive}
+                    </span>
+                  )}
+                </motion.button>
+              ))}
+            </div>
 
-          {/* Go Live button */}
-          <div className="shrink-0 px-6">
+            {/* Divider */}
+            <div className="mx-6 shrink-0" style={{ width: 1, height: 28, background: 'rgba(255,255,255,0.1)' }}/>
+
+            {/* Go Live */}
             <motion.button
               type="button"
               onClick={() => setGoLiveOpen(true)}
-              className="flex items-center gap-2 px-5 py-2 text-sm font-semibold rounded-full"
-              style={{ background: 'rgba(220,38,38,0.15)', border: '1px solid rgba(220,38,38,0.4)', color: '#f87171' }}
-              whileHover={{ background: 'rgba(220,38,38,0.26)' }}
+              className="shrink-0 flex items-center gap-2 px-5 py-2 text-sm font-semibold rounded-full"
+              style={{ background: '#dc2626', color: 'white' }}
+              whileHover={{ background: '#b91c1c' }}
               whileTap={{ scale: 0.96 }}>
               <motion.span
-                className="size-2 rounded-full"
-                style={{ background: '#f87171', display: 'inline-block' }}
-                animate={{ opacity: [1, 0.3, 1] }}
+                className="size-2 rounded-full bg-white"
+                animate={{ opacity: [1, 0.35, 1] }}
                 transition={{ duration: 1.1, repeat: Infinity }}/>
               Go Live
             </motion.button>
@@ -580,12 +582,12 @@ export function LivePage() {
         </div>
 
         {/* ── Grid ── */}
-        <div className="px-6 py-6">
+        <div className="max-w-screen-2xl mx-auto px-8 py-8">
           <AnimatePresence mode="wait">
             {filtered.length > 0 ? (
               <motion.div
                 key={chip}
-                className="grid grid-cols-4 gap-x-3 gap-y-7"
+                className="grid grid-cols-4 gap-x-5 gap-y-9"
                 variants={gridVariants}
                 initial="hidden"
                 animate="show">
