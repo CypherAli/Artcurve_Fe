@@ -700,6 +700,7 @@ export function StudioPage() {
     try {
       // Step 1: upload image + pin metadata to IPFS (if file chosen)
       let ipfsMetadataUri: string | undefined
+      let imageUri:        string | undefined
       if (selectedFile) {
         const upload = await api.artworks.uploadMedia(
           selectedFile,
@@ -707,12 +708,14 @@ export function StudioPage() {
           form.description,
         )
         ipfsMetadataUri = upload.metadata_uri
+        imageUri        = upload.image_uri
       }
 
       // Step 2: create DRAFT in backend
       await api.artworks.createDraft({
         title:             form.title,
         description:       form.description,
+        image_uri:         imageUri,
         ipfs_metadata_uri: ipfsMetadataUri,
         target_cap:        String(form.supply * form.initPrice),
         ticker:            form.ticker !== '$TOKEN' ? form.ticker : undefined,

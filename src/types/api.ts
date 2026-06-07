@@ -131,6 +131,7 @@ export interface ArtworkSearchParams {
 export interface CreateArtworkDto {
   title:              string
   description?:       string
+  image_uri?:         string
   ipfs_metadata_uri?: string
   target_cap:         string
   ticker?:            string   // auto-generated if omitted

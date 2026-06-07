@@ -1,22 +1,34 @@
 'use client'
-// ─────────────────────────────────────────────────────────────────
-//  hooks/usePriceSocket.ts  —  Real-time price updates via Socket.IO
+// hooks/usePriceSocket.ts — Real-time price updates via native WebSocket → Go WS Hub
 //
-//  Connects to backend WebSocket gateway:
-//    /prices  (PriceGateway namespace)
+// Protocol (Go WS Hub at /ws):
+//   client → {"action":"subscribe","artwork_id":"<uuid>"}
+//   server → {"type":"price_update","data":{...PriceEvent}}
+//   server → {"type":"artwork_graduated","data":{...}}
+//   client → {"action":"unsubscribe","artwork_id":"<uuid>"}
 //
-//  Flow:
-//    socket.emit('subscribe_artwork',   { artwork_id })
-//    socket.on('price_update', handler)
-//    socket.emit('unsubscribe_artwork', { artwork_id })
-// ─────────────────────────────────────────────────────────────────
+// Env var: NEXT_PUBLIC_WS_HUB_URL  e.g. wss://artcurve-ws-hub.railway.app
+// Falls back to API_URL host on port 8080 for local dev.
 
 import { useState, useEffect, useRef } from 'react'
 import type { PriceUpdateEvent }       from '@/types/api'
 
-const WS_URL =
-  (process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:3001/api/v1')
-    .replace('/api/v1', '')
+function resolveHubUrl(): string {
+  const explicit = process.env.NEXT_PUBLIC_WS_HUB_URL
+  if (explicit) return explicit.replace(/\/$/, '')
+
+  // local dev fallback: derive from API URL
+  const api = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:3001/api/v1'
+  try {
+    const u = new URL(api)
+    const proto = u.protocol === 'https:' ? 'wss' : 'ws'
+    return `${proto}://${u.hostname}:8080`
+  } catch {
+    return 'ws://localhost:8080'
+  }
+}
+
+const HUB_BASE = resolveHubUrl()
 
 interface PriceState {
   price:     string | null
@@ -27,85 +39,96 @@ interface PriceState {
 
 const INIT: PriceState = { price: null, supply: null, volume24h: null, timestamp: null }
 
+const MAX_RETRIES  = 5
+const BASE_DELAY   = 2_000  // ms, doubles each retry
+
 export function usePriceSocket(artworkId: string | null) {
   const [connected,   setConnected]   = useState(false)
   const [priceState,  setPriceState]  = useState<PriceState>(INIT)
   const [socketError, setSocketError] = useState<string | null>(null)
 
-  // Ref để cleanup type-safe — không cần `any`
-  const socketRef  = useRef<{ emit: (e: string, d?: unknown) => void; disconnect: () => void } | null>(null)
+  const wsRef      = useRef<WebSocket | null>(null)
   const mountedRef = useRef(true)
+  const retryRef   = useRef(0)
+  const timerRef   = useRef<ReturnType<typeof setTimeout> | null>(null)
 
   useEffect(() => {
     mountedRef.current = true
+    retryRef.current   = 0
 
     if (!artworkId) return
 
-    let socket: ReturnType<typeof import('socket.io-client')['io']> | null = null
-
-    import('socket.io-client').then(({ io }) => {
-      // Nếu component đã unmount trước khi import hoàn thành — bỏ qua
+    function connect() {
       if (!mountedRef.current) return
 
-      socket = io(`${WS_URL}/prices`, {
-        transports:           ['websocket'],
-        reconnection:         true,
-        reconnectionAttempts: 5,
-        reconnectionDelay:    2000,
-      })
+      const ws = new WebSocket(`${HUB_BASE}/ws`)
+      wsRef.current = ws
 
-      socketRef.current = socket
-
-      socket.on('connect', () => {
-        if (!mountedRef.current) return
+      ws.onopen = () => {
+        if (!mountedRef.current) { ws.close(); return }
+        retryRef.current = 0
         setConnected(true)
         setSocketError(null)
-        socket!.emit('subscribe_artwork', { artwork_id: artworkId })
-      })
-
-      socket.on('disconnect', () => {
-        if (!mountedRef.current) return
-        setConnected(false)
-      })
-
-      socket.on('connect_error', (err: Error) => {
-        if (!mountedRef.current) return
-        setSocketError(err.message)
-        setConnected(false)
-      })
-
-      const handlePriceEvent = (evt: PriceUpdateEvent & { price?: string; supply?: string }) => {
-        if (!mountedRef.current) return
-        if (evt.artwork_id !== artworkId) return
-        setPriceState({
-          price:     evt.current_price  ?? evt.price ?? null,
-          supply:    evt.current_supply ?? evt.supply ?? null,
-          volume24h: evt.volume_24h     ?? null,
-          timestamp: String(evt.timestamp ?? Date.now()),
-        })
+        ws.send(JSON.stringify({ action: 'subscribe', artwork_id: artworkId }))
       }
 
-      socket.on('price_snapshot', handlePriceEvent)
-      socket.on('price_update',   handlePriceEvent)
+      ws.onmessage = (evt) => {
+        if (!mountedRef.current) return
+        try {
+          const msg = JSON.parse(evt.data as string) as {
+            type: string
+            data: PriceUpdateEvent & { price?: string; supply?: string }
+          }
+          if (msg.type !== 'price_update') return
+          const d = msg.data
+          if (d.artwork_id !== artworkId) return
+          setPriceState({
+            price:     d.current_price  ?? d.price ?? null,
+            supply:    d.current_supply ?? d.supply ?? null,
+            volume24h: d.volume_24h     ?? null,
+            timestamp: String(d.timestamp ?? Date.now()),
+          })
+        } catch {
+          // malformed message — ignore
+        }
+      }
 
-    }).catch(err => {
-      if (!mountedRef.current) return
-      setSocketError(`socket.io-client load failed: ${err.message}`)
-    })
+      ws.onerror = () => {
+        if (!mountedRef.current) return
+        setSocketError('WebSocket error')
+      }
+
+      ws.onclose = () => {
+        if (!mountedRef.current) return
+        setConnected(false)
+        wsRef.current = null
+
+        if (retryRef.current < MAX_RETRIES) {
+          const delay = BASE_DELAY * Math.pow(2, retryRef.current)
+          retryRef.current++
+          timerRef.current = setTimeout(connect, delay)
+        } else {
+          setSocketError(`Connection failed after ${MAX_RETRIES} retries`)
+        }
+      }
+    }
+
+    connect()
 
     return () => {
       mountedRef.current = false
-      if (socket?.connected) {
-        socket.emit('unsubscribe_artwork', { artwork_id: artworkId })
-        socket.disconnect()
+      if (timerRef.current) clearTimeout(timerRef.current)
+      const ws = wsRef.current
+      if (ws && ws.readyState === WebSocket.OPEN) {
+        ws.send(JSON.stringify({ action: 'unsubscribe', artwork_id: artworkId }))
+        ws.close()
       }
-      socketRef.current = null
+      wsRef.current = null
       setConnected(false)
       setPriceState(INIT)
     }
   }, [artworkId])
 
-  // Cleanup on unmount
   useEffect(() => {
     return () => { mountedRef.current = false }
   }, [])
