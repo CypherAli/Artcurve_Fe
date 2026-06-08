@@ -467,13 +467,13 @@ function LangSwitcher({ theme }: { theme: typeof THEMES[keyof typeof THEMES] }) 
   const panelRef            = useRef<HTMLDivElement>(null)
   const current             = LANGUAGES.find(l => l.code === locale) ?? LANGUAGES[0]
 
-  // Animate panel
+  // Animate panel — xPercent: -50 giữ translateX(-50%) centering khi GSAP chạy
   useEffect(() => {
     if (!open || !panelRef.current) return
     const ctx = gsap.context(() => {
       gsap.fromTo(panelRef.current,
-        { autoAlpha: 0, y: -8, scale: 0.96 },
-        { autoAlpha: 1, y: 0,  scale: 1, duration: 0.24, ease: 'power3.out' },
+        { autoAlpha: 0, y: -6, scale: 0.97, xPercent: -50 },
+        { autoAlpha: 1, y: 0,  scale: 1,    xPercent: -50, duration: 0.2, ease: 'power3.out' },
       )
     })
     return () => ctx.revert()
@@ -503,25 +503,35 @@ function LangSwitcher({ theme }: { theme: typeof THEMES[keyof typeof THEMES] }) 
       <button
         type="button"
         onClick={() => { setOpen(v => !v); setSearch('') }}
-        className="flex items-center gap-1.5 h-9 px-2.5 rounded-full transition-all duration-200 select-none"
+        className="flex items-center gap-1.5 h-9 px-3 rounded-full transition-all duration-200 select-none"
         style={{
-          color:      open ? theme.navHover : theme.bell,
-          background: open ? theme.bellActiveBg : 'transparent',
-          border:     `1px solid ${open ? theme.gold + '55' : 'transparent'}`,
+          color:      open ? '#D4AF37' : theme.bell,
+          background: open ? 'rgba(212,175,55,0.12)' : 'transparent',
+          border:     `1px solid ${open ? 'rgba(212,175,55,0.4)' : 'rgba(255,255,255,0.1)'}`,
         }}
-        onMouseEnter={e => { (e.currentTarget as HTMLElement).style.background = theme.bellHoverBg }}
-        onMouseLeave={e => { (e.currentTarget as HTMLElement).style.background = open ? theme.bellActiveBg : 'transparent' }}
+        onMouseEnter={e => {
+          if (!open) {
+            (e.currentTarget as HTMLElement).style.background = 'rgba(255,255,255,0.06)'
+            ;(e.currentTarget as HTMLElement).style.borderColor = 'rgba(255,255,255,0.18)'
+          }
+        }}
+        onMouseLeave={e => {
+          if (!open) {
+            (e.currentTarget as HTMLElement).style.background = 'transparent'
+            ;(e.currentTarget as HTMLElement).style.borderColor = 'rgba(255,255,255,0.1)'
+          }
+        }}
         aria-label="Switch language"
       >
-        {/* Globe icon */}
-        <svg viewBox="0 0 24 24" className="w-[18px] h-[18px]" fill="none" stroke="currentColor" strokeWidth="1.6">
+        <svg viewBox="0 0 24 24" className="w-[15px] h-[15px] shrink-0" fill="none" stroke="currentColor" strokeWidth="1.8">
           <circle cx="12" cy="12" r="10"/>
           <path d="M2 12h20M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z" strokeLinecap="round"/>
         </svg>
-        <span className="font-mono text-[11px] tracking-wider uppercase font-medium">
+        <span className="font-mono text-[11px] tracking-widest uppercase font-semibold leading-none">
           {current.code}
         </span>
-        <svg viewBox="0 0 24 24" className={`w-2.5 h-2.5 transition-transform duration-200 ${open ? 'rotate-180' : ''}`}
+        <svg viewBox="0 0 24 24"
+          className={`w-3 h-3 shrink-0 transition-transform duration-200 ${open ? 'rotate-180' : ''}`}
           fill="none" stroke="currentColor" strokeWidth="2.5">
           <path d="M6 9l6 6 6-6" strokeLinecap="round" strokeLinejoin="round"/>
         </svg>
@@ -529,31 +539,37 @@ function LangSwitcher({ theme }: { theme: typeof THEMES[keyof typeof THEMES] }) 
 
       {/* Dropdown */}
       {open && (
-        <div ref={panelRef}
-          className="absolute right-0 top-[calc(100%+10px)] w-[240px] rounded-2xl overflow-hidden"
+        <div
+          ref={panelRef}
+          data-lang-panel
+          className="absolute top-[calc(100%+8px)] w-[228px] rounded-xl"
           style={{
-            background:      '#0E0E0E',
-            border:          '1px solid rgba(212,175,55,0.18)',
-            boxShadow:       '0 24px 60px rgba(0,0,0,0.6), 0 0 0 1px rgba(255,255,255,0.03) inset',
-            transformOrigin: 'top right',
-            zIndex:          60,
+            left:            '50%',
+            background:      'rgba(14,14,14,0.98)',
+            border:          '1px solid rgba(212,175,55,0.25)',
+            boxShadow:       '0 20px 50px rgba(0,0,0,0.75), 0 0 0 1px rgba(255,255,255,0.04) inset',
+            transformOrigin: 'top center',
+            zIndex:          9999,
+            backdropFilter:  'blur(16px)',
+            visibility:      'hidden',
           }}
         >
-          {/* Gold accent line */}
-          <div className="h-[2px] w-full"
-            style={{ background: 'linear-gradient(90deg, #D4AF37 0%, rgba(212,175,55,0.3) 60%, transparent 100%)' }}
+          {/* Gold top bar */}
+          <div className="shrink-0 h-[2px] w-full rounded-t-xl"
+            style={{ background: 'linear-gradient(90deg, #D4AF37, rgba(212,175,55,0.2) 70%, transparent)' }}
           />
 
-          {/* Header */}
-          <div className="px-4 pt-3.5 pb-2.5">
-            <p className="text-[10px] font-mono tracking-[0.22em] uppercase mb-2.5"
-              style={{ color: 'rgba(212,175,55,0.55)' }}>
+          {/* Header + search — fixed, không scroll */}
+          <div className="shrink-0 px-3.5 pt-3 pb-2.5">
+            <p className="text-[9px] font-mono tracking-[0.28em] uppercase mb-2"
+              style={{ color: 'rgba(212,175,55,0.6)' }}>
               {t.lang.label}
             </p>
-            {/* Search */}
             <div className="relative">
-              <svg viewBox="0 0 24 24" className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3 h-3"
-                style={{ color: 'rgba(255,255,255,0.22)' }} fill="none" stroke="currentColor" strokeWidth="2">
+              <svg viewBox="0 0 24 24"
+                className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3 h-3 pointer-events-none"
+                style={{ color: 'rgba(255,255,255,0.35)' }}
+                fill="none" stroke="currentColor" strokeWidth="2">
                 <circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35" strokeLinecap="round"/>
               </svg>
               <input
@@ -562,18 +578,30 @@ function LangSwitcher({ theme }: { theme: typeof THEMES[keyof typeof THEMES] }) 
                 onChange={e => setSearch(e.target.value)}
                 placeholder={t.lang.search}
                 autoFocus
-                className="w-full h-7 pl-7 pr-3 rounded-lg text-[11px] outline-none"
+                className="w-full h-8 pl-8 pr-3 rounded-lg text-[12px] outline-none placeholder:text-white/25"
                 style={{
-                  background:  'rgba(255,255,255,0.05)',
-                  border:      '1px solid rgba(255,255,255,0.09)',
-                  color:       'rgba(255,255,255,0.72)',
+                  background: 'rgba(255,255,255,0.06)',
+                  border:     '1px solid rgba(255,255,255,0.1)',
+                  color:      'rgba(255,255,255,0.85)',
                 }}
               />
             </div>
           </div>
 
-          {/* Language list */}
-          <div className="pb-2 overflow-y-auto" style={{ maxHeight: 260, scrollbarWidth: 'thin', scrollbarColor: 'rgba(212,175,55,0.1) transparent' }}>
+          {/* Divider */}
+          <div className="shrink-0 mx-3.5 mb-1" style={{ height: '1px', background: 'rgba(255,255,255,0.06)' }} />
+
+          {/* Language list — scrollable */}
+          <div
+            className="pb-1.5"
+            style={{
+              overflowY:        'auto',
+              maxHeight:        '210px',
+              overscrollBehavior: 'contain',
+              scrollbarWidth:   'thin',
+              scrollbarColor:   'rgba(212,175,55,0.3) rgba(255,255,255,0.04)',
+            }}
+          >
             {filtered.map(lang => {
               const active = lang.code === locale
               return (
@@ -581,31 +609,45 @@ function LangSwitcher({ theme }: { theme: typeof THEMES[keyof typeof THEMES] }) 
                   key={lang.code}
                   type="button"
                   onClick={() => { setLocale(lang.code as LocaleCode); setOpen(false); setSearch('') }}
-                  className="w-full flex items-center gap-3 px-4 py-2.5 transition-colors duration-150"
+                  className="w-full flex items-center gap-2.5 px-3.5 py-2 transition-all duration-100"
                   style={{
-                    background: active ? 'rgba(212,175,55,0.1)' : 'transparent',
-                    color:      active ? '#D4AF37' : 'rgba(255,255,255,0.55)',
+                    background: active ? 'rgba(212,175,55,0.13)' : 'transparent',
+                    color:      active ? '#D4AF37' : 'rgba(255,255,255,0.82)',
                   }}
-                  onMouseEnter={e => { if (!active) (e.currentTarget as HTMLElement).style.background = 'rgba(255,255,255,0.04)' }}
-                  onMouseLeave={e => { if (!active) (e.currentTarget as HTMLElement).style.background = 'transparent' }}
+                  onMouseEnter={e => {
+                    if (!active) (e.currentTarget as HTMLElement).style.background = 'rgba(255,255,255,0.06)'
+                  }}
+                  onMouseLeave={e => {
+                    if (!active) (e.currentTarget as HTMLElement).style.background = 'transparent'
+                  }}
                 >
-                  <span className="text-[18px] leading-none">{lang.flag}</span>
+                  {/* Flag */}
+                  <span className="text-[17px] leading-none shrink-0 w-6 text-center">{lang.flag}</span>
+
+                  {/* Text */}
                   <div className="flex-1 text-left min-w-0">
-                    <p className="text-[12px] font-medium leading-tight">{lang.native}</p>
-                    <p className="text-[10px] mt-0.5" style={{ color: active ? 'rgba(212,175,55,0.55)' : 'rgba(255,255,255,0.22)' }}>
+                    <p className="text-[12px] font-medium leading-tight truncate">{lang.native}</p>
+                    <p className="text-[10px] leading-none mt-0.5 truncate"
+                      style={{ color: active ? 'rgba(212,175,55,0.5)' : 'rgba(255,255,255,0.35)' }}>
                       {lang.label}
                     </p>
                   </div>
-                  {active && (
+
+                  {/* Checkmark */}
+                  {active ? (
                     <svg viewBox="0 0 24 24" className="w-3.5 h-3.5 shrink-0" fill="none" stroke="#D4AF37" strokeWidth="2.5">
                       <path d="M20 6L9 17l-5-5" strokeLinecap="round" strokeLinejoin="round"/>
                     </svg>
+                  ) : (
+                    <span className="w-3.5 shrink-0" />
                   )}
                 </button>
               )
             })}
+
             {filtered.length === 0 && (
-              <p className="text-center py-4 text-[11px] font-mono" style={{ color: 'rgba(255,255,255,0.18)' }}>
+              <p className="text-center py-5 text-[11px] font-mono"
+                style={{ color: 'rgba(255,255,255,0.25)' }}>
                 No results
               </p>
             )}
