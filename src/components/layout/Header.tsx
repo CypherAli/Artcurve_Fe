@@ -8,31 +8,8 @@ import { LoginModal }                  from './LoginModal'
 import { useAuthStore }                from '@/store/authStore'
 import { authStore }                   from '@/lib/auth-store'
 import { userService }                 from '@/services/user.service'
-
-// ── Notification data ────────────────────────────────────────────
-const NOTIF_DATA = [
-  { id: 1, type: 'price', unread: true,
-    title: '"Self-Portrait with Death" tăng 44.1%',
-    desc: 'Giá hiện tại: 0.0182 ETH · Phase Migration', time: '3m ago' },
-  { id: 2, type: 'trade', unread: true,
-    title: 'Lệnh BUY đã khớp',
-    desc: 'Mua 2,000 $SAKOL — Sakura Overload · 0.00412 ETH/token', time: '18m ago' },
-  { id: 3, type: 'price', unread: true,
-    title: '"Sakura Overload" tăng 29.3%',
-    desc: 'Giá hiện tại: 0.00412 ETH · Phase FOMO', time: '1h ago' },
-  { id: 4, type: 'follow', unread: true,
-    title: 'aiko_tanaka đã follow bạn',
-    desc: 'Xem bộ sưu tập của họ', time: '2h ago' },
-  { id: 5, type: 'trade', unread: false,
-    title: 'Lệnh SELL đã khớp',
-    desc: 'Bán 500 $GENP7 — Genesis Protocol #7 · 0.00089 ETH/token', time: '4h ago' },
-  { id: 6, type: 'sale',  unread: false,
-    title: '"Entropy Garden" đạt milestone',
-    desc: 'Đã bán 12,100/20,000 token · 60% target cap', time: '6h ago' },
-  { id: 7, type: 'price', unread: false,
-    title: '"Neon Seoul 2077" tăng 12.8%',
-    desc: 'Giá hiện tại: 0.00178 ETH · Phase Growth', time: '9h ago' },
-]
+import { useNotifications }            from '@/hooks/useNotifications'
+import type { AppNotification }        from '@/store/notificationStore'
 
 function NotifTypeIcon({ type }: { type: string }) {
   const wrap = (bg: string, el: React.ReactNode) => (
@@ -64,16 +41,19 @@ function NotifTypeIcon({ type }: { type: string }) {
 }
 
 function NotificationsDropdown({
-  onClose, notifs, setNotifs,
+  onClose, notifs, onMarkAllRead, onMarkRead, onDelete, onClearAll,
 }: {
-  onClose: () => void
-  notifs: typeof NOTIF_DATA
-  setNotifs: React.Dispatch<React.SetStateAction<typeof NOTIF_DATA>>
+  onClose:      () => void
+  notifs:       AppNotification[]
+  onMarkAllRead: () => void
+  onMarkRead:   (id: string) => void
+  onDelete:     (id: string) => void
+  onClearAll:   () => void
 }) {
   const panelRef               = useRef<HTMLDivElement>(null)
   const [tab, setTab]          = useState<'all' | 'unread'>('all')
-  const unread                 = notifs.filter(n => n.unread).length
-  const displayed              = tab === 'unread' ? notifs.filter(n => n.unread) : notifs
+  const unread                 = notifs.filter(n => !n.is_read).length
+  const displayed              = tab === 'unread' ? notifs.filter(n => !n.is_read) : notifs
 
   // Entrance
   useEffect(() => {
@@ -102,8 +82,14 @@ function NotificationsDropdown({
     return () => { clearTimeout(t); document.removeEventListener('mousedown', handler) }
   }, [onClose])
 
-  function dismiss(id: number) {
-    setNotifs(n => n.filter(x => x.id !== id))
+  function relativeTime(dateStr: string): string {
+    const diff = Date.now() - new Date(dateStr).getTime()
+    const m = Math.floor(diff / 60000)
+    if (m < 1)  return 'vừa xong'
+    if (m < 60) return `${m}m ago`
+    const h = Math.floor(m / 60)
+    if (h < 24) return `${h}h ago`
+    return `${Math.floor(h / 24)}d ago`
   }
 
   return (
@@ -138,7 +124,7 @@ function NotificationsDropdown({
         </div>
         {unread > 0 && (
           <button type="button"
-            onClick={() => setNotifs(n => n.map(x => ({ ...x, unread: false })))}
+            onClick={onMarkAllRead}
             className="text-[10px] font-mono tracking-[0.14em] uppercase text-white/25
                        hover:text-[#C9A96E] transition-colors duration-250">
             Mark all read
@@ -178,17 +164,16 @@ function NotificationsDropdown({
           </div>
         ) : displayed.map(n => (
           <div key={n.id}
+            onClick={() => !n.is_read && onMarkRead(n.id)}
             className={[
               'ni group relative flex items-start gap-3.5 px-5 py-4 cursor-pointer',
               'transition-colors duration-150',
-              n.unread
-                ? 'hover:bg-[#C9A96E]/[0.04]'
-                : 'hover:bg-white/[0.02]',
+              !n.is_read ? 'hover:bg-[#C9A96E]/[0.04]' : 'hover:bg-white/[0.02]',
             ].join(' ')}
             style={{ borderBottom: '1px solid rgba(255,255,255,0.05)' }}
           >
             {/* Unread left strip */}
-            {n.unread && (
+            {!n.is_read && (
               <span className="absolute left-0 top-3 bottom-3 w-[2px] rounded-r-full bg-[#C9A96E]"/>
             )}
 
@@ -196,21 +181,23 @@ function NotificationsDropdown({
 
             <div className="flex-1 min-w-0">
               <div className="flex items-start justify-between gap-3">
-                <p className={`text-[13px] leading-snug font-medium ${n.unread ? 'text-white/88' : 'text-white/38'}`}>
+                <p className={`text-[13px] leading-snug font-medium ${!n.is_read ? 'text-white/88' : 'text-white/38'}`}>
                   {n.title}
                 </p>
-                <span className={`text-[10px] font-mono shrink-0 mt-0.5 ${n.unread ? 'text-[#C9A96E]/70' : 'text-white/18'}`}>
-                  {n.time}
+                <span className={`text-[10px] font-mono shrink-0 mt-0.5 ${!n.is_read ? 'text-[#C9A96E]/70' : 'text-white/18'}`}>
+                  {relativeTime(n.created_at)}
                 </span>
               </div>
-              <p className={`text-[11.5px] mt-1 truncate ${n.unread ? 'text-white/32' : 'text-white/18'}`}>
-                {n.desc}
-              </p>
+              {n.description && (
+                <p className={`text-[11.5px] mt-1 truncate ${!n.is_read ? 'text-white/32' : 'text-white/18'}`}>
+                  {n.description}
+                </p>
+              )}
             </div>
 
             {/* Dismiss on hover */}
             <button type="button"
-              onClick={e => { e.stopPropagation(); dismiss(n.id) }}
+              onClick={e => { e.stopPropagation(); onDelete(n.id) }}
               className="absolute right-3.5 top-3.5 w-5 h-5 rounded-full flex items-center justify-center
                          opacity-0 group-hover:opacity-100 text-white/30 hover:text-white/70
                          hover:bg-white/8 transition-all duration-150">
@@ -231,7 +218,7 @@ function NotificationsDropdown({
           View all activity
         </button>
         {notifs.length > 0 && (
-          <button type="button" onClick={() => setNotifs([])}
+          <button type="button" onClick={onClearAll}
             className="text-[10px] font-mono tracking-[0.12em] uppercase
                        text-white/16 hover:text-red-400/60 transition-colors duration-200">
             Clear all
@@ -528,8 +515,14 @@ export function Header({ dark = false }: HeaderProps) {
   const [showUserMenu,setShowUserMenu] = useState(false)
   const [hoveredNav,  setHoveredNav] = useState<string | null>(null)
   const headerRef                   = useRef<HTMLElement>(null)
-  const [notifData, setNotifData] = useState(NOTIF_DATA)
-  const unreadCount = notifData.filter(n => n.unread).length
+  const {
+    items: notifData,
+    unreadCount,
+    markAllRead:  notifMarkAllRead,
+    markRead:     notifMarkRead,
+    deleteOne:    notifDelete,
+    clearAll:     notifClearAll,
+  } = useNotifications()
   const { isConnected }                        = useAccount()
   const { isAuthenticated, user, clearAuth, setAuth } = useAuthStore()
   const loggedIn = isConnected || isAuthenticated
@@ -668,7 +661,10 @@ export function Header({ dark = false }: HeaderProps) {
             <NotificationsDropdown
               onClose={() => setShowNotifs(false)}
               notifs={notifData}
-              setNotifs={setNotifData}
+              onMarkAllRead={notifMarkAllRead}
+              onMarkRead={notifMarkRead}
+              onDelete={notifDelete}
+              onClearAll={notifClearAll}
             />
           )}
         </div>
