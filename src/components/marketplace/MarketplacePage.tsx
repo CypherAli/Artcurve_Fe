@@ -57,6 +57,8 @@ interface MarketArtwork {
   image:          string
   description:    string
   sparkline:      number[]    // 10-point price history
+  rating:         number | null   // avg rating 1–5, null = no reviews
+  ratingCount:    number
 }
 
 // ── Artwork catalogue (mock — used when backend is unreachable) ───
@@ -326,7 +328,13 @@ const ARTWORKS_MOCK: MarketArtwork[] = ([
     description: 'Buildings that absorb sound — spaces designed for contemplation. Sorokin documents structures that resist the noise of the modern city. High FOMO phase.',
     sparkline: [5, 5.8, 7.5, 6.3, 9.1, 12.5, 17.0, 23.8, 38.5, 71.0],
   },
-] as Omit<MarketArtwork, 'artworkId'>[]).map(a => ({ ...a, artworkId: '' }))
+] as Omit<MarketArtwork, 'artworkId' | 'rating' | 'ratingCount'>[]).map((a, i) => ({
+  ...a,
+  artworkId:   '',
+  // Deterministic plausible ratings per artwork (3.50 – 5.00)
+  rating:      parseFloat((3.5 + ((i * 37 + 11) % 16) / 10).toFixed(2)),
+  ratingCount: 3 + ((i * 13 + 7) % 28),
+})))
 
 // ── Adapter: backend Artwork → MarketArtwork ──────────────────────
 function adaptArtwork(artwork: Artwork, index: number): MarketArtwork {
@@ -373,6 +381,8 @@ function adaptArtwork(artwork: Artwork, index: number): MarketArtwork {
     image,
     description:    artwork.description ?? '',
     sparkline:      Array.from({ length: 10 }, (_, i) => price * (1 + i * 0.1) || 1),
+    rating:         null,   // fetched separately in InspectionDeck
+    ratingCount:    0,
   }
 }
 
@@ -701,6 +711,7 @@ function adaptRecentTrade(t: RecentTrade, idx: number): LiveTrade {
     phaseColor: PHASE_COLOR['Accumulation'], marketCap: 0, marketCapLabel: '',
     change24h: '', changePositive: true, change7d: '', volume24h: '',
     holders: 0, progress: 0, image, description: '', sparkline: [],
+    rating: null, ratingCount: 0,
   }
   const addr = t.user.wallet_address
   return {
@@ -2263,17 +2274,18 @@ function InspectionDeck({
   const [chartRange,   setChartRange]   = useState<TimeRange>('1D')
   const [chartHovered, setChartHovered] = useState(false)
   const [tilt,         setTilt]         = useState({ rx: 0, ry: 0 })
-  const [avgRating,    setAvgRating]    = useState<number | null>(null)
-  const [ratingCount,  setRatingCount]  = useState(0)
+  const [avgRating,    setAvgRating]    = useState<number | null>(art.rating ?? null)
+  const [ratingCount,  setRatingCount]  = useState(art.ratingCount ?? 0)
 
   // Reset state when artwork changes
   useEffect(() => {
     setChartRange('1D')
     setChartHovered(false)
     setTilt({ rx: 0, ry: 0 })
-    setAvgRating(null)
-    setRatingCount(0)
-  }, [art.id])
+    // Seed immediately from art object (mock rating or null for real artworks)
+    setAvgRating(art.rating ?? null)
+    setRatingCount(art.ratingCount ?? 0)
+  }, [art.id, art.rating, art.ratingCount])
 
   // Fetch avg_rating from social stats
   useEffect(() => {
