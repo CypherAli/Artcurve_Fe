@@ -209,6 +209,30 @@ export interface TradeHistoryResponse {
   total: number
 }
 
+export interface MyTradeRecord {
+  id:              string
+  tx_hash:         string
+  tx_type:         TxType
+  share_amount:    string
+  eth_amount:      string
+  price_per_share: string
+  gas_fee:         string
+  block_number:    number
+  timestamp:       string
+  created_at:      string
+  artwork_id:      string
+  artwork_title:   string
+  artwork_ticker:  string | null
+  artwork_image_uri: string | null
+}
+
+export interface MyTradeHistoryResponse {
+  data:       MyTradeRecord[]
+  total:      number
+  page:       number
+  totalPages: number
+}
+
 export interface LeaderboardEntry {
   artwork_id:    string
   artwork_title: string

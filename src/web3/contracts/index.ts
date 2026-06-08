@@ -12,12 +12,12 @@
 
 export const CONTRACT_ADDRESSES = {
   base: {
-    ArtFactory:      '0x0000000000000000000000000000000000000000' as `0x${string}`, // TODO: địa chỉ mainnet sau khi deploy
-    BondingCurveAMM: '0x0000000000000000000000000000000000000000' as `0x${string}`, // TODO: địa chỉ mainnet sau khi deploy
+    ArtFactory:      '0x0000000000000000000000000000000000000000' as `0x${string}`,
+    BondingCurveAMM: '0x0000000000000000000000000000000000000000' as `0x${string}`,
   },
   baseSepolia: {
-    ArtFactory:      '0x0000000000000000000000000000000000000000' as `0x${string}`, // TODO: địa chỉ testnet sau khi deploy
-    BondingCurveAMM: '0x0000000000000000000000000000000000000000' as `0x${string}`, // TODO: địa chỉ testnet sau khi deploy
+    ArtFactory:      '0xBe1F8a192eD168fed99E7F5d479F1A314200F1bF' as `0x${string}`,
+    BondingCurveAMM: '0xF8F4233DA0Cc3f6968a239b36010a864c6E9bFb6' as `0x${string}`,
   },
 } as const
 

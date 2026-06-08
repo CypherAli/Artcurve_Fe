@@ -4,12 +4,14 @@
 //  Added: portfolio chart, sortable columns, quick trade, realized P&L
 // ─────────────────────────────────────────────────────────────────
 
-import { useState, useMemo } from 'react'
+import { useState, useMemo, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { PHASE_COLOR, Phase } from '../marketplace/ArtCard'
 import { usePortfolio } from '@/hooks/usePortfolio'
 import { useEthBalance } from '@/web3/hooks/useContract'
-import type { PortfolioHolding } from '@/types/api'
+import type { PortfolioHolding, MyTradeRecord } from '@/types/api'
+import { tradeService } from '@/services/trade.service'
+import { authStore } from '@/lib/auth-store'
 
 // ── Types ─────────────────────────────────────────────────────────
 interface Holding {
@@ -65,7 +67,7 @@ function adaptHolding(h: PortfolioHolding, index: number): Holding {
   }
 }
 
-const TXS: TxRecord[] = [
+const TXS_MOCK: TxRecord[] = [
   { id:'t1', ticker:'$PALE',    side:'buy',  price:65.20, eth:0.420, date:'2026-05-28' },
   { id:'t2', ticker:'$BLOOM',   side:'buy',  price:2.88,  eth:0.350, date:'2026-05-26' },
   { id:'t3', ticker:'$THRESH',  side:'buy',  price:18.40, eth:0.338, date:'2026-05-22' },
@@ -75,6 +77,22 @@ const TXS: TxRecord[] = [
   { id:'t7', ticker:'$PALE',    side:'buy',  price:58.40, eth:0.584, date:'2026-05-10' },
   { id:'t8', ticker:'$BLOOM',   side:'sell', price:3.55,  eth:0.142, date:'2026-05-08' },
 ]
+
+function adaptTx(t: MyTradeRecord): TxRecord {
+  const ticker = t.artwork_ticker
+    ? `$${t.artwork_ticker}`
+    : t.artwork_title
+      ? '$' + t.artwork_title.split(' ').map(w => w[0]).join('').toUpperCase().slice(0, 6)
+      : '$???'
+  return {
+    id:     t.id,
+    ticker,
+    side:   t.tx_type === 'BUY' ? 'buy' : 'sell',
+    price:  parseFloat(t.price_per_share),
+    eth:    parseFloat(t.eth_amount),
+    date:   t.timestamp.slice(0, 10),
+  }
+}
 
 const REALIZED_PNL = 0.312   // ETH — from closed positions
 const ETH_USD      = 3_420
@@ -336,6 +354,16 @@ export function VaultPage() {
   const [activeTab, setActiveTab]   = useState<'holdings' | 'history'>('holdings')
   const [sortKey,   setSortKey]     = useState<SortKey>('value')
   const [sortDir,   setSortDir]     = useState<SortDir>('desc')
+  const [apiTxs,    setApiTxs]      = useState<TxRecord[]>([])
+
+  useEffect(() => {
+    if (!authStore.getJwt()) return
+    tradeService.myHistory(1, 50)
+      .then(res => setApiTxs(res.data.map(adaptTx)))
+      .catch(() => { /* keep mock */ })
+  }, [])
+
+  const TXS = apiTxs.length > 0 ? apiTxs : TXS_MOCK
 
   // Use API P&L numbers when available; fall back to local computation
   const totalValue = portfolio.totalValue ?? HOLDINGS.reduce((s, h) => s + h.qty * h.curPrice, 0)

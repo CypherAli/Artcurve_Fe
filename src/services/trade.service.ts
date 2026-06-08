@@ -1,5 +1,5 @@
 import { get } from '@/lib/http'
-import type { OhlcvCandle, OhlcvCandleRaw, OhlcvTimeframe, TradeHistoryResponse, LeaderboardEntry, RecentTrade } from '@/types/api'
+import type { OhlcvCandle, OhlcvCandleRaw, OhlcvTimeframe, TradeHistoryResponse, MyTradeHistoryResponse, LeaderboardEntry, RecentTrade } from '@/types/api'
 import { normalizeCandle } from '@/types/api'
 
 export const tradeService = {
@@ -23,4 +23,6 @@ export const tradeService = {
     get<LeaderboardEntry[]>(`/trades/leaderboard?limit=${limit}`),
   recent: (limit = 20)                                   =>
     get<RecentTrade[]>(`/trades/recent?limit=${limit}`),
+  myHistory: (page = 1, limit = 20)                      =>
+    get<MyTradeHistoryResponse>(`/trades/me/history?page=${page}&limit=${limit}`, true),
 }

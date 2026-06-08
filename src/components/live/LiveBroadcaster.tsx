@@ -17,7 +17,7 @@ import { Track } from 'livekit-client'
 import '@livekit/components-styles'
 import { authStore } from '@/lib/auth-store'
 
-const API    = process.env.NEXT_PUBLIC_API_URL    ?? 'https://artcurve-be-production.up.railway.app/api/v1'
+const API    = process.env.NEXT_PUBLIC_API_URL    ?? 'https://artcurve-be.onrender.com/api/v1'
 const LK_URL = process.env.NEXT_PUBLIC_LIVEKIT_URL ?? ''
 
 // ── Inner broadcast stage ─────────────────────────────────────────────────────
