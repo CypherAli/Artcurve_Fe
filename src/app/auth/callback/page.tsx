@@ -74,6 +74,7 @@ function CallbackHandler() {
     // Remember last social account for account picker in LoginModal
     const provider = searchParams.get('provider') ?? 'github'
     const storageKey =
+      provider === 'google'   ? 'artcurve_google_account'   :
       provider === 'twitter'  ? 'artcurve_twitter_account'  :
       provider === 'telegram' ? 'artcurve_telegram_account' :
       provider === 'apple'    ? 'artcurve_apple_account'    :
