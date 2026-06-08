@@ -52,6 +52,7 @@ function NotificationsDropdown({
   onDelete:     (id: string) => void
   onClearAll:   () => void
 }) {
+  const { t: tl }              = useLanguage()
   const panelRef               = useRef<HTMLDivElement>(null)
   const [tab, setTab]          = useState<'all' | 'unread'>('all')
   const unread                 = notifs.filter(n => !n.is_read).length
@@ -115,7 +116,7 @@ function NotificationsDropdown({
         <div className="flex items-center gap-2.5">
           <span className="text-[15px] text-white/85 tracking-wide"
             style={{ fontFamily: "'Cormorant Garamond', serif", fontWeight: 600 }}>
-            Notifications
+            {tl.header.notifications}
           </span>
           {unread > 0 && (
             <span className="h-[18px] min-w-[18px] px-1.5 rounded-full bg-[#C9A96E]
@@ -129,7 +130,7 @@ function NotificationsDropdown({
             onClick={onMarkAllRead}
             className="text-[10px] font-mono tracking-[0.14em] uppercase text-white/25
                        hover:text-[#C9A96E] transition-colors duration-250">
-            Mark all read
+            {tl.header.markAllRead}
           </button>
         )}
       </div>
@@ -144,7 +145,7 @@ function NotificationsDropdown({
               'transition-colors duration-200',
               tab === t ? 'text-[#C9A96E]' : 'text-white/25 hover:text-white/50',
             ].join(' ')}>
-            {t === 'all' ? 'All' : `Unread${unread > 0 ? ` (${unread})` : ''}`}
+            {t === 'all' ? tl.header.all : `${tl.header.unread}${unread > 0 ? ` (${unread})` : ''}`}
             {tab === t && (
               <span className="absolute bottom-0 left-4 right-4 h-px bg-[#C9A96E]" />
             )}
@@ -162,7 +163,7 @@ function NotificationsDropdown({
               <path d="M15 17h5l-1.405-1.405A2.032 2.032 0 0 1 18 14.158V11a6 6 0 0 0-5-5.917V4a1 1 0 1 0-2 0v1.083A6 6 0 0 0 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 0 1-6 0v-1m6 0H9"
                 strokeLinecap="round" strokeLinejoin="round"/>
             </svg>
-            <p className="text-[11px] text-white/18 font-mono tracking-widest uppercase">All caught up</p>
+            <p className="text-[11px] text-white/18 font-mono tracking-widest uppercase">{tl.header.allCaughtUp}</p>
           </div>
         ) : displayed.map(n => (
           <div key={n.id}
@@ -217,13 +218,13 @@ function NotificationsDropdown({
         <button type="button"
           className="text-[10px] font-mono tracking-[0.18em] uppercase
                      text-white/22 hover:text-[#C9A96E] transition-colors duration-200">
-          View all activity
+          {tl.header.viewAllActivity}
         </button>
         {notifs.length > 0 && (
           <button type="button" onClick={onClearAll}
             className="text-[10px] font-mono tracking-[0.12em] uppercase
                        text-white/16 hover:text-red-400/60 transition-colors duration-200">
-            Clear all
+            {tl.header.clearAll}
           </button>
         )}
       </div>
@@ -239,6 +240,7 @@ function UserMenuDropdown({
   onClose:  () => void
   onLogout: () => void
 }) {
+  const { t } = useLanguage()
   const panelRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
@@ -452,7 +454,7 @@ function UserMenuDropdown({
               <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9" strokeLinecap="round" strokeLinejoin="round"/>
             </svg>
           </div>
-          Sign out
+          {t.header.signOut}
         </button>
       </div>
     </div>
@@ -659,16 +661,16 @@ function LangSwitcher({ theme }: { theme: typeof THEMES[keyof typeof THEMES] }) 
   )
 }
 
-const NAV_LINKS_PUBLIC = [
-  { label: 'Marketplace', href: '/marketplace' },
-  { label: 'Trade',       href: '/trade' },
-  { label: 'Live',        href: '/live' },
-  { label: 'Guild',       href: '/guild' },
+const NAV_HREFS_PUBLIC = [
+  { key: 'marketplace' as const, href: '/marketplace' },
+  { key: 'trade'       as const, href: '/trade' },
+  { key: 'live'        as const, href: '/live' },
+  { key: 'guild'       as const, href: '/guild' },
 ]
 
-const NAV_LINKS_AUTH = [
-  { label: 'Vault',  href: '/vault'  },
-  { label: 'Studio', href: '/studio' },
+const NAV_HREFS_AUTH = [
+  { key: 'vault'  as const, href: '/vault'  },
+  { key: 'studio' as const, href: '/studio' },
 ]
 
 // ── Theme tokens for light ↔ dark header ─────────────────────────
@@ -723,6 +725,7 @@ interface HeaderProps { dark?: boolean }
 
 export function Header({ dark = false }: HeaderProps) {
   const T = dark ? THEMES.dark : THEMES.light
+  const { t } = useLanguage()
 
   const [scrolled,    setScrolled]   = useState(false)
   const [showLogin,   setShowLogin]  = useState(false)
@@ -762,9 +765,10 @@ export function Header({ dark = false }: HeaderProps) {
       })
       .catch(() => {})
   }, [isAuthenticated])
-  const NAV_LINKS  = loggedIn
-    ? [...NAV_LINKS_PUBLIC, ...NAV_LINKS_AUTH]
-    : NAV_LINKS_PUBLIC
+  const NAV_HREFS  = loggedIn
+    ? [...NAV_HREFS_PUBLIC, ...NAV_HREFS_AUTH]
+    : NAV_HREFS_PUBLIC
+  const NAV_LINKS  = NAV_HREFS.map(({ key, href }) => ({ label: t.nav[key], href }))
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 80)
@@ -983,7 +987,7 @@ export function Header({ dark = false }: HeaderProps) {
                   el.style.color = T.btnText
                 }}
               >
-                Connect Wallet
+                {t.header.connectWallet}
               </button>
             )
 
