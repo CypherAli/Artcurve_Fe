@@ -5,8 +5,10 @@ import { useRouter }                         from 'next/navigation'
 import { motion, AnimatePresence }           from 'framer-motion'
 import Link                                  from 'next/link'
 import { reviewService }                     from '@/services/review.service'
+import { artworkService }                    from '@/services/artwork.service'
+import { portfolioService }                  from '@/services/portfolio.service'
 import { authStore }                         from '@/lib/auth-store'
-import type { Review }                       from '@/types/api'
+import type { Review, Artwork, TopHolder }   from '@/types/api'
 
 // ── Stored artwork shape (set in sessionStorage by MarketplacePage) ──
 export interface StoredArtwork {
@@ -233,11 +235,153 @@ function ReviewCard({
   )
 }
 
+// ── Bonding Curve SVG ────────────────────────────────────────────────
+function BondingCurveViz({ initPrice, currentPrice, currentSupply }: {
+  initPrice:     number
+  currentPrice:  number
+  currentSupply: number
+}) {
+  const W = 400, H = 120, PAD = { t: 12, r: 16, b: 28, l: 36 }
+  const pw = W - PAD.l - PAD.r
+  const ph = H - PAD.t - PAD.b
+
+  const totalSupply = Math.max(currentSupply * 1.2, 1)
+  const k = currentSupply > 0
+    ? (currentPrice - initPrice) / (currentSupply * currentSupply)
+    : 0
+
+  const pts = Array.from({ length: 60 }, (_, i) => {
+    const x = (i / 59) * totalSupply
+    const p = initPrice + k * x * x
+    return { x, p }
+  })
+  const maxP = Math.max(...pts.map(pt => pt.p), currentPrice)
+  const minP = initPrice * 0.9
+
+  const toSvg = (x: number, p: number) => ({
+    svgX: PAD.l + (x / totalSupply) * pw,
+    svgY: PAD.t + ph - ((p - minP) / (maxP - minP || 1)) * ph,
+  })
+
+  const pathD = pts.map((pt, i) => {
+    const { svgX, svgY } = toSvg(pt.x, pt.p)
+    return `${i === 0 ? 'M' : 'L'}${svgX.toFixed(1)},${svgY.toFixed(1)}`
+  }).join(' ')
+
+  const { svgX: dotX, svgY: dotY } = toSvg(currentSupply, currentPrice)
+
+  return (
+    <div className="mb-8">
+      <p className="font-mono text-[8px] uppercase tracking-[0.22em] mb-2"
+        style={{ color: 'rgba(255,255,255,0.22)' }}>
+        Bonding Curve
+      </p>
+      <div style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.07)' }}>
+        <svg viewBox={`0 0 ${W} ${H}`} className="w-full" style={{ height: 120 }} aria-hidden>
+          <defs>
+            <linearGradient id="bcg-detail" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stopColor="#D4AF37" stopOpacity="0.25"/>
+              <stop offset="100%" stopColor="#D4AF37" stopOpacity="0"/>
+            </linearGradient>
+          </defs>
+          {pathD && (
+            <path
+              d={`${pathD} L${(PAD.l + (currentSupply / totalSupply) * pw).toFixed(1)},${(PAD.t + ph).toFixed(1)} L${PAD.l},${(PAD.t + ph).toFixed(1)} Z`}
+              fill="url(#bcg-detail)"
+            />
+          )}
+          <path d={pathD} fill="none" stroke="#D4AF37" strokeWidth="1.5" strokeLinecap="round"/>
+          <line
+            x1={dotX.toFixed(1)} x2={dotX.toFixed(1)}
+            y1={PAD.t} y2={PAD.t + ph}
+            stroke="rgba(212,175,55,0.25)" strokeWidth="1" strokeDasharray="3 4"
+          />
+          <circle cx={dotX} cy={dotY} r="5" fill="#D4AF37" opacity="0.25"/>
+          <circle cx={dotX} cy={dotY} r="3" fill="#D4AF37"/>
+          <circle cx={dotX} cy={dotY} r="1.5" fill="white"/>
+          <text x={PAD.l - 4} y={PAD.t + ph} fill="rgba(255,255,255,0.2)" fontSize="7" textAnchor="end" dominantBaseline="auto">0</text>
+          <text x={PAD.l - 4} y={PAD.t + 4} fill="rgba(255,255,255,0.2)" fontSize="7" textAnchor="end">{maxP.toFixed(4)}</text>
+          <text x={dotX} y={PAD.t + ph + 14} fill="#D4AF37" fontSize="7" textAnchor="middle">now</text>
+        </svg>
+      </div>
+    </div>
+  )
+}
+
+// ── Top Holders Table ────────────────────────────────────────────────
+function TopHoldersSection({ artworkId }: { artworkId: string }) {
+  const [holders, setHolders] = useState<TopHolder[] | null>(null)
+
+  useEffect(() => {
+    if (!artworkId || artworkId.startsWith('mock-')) return
+    portfolioService.topHolders(artworkId, 10)
+      .then(data => setHolders(Array.isArray(data) ? data : []))
+      .catch(() => setHolders([]))
+  }, [artworkId])
+
+  if (!holders || holders.length === 0) return null
+
+  return (
+    <div className="mt-12 pt-8" style={{ borderTop: '1px solid rgba(255,255,255,0.07)' }}>
+      <p className="font-mono text-[8px] uppercase tracking-[0.32em] mb-5"
+        style={{ color: 'rgba(255,255,255,0.22)' }}>
+        Top Holders
+      </p>
+      <div className="flex flex-col gap-0">
+        {holders.map((h, i) => {
+          const wallet = h.username ?? `${h.wallet_address.slice(0, 6)}…${h.wallet_address.slice(-4)}`
+          const pct    = parseFloat(h.ownership_pct || '0')
+          return (
+            <div key={h.wallet_address}
+              className="flex items-center justify-between py-2.5"
+              style={{ borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
+              <div className="flex items-center gap-3">
+                <span className="font-mono text-[9px] w-5 text-right"
+                  style={{ color: i < 3 ? '#D4AF37' : 'rgba(255,255,255,0.22)' }}>
+                  #{h.rank}
+                </span>
+                <span className="font-mono text-[9px]" style={{ color: 'rgba(255,255,255,0.6)' }}>
+                  {wallet}
+                </span>
+              </div>
+              <div className="flex items-center gap-3">
+                <div className="w-20 h-[3px] rounded-full overflow-hidden"
+                  style={{ background: 'rgba(255,255,255,0.08)' }}>
+                  <div className="h-full rounded-full"
+                    style={{ width: `${Math.min(pct, 100)}%`, background: 'linear-gradient(90deg,#B8960C,#D4AF37)' }}/>
+                </div>
+                <span className="font-mono text-[9px] w-10 text-right"
+                  style={{ color: 'rgba(255,255,255,0.45)' }}>
+                  {pct.toFixed(1)}%
+                </span>
+                <span className="font-mono text-[9px] w-16 text-right"
+                  style={{ color: 'rgba(255,255,255,0.3)' }}>
+                  {parseFloat(h.share_balance).toFixed(2)}
+                </span>
+              </div>
+            </div>
+          )
+        })}
+      </div>
+    </div>
+  )
+}
+
 // ── Main Component ────────────────────────────────────────────────────
 
 export function ArtworkDetailPage({ artworkId }: { artworkId: string }) {
   const router = useRouter()
-  const [artwork,    setArtwork]    = useState<StoredArtwork | null>(null)
+
+  // FIX 1: sessionStorage as instant cache; always fetch live data
+  const [artwork, setArtwork] = useState<StoredArtwork | null>(() => {
+    try {
+      return JSON.parse(sessionStorage.getItem('artcurve_detail') || 'null')
+    } catch { return null }
+  })
+  const [liveArtwork,  setLiveArtwork]  = useState<Artwork | null>(null)
+  const [loading,      setLoading]      = useState(false)
+  const [fetchError,   setFetchError]   = useState(false)
+
   const [reviews,    setReviews]    = useState<Review[]>(MOCK_REVIEWS)
   const [rating,     setRating]     = useState(0)
   const [comment,    setComment]    = useState('')
@@ -245,16 +389,29 @@ export function ArtworkDetailPage({ artworkId }: { artworkId: string }) {
   const [submitErr,  setSubmitErr]  = useState('')
   const [success,    setSuccess]    = useState(false)
 
+  // FIX 4: Like button state
+  const [liked,   setLiked]   = useState(false)
+  const [liking,  setLiking]  = useState(false)
+
   const currentUser = authStore.getUser()
   const isMock      = !artworkId || artworkId.startsWith('mock-')
 
-  // Read artwork from sessionStorage (set by MarketplacePage on click)
+  // FIX 1: Always fetch live data from API
   useEffect(() => {
-    try {
-      const raw = sessionStorage.getItem('artcurve_detail')
-      if (raw) setArtwork(JSON.parse(raw) as StoredArtwork)
-    } catch { /* ignore */ }
-  }, [])
+    if (isMock) return
+    if (!artwork) setLoading(true)
+    artworkService.getById(artworkId)
+      .then(data => {
+        setLiveArtwork(data)
+        setLoading(false)
+        setFetchError(false)
+      })
+      .catch(() => {
+        setLoading(false)
+        if (!artwork) setFetchError(true)
+      })
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [artworkId, isMock])
 
   // Load live reviews from API
   const loadReviews = useCallback(async () => {
@@ -323,7 +480,68 @@ export function ArtworkDetailPage({ artworkId }: { artworkId: string }) {
   }))
   const maxCount = Math.max(...distribution.map(d => d.count), 1)
 
-  // ── Loading / not-found state ─────────────────────────────────────
+  // FIX 4: Like handler
+  const handleLike = useCallback(async () => {
+    if (!currentUser || isMock || liking) return
+    setLiking(true)
+    try {
+      const API_URL = (process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:3001/api/v1').replace(/\/$/, '')
+      const jwt = authStore.getJwt()
+      if (liked) {
+        await fetch(`${API_URL}/social/like/${artworkId}`, {
+          method: 'DELETE',
+          headers: jwt ? { Authorization: `Bearer ${jwt}` } : {},
+        })
+        setLiked(false)
+      } else {
+        await fetch(`${API_URL}/social/like/${artworkId}`, {
+          method: 'POST',
+          headers: jwt ? { Authorization: `Bearer ${jwt}` } : {},
+        })
+        setLiked(true)
+      }
+    } catch { /* ignore */ } finally {
+      setLiking(false)
+    }
+  }, [currentUser, isMock, liking, liked, artworkId])
+
+  // ── Loading skeleton ───────────────────────────────────────────────
+  if (loading) {
+    return (
+      <div className="min-h-dvh" style={{ background: '#0A0A0A' }}>
+        <div className="px-8 py-4" style={{ borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
+          <div className="h-3 w-24 rounded animate-pulse" style={{ background: 'rgba(255,255,255,0.07)' }}/>
+        </div>
+        <div className="grid grid-cols-1 lg:grid-cols-2">
+          <div className="animate-pulse" style={{ height: '100dvh', background: 'rgba(255,255,255,0.04)' }}/>
+          <div className="px-10 pt-12 flex flex-col gap-4">
+            {[1,2,3,4,5,6].map(i => (
+              <div key={i} className="h-4 rounded animate-pulse" style={{ background: 'rgba(255,255,255,0.06)', width: `${90 - i * 8}%` }}/>
+            ))}
+          </div>
+        </div>
+      </div>
+    )
+  }
+
+  // ── Error / not-found state ────────────────────────────────────────
+  if (fetchError && !artwork) {
+    return (
+      <div className="min-h-dvh flex flex-col items-center justify-center gap-4" style={{ background: '#0A0A0A' }}>
+        <p className="font-mono text-[10px] tracking-[0.28em] uppercase" style={{ color: 'rgba(255,255,255,0.2)' }}>
+          Artwork not found
+        </p>
+        <Link
+          href="/marketplace"
+          className="font-mono text-[9px] tracking-widest uppercase px-4 py-2 transition-colors duration-150"
+          style={{ border: '1px solid rgba(212,175,55,0.35)', color: '#D4AF37' }}
+        >
+          Back to Marketplace
+        </Link>
+      </div>
+    )
+  }
+
   if (!artwork) {
     return (
       <div
@@ -344,7 +562,17 @@ export function ArtworkDetailPage({ artworkId }: { artworkId: string }) {
     )
   }
 
-  const graduated = artwork.progress >= 100
+  // Merge live API data over cached sessionStorage data where available
+  const initPrice     = liveArtwork ? parseFloat(liveArtwork.init_price) || 0 : 0
+  const currentPrice  = liveArtwork ? parseFloat(liveArtwork.current_price) || 0 : 0
+  const currentSupply = liveArtwork ? parseFloat(liveArtwork.current_supply) || 0 : 0
+  // Use live data for display fields when available
+  const displayArtwork = liveArtwork ? {
+    ...artwork,
+    description: liveArtwork.description ?? artwork.description,
+  } : artwork
+
+  const graduated = displayArtwork.progress >= 100
 
   return (
     <div className="min-h-dvh" style={{ background: '#0A0A0A', color: '#FDFBF7' }}>
@@ -383,13 +611,13 @@ export function ArtworkDetailPage({ artworkId }: { artworkId: string }) {
             {/* Phase left accent */}
             <span
               className="absolute left-0 top-0 bottom-0 w-[3px] z-10"
-              style={{ background: artwork.phaseColor }}
+              style={{ background: displayArtwork.phaseColor }}
             />
 
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
-              src={artwork.image}
-              alt={artwork.title}
+              src={displayArtwork.image}
+              alt={displayArtwork.title}
               className="w-full h-full object-cover"
               draggable={false}
             />
@@ -400,24 +628,24 @@ export function ArtworkDetailPage({ artworkId }: { artworkId: string }) {
                          font-mono text-[9px] tracking-[0.24em] uppercase"
               style={{
                 background: 'rgba(0,0,0,0.72)',
-                border:     `1px solid ${artwork.phaseColor}45`,
-                color:      artwork.phaseColor,
+                border:     `1px solid ${displayArtwork.phaseColor}45`,
+                color:      displayArtwork.phaseColor,
               }}
             >
-              <span className="size-[5px] rounded-full" style={{ background: artwork.phaseColor }}/>
-              {artwork.phase}
+              <span className="size-[5px] rounded-full" style={{ background: displayArtwork.phaseColor }}/>
+              {displayArtwork.phase}
             </div>
 
             {/* 24h badge */}
             <div
               className="absolute top-4 right-4 z-10 px-2.5 py-1 font-mono text-[10px] font-semibold"
               style={{
-                background: artwork.changePositive ? 'rgba(74,222,128,0.14)' : 'rgba(248,113,113,0.14)',
-                border:     `1px solid ${artwork.changePositive ? 'rgba(74,222,128,0.32)' : 'rgba(248,113,113,0.32)'}`,
-                color:      artwork.changePositive ? '#4ade80' : '#f87171',
+                background: displayArtwork.changePositive ? 'rgba(74,222,128,0.14)' : 'rgba(248,113,113,0.14)',
+                border:     `1px solid ${displayArtwork.changePositive ? 'rgba(74,222,128,0.32)' : 'rgba(248,113,113,0.32)'}`,
+                color:      displayArtwork.changePositive ? '#4ade80' : '#f87171',
               }}
             >
-              {artwork.change24h}
+              {displayArtwork.change24h}
             </div>
           </div>
         </motion.div>
@@ -434,7 +662,7 @@ export function ArtworkDetailPage({ artworkId }: { artworkId: string }) {
             className="font-mono text-[9px] tracking-[0.28em] uppercase mb-3"
             style={{ color: 'rgba(255,255,255,0.28)' }}
           >
-            {artwork.ticker} · {artwork.artist}
+            {displayArtwork.ticker} · {displayArtwork.artist}
           </p>
 
           {/* Title */}
@@ -446,7 +674,7 @@ export function ArtworkDetailPage({ artworkId }: { artworkId: string }) {
               color:      '#FDFBF7',
             }}
           >
-            {artwork.title}
+            {displayArtwork.title}
           </h1>
 
           {/* Stats grid 3×2 */}
@@ -455,12 +683,12 @@ export function ArtworkDetailPage({ artworkId }: { artworkId: string }) {
             style={{ background: 'rgba(255,255,255,0.06)' }}
           >
             {[
-              { label: 'Market Cap',  value: artwork.marketCapLabel,             color: '' },
-              { label: '24h Change',  value: artwork.change24h,                  color: artwork.changePositive ? '#4ade80' : '#f87171' },
-              { label: 'Holders',     value: String(artwork.holders),            color: '' },
-              { label: 'Volume 24h',  value: artwork.volume24h,                  color: '' },
-              { label: 'Completion',  value: `${artwork.progress}%`,             color: graduated ? '#4ade80' : '#D4AF37' },
-              { label: 'Phase',       value: artwork.phase,                      color: artwork.phaseColor },
+              { label: 'Market Cap',  value: displayArtwork.marketCapLabel,             color: '' },
+              { label: '24h Change',  value: displayArtwork.change24h,                  color: displayArtwork.changePositive ? '#4ade80' : '#f87171' },
+              { label: 'Holders',     value: String(displayArtwork.holders),            color: '' },
+              { label: 'Volume 24h',  value: displayArtwork.volume24h,                  color: '' },
+              { label: 'Completion',  value: `${displayArtwork.progress}%`,             color: graduated ? '#4ade80' : '#D4AF37' },
+              { label: 'Phase',       value: displayArtwork.phase,                      color: displayArtwork.phaseColor },
             ].map((stat, i) => (
               <motion.div
                 key={stat.label}
@@ -493,7 +721,7 @@ export function ArtworkDetailPage({ artworkId }: { artworkId: string }) {
                 className="font-mono text-[9px] uppercase tracking-[0.18em]"
                 style={{ color: graduated ? '#4ade80' : '#D4AF37' }}
               >
-                {graduated ? '✦ GRADUATED' : `${artwork.progress}% TO GRADUATION`}
+                {graduated ? '✦ GRADUATED' : `${displayArtwork.progress}% TO GRADUATION`}
               </span>
             </div>
             <div
@@ -503,7 +731,7 @@ export function ArtworkDetailPage({ artworkId }: { artworkId: string }) {
               <motion.div
                 className="h-full rounded-full"
                 initial={{ width: 0 }}
-                animate={{ width: `${Math.min(artwork.progress, 100)}%` }}
+                animate={{ width: `${Math.min(displayArtwork.progress, 100)}%` }}
                 transition={{ duration: 1.3, ease: [0.25, 0.46, 0.45, 0.94], delay: 0.4 }}
                 style={{
                   background: graduated
@@ -514,21 +742,54 @@ export function ArtworkDetailPage({ artworkId }: { artworkId: string }) {
             </div>
           </div>
 
-          {/* BUY CTA */}
-          <motion.button
-            type="button"
-            onClick={() => router.push('/marketplace')}
-            whileHover={{ scale: 1.01, filter: 'brightness(1.08)' }}
-            whileTap={{ scale: 0.985 }}
-            transition={{ type: 'spring', stiffness: 400, damping: 20 }}
-            className="w-full py-4 mb-8 font-mono text-[10px] tracking-[0.32em] uppercase font-bold"
-            style={{
-              background: 'linear-gradient(90deg, #D4AF37 0%, #B8960C 100%)',
-              color:      '#0A0A0A',
-            }}
-          >
-            BUY {artwork.ticker}
-          </motion.button>
+          {/* FIX 3: Bonding Curve visualization */}
+          {liveArtwork && currentSupply > 0 && (
+            <BondingCurveViz
+              initPrice={initPrice}
+              currentPrice={currentPrice}
+              currentSupply={currentSupply}
+            />
+          )}
+
+          {/* BUY CTA + Like button */}
+          <div className="flex gap-3 mb-8">
+            <motion.button
+              type="button"
+              onClick={() => router.push('/trade')}
+              whileHover={{ scale: 1.01, filter: 'brightness(1.08)' }}
+              whileTap={{ scale: 0.985 }}
+              transition={{ type: 'spring', stiffness: 400, damping: 20 }}
+              className="flex-1 py-4 font-mono text-[10px] tracking-[0.32em] uppercase font-bold"
+              style={{
+                background: 'linear-gradient(90deg, #D4AF37 0%, #B8960C 100%)',
+                color:      '#0A0A0A',
+              }}
+            >
+              BUY {displayArtwork.ticker}
+            </motion.button>
+
+            {/* FIX 4: Like button */}
+            {currentUser && !isMock && (
+              <motion.button
+                type="button"
+                onClick={handleLike}
+                disabled={liking}
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+                transition={{ type: 'spring', stiffness: 400, damping: 20 }}
+                className="w-14 py-4 flex items-center justify-center font-mono text-[14px]"
+                style={{
+                  background: liked ? 'rgba(248,113,113,0.14)' : 'rgba(255,255,255,0.04)',
+                  border:     `1px solid ${liked ? 'rgba(248,113,113,0.45)' : 'rgba(255,255,255,0.12)'}`,
+                  color:      liked ? '#f87171' : 'rgba(255,255,255,0.35)',
+                  transition: 'all 0.2s ease',
+                }}
+                title={liked ? 'Unlike' : 'Like'}
+              >
+                {liked ? '♥' : '♡'}
+              </motion.button>
+            )}
+          </div>
 
           {/* Description */}
           <p
@@ -539,7 +800,7 @@ export function ArtworkDetailPage({ artworkId }: { artworkId: string }) {
               fontFamily: "'Cormorant Garamond', serif",
             }}
           >
-            {artwork.description}
+            {displayArtwork.description}
           </p>
 
           {/* ── COLLECTOR VOICES ───────────────────────────────────── */}
@@ -692,6 +953,10 @@ export function ArtworkDetailPage({ artworkId }: { artworkId: string }) {
               </AnimatePresence>
             )}
           </div>
+
+          {/* FIX 2: Top Holders */}
+          <TopHoldersSection artworkId={artworkId} />
+
         </motion.div>
       </div>
     </div>

@@ -2634,7 +2634,14 @@ const ROTATE_MS = 4500
 // ── Main MarketplacePage ───────────────────────────────────────────
 export function MarketplacePage() {
   // ── Backend data (falls back to mock when API unreachable) ────────
-  const { artworks: _rawArtworks } = useMarketplace({ initialLimit: 50 })
+  const {
+    artworks: _rawArtworks,
+    isLoading,
+    isFetching,
+    page,
+    setPage,
+    pageCount,
+  } = useMarketplace({ initialLimit: 20 })
   const _apiArtworks = useMemo(
     () => _rawArtworks.map(adaptArtwork),
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -2642,10 +2649,13 @@ export function MarketplacePage() {
   )
   const ARTWORKS = _apiArtworks.length > 0 ? _apiArtworks : ARTWORKS_MOCK
 
-  const [selected,     setSelected]     = useState<MarketArtwork>(ARTWORKS_MOCK[0])
-  const [activePhase,  setActivePhase]  = useState<Phase | 'All'>('All')
-  const [sortKey,      setSortKey]      = useState<SortKey>('market_cap')
-  const [search,       setSearch]       = useState('')
+  const [selected,       setSelected]       = useState<MarketArtwork>(ARTWORKS_MOCK[0])
+  const [activePhase,    setActivePhase]    = useState<Phase | 'All'>('All')
+  const [sortKey,        setSortKey]        = useState<SortKey>('market_cap')
+  const [search,         setSearch]         = useState('')
+  const [searchResults,  setSearchResults]  = useState<MarketArtwork[] | null>(null)
+  const [searchFetching, setSearchFetching] = useState(false)
+  const searchDebounceRef = useRef<ReturnType<typeof setTimeout> | null>(null)
   const [sortOpen,     setSortOpen]     = useState(false)
   const [buyArt,       setBuyArt]       = useState<MarketArtwork | null>(null)
   const [sheetOpen,    setSheetOpen]    = useState(false)
@@ -2675,6 +2685,31 @@ export function MarketplacePage() {
   const userPickedRef   = useRef(false)
   // Tracks whether we've already synced to real API data once
   const apiSyncedRef    = useRef(false)
+
+  // FIX 7: BE search with debounce 400ms
+  useEffect(() => {
+    if (searchDebounceRef.current) clearTimeout(searchDebounceRef.current)
+    if (search.length < 2) {
+      setSearchResults(null)
+      setSearchFetching(false)
+      return
+    }
+    setSearchFetching(true)
+    searchDebounceRef.current = setTimeout(async () => {
+      try {
+        const result = await artworkService.search({ q: search, page: 1, limit: 20 })
+        const mapped = (result.data ?? []).map(adaptArtwork)
+        setSearchResults(mapped)
+      } catch {
+        setSearchResults([])
+      } finally {
+        setSearchFetching(false)
+      }
+    }, 400)
+    return () => {
+      if (searchDebounceRef.current) clearTimeout(searchDebounceRef.current)
+    }
+  }, [search])
 
   // ── Sync selected + price state when real data first arrives ──────
   useEffect(() => {
@@ -2752,10 +2787,18 @@ export function MarketplacePage() {
   }, [])
 
   // ── Filter + sort ──────────────────────────────────────────────
+  // FIX 7: Use BE search results when search >= 2 chars, else client filter
   const filtered = useMemo(() => {
-    let items = [...ARTWORKS]
+    // When search active: use BE results (or empty while fetching)
+    let items = search.length >= 2
+      ? (searchResults ?? [])
+      : [...ARTWORKS]
+
+    // Phase filter (applied on top of search results too)
     if (activePhase !== 'All') items = items.filter(a => a.phase === activePhase)
-    if (search.trim()) {
+
+    // Client-side search fallback when search < 2
+    if (search.trim() && search.length < 2) {
       const q = search.toLowerCase()
       items = items.filter(a =>
         a.title.toLowerCase().includes(q) ||
@@ -2763,6 +2806,7 @@ export function MarketplacePage() {
         a.ticker.toLowerCase().includes(q)
       )
     }
+
     items.sort((a, b) => {
       const pa = livePrices[a.id] ?? a.marketCap
       const pb = livePrices[b.id] ?? b.marketCap
@@ -2774,7 +2818,7 @@ export function MarketplacePage() {
       return b.id - a.id
     })
     return items
-  }, [activePhase, sortKey, search, livePrices])
+  }, [activePhase, sortKey, search, searchResults, livePrices, ARTWORKS])
 
   // If selected gets filtered out, auto-select first
   useEffect(() => {
@@ -3056,13 +3100,22 @@ export function MarketplacePage() {
           {/* Search + sort */}
           <div className="flex items-center gap-2.5 shrink-0">
             <div className="relative">
-              <svg viewBox="0 0 24 24"
-                className="absolute left-0 top-1/2 -translate-y-1/2 w-3 h-3"
-                style={{ color: 'rgba(255,255,255,0.25)' }}
-                fill="none" stroke="currentColor" strokeWidth="2">
-                <circle cx="11" cy="11" r="8"/>
-                <path d="m21 21-4.35-4.35" strokeLinecap="round"/>
-              </svg>
+              {/* FIX 7: spinner while searching BE */}
+              {searchFetching ? (
+                <svg className="absolute left-0 top-1/2 -translate-y-1/2 w-3 h-3 animate-spin"
+                  viewBox="0 0 24 24" fill="none" style={{ color: '#D4AF37' }}>
+                  <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="2" strokeOpacity="0.2"/>
+                  <path d="M12 2a10 10 0 0 1 10 10" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
+                </svg>
+              ) : (
+                <svg viewBox="0 0 24 24"
+                  className="absolute left-0 top-1/2 -translate-y-1/2 w-3 h-3"
+                  style={{ color: 'rgba(255,255,255,0.25)' }}
+                  fill="none" stroke="currentColor" strokeWidth="2">
+                  <circle cx="11" cy="11" r="8"/>
+                  <path d="m21 21-4.35-4.35" strokeLinecap="round"/>
+                </svg>
+              )}
               <input type="search" placeholder="Search…"
                 value={search} onChange={e => setSearch(e.target.value)}
                 className="h-7 pl-5 pr-2 w-36 text-[10.5px] bg-transparent outline-none
@@ -3201,7 +3254,26 @@ export function MarketplacePage() {
               ))}
             </div>
 
-            {filtered.length === 0 ? (
+            {/* FIX 9: skeleton loading state */}
+            {isLoading ? (
+              <div className="flex flex-col">
+                {[1,2,3,4,5,6].map(i => (
+                  <div key={i} className="flex items-center gap-3 px-4 py-3 animate-pulse"
+                    style={{ borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
+                    <div className="w-10 h-10 shrink-0 rounded-sm"
+                      style={{ background: 'rgba(255,255,255,0.07)' }}/>
+                    <div className="flex-1 flex flex-col gap-1.5">
+                      <div className="h-3 rounded" style={{ background: 'rgba(255,255,255,0.07)', width: '65%' }}/>
+                      <div className="h-2 rounded" style={{ background: 'rgba(255,255,255,0.04)', width: '40%' }}/>
+                    </div>
+                    <div className="w-20 flex flex-col items-end gap-1.5">
+                      <div className="h-3 rounded" style={{ background: 'rgba(255,255,255,0.07)', width: '80%' }}/>
+                      <div className="h-2 rounded" style={{ background: 'rgba(255,255,255,0.04)', width: '50%' }}/>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            ) : filtered.length === 0 ? (
               <div className="flex flex-col items-center justify-center py-16 gap-3">
                 <p className="font-mono text-[10px]" style={{ color: 'rgba(255,255,255,0.25)' }}>
                   No results
@@ -3227,6 +3299,61 @@ export function MarketplacePage() {
                   />
                 ))}
               </LayoutGroup>
+            )}
+
+            {/* FIX 8: Pagination controls */}
+            {!isLoading && !search && pageCount > 1 && (
+              <div className="flex items-center justify-center gap-2 py-6"
+                style={{ borderTop: '1px solid rgba(255,255,255,0.06)' }}>
+                <button
+                  type="button"
+                  onClick={() => setPage(p => Math.max(1, p - 1))}
+                  disabled={page === 1}
+                  className="flex items-center justify-center w-7 h-7 font-mono text-[11px] transition-colors duration-150"
+                  style={{
+                    border:     '1px solid rgba(255,255,255,0.1)',
+                    color:      page === 1 ? 'rgba(255,255,255,0.2)' : 'rgba(255,255,255,0.55)',
+                    cursor:     page === 1 ? 'not-allowed' : 'pointer',
+                  }}
+                  onMouseEnter={e => { if (page !== 1) e.currentTarget.style.borderColor = 'rgba(212,175,55,0.4)' }}
+                  onMouseLeave={e => { e.currentTarget.style.borderColor = 'rgba(255,255,255,0.1)' }}
+                >
+                  ←
+                </button>
+                <span className="font-mono text-[9px]" style={{ color: 'rgba(255,255,255,0.35)' }}>
+                  {page} / {pageCount}
+                </span>
+                <button
+                  type="button"
+                  onClick={() => setPage(p => Math.min(pageCount, p + 1))}
+                  disabled={page === pageCount}
+                  className="flex items-center justify-center w-7 h-7 font-mono text-[11px] transition-colors duration-150"
+                  style={{
+                    border:     '1px solid rgba(255,255,255,0.1)',
+                    color:      page === pageCount ? 'rgba(255,255,255,0.2)' : 'rgba(255,255,255,0.55)',
+                    cursor:     page === pageCount ? 'not-allowed' : 'pointer',
+                  }}
+                  onMouseEnter={e => { if (page !== pageCount) e.currentTarget.style.borderColor = 'rgba(212,175,55,0.4)' }}
+                  onMouseLeave={e => { e.currentTarget.style.borderColor = 'rgba(255,255,255,0.1)' }}
+                >
+                  →
+                </button>
+              </div>
+            )}
+
+            {/* FIX 9: isFetching overlay spinner (not initial load) */}
+            {isFetching && !isLoading && (
+              <div className="sticky bottom-3 flex justify-end px-4 pointer-events-none">
+                <div className="flex items-center gap-1.5 px-2.5 py-1.5"
+                  style={{ background: 'rgba(0,0,0,0.82)', border: '1px solid rgba(255,255,255,0.08)' }}>
+                  <svg className="w-2.5 h-2.5 animate-spin" viewBox="0 0 24 24" fill="none"
+                    style={{ color: '#D4AF37' }}>
+                    <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="2" strokeOpacity="0.2"/>
+                    <path d="M12 2a10 10 0 0 1 10 10" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
+                  </svg>
+                  <span className="font-mono text-[7px] tracking-widest" style={{ color: '#D4AF37' }}>UPDATING</span>
+                </div>
+              </div>
             )}
 
             {/* ── Live Activity Feed ── */}

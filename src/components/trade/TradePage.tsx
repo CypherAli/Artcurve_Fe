@@ -23,13 +23,17 @@ import {
   motion, AnimatePresence,
   useMotionValue, useMotionTemplate,
 } from 'framer-motion'
+import { useQueryClient }               from '@tanstack/react-query'
 import { CandlestickChart, CandleRange } from '../common/CandlestickChart'
 import { PHASE_COLOR, Phase }            from '../marketplace/ArtCard'
 import { useMarketplace }               from '@/hooks/useMarketplace'
 import { useBuyTokens, useSellTokens, useTokenBalance, useEthBalance, toWei } from '@/web3/hooks/useContract'
 import { tradeService }                 from '@/services/trade.service'
+import { authStore }                    from '@/lib/auth-store'
 import { parseEther }                   from 'viem'
 import type { Artwork, OhlcvCandle, OhlcvTimeframe } from '@/types/api'
+
+const API_URL = (process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:3001/api/v1').replace(/\/$/, '')
 
 // ─────────────────────────────────────────────────────────────────
 //  Types
@@ -672,6 +676,42 @@ function BottomPanel({ art, livePrice, trades, bookTick }: {
 }
 
 // ─────────────────────────────────────────────────────────────────
+//  Quote fetcher — FIX 5
+// ─────────────────────────────────────────────────────────────────
+interface QuoteResult {
+  ethAmount:      number
+  pricePerToken:  number
+  newSupply:      number
+  newSpotPrice:   number
+  wouldGraduate?: boolean
+  priceImpactPct: number
+}
+
+async function fetchQuote(artworkId: string, side: 'buy'|'sell', amount: string): Promise<QuoteResult | null> {
+  if (!artworkId || !amount || parseFloat(amount) <= 0) return null
+  try {
+    const jwt = authStore.getJwt()
+    const r = await fetch(
+      `${API_URL}/artworks/${artworkId}/quote?side=${side}&amount=${amount}`,
+      jwt ? { headers: { Authorization: `Bearer ${jwt}` } } : {},
+    )
+    if (!r.ok) return null
+    const json = await r.json()
+    const data = json?.data ?? json
+    return {
+      ethAmount:      parseFloat(data.ethAmount     ?? data.eth_amount      ?? '0') || 0,
+      pricePerToken:  parseFloat(data.pricePerToken ?? data.price_per_token ?? '0') || 0,
+      newSupply:      parseFloat(data.newSupply     ?? data.new_supply      ?? '0') || 0,
+      newSpotPrice:   parseFloat(data.newSpotPrice  ?? data.new_spot_price  ?? '0') || 0,
+      wouldGraduate:  data.wouldGraduate ?? data.would_graduate ?? false,
+      priceImpactPct: parseFloat(data.priceImpactPct ?? data.price_impact_pct ?? '0') || 0,
+    }
+  } catch {
+    return null
+  }
+}
+
+// ─────────────────────────────────────────────────────────────────
 //  Trade Panel — BUY (green) / SELL (red) fully differentiated
 // ─────────────────────────────────────────────────────────────────
 function TradePanel({ art, livePrice }: { art:TradeArtwork; livePrice:number }) {
@@ -680,6 +720,11 @@ function TradePanel({ art, livePrice }: { art:TradeArtwork; livePrice:number }) 
   const [tokenInput, setTokenInput] = useState('')   // SELL: tokens to sell
   const [slippage,   setSlippage]   = useState('1.0')
   const [txState,    setTxState]    = useState<'idle'|'pending'|'success'>('idle')
+
+  // FIX 5: Quote from API
+  const [quote,        setQuote]        = useState<QuoteResult | null>(null)
+  const [quoteFetching, setQuoteFetching] = useState(false)
+  const quoteDebounceRef = useRef<ReturnType<typeof setTimeout> | null>(null)
 
   // Radial glow that follows the mouse — shifts between green/red per side
   const mouseX   = useMotionValue(0)
@@ -692,21 +737,46 @@ function TradePanel({ art, livePrice }: { art:TradeArtwork; livePrice:number }) 
   const { formatted: WALLET_ETH }   = useEthBalance()
   const { formatted: WALLET_TOKEN } = useTokenBalance(contractAddr)
 
+  // FIX 6: Query client for cache invalidation after trade
+  const queryClient = useQueryClient()
+
   // Trade hooks
   const { buy, isPending: isBuying, isConfirming: buyConfirming, isSuccess: buySuccess } = useBuyTokens(contractAddr)
   const { sell, isPending: isSelling, isConfirming: sellConfirming, isSuccess: sellSuccess } = useSellTokens(contractAddr)
 
-  // ── BUY calculations ────────────────────────────────────────────
+  // FIX 5: Debounced quote fetch from API
+  useEffect(() => {
+    const artworkUuid = art.artworkId
+    if (!artworkUuid) { setQuote(null); return }
+
+    const inputVal = side === 'buy' ? ethInput : tokenInput
+    if (!inputVal || parseFloat(inputVal) <= 0) { setQuote(null); return }
+
+    if (quoteDebounceRef.current) clearTimeout(quoteDebounceRef.current)
+    quoteDebounceRef.current = setTimeout(async () => {
+      setQuoteFetching(true)
+      const result = await fetchQuote(artworkUuid, side, inputVal)
+      setQuote(result)
+      setQuoteFetching(false)
+    }, 300)
+
+    return () => {
+      if (quoteDebounceRef.current) clearTimeout(quoteDebounceRef.current)
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [ethInput, tokenInput, side, art.artworkId])
+
+  // ── BUY calculations (use quote if available, else approximation) ──
   const ethAmt      = Math.max(0, parseFloat(ethInput)  || 0)
   const poolDepth   = livePrice * (art.progress * 0.18 + 4)
-  const buyImpact   = ethAmt > 0 ? Math.min((ethAmt / poolDepth) * 100, 49.9) : 0
-  const tokensOut   = ethAmt > 0 ? (ethAmt / livePrice) * (1 - buyImpact / 180) : 0
+  const buyImpact   = quote ? quote.priceImpactPct : (ethAmt > 0 ? Math.min((ethAmt / poolDepth) * 100, 49.9) : 0)
+  const tokensOut   = quote && side === 'buy' ? (ethAmt / (quote.pricePerToken || livePrice)) : (ethAmt > 0 ? (ethAmt / livePrice) * (1 - buyImpact / 180) : 0)
   const minReceived = tokensOut * (1 - parseFloat(slippage) / 100)
 
-  // ── SELL calculations ───────────────────────────────────────────
+  // ── SELL calculations (use quote if available, else approximation) ──
   const tokenAmt  = Math.max(0, parseFloat(tokenInput) || 0)
-  const sellImpact = tokenAmt > 0 ? Math.min((tokenAmt * livePrice / poolDepth) * 100, 49.9) : 0
-  const ethOut     = tokenAmt > 0 ? tokenAmt * livePrice * (1 - sellImpact / 180) * 0.993 : 0
+  const sellImpact = quote ? quote.priceImpactPct : (tokenAmt > 0 ? Math.min((tokenAmt * livePrice / poolDepth) * 100, 49.9) : 0)
+  const ethOut     = quote && side === 'sell' ? quote.ethAmount : (tokenAmt > 0 ? tokenAmt * livePrice * (1 - sellImpact / 180) * 0.993 : 0)
   const minEthOut  = ethOut * (1 - parseFloat(slippage) / 100)
 
   const impactPct  = side === 'buy' ? buyImpact : sellImpact
@@ -725,9 +795,15 @@ function TradePanel({ art, livePrice }: { art:TradeArtwork; livePrice:number }) 
   useEffect(() => {
     if (buySuccess || sellSuccess) {
       setTxState('success')
+      // FIX 6: Invalidate relevant caches after trade success
+      queryClient.invalidateQueries({ queryKey: ['artworks'] })
+      queryClient.invalidateQueries({ queryKey: ['portfolio'] })
+      if (art.artworkId) {
+        queryClient.invalidateQueries({ queryKey: ['ohlcv', art.artworkId] })
+      }
       setTimeout(() => { setTxState('idle'); setEthInput(''); setTokenInput('') }, 2200)
     }
-  }, [buySuccess, sellSuccess])
+  }, [buySuccess, sellSuccess, queryClient, art.artworkId])
 
   const handleExecute = useCallback(() => {
     if (!canTrade) return
@@ -758,6 +834,7 @@ function TradePanel({ art, livePrice }: { art:TradeArtwork; livePrice:number }) 
     setEthInput('')
     setTokenInput('')
     setTxState('idle')
+    setQuote(null)
   }, [art.id])
 
   // Reset input when switching side
@@ -765,6 +842,7 @@ function TradePanel({ art, livePrice }: { art:TradeArtwork; livePrice:number }) 
     setEthInput('')
     setTokenInput('')
     setTxState('idle')
+    setQuote(null)
   }, [side])
 
   // Side-specific colors
@@ -929,15 +1007,22 @@ function TradePanel({ art, livePrice }: { art:TradeArtwork; livePrice:number }) 
               <div className="flex flex-col gap-1 py-1.5 px-2.5"
                 style={{ background:'rgba(74,222,128,0.03)', border:'1px solid rgba(74,222,128,0.08)' }}>
                 {[
-                  { label:'Price',        value:`${fmtETH(livePrice)} ETH` },
-                  { label:'Impact',       value: ethAmt>0?`${buyImpact.toFixed(2)}%`:'—', color:impactColor },
-                  { label:'Min. Out',     value: tokensOut>0?`${minReceived.toFixed(3)} ${art.ticker}`:'—' },
+                  { label:'Price',        value: quoteFetching ? '…' : `${fmtETH(quote?.pricePerToken ?? livePrice)} ETH` },
+                  { label:'Impact',       value: quoteFetching ? '…' : (ethAmt>0?`${buyImpact.toFixed(2)}%`:'—'), color:impactColor },
+                  { label:'Min. Out',     value: quoteFetching ? '…' : (tokensOut>0?`${minReceived.toFixed(3)} ${art.ticker}`:'—') },
                 ].map(({ label, value, color }) => (
                   <div key={label} className="flex items-center justify-between">
                     <span className="font-mono text-[7px]" style={{ color:'rgba(255,255,255,0.22)' }}>{label}</span>
                     <span className="font-mono text-[7px]" style={{ color: color??'rgba(255,255,255,0.5)' }}>{value}</span>
                   </div>
                 ))}
+                {quote?.wouldGraduate && (
+                  <div className="flex items-center gap-1.5 mt-1 px-2 py-1"
+                    style={{ background:'rgba(212,175,55,0.1)', border:'1px solid rgba(212,175,55,0.35)' }}>
+                    <span style={{ fontSize:8, color:'#D4AF37' }}>✦</span>
+                    <span className="font-mono text-[7px]" style={{ color:'#D4AF37' }}>This trade would graduate the artwork to DEX</span>
+                  </div>
+                )}
               </div>
             </motion.div>
 
@@ -1019,9 +1104,9 @@ function TradePanel({ art, livePrice }: { art:TradeArtwork; livePrice:number }) 
               <div className="flex flex-col gap-1 py-1.5 px-2.5"
                 style={{ background:'rgba(248,113,113,0.03)', border:'1px solid rgba(248,113,113,0.08)' }}>
                 {[
-                  { label:'Price',    value:`${fmtETH(livePrice)} ETH` },
-                  { label:'Impact',   value: tokenAmt>0?`${sellImpact.toFixed(2)}%`:'—', color:impactColor },
-                  { label:'Min. Out', value: ethOut>0?`${minEthOut.toFixed(4)} ETH`:'—' },
+                  { label:'Price',    value: quoteFetching ? '…' : `${fmtETH(quote?.pricePerToken ?? livePrice)} ETH` },
+                  { label:'Impact',   value: quoteFetching ? '…' : (tokenAmt>0?`${sellImpact.toFixed(2)}%`:'—'), color:impactColor },
+                  { label:'Min. Out', value: quoteFetching ? '…' : (ethOut>0?`${minEthOut.toFixed(4)} ETH`:'—') },
                 ].map(({ label, value, color }) => (
                   <div key={label} className="flex items-center justify-between">
                     <span className="font-mono text-[7px]" style={{ color:'rgba(255,255,255,0.22)' }}>{label}</span>
@@ -1243,11 +1328,46 @@ export function TradePage() {
     return () => clearInterval(id)
   }, [])
 
-  // Reset trades on artwork change
+  // FIX 10: Load real trade history from API, refresh every 15s
   useEffect(() => {
-    setTrades(seedTrades(livePricesRef.current[selectedId] ?? selectedArt.basePrice, selectedId))
+    const artworkUuid = selectedArt.artworkId
+    if (!artworkUuid) {
+      // Fallback to mock data for artworks without UUID
+      setTrades(seedTrades(livePricesRef.current[selectedId] ?? selectedArt.basePrice, selectedId))
+      return
+    }
+
+    const loadHistory = () => {
+      tradeService.history(artworkUuid, 20, 0)
+        .then(result => {
+          const records = result.data ?? []
+          if (records.length === 0) {
+            setTrades(seedTrades(livePricesRef.current[selectedId] ?? selectedArt.basePrice, selectedId))
+            return
+          }
+          const mapped: RecentTrade[] = records.map((r, i) => ({
+            id:     r.id,
+            side:   r.tx_type === 'BUY' ? 'buy' : 'sell',
+            price:  parseFloat(r.price_per_share) || 0,
+            eth:    parseFloat(r.eth_amount) || 0,
+            tokens: parseFloat(r.share_amount) || 0,
+            wallet: r.wallet_address
+              ? `${r.wallet_address.slice(0, 6)}…${r.wallet_address.slice(-4)}`
+              : `0x????`,
+            ago:    Math.floor((Date.now() - new Date(r.timestamp).getTime()) / 1000),
+          }))
+          setTrades(mapped)
+        })
+        .catch(() => {
+          setTrades(seedTrades(livePricesRef.current[selectedId] ?? selectedArt.basePrice, selectedId))
+        })
+    }
+
+    loadHistory()
+    const refreshId = setInterval(loadHistory, 15_000)
+    return () => clearInterval(refreshId)
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [selectedId])
+  }, [selectedId, selectedArt.artworkId])
 
   // Stream live trades (stale-closure safe)
   useEffect(() => {
