@@ -6,6 +6,7 @@
 
 import { useState, useMemo, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
+import { useLanguage } from '@/context/LanguageContext'
 import { PHASE_COLOR, Phase } from '../marketplace/ArtCard'
 import { usePortfolio } from '@/hooks/usePortfolio'
 import { useEthBalance } from '@/web3/hooks/useContract'
@@ -119,6 +120,7 @@ function genHistory(days: number, end: number): number[] {
 
 // ── Portfolio chart component ─────────────────────────────────────
 function PortfolioChart({ totalValue, pnlPct }: { totalValue: number; pnlPct: number }) {
+  const { t } = useLanguage()
   const [tf, setTf] = useState<Timeframe>('30D')
 
   const pts = useMemo(() => {
@@ -160,7 +162,7 @@ function PortfolioChart({ totalValue, pnlPct }: { totalValue: number; pnlPct: nu
         style={{ borderBottom: '1px solid rgba(255,255,255,0.05)', background: 'rgba(0,0,0,0.32)' }}>
         <div className="flex items-center gap-3">
           <span className="font-mono text-[6.5px] tracking-[0.2em] uppercase"
-            style={{ color: 'rgba(255,255,255,0.2)' }}>Portfolio Value</span>
+            style={{ color: 'rgba(255,255,255,0.2)' }}>{t.vault.portfolioValue}</span>
           <span className="font-sans text-[13px] font-semibold"
             style={{ color: 'rgba(255,255,255,0.85)', letterSpacing: '-0.02em' }}>
             {fmtETH(totalValue)} ETH
@@ -177,15 +179,15 @@ function PortfolioChart({ totalValue, pnlPct }: { totalValue: number; pnlPct: nu
           )}
         </div>
         <div className="flex items-center gap-1">
-          {(['7D', '30D', '90D'] as const).map(t => (
-            <button key={t} type="button" onClick={() => setTf(t)}
+          {(['7D', '30D', '90D'] as const).map(tfVal => (
+            <button key={tfVal} type="button" onClick={() => setTf(tfVal)}
               className="px-2 py-0.5 font-mono text-[7px]"
               style={{
-                background: tf === t ? 'rgba(255,255,255,0.08)' : 'transparent',
-                border:     tf === t ? '1px solid rgba(255,255,255,0.12)' : '1px solid transparent',
-                color:      tf === t ? 'rgba(255,255,255,0.65)' : 'rgba(255,255,255,0.25)',
+                background: tf === tfVal ? 'rgba(255,255,255,0.08)' : 'transparent',
+                border:     tf === tfVal ? '1px solid rgba(255,255,255,0.12)' : '1px solid transparent',
+                color:      tf === tfVal ? 'rgba(255,255,255,0.65)' : 'rgba(255,255,255,0.25)',
               }}>
-              {t}
+              {tfVal === '7D' ? t.vault.timeframe7d : tfVal === '30D' ? t.vault.timeframe30d : t.vault.timeframe90d}
             </button>
           ))}
         </div>
@@ -229,6 +231,7 @@ function PortfolioChart({ totalValue, pnlPct }: { totalValue: number; pnlPct: nu
 
 // ── Allocation donut ──────────────────────────────────────────────
 function AllocationDonut({ holdings }: { holdings: Holding[] }) {
+  const { t } = useLanguage()
   const total = holdings.reduce((s, h) => s + h.qty * h.curPrice, 0)
   type Seg = { path: string; color: string; pct: number; ticker: string }
   const segments = useMemo<Seg[]>(() => {
@@ -259,7 +262,7 @@ function AllocationDonut({ holdings }: { holdings: Holding[] }) {
       <div className="flex items-center justify-between px-3 shrink-0"
         style={{ height: 36, background: 'rgba(0,0,0,0.38)', borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
         <span className="font-mono text-[7px] tracking-[0.2em] uppercase"
-          style={{ color: 'rgba(255,255,255,0.22)' }}>ALLOCATION</span>
+          style={{ color: 'rgba(255,255,255,0.22)' }}>{t.vault.allocation}</span>
         <span className="font-mono text-[7px]" style={{ color: 'rgba(255,255,255,0.18)' }}>
           {fmtUSD(total)}
         </span>
@@ -273,7 +276,7 @@ function AllocationDonut({ holdings }: { holdings: Holding[] }) {
           ))}
           <circle cx="56" cy="56" r="30" fill="#070707"/>
           <text x="56" y="52" textAnchor="middle" fontFamily="monospace"
-            fontSize="8" fill="rgba(255,255,255,0.45)">TOTAL</text>
+            fontSize="8" fill="rgba(255,255,255,0.45)">{t.vault.total}</text>
           <text x="56" y="65" textAnchor="middle" fontFamily="monospace"
             fontSize="9" fontWeight="bold" fill="rgba(255,255,255,0.7)">
             {fmtETH(total)}
@@ -341,6 +344,7 @@ const TABLE_V = {
 //  Main VaultPage
 // ─────────────────────────────────────────────────────────────────
 export function VaultPage() {
+  const { t } = useLanguage()
   // ── Backend portfolio data ────────────────────────────────────────
   const portfolio  = usePortfolio()
   const { formatted: walletEthBalance } = useEthBalance()
@@ -373,10 +377,10 @@ export function VaultPage() {
   const totalPnL   = unrealPnL + REALIZED_PNL
 
   const STATS = [
-    { label: 'PORTFOLIO VALUE', value: fmtETH(totalValue) + ' ETH', sub: fmtUSD(totalValue),         up: true          },
-    { label: 'UNREALIZED P&L',  value: (unrealPnL >= 0 ? '+' : '') + fmtETH(unrealPnL) + ' ETH',    sub: (unrealPct >= 0 ? '+' : '') + unrealPct.toFixed(1) + '%', up: unrealPnL >= 0 },
-    { label: 'REALIZED P&L',    value: '+' + fmtETH(REALIZED_PNL)  + ' ETH',                         sub: '+' + fmtUSD(REALIZED_PNL), up: true              },
-    { label: 'ETH BALANCE',     value: walletEthBalance.toFixed(4) + ' ETH',                          sub: fmtUSD(walletEthBalance),   up: true              },
+    { label: t.vault.portfolioValueStat, value: fmtETH(totalValue) + ' ETH', sub: fmtUSD(totalValue),         up: true          },
+    { label: t.vault.unrealizedPnl,      value: (unrealPnL >= 0 ? '+' : '') + fmtETH(unrealPnL) + ' ETH',    sub: (unrealPct >= 0 ? '+' : '') + unrealPct.toFixed(1) + '%', up: unrealPnL >= 0 },
+    { label: t.vault.realizedPnl,        value: '+' + fmtETH(REALIZED_PNL)  + ' ETH',                         sub: '+' + fmtUSD(REALIZED_PNL), up: true              },
+    { label: t.vault.ethBalance,         value: walletEthBalance.toFixed(4) + ' ETH',                          sub: fmtUSD(walletEthBalance),   up: true              },
   ]
 
   function handleSort(k: SortKey) {
@@ -444,7 +448,7 @@ export function VaultPage() {
                 whileTap={{ scale: 0.97 }}
                 className="relative px-5 py-2 font-mono text-[8px] tracking-widest uppercase"
                 style={{ color: activeTab === tab ? 'rgba(255,255,255,0.75)' : 'rgba(255,255,255,0.25)' }}>
-                {tab === 'holdings' ? 'MY HOLDINGS' : 'TX HISTORY'}
+                {tab === 'holdings' ? t.vault.myHoldings : t.vault.txHistory}
                 {activeTab === tab && (
                   <motion.div layoutId="vault-tab" className="absolute bottom-0 left-0 right-0 h-[2px]"
                     style={{ background: '#D4AF37' }}/>
@@ -461,13 +465,13 @@ export function VaultPage() {
                 {/* Sortable header */}
                 <div className="flex items-center px-4 shrink-0"
                   style={{ height: 28, background: 'rgba(0,0,0,0.28)', borderBottom: '1px solid rgba(255,255,255,0.04)' }}>
-                  <SortHeader label="ASSET"   sk="ticker"   sortKey={sortKey} sortDir={sortDir} onSort={handleSort} minWidth={172}/>
-                  <SortHeader label="QTY"     sk="qty"      sortKey={sortKey} sortDir={sortDir} onSort={handleSort} flex={1}/>
-                  <SortHeader label="AVG BUY" sk="avgBuy"   sortKey={sortKey} sortDir={sortDir} onSort={handleSort} flex={1}/>
-                  <SortHeader label="CURRENT" sk="curPrice" sortKey={sortKey} sortDir={sortDir} onSort={handleSort} flex={1}/>
-                  <SortHeader label="VALUE"   sk="value"    sortKey={sortKey} sortDir={sortDir} onSort={handleSort} flex={1}/>
-                  <SortHeader label="P&L"     sk="pnl"      sortKey={sortKey} sortDir={sortDir} onSort={handleSort} flex={1}/>
-                  <SortHeader label="CHG %"   sk="pnlPct"   sortKey={sortKey} sortDir={sortDir} onSort={handleSort} flex={1}/>
+                  <SortHeader label={t.vault.asset}   sk="ticker"   sortKey={sortKey} sortDir={sortDir} onSort={handleSort} minWidth={172}/>
+                  <SortHeader label={t.vault.qty}     sk="qty"      sortKey={sortKey} sortDir={sortDir} onSort={handleSort} flex={1}/>
+                  <SortHeader label={t.vault.avgBuy}  sk="avgBuy"   sortKey={sortKey} sortDir={sortDir} onSort={handleSort} flex={1}/>
+                  <SortHeader label={t.vault.current} sk="curPrice" sortKey={sortKey} sortDir={sortDir} onSort={handleSort} flex={1}/>
+                  <SortHeader label={t.vault.value}   sk="value"    sortKey={sortKey} sortDir={sortDir} onSort={handleSort} flex={1}/>
+                  <SortHeader label={t.vault.pnl}     sk="pnl"      sortKey={sortKey} sortDir={sortDir} onSort={handleSort} flex={1}/>
+                  <SortHeader label={t.vault.chgPct}  sk="pnlPct"   sortKey={sortKey} sortDir={sortDir} onSort={handleSort} flex={1}/>
                   {/* trade col */}
                   <span className="font-mono text-[6.5px] tracking-wider" style={{ color: 'rgba(255,255,255,0.12)', width: 56, textAlign: 'right' }}/>
                 </div>
@@ -517,7 +521,7 @@ export function VaultPage() {
                         <a href="/trade"
                           className="shrink-0 px-2 py-0.5 font-mono text-[7px] opacity-0 group-hover:opacity-100 transition-opacity"
                           style={{ width: 56, textAlign: 'right', color: '#D4AF37', border: '1px solid rgba(212,175,55,0.25)', textDecoration: 'none' }}>
-                          TRADE →
+                          {t.vault.tradeLink}
                         </a>
                       </motion.div>
                     )
@@ -530,7 +534,7 @@ export function VaultPage() {
                 transition={{ duration: 0.14 }}>
                 <div className="flex items-center px-4 shrink-0"
                   style={{ height: 28, background: 'rgba(0,0,0,0.28)', borderBottom: '1px solid rgba(255,255,255,0.04)' }}>
-                  {['DATE', 'SIDE', 'TOKEN', 'PRICE', 'ETH SPENT'].map(l => (
+                  {[t.vault.date, t.vault.side, t.vault.token, t.trade.price, t.vault.ethSpent].map(l => (
                     <span key={l} className="font-mono text-[6.5px] tracking-wider flex-1"
                       style={{ color: 'rgba(255,255,255,0.15)' }}>{l}</span>
                   ))}
@@ -545,7 +549,7 @@ export function VaultPage() {
                       </span>
                       <span style={{ flex: 1, fontFamily: 'monospace', fontSize: 8, fontWeight: 700,
                         color: tx.side === 'buy' ? '#4ade80' : '#f87171' }}>
-                        {tx.side.toUpperCase()}
+                        {tx.side === 'buy' ? t.common.buy : t.common.sell}
                       </span>
                       <span style={{ flex: 1, fontFamily: 'monospace', fontSize: 9, color: 'rgba(255,255,255,0.55)' }}>
                         {tx.ticker}
@@ -563,7 +567,7 @@ export function VaultPage() {
                 <div className="flex items-center justify-between px-4 py-2 shrink-0"
                   style={{ borderTop: '1px solid rgba(255,255,255,0.05)', background: 'rgba(0,0,0,0.3)' }}>
                   <span className="font-mono text-[7px] tracking-wider" style={{ color: 'rgba(255,255,255,0.22)' }}>
-                    REALIZED P&L (CLOSED POSITIONS)
+                    {t.vault.realizedPnlClosed}
                   </span>
                   <span className="font-mono text-[10px] font-bold" style={{ color: '#4ade80' }}>
                     +{fmtETH(REALIZED_PNL)} ETH ({fmtUSD(REALIZED_PNL)})

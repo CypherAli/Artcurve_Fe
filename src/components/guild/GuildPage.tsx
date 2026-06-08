@@ -6,6 +6,7 @@
 
 import { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
+import { useLanguage } from '@/context/LanguageContext'
 
 // ── Types ─────────────────────────────────────────────────────────
 interface Guild {
@@ -151,6 +152,7 @@ const LIST_V = {
 function GuildCard({ guild, selected, onClick }: {
   guild: Guild; selected: boolean; onClick: () => void
 }) {
+  const { t } = useLanguage()
   return (
     <motion.div variants={CARD_V} onClick={onClick}
       className="cursor-pointer overflow-hidden"
@@ -160,7 +162,7 @@ function GuildCard({ guild, selected, onClick }: {
         {guild.joined && (
           <div className="absolute top-2 right-2 font-mono text-[6.5px] px-1.5 py-0.5"
             style={{ background:`${guild.color}18`, color:guild.color, border:`1px solid ${guild.color}28` }}>
-            JOINED
+            {t.guild.joined}
           </div>
         )}
         <div className="absolute bottom-0 left-0 right-0 h-8"
@@ -199,6 +201,7 @@ function GuildCard({ guild, selected, onClick }: {
 //  Activity tab content
 // ─────────────────────────────────────────────────────────────────
 function ActivityTab() {
+  const { t } = useLanguage()
   return (
     <div className="flex-1 overflow-y-auto"
       style={{ scrollbarWidth:'thin', scrollbarColor:'rgba(255,255,255,0.05) transparent' }}>
@@ -232,7 +235,7 @@ function ActivityTab() {
                   ♡ {post.likes}
                 </button>
                 <button type="button" className="font-mono text-[7px]" style={{ color:'rgba(255,255,255,0.16)' }}>
-                  Reply
+                  {t.guild.reply}
                 </button>
               </div>
             </div>
@@ -247,6 +250,7 @@ function ActivityTab() {
 //  Chat tab content
 // ─────────────────────────────────────────────────────────────────
 function ChatTab({ guild }: { guild: Guild }) {
+  const { t } = useLanguage()
   const [messages, setMessages] = useState<ChatMsg[]>(CHAT_SEED)
   const [input, setInput] = useState('')
 
@@ -295,7 +299,7 @@ function ChatTab({ guild }: { guild: Guild }) {
         <div className="flex items-center gap-2"
           style={{ border:'1px solid rgba(255,255,255,0.07)', background:'rgba(255,255,255,0.02)', padding:'5px 10px' }}>
           <input value={input} onChange={e => setInput(e.target.value)}
-            placeholder={`Message ${guild.name}…`}
+            placeholder={t.guild.chatPlaceholder.replace('{name}', guild.name)}
             className="flex-1 bg-transparent outline-none font-sans text-[8.5px] placeholder:opacity-25"
             style={{ color:'rgba(255,255,255,0.7)' }}
             onKeyDown={e => {
@@ -315,6 +319,7 @@ function ChatTab({ guild }: { guild: Guild }) {
 //  Members tab content
 // ─────────────────────────────────────────────────────────────────
 function MembersTab({ guild }: { guild: Guild }) {
+  const { t } = useLanguage()
   const members = MEMBERS_BY_GUILD[guild.id] ?? []
   const extra = guild.members - members.length
 
@@ -348,7 +353,7 @@ function MembersTab({ guild }: { guild: Guild }) {
         {extra > 0 && (
           <div className="py-3 text-center">
             <span className="font-mono text-[7.5px]" style={{ color:'rgba(255,255,255,0.22)' }}>
-              +{extra} more members
+              {t.guild.moreMembers.replace('{count}', String(extra))}
             </span>
           </div>
         )}
@@ -361,6 +366,7 @@ function MembersTab({ guild }: { guild: Guild }) {
 //  Holdings tab content
 // ─────────────────────────────────────────────────────────────────
 function HoldingsTab({ guild }: { guild: Guild }) {
+  const { t } = useLanguage()
   const holdings = HOLDINGS_BY_GUILD[guild.id] ?? []
   const totalETH = holdings.reduce((s, h) => s + parseFloat(h.value), 0)
 
@@ -372,7 +378,7 @@ function HoldingsTab({ guild }: { guild: Guild }) {
         style={{ borderBottom:'1px solid rgba(255,255,255,0.05)', background:'rgba(0,0,0,0.2)' }}>
         <div>
           <div className="font-mono text-[6.5px] tracking-wider uppercase" style={{ color:'rgba(255,255,255,0.2)' }}>
-            Collective Holdings
+            {t.guild.collectiveHoldings}
           </div>
           <div className="font-sans text-[15px] font-semibold mt-0.5"
             style={{ color:'rgba(255,255,255,0.8)', letterSpacing:'-0.02em' }}>
@@ -381,11 +387,11 @@ function HoldingsTab({ guild }: { guild: Guild }) {
         </div>
         <div className="text-right">
           <div className="font-mono text-[6.5px] tracking-wider uppercase" style={{ color:'rgba(255,255,255,0.2)' }}>
-            Positions
+            {t.guild.positions}
           </div>
           <div className="font-sans text-[15px] font-semibold mt-0.5"
             style={{ color:'rgba(255,255,255,0.6)', letterSpacing:'-0.02em' }}>
-            {holdings.length} tokens
+            {t.guild.tokens.replace('{count}', String(holdings.length))}
           </div>
         </div>
       </div>
@@ -393,7 +399,7 @@ function HoldingsTab({ guild }: { guild: Guild }) {
       {holdings.length === 0 ? (
         <div className="flex items-center justify-center py-10">
           <span className="font-mono text-[8px]" style={{ color:'rgba(255,255,255,0.2)' }}>
-            No collective holdings data
+            {t.guild.noHoldingsData}
           </span>
         </div>
       ) : (
@@ -411,7 +417,7 @@ function HoldingsTab({ guild }: { guild: Guild }) {
                   </div>
                   <div className="flex items-center gap-3 text-right">
                     <span className="font-mono text-[7.5px]" style={{ color:'rgba(255,255,255,0.3)' }}>
-                      {h.members} members · {h.qty.toFixed(2)} qty
+                      {h.members} members · {h.qty.toFixed(2)} {t.guild.qty}
                     </span>
                     <span className="font-mono text-[9px] font-semibold" style={{ color:'rgba(255,255,255,0.65)' }}>
                       {h.value}
@@ -425,7 +431,7 @@ function HoldingsTab({ guild }: { guild: Guild }) {
                     transition={{ duration:0.6, ease:EASE }}/>
                 </div>
                 <div className="font-mono text-[6.5px] mt-1" style={{ color:'rgba(255,255,255,0.18)' }}>
-                  {pct.toFixed(1)}% of collective
+                  {pct.toFixed(1)}{t.guild.pctCollective}
                 </div>
               </div>
             )
@@ -440,6 +446,7 @@ function HoldingsTab({ guild }: { guild: Guild }) {
 //  Guild detail panel
 // ─────────────────────────────────────────────────────────────────
 function GuildDetail({ guild }: { guild: Guild }) {
+  const { t } = useLanguage()
   const [joined, setJoined] = useState(guild.joined)
   const [tab,    setTab]    = useState<DetailTab>('activity')
 
@@ -449,10 +456,10 @@ function GuildDetail({ guild }: { guild: Guild }) {
   }, [guild.id, guild.joined])
 
   const TABS: { id: DetailTab; label: string }[] = [
-    { id:'activity', label:'Activity'  },
-    { id:'chat',     label:'Chat'      },
-    { id:'members',  label:'Members'   },
-    { id:'holdings', label:'Holdings'  },
+    { id:'activity', label: t.guild.activity  },
+    { id:'chat',     label: t.guild.chat      },
+    { id:'members',  label: t.guild.members   },
+    { id:'holdings', label: t.guild.holdings  },
   ]
 
   return (
@@ -482,7 +489,7 @@ function GuildDetail({ guild }: { guild: Guild }) {
                   color:      joined ? 'rgba(255,255,255,0.45)' : guild.color,
                 }}
                 whileHover={{ scale:1.02 }} whileTap={{ scale:0.97 }}>
-                {joined ? 'LEAVE' : 'JOIN GUILD'}
+                {joined ? t.guild.leave : t.guild.joinGuild}
               </motion.button>
             </div>
           </div>
@@ -532,7 +539,7 @@ function GuildDetail({ guild }: { guild: Guild }) {
               <motion.span className="size-1.5 rounded-full"
                 style={{ background:'#22c55e', display:'inline-block' }}
                 animate={{ opacity:[1,0.3,1] }} transition={{ duration:1.4, repeat:Infinity }}/>
-              <span className="font-mono text-[7px]" style={{ color:'rgba(255,255,255,0.28)' }}>Live</span>
+              <span className="font-mono text-[7px]" style={{ color:'rgba(255,255,255,0.28)' }}>{t.common.live}</span>
             </div>
           )}
         </div>
@@ -557,6 +564,7 @@ function GuildDetail({ guild }: { guild: Guild }) {
 //  Create Guild modal
 // ─────────────────────────────────────────────────────────────────
 function CreateGuildModal({ onClose }: { onClose: () => void }) {
+  const { t } = useLanguage()
   const [name, setName]   = useState('')
   const [desc, setDesc]   = useState('')
   const [focus, setFocus] = useState('Painting')
@@ -575,7 +583,7 @@ function CreateGuildModal({ onClose }: { onClose: () => void }) {
         <div className="flex items-center justify-between px-5 py-3.5"
           style={{ borderBottom:'1px solid rgba(255,255,255,0.07)' }}>
           <span style={{ fontFamily:"'Cormorant Garamond', serif", fontSize:16, fontWeight:600, color:'rgba(255,255,255,0.85)' }}>
-            Create a Guild
+            {t.guild.createModalTitle}
           </span>
           <button type="button" onClick={onClose}
             className="font-mono text-[11px]" style={{ color:'rgba(255,255,255,0.3)' }}>✕</button>
@@ -583,24 +591,24 @@ function CreateGuildModal({ onClose }: { onClose: () => void }) {
         <div className="px-5 py-4 flex flex-col gap-3.5">
           <div>
             <label className="font-mono text-[7px] tracking-wider uppercase block mb-1.5"
-              style={{ color:'rgba(255,255,255,0.28)' }}>Guild Name</label>
+              style={{ color:'rgba(255,255,255,0.28)' }}>{t.guild.guildNameLabel}</label>
             <input value={name} onChange={e => setName(e.target.value)}
-              placeholder="e.g. The Nocturne Society"
+              placeholder={t.guild.guildNamePlaceholder}
               className="w-full bg-transparent font-sans text-[11px] px-3 py-2 outline-none"
               style={{ border:'1px solid rgba(255,255,255,0.1)', color:'rgba(255,255,255,0.78)', caretColor:'#D4AF37' }}/>
           </div>
           <div>
             <label className="font-mono text-[7px] tracking-wider uppercase block mb-1.5"
-              style={{ color:'rgba(255,255,255,0.28)' }}>Description</label>
+              style={{ color:'rgba(255,255,255,0.28)' }}>{t.guild.descriptionLabel}</label>
             <textarea value={desc} onChange={e => setDesc(e.target.value)}
-              placeholder="What does your guild collect and celebrate?"
+              placeholder={t.guild.descriptionPlaceholder}
               rows={2}
               className="w-full bg-transparent font-sans text-[11px] px-3 py-2 outline-none resize-none"
               style={{ border:'1px solid rgba(255,255,255,0.1)', color:'rgba(255,255,255,0.78)', caretColor:'#D4AF37' }}/>
           </div>
           <div>
             <label className="font-mono text-[7px] tracking-wider uppercase block mb-1.5"
-              style={{ color:'rgba(255,255,255,0.28)' }}>Focus</label>
+              style={{ color:'rgba(255,255,255,0.28)' }}>{t.guild.focusLabel}</label>
             <div className="flex flex-wrap gap-1.5">
               {FOCUSES.map(f => (
                 <button key={f} type="button" onClick={() => setFocus(f)}
@@ -623,7 +631,7 @@ function CreateGuildModal({ onClose }: { onClose: () => void }) {
             }}
             whileHover={name ? { background:'rgba(212,175,55,0.22)' } : {}}
             whileTap={name ? { scale:0.98 } : {}}>
-            ✦ CREATE GUILD
+            {t.guild.createButton}
           </motion.button>
         </div>
       </motion.div>
@@ -635,6 +643,7 @@ function CreateGuildModal({ onClose }: { onClose: () => void }) {
 //  Main GuildPage
 // ─────────────────────────────────────────────────────────────────
 export function GuildPage() {
+  const { t } = useLanguage()
   const [selected,      setSelected]      = useState<Guild>(GUILDS[0])
   const [filter,        setFilter]        = useState<'discover' | 'joined'>('discover')
   const [createOpen,    setCreateOpen]    = useState(false)
@@ -657,7 +666,7 @@ export function GuildPage() {
         <div className="flex items-center gap-1 px-4 shrink-0"
           style={{ height:44, borderBottom:'1px solid rgba(255,255,255,0.05)', background:'rgba(0,0,0,0.3)' }}>
           <span className="font-sans text-[11px] font-semibold mr-2" style={{ color:'rgba(255,255,255,0.3)' }}>
-            Guilds
+            {t.guild.guilds}
           </span>
           {(['discover', 'joined'] as const).map(f => (
             <motion.button key={f} type="button" onClick={() => setFilter(f)}
@@ -667,18 +676,18 @@ export function GuildPage() {
                 borderBottom: filter===f ? '1px solid rgba(255,255,255,0.5)' : '1px solid transparent',
               }}
               whileHover={{ color:'rgba(255,255,255,0.6)' }}>
-              {f === 'discover' ? 'Discover' : 'My Guilds'}
+              {f === 'discover' ? t.guild.discover : t.guild.myGuilds}
             </motion.button>
           ))}
           <div className="ml-auto flex items-center gap-3">
             <span className="font-mono text-[7.5px]" style={{ color:'rgba(255,255,255,0.2)' }}>
-              {GUILDS.length} guilds · {totalMembers} members
+              {t.guild.statsFormat.replace('{count}', String(GUILDS.length)).replace('{members}', String(totalMembers))}
             </span>
             <motion.button type="button" onClick={() => setCreateOpen(true)}
               className="px-3 py-1.5 font-mono text-[8px] font-semibold tracking-wider"
               style={{ background:'rgba(212,175,55,0.1)', border:'1px solid rgba(212,175,55,0.28)', color:'#D4AF37' }}
               whileHover={{ background:'rgba(212,175,55,0.18)' }} whileTap={{ scale:0.97 }}>
-              + CREATE GUILD
+              {t.guild.createGuild}
             </motion.button>
           </div>
         </div>

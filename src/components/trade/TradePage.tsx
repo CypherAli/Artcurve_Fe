@@ -32,6 +32,7 @@ import { tradeService }                 from '@/services/trade.service'
 import { authStore }                    from '@/lib/auth-store'
 import { parseEther }                   from 'viem'
 import type { Artwork, OhlcvCandle, OhlcvTimeframe } from '@/types/api'
+import { useLanguage } from '@/context/LanguageContext'
 
 const API_URL = (process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:3001/api/v1').replace(/\/$/, '')
 
@@ -319,6 +320,7 @@ function TokenPickerPanel({
   selectedId: number
   onSelect:   (id: number) => void
 }) {
+  const { t } = useLanguage()
   const [search,      setSearch]      = useState('')
   const [phaseFilter, setPhaseFilter] = useState<Phase|'All'>('All')
 
@@ -341,7 +343,7 @@ function TokenPickerPanel({
       {/* Header */}
       <div className="flex items-center justify-between px-3 shrink-0"
         style={{ height:36, background:'rgba(0,0,0,0.35)', borderBottom:'1px solid rgba(255,255,255,0.05)' }}>
-        <span className="font-mono text-[7px] tracking-[0.24em] uppercase" style={{ color:'rgba(255,255,255,0.22)' }}>MARKETS</span>
+        <span className="font-mono text-[7px] tracking-[0.24em] uppercase" style={{ color:'rgba(255,255,255,0.22)' }}>{t.trade.markets}</span>
         <span className="font-mono text-[7px]" style={{ color:'rgba(255,255,255,0.14)' }}>{filtered.length}/{artworks.length}</span>
       </div>
 
@@ -355,7 +357,7 @@ function TokenPickerPanel({
           <motion.input
             value={search}
             onChange={e => setSearch(e.target.value)}
-            placeholder="Search…"
+            placeholder={t.trade.search}
             className="w-full bg-transparent font-mono text-[10px] pl-7 pr-2 py-1.5 outline-none"
             style={{ border:'1px solid rgba(255,255,255,0.07)', color:'rgba(255,255,255,0.65)', caretColor:'#D4AF37' }}
             whileFocus={{ outline: '1px solid rgba(212,175,55,0.4)' }}
@@ -418,7 +420,7 @@ function TokenPickerPanel({
         {filtered.length===0 && (
           <motion.div initial={{ opacity:0 }} animate={{ opacity:1 }}
             className="flex items-center justify-center py-8">
-            <span className="font-mono text-[9px]" style={{ color:'rgba(255,255,255,0.18)' }}>No results</span>
+            <span className="font-mono text-[9px]" style={{ color:'rgba(255,255,255,0.18)' }}>{t.common.noResults}</span>
           </motion.div>
         )}
       </div>
@@ -430,6 +432,7 @@ function TokenPickerPanel({
 //  Price Header  — animated price flip + stats stagger on token change
 // ─────────────────────────────────────────────────────────────────
 function PriceHeader({ art, livePrice }: { art: TradeArtwork; livePrice: number }) {
+  const { t } = useLanguage()
   const pct   = ((livePrice - art.basePrice) / art.basePrice) * 100
   const up    = pct >= 0
   const flash = usePriceFlash(livePrice)
@@ -439,12 +442,12 @@ function PriceHeader({ art, livePrice }: { art: TradeArtwork; livePrice: number 
     : 'rgba(255,255,255,0.92)'
 
   const stats = [
-    { label:'24H CHANGE', value:fmtPct(pct),                      color: up?'#22c55e':'#f87171' },
-    { label:'24H VOL',    value:`${fmtETH(art.volume24h)} ETH`    },
-    { label:'24H HIGH',   value:`${fmtETH(livePrice*1.042)} ETH` },
-    { label:'24H LOW',    value:`${fmtETH(livePrice*0.881)} ETH` },
-    { label:'HOLDERS',    value:String(art.holders)               },
-    { label:'PROGRESS',  value:`${art.progress}%`,                color: art.phaseColor },
+    { label:t.trade.change24h, value:fmtPct(pct),                      color: up?'#22c55e':'#f87171' },
+    { label:t.trade.vol24h,    value:`${fmtETH(art.volume24h)} ETH`    },
+    { label:t.trade.high24h,   value:`${fmtETH(livePrice*1.042)} ETH` },
+    { label:t.trade.low24h,    value:`${fmtETH(livePrice*0.881)} ETH` },
+    { label:t.trade.holders,   value:String(art.holders)               },
+    { label:t.trade.progress,  value:`${art.progress}%`,                color: art.phaseColor },
   ]
 
   return (
@@ -528,6 +531,7 @@ function PriceHeader({ art, livePrice }: { art: TradeArtwork; livePrice: number 
 //  Order Book — animated depth bars
 // ─────────────────────────────────────────────────────────────────
 function OrderBookPanel({ art, livePrice, bookTick }: { art:TradeArtwork; livePrice:number; bookTick:number }) {
+  const { t } = useLanguage()
   const { asks, bids, spread } = useMemo(
     () => buildOrderBook(livePrice, art.id, bookTick),
     [livePrice, art.id, bookTick],
@@ -556,7 +560,7 @@ function OrderBookPanel({ art, livePrice, bookTick }: { art:TradeArtwork; livePr
   return (
     <div className="h-full flex flex-col overflow-hidden">
       <div className="flex items-center px-3 py-1.5 shrink-0" style={{ borderBottom:'1px solid rgba(255,255,255,0.04)' }}>
-        {['PRICE (ETH)','SIZE','TOTAL'].map((h,i)=>(
+        {[t.trade.priceEth, t.trade.size, t.trade.total].map((h,i)=>(
           <span key={h} className="flex-1 font-mono text-[6.5px] tracking-wider"
             style={{ color:'rgba(255,255,255,0.16)', textAlign: i===0?'left':'right' }}>{h}</span>
         ))}
@@ -584,20 +588,21 @@ function OrderBookPanel({ art, livePrice, bookTick }: { art:TradeArtwork; livePr
 //  Recent Trades — AnimatePresence popLayout
 // ─────────────────────────────────────────────────────────────────
 function RecentTradesPanel({ trades }: { trades: RecentTrade[] }) {
+  const { t } = useLanguage()
   return (
     <div className="h-full overflow-y-auto"
       style={{ scrollbarWidth:'thin', scrollbarColor:'rgba(255,255,255,0.06) transparent' }}>
       <div className="sticky top-0 flex items-center px-3 py-1.5 shrink-0 z-[1]"
         style={{ background:'rgba(8,8,8,0.96)', borderBottom:'1px solid rgba(255,255,255,0.04)' }}>
-        {[{l:'TIME',w:40},{l:'SIDE',w:36},{l:'PRICE',w:undefined},{l:'SIZE (ETH)',w:undefined},{l:'WALLET',w:undefined}].map(({l,w})=>(
+        {[{l:t.trade.time,w:40},{l:t.trade.side,w:36},{l:t.trade.price,w:undefined},{l:t.trade.sizeEth,w:undefined},{l:t.trade.wallet,w:undefined}].map(({l,w})=>(
           <span key={l} className="font-mono text-[6.5px] tracking-wider"
             style={{ color:'rgba(255,255,255,0.15)', minWidth:w, flex:w?undefined:1 }}>{l}</span>
         ))}
       </div>
       <AnimatePresence mode="popLayout" initial={false}>
-        {trades.map(t => (
+        {trades.map(trade => (
           <motion.div
-            key={t.id}
+            key={trade.id}
             variants={TRADE_V}
             initial="initial"
             animate="animate"
@@ -608,16 +613,16 @@ function RecentTradesPanel({ trades }: { trades: RecentTrade[] }) {
             style={{ borderBottom:'1px solid rgba(255,255,255,0.02)' }}
           >
             <span style={{ minWidth:40, fontSize:8, color:'rgba(255,255,255,0.2)' }}>
-              {t.ago<60?`${t.ago}s`:`${Math.floor(t.ago/60)}m`}
+              {trade.ago<60?`${trade.ago}s`:`${Math.floor(trade.ago/60)}m`}
             </span>
-            <span style={{ minWidth:36, fontSize:8, fontWeight:600, color:t.side==='buy'?'#4ade80':'#f87171' }}>
-              {t.side==='buy'?'BUY':'SELL'}
+            <span style={{ minWidth:36, fontSize:8, fontWeight:600, color:trade.side==='buy'?'#4ade80':'#f87171' }}>
+              {trade.side==='buy'?t.common.buy:t.common.sell}
             </span>
-            <span style={{ flex:1, fontSize:9, color:t.side==='buy'?'rgba(74,222,128,0.7)':'rgba(248,113,113,0.7)' }}>
-              {t.price.toFixed(4)}
+            <span style={{ flex:1, fontSize:9, color:trade.side==='buy'?'rgba(74,222,128,0.7)':'rgba(248,113,113,0.7)' }}>
+              {trade.price.toFixed(4)}
             </span>
-            <span style={{ flex:1, fontSize:8, color:'rgba(255,255,255,0.45)' }}>{t.eth.toFixed(3)}</span>
-            <span style={{ flex:1, fontSize:8, color:'rgba(255,255,255,0.2)' }}>{t.wallet}</span>
+            <span style={{ flex:1, fontSize:8, color:'rgba(255,255,255,0.45)' }}>{trade.eth.toFixed(3)}</span>
+            <span style={{ flex:1, fontSize:8, color:'rgba(255,255,255,0.2)' }}>{trade.wallet}</span>
           </motion.div>
         ))}
       </AnimatePresence>
@@ -631,8 +636,9 @@ function RecentTradesPanel({ trades }: { trades: RecentTrade[] }) {
 function BottomPanel({ art, livePrice, trades, bookTick }: {
   art:TradeArtwork; livePrice:number; trades:RecentTrade[]; bookTick:number
 }) {
+  const { t } = useLanguage()
   const [tab, setTab] = useState<'trades'|'book'>('trades')
-  const TABS = [{ key:'trades' as const, label:'RECENT TRADES' }, { key:'book' as const, label:'ORDER BOOK' }]
+  const TABS = [{ key:'trades' as const, label:t.trade.recentTrades }, { key:'book' as const, label:t.trade.orderBook }]
 
   return (
     <div className="shrink-0 flex flex-col" style={{ height:170, borderTop:'1px solid rgba(255,255,255,0.05)' }}>
@@ -715,6 +721,7 @@ async function fetchQuote(artworkId: string, side: 'buy'|'sell', amount: string)
 //  Trade Panel — BUY (green) / SELL (red) fully differentiated
 // ─────────────────────────────────────────────────────────────────
 function TradePanel({ art, livePrice }: { art:TradeArtwork; livePrice:number }) {
+  const { t } = useLanguage()
   const [side,       setSide]       = useState<'buy'|'sell'>('buy')
   const [ethInput,   setEthInput]   = useState('')   // BUY: ETH to spend
   const [tokenInput, setTokenInput] = useState('')   // SELL: tokens to sell
@@ -939,8 +946,8 @@ function TradePanel({ art, livePrice }: { art:TradeArtwork; livePrice:number }) 
               {/* Pay ETH */}
               <div>
                 <div className="flex items-center justify-between mb-1">
-                  <span className="font-mono text-[7px] tracking-wider uppercase" style={{ color:'rgba(255,255,255,0.28)' }}>You Pay</span>
-                  <span className="font-mono text-[7px]" style={{ color:'rgba(74,222,128,0.5)' }}>Bal: {WALLET_ETH.toFixed(2)} ETH</span>
+                  <span className="font-mono text-[7px] tracking-wider uppercase" style={{ color:'rgba(255,255,255,0.28)' }}>{t.trade.youPay}</span>
+                  <span className="font-mono text-[7px]" style={{ color:'rgba(74,222,128,0.5)' }}>{t.trade.bal}: {WALLET_ETH.toFixed(2)} ETH</span>
                 </div>
                 <div className="relative">
                   <motion.input
@@ -984,8 +991,8 @@ function TradePanel({ art, livePrice }: { art:TradeArtwork; livePrice:number }) 
               {/* Receive token */}
               <div>
                 <div className="flex items-center justify-between mb-1">
-                  <span className="font-mono text-[7px] tracking-wider uppercase" style={{ color:'rgba(255,255,255,0.28)' }}>You Receive</span>
-                  <span className="font-mono text-[7px]" style={{ color:'rgba(255,255,255,0.18)' }}>estimate</span>
+                  <span className="font-mono text-[7px] tracking-wider uppercase" style={{ color:'rgba(255,255,255,0.28)' }}>{t.trade.youReceive}</span>
+                  <span className="font-mono text-[7px]" style={{ color:'rgba(255,255,255,0.18)' }}>{t.trade.estimate}</span>
                 </div>
                 <div style={{ border:'1px solid rgba(74,222,128,0.1)', background:'rgba(74,222,128,0.03)', padding:'8px 12px' }}>
                   <div className="flex items-center justify-between">
@@ -1007,9 +1014,9 @@ function TradePanel({ art, livePrice }: { art:TradeArtwork; livePrice:number }) 
               <div className="flex flex-col gap-1 py-1.5 px-2.5"
                 style={{ background:'rgba(74,222,128,0.03)', border:'1px solid rgba(74,222,128,0.08)' }}>
                 {[
-                  { label:'Price',        value: quoteFetching ? '…' : `${fmtETH(quote?.pricePerToken ?? livePrice)} ETH` },
-                  { label:'Impact',       value: quoteFetching ? '…' : (ethAmt>0?`${buyImpact.toFixed(2)}%`:'—'), color:impactColor },
-                  { label:'Min. Out',     value: quoteFetching ? '…' : (tokensOut>0?`${minReceived.toFixed(3)} ${art.ticker}`:'—') },
+                  { label:t.trade.price,        value: quoteFetching ? '…' : `${fmtETH(quote?.pricePerToken ?? livePrice)} ETH` },
+                  { label:t.trade.impact,        value: quoteFetching ? '…' : (ethAmt>0?`${buyImpact.toFixed(2)}%`:'—'), color:impactColor },
+                  { label:t.trade.minOut,        value: quoteFetching ? '…' : (tokensOut>0?`${minReceived.toFixed(3)} ${art.ticker}`:'—') },
                 ].map(({ label, value, color }) => (
                   <div key={label} className="flex items-center justify-between">
                     <span className="font-mono text-[7px]" style={{ color:'rgba(255,255,255,0.22)' }}>{label}</span>
@@ -1020,7 +1027,7 @@ function TradePanel({ art, livePrice }: { art:TradeArtwork; livePrice:number }) 
                   <div className="flex items-center gap-1.5 mt-1 px-2 py-1"
                     style={{ background:'rgba(212,175,55,0.1)', border:'1px solid rgba(212,175,55,0.35)' }}>
                     <span style={{ fontSize:8, color:'#D4AF37' }}>✦</span>
-                    <span className="font-mono text-[7px]" style={{ color:'#D4AF37' }}>This trade would graduate the artwork to DEX</span>
+                    <span className="font-mono text-[7px]" style={{ color:'#D4AF37' }}>{t.trade.graduationWarning}</span>
                   </div>
                 )}
               </div>
@@ -1035,8 +1042,8 @@ function TradePanel({ art, livePrice }: { art:TradeArtwork; livePrice:number }) 
               {/* Sell token */}
               <div>
                 <div className="flex items-center justify-between mb-1">
-                  <span className="font-mono text-[7px] tracking-wider uppercase" style={{ color:'rgba(255,255,255,0.28)' }}>You Sell</span>
-                  <span className="font-mono text-[7px]" style={{ color:'rgba(248,113,113,0.5)' }}>Bal: {WALLET_TOKEN.toFixed(4)} {art.ticker}</span>
+                  <span className="font-mono text-[7px] tracking-wider uppercase" style={{ color:'rgba(255,255,255,0.28)' }}>{t.trade.youSell}</span>
+                  <span className="font-mono text-[7px]" style={{ color:'rgba(248,113,113,0.5)' }}>{t.trade.bal}: {WALLET_TOKEN.toFixed(4)} {art.ticker}</span>
                 </div>
                 <div className="relative">
                   <motion.input
@@ -1061,7 +1068,7 @@ function TradePanel({ art, livePrice }: { art:TradeArtwork; livePrice:number }) 
                       transition={{ type:'spring', stiffness:420, damping:20 }}
                       className="py-0.5 font-mono text-[7px]"
                       style={{ border:'1px solid rgba(248,113,113,0.14)', color:'rgba(248,113,113,0.45)', background:'rgba(248,113,113,0.02)' }}>
-                      {pct===100?'MAX':`${pct}%`}
+                      {pct===100?t.trade.max:`${pct}%`}
                     </motion.button>
                   ))}
                 </div>
@@ -1081,8 +1088,8 @@ function TradePanel({ art, livePrice }: { art:TradeArtwork; livePrice:number }) 
               {/* Receive ETH */}
               <div>
                 <div className="flex items-center justify-between mb-1">
-                  <span className="font-mono text-[7px] tracking-wider uppercase" style={{ color:'rgba(255,255,255,0.28)' }}>You Receive</span>
-                  <span className="font-mono text-[7px]" style={{ color:'rgba(255,255,255,0.18)' }}>estimate</span>
+                  <span className="font-mono text-[7px] tracking-wider uppercase" style={{ color:'rgba(255,255,255,0.28)' }}>{t.trade.youReceive}</span>
+                  <span className="font-mono text-[7px]" style={{ color:'rgba(255,255,255,0.18)' }}>{t.trade.estimate}</span>
                 </div>
                 <div style={{ border:'1px solid rgba(248,113,113,0.1)', background:'rgba(248,113,113,0.03)', padding:'8px 12px' }}>
                   <div className="flex items-center justify-between">
@@ -1104,9 +1111,9 @@ function TradePanel({ art, livePrice }: { art:TradeArtwork; livePrice:number }) 
               <div className="flex flex-col gap-1 py-1.5 px-2.5"
                 style={{ background:'rgba(248,113,113,0.03)', border:'1px solid rgba(248,113,113,0.08)' }}>
                 {[
-                  { label:'Price',    value: quoteFetching ? '…' : `${fmtETH(quote?.pricePerToken ?? livePrice)} ETH` },
-                  { label:'Impact',   value: quoteFetching ? '…' : (tokenAmt>0?`${sellImpact.toFixed(2)}%`:'—'), color:impactColor },
-                  { label:'Min. Out', value: quoteFetching ? '…' : (ethOut>0?`${minEthOut.toFixed(4)} ETH`:'—') },
+                  { label:t.trade.price,    value: quoteFetching ? '…' : `${fmtETH(quote?.pricePerToken ?? livePrice)} ETH` },
+                  { label:t.trade.impact,   value: quoteFetching ? '…' : (tokenAmt>0?`${sellImpact.toFixed(2)}%`:'—'), color:impactColor },
+                  { label:t.trade.minOut,   value: quoteFetching ? '…' : (ethOut>0?`${minEthOut.toFixed(4)} ETH`:'—') },
                 ].map(({ label, value, color }) => (
                   <div key={label} className="flex items-center justify-between">
                     <span className="font-mono text-[7px]" style={{ color:'rgba(255,255,255,0.22)' }}>{label}</span>
@@ -1121,7 +1128,7 @@ function TradePanel({ art, livePrice }: { art:TradeArtwork; livePrice:number }) 
         {/* ── Slippage ── */}
         <div className="shrink-0">
           <div className="flex items-center justify-between mb-1">
-            <span className="font-mono text-[6.5px] tracking-wider uppercase" style={{ color:'rgba(255,255,255,0.18)' }}>Slippage</span>
+            <span className="font-mono text-[6.5px] tracking-wider uppercase" style={{ color:'rgba(255,255,255,0.18)' }}>{t.trade.slippage}</span>
           </div>
           <div className="grid grid-cols-3 gap-1">
             {['0.5','1.0','2.0'].map(s => {
@@ -1169,14 +1176,14 @@ function TradePanel({ art, livePrice }: { art:TradeArtwork; livePrice:number }) 
                 className="flex items-center justify-center gap-2">
                 <motion.span animate={{ rotate:360 }} transition={{ duration:0.9,repeat:Infinity,ease:'linear' }}
                   className="inline-block w-3 h-3 border border-current border-t-transparent rounded-full"/>
-                CONFIRMING…
+                {t.trade.confirming}
               </motion.span>}
               {txState==='success'&&<motion.span key="success" initial={{ opacity:0,scale:0.88 }} animate={{ opacity:1,scale:1 }}
                 className="flex items-center justify-center gap-2">
                 <svg viewBox="0 0 24 24" className="w-3.5 h-3.5" fill="none" stroke="currentColor" strokeWidth="2.8" strokeLinecap="round">
                   <path d="M5 13l4 4L19 7"/>
                 </svg>
-                ORDER EXECUTED
+                {t.trade.orderExecuted}
               </motion.span>}
             </AnimatePresence>
           </motion.button>

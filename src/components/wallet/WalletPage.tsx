@@ -6,6 +6,7 @@ import { useConnectModal } from '@rainbow-me/rainbowkit'
 import { useAuthStore }    from '@/store/authStore'
 import { usePortfolio }    from '@/hooks/usePortfolio'
 import { gsap }            from '@/lib/gsap'
+import { useLanguage }     from '@/context/LanguageContext'
 import type { PortfolioHolding } from '@/types/api'
 
 const GOLD = '#C9A96E'
@@ -181,6 +182,7 @@ function WalletConnectorIcon({ name, icon }: { name: string; icon?: string }) {
 // ── Main component ────────────────────────────────────────────────────
 
 export function WalletPage() {
+  const { t } = useLanguage()
   const { address, isConnected, chain }  = useAccount()
   const { data: balance }                = useBalance({ address })
   const { user, isAuthenticated, clearAuth } = useAuthStore()
@@ -243,10 +245,10 @@ export function WalletPage() {
           </div>
           <h2 className="text-[1.4rem] text-white/85 mb-2"
             style={{ fontFamily: "'Cormorant Garamond',serif", fontWeight: 600 }}>
-            Sign in to view your wallet
+            {t.wallet.signInTitle}
           </h2>
           <p className="text-[13px]" style={{ color: 'rgba(255,255,255,0.35)' }}>
-            Connect with GitHub, X, or a crypto wallet to access your portfolio and on-chain activity.
+            {t.wallet.signInDesc}
           </p>
         </div>
       </div>
@@ -261,14 +263,14 @@ export function WalletPage() {
       <div className="wpage-item mb-10 flex items-start justify-between gap-4 flex-wrap">
         <div>
           <p className="text-[10.5px] font-mono tracking-[0.22em] uppercase mb-2" style={{ color: GOLD }}>
-            Wallet
+            {t.wallet.title}
           </p>
           <h1 className="text-[2.1rem] text-white/90 leading-tight"
             style={{ fontFamily: "'Cormorant Garamond',serif", fontWeight: 600 }}>
-            Your Wallet
+            {t.wallet.yourWallet}
           </h1>
           <p className="text-[13.5px] mt-1.5" style={{ color: 'rgba(255,255,255,0.35)' }}>
-            Manage your identity, balance, and on-chain activity.
+            {t.wallet.walletDesc}
           </p>
         </div>
         {/* Verified badge */}
@@ -278,7 +280,7 @@ export function WalletPage() {
             <svg viewBox="0 0 24 24" className="w-3.5 h-3.5" fill={GOLD}>
               <path d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 0 0 1.946-.806 3.42 3.42 0 0 1 4.438 0 3.42 3.42 0 0 0 1.946.806 3.42 3.42 0 0 1 3.138 3.138 3.42 3.42 0 0 0 .806 1.946 3.42 3.42 0 0 1 0 4.438 3.42 3.42 0 0 0-.806 1.946 3.42 3.42 0 0 1-3.138 3.138 3.42 3.42 0 0 0-1.946.806 3.42 3.42 0 0 1-4.438 0 3.42 3.42 0 0 0-1.946-.806 3.42 3.42 0 0 1-3.138-3.138 3.42 3.42 0 0 0-.806-1.946 3.42 3.42 0 0 1 0-4.438 3.42 3.42 0 0 0 .806-1.946 3.42 3.42 0 0 1 3.138-3.138z"/>
             </svg>
-            <span className="text-[10.5px] font-mono tracking-[0.1em]" style={{ color: GOLD }}>VERIFIED</span>
+            <span className="text-[10.5px] font-mono tracking-[0.1em]" style={{ color: GOLD }}>{t.wallet.verified}</span>
           </div>
         )}
       </div>
@@ -305,7 +307,7 @@ export function WalletPage() {
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-2 flex-wrap">
             <p className="text-[1.05rem] font-semibold text-white/90">
-              {user?.username ?? 'Anonymous'}
+              {user?.username ?? t.wallet.anonymous}
             </p>
             <span className="text-[10px] font-mono tracking-[0.1em] uppercase px-2 py-0.5 rounded-full"
               style={{ background: 'rgba(255,255,255,0.06)', color: 'rgba(255,255,255,0.4)', border: '1px solid rgba(255,255,255,0.1)' }}>
@@ -328,7 +330,7 @@ export function WalletPage() {
           <svg viewBox="0 0 24 24" className="w-3.5 h-3.5" fill="none" stroke="currentColor" strokeWidth="2">
             <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9" strokeLinecap="round" strokeLinejoin="round"/>
           </svg>
-          Sign out
+          {t.wallet.signOut}
         </button>
       </div>
 
@@ -339,7 +341,7 @@ export function WalletPage() {
           <div className="flex items-start justify-between gap-4 flex-wrap">
             <div className="min-w-0">
               <p className="text-[10.5px] font-mono tracking-[0.16em] uppercase mb-1.5" style={{ color: 'rgba(201,169,110,0.6)' }}>
-                {isConnected ? 'Connected Wallet' : 'Account Address'}
+                {isConnected ? t.wallet.connectedWallet : t.wallet.accountAddress}
               </p>
               <p className="text-[13.5px] font-mono text-white/80 break-all leading-relaxed">
                 {displayAddress}
@@ -351,7 +353,7 @@ export function WalletPage() {
               )}
               {!isConnected && user?.wallet_address && (
                 <p className="text-[11px] mt-1.5 font-mono" style={{ color: 'rgba(255,255,255,0.25)' }}>
-                  Smart account · managed by platform
+                  {t.wallet.smartAccount}
                 </p>
               )}
             </div>
@@ -360,9 +362,9 @@ export function WalletPage() {
                 className="flex items-center gap-2 px-3.5 h-9 rounded-xl text-[11.5px] font-mono tracking-widest uppercase transition-all duration-150"
                 style={{ border: `1px solid rgba(201,169,110,0.3)`, color: copied ? '#4ade80' : GOLD, background: 'transparent' }}>
                 {copied ? (
-                  <><svg viewBox="0 0 24 24" className="w-3.5 h-3.5" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M5 13l4 4L19 7" strokeLinecap="round" strokeLinejoin="round"/></svg>Copied</>
+                  <><svg viewBox="0 0 24 24" className="w-3.5 h-3.5" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M5 13l4 4L19 7" strokeLinecap="round" strokeLinejoin="round"/></svg>{t.wallet.copied}</>
                 ) : (
-                  <><svg viewBox="0 0 24 24" className="w-3.5 h-3.5" fill="none" stroke="currentColor" strokeWidth="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1" strokeLinecap="round"/></svg>Copy</>
+                  <><svg viewBox="0 0 24 24" className="w-3.5 h-3.5" fill="none" stroke="currentColor" strokeWidth="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1" strokeLinecap="round"/></svg>{t.wallet.copy}</>
                 )}
               </button>
               <a href={`https://basescan.org/address/${displayAddress}`}
@@ -372,7 +374,7 @@ export function WalletPage() {
                 <svg viewBox="0 0 24 24" className="w-3.5 h-3.5" fill="none" stroke="currentColor" strokeWidth="2">
                   <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6M15 3h6v6M10 14L21 3" strokeLinecap="round" strokeLinejoin="round"/>
                 </svg>
-                Explorer
+                {t.wallet.explorer}
               </a>
             </div>
           </div>
@@ -382,26 +384,26 @@ export function WalletPage() {
       {/* ── Stats grid ── */}
       <div className="wpage-item grid grid-cols-2 md:grid-cols-4 gap-3 mb-6">
         <StatCard
-          label="ETH Balance"
+          label={t.wallet.ethBalance}
           value={ethRaw !== null ? `${fmt(ethRaw, 4)} ETH` : '—'}
-          sub={ethRaw !== null && ethRaw > 0 ? `≈ $${(ethRaw * 3420).toLocaleString('en', { maximumFractionDigits: 0 })}` : isConnected ? 'Empty wallet' : 'Wallet not connected'}
+          sub={ethRaw !== null && ethRaw > 0 ? `≈ $${(ethRaw * 3420).toLocaleString('en', { maximumFractionDigits: 0 })}` : isConnected ? t.wallet.emptyWallet : t.wallet.walletNotConnected}
           highlight={ethRaw !== null && ethRaw > 0}
           icon={<svg viewBox="0 0 24 24" className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="1.7"><path d="M12 2L2 12l10 10 10-10L12 2z" strokeLinecap="round" strokeLinejoin="round"/><path d="M12 6v12M6 12h12" strokeLinecap="round"/></svg>}
         />
         <StatCard
-          label="Portfolio"
+          label={t.wallet.portfolio}
           value={totalValue !== null ? `${fmt(totalValue, 4)} ETH` : pfLoading ? '...' : '—'}
-          sub={holdings.length > 0 ? `${holdings.length} holding${holdings.length > 1 ? 's' : ''}` : 'No positions'}
+          sub={holdings.length > 0 ? (holdings.length === 1 ? t.wallet.holdingsCount.replace('{count}', '1') : t.wallet.holdingsCountPlural.replace('{count}', String(holdings.length))) : t.wallet.noPositions}
           icon={<svg viewBox="0 0 24 24" className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="1.7"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2" strokeLinecap="round"/></svg>}
         />
         <StatCard
-          label="Network"
+          label={t.wallet.network}
           value={chain?.name ?? (isAuthenticated ? 'Base Sepolia' : '—')}
           sub={chain ? `Chain ID ${chain.id}` : 'Testnet'}
           icon={<svg viewBox="0 0 24 24" className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="1.7"><circle cx="12" cy="12" r="10"/><path d="M2 12h20M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z" strokeLinecap="round"/></svg>}
         />
         <StatCard
-          label="Auth Method"
+          label={t.wallet.authMethod}
           value={isConnected ? 'On-Chain' : authMethod.label}
           sub={isConnected ? 'SIWE · EIP-4361' : authMethod.sub}
           icon={<svg viewBox="0 0 24 24" className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="1.7"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" strokeLinecap="round" strokeLinejoin="round"/></svg>}
@@ -421,13 +423,13 @@ export function WalletPage() {
                 <path d="M18 20V10M12 20V4M6 20v-6" strokeLinecap="round" strokeLinejoin="round"/>
               </svg>
               <span className="text-[12.5px] font-semibold text-white/75 tracking-[0.02em]">
-                Portfolio Holdings
+                {t.wallet.portfolioHoldings}
               </span>
             </div>
             {pnlEth !== null && (
               <div className="flex items-center gap-2">
                 <span className="text-[11.5px] font-mono" style={{ color: 'rgba(255,255,255,0.4)' }}>
-                  Total P&amp;L:
+                  {t.wallet.totalPnl}
                 </span>
                 <span className="text-[12px] font-mono font-semibold"
                   style={{ color: pnlEth >= 0 ? '#4ade80' : '#f87171' }}>
@@ -475,10 +477,10 @@ export function WalletPage() {
               </div>
               <h3 className="text-[1.05rem] font-semibold text-white/90"
                 style={{ fontFamily: "'Cormorant Garamond',serif" }}>
-                Link an External Wallet
+                {t.wallet.linkWalletTitle}
               </h3>
               <p className="text-[12px] mt-1" style={{ color: 'rgba(255,255,255,0.38)' }}>
-                Connect MetaMask or another wallet to trade directly on-chain, sign transactions, and verify ownership via SIWE.
+                {t.wallet.linkWalletDesc}
               </p>
             </div>
           </div>
@@ -494,12 +496,12 @@ export function WalletPage() {
                     <path d="M16 12h5v4h-5a2 2 0 0 1 0-4z" strokeLinecap="round"/>
                   </svg>
                 </div>
-                <p className="text-[13px] text-white/35 mb-1">No wallets detected</p>
-                <p className="text-[11.5px] text-white/20 mb-5">Install MetaMask or another browser extension wallet</p>
+                <p className="text-[13px] text-white/35 mb-1">{t.wallet.noWalletsDetected}</p>
+                <p className="text-[11.5px] text-white/20 mb-5">{t.wallet.noWalletsHint}</p>
                 <a href="https://metamask.io/download" target="_blank" rel="noopener noreferrer"
                   className="inline-flex items-center gap-2 px-4 h-9 rounded-xl text-[11.5px] font-mono tracking-widest uppercase transition-opacity duration-150 hover:opacity-80"
                   style={{ border: `1px solid rgba(201,169,110,0.35)`, color: GOLD }}>
-                  Get MetaMask
+                  {t.wallet.getMetaMask}
                   <svg viewBox="0 0 24 24" className="w-3.5 h-3.5" fill="none" stroke="currentColor" strokeWidth="2">
                     <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6M15 3h6v6M10 14L21 3" strokeLinecap="round" strokeLinejoin="round"/>
                   </svg>
@@ -536,7 +538,7 @@ export function WalletPage() {
                     {connector.type === 'injected' && (
                       <span className="flex items-center gap-1.5 text-[10px] font-mono tracking-[0.12em] text-emerald-400">
                         <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"/>
-                        DETECTED
+                        {t.wallet.detected}
                       </span>
                     )}
                     <svg viewBox="0 0 24 24" className="w-4 h-4 opacity-0 group-hover:opacity-35 transition-opacity duration-150"
@@ -552,7 +554,7 @@ export function WalletPage() {
                     style={{ border: '1px solid rgba(255,255,255,0.06)', color: 'rgba(255,255,255,0.3)' }}
                     onMouseEnter={e => { e.currentTarget.style.color = 'rgba(255,255,255,0.6)' }}
                     onMouseLeave={e => { e.currentTarget.style.color = 'rgba(255,255,255,0.3)' }}>
-                    {showAll ? 'Show less' : `Show ${unique.length - 3} more wallets`}
+                    {showAll ? t.wallet.showLess : t.wallet.showMore.replace('{count}', String(unique.length - 3))}
                     <svg viewBox="0 0 24 24" className="w-3.5 h-3.5 transition-transform duration-200"
                       style={{ transform: showAll ? 'rotate(180deg)' : 'none' }}
                       fill="none" stroke="currentColor" strokeWidth="2">
@@ -585,28 +587,28 @@ export function WalletPage() {
           <svg viewBox="0 0 24 24" className="w-4 h-4" fill="none" stroke={GOLD} strokeWidth="1.7">
             <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" strokeLinecap="round" strokeLinejoin="round"/>
           </svg>
-          <span className="text-[12.5px] font-semibold text-white/75 tracking-[0.02em]">Security</span>
+          <span className="text-[12.5px] font-semibold text-white/75 tracking-[0.02em]">{t.wallet.securitySection}</span>
         </div>
 
         <div className="divide-y" style={{ borderColor: 'rgba(255,255,255,0.05)' }}>
           {[
             {
-              label: 'Sign-in method',
-              value: isConnected ? 'On-Chain Wallet (SIWE)' : authMethod.label,
+              label: t.wallet.signInMethod,
+              value: isConnected ? t.wallet.onChainWallet : authMethod.label,
               ok: true,
             },
             {
-              label: 'Wallet verification',
-              value: isConnected ? 'Verified via EIP-4361 signature' : 'Not verified — no wallet connected',
+              label: t.wallet.walletVerification,
+              value: isConnected ? t.wallet.verifiedViaSiwe : t.wallet.notVerified,
               ok: isConnected,
             },
             {
-              label: 'Account role',
-              value: user?.role === 'artist' ? 'Artist — can mint artworks' : user?.role === 'admin' ? 'Admin' : 'Collector',
+              label: t.wallet.accountRole,
+              value: user?.role === 'artist' ? t.wallet.artist : user?.role === 'admin' ? t.wallet.admin : t.wallet.collector,
               ok: true,
             },
             {
-              label: 'User ID',
+              label: t.wallet.userId,
               value: user?.id ?? '—',
               mono: true,
               ok: true,

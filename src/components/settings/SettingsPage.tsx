@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from 'react'
 import { useAuthStore }                from '@/store/authStore'
 import { useUpdateProfile }            from '@/hooks/useProfile'
 import { gsap }                        from '@/lib/gsap'
+import { useLanguage }                 from '@/context/LanguageContext'
 
 const GOLD  = '#C9A96E'
 const DARK  = 'rgba(255,255,255,0.03)'
@@ -36,6 +37,7 @@ function Row({ label, desc, children }: { label: string; desc?: string; children
 }
 
 export function SettingsPage() {
+  const { t } = useLanguage()
   const { user }        = useAuthStore()
   const { mutate, isPending } = useUpdateProfile()
   const rootRef         = useRef<HTMLDivElement>(null)
@@ -79,18 +81,18 @@ export function SettingsPage() {
 
       {/* Header */}
       <div className="mb-10">
-        <p className="text-[11px] font-mono tracking-[0.2em] uppercase mb-2" style={{ color: GOLD }}>Settings</p>
+        <p className="text-[11px] font-mono tracking-[0.2em] uppercase mb-2" style={{ color: GOLD }}>{t.settings.title}</p>
         <h1 className="text-[2.2rem] text-white/90 leading-tight"
           style={{ fontFamily: "'Cormorant Garamond', serif", fontWeight: 600 }}>
-          Account Settings
+          {t.settings.accountSettings}
         </h1>
         <p className="text-[14px] mt-2" style={{ color: 'rgba(255,255,255,0.35)' }}>
-          Manage your profile, security, and preferences.
+          {t.settings.accountSettingsDesc}
         </p>
       </div>
 
       {/* Profile */}
-      <Section title="Profile">
+      <Section title={t.settings.profileSection}>
         <div className="px-5 py-5" style={{ background: DARK }}>
           <div className="flex items-center gap-4 mb-5">
             {user?.avatar_url ? (
@@ -113,11 +115,11 @@ export function SettingsPage() {
           <div className="space-y-3">
             <div>
               <label className="text-[11px] font-mono tracking-widest uppercase block mb-1.5"
-                style={{ color: 'rgba(255,255,255,0.35)' }}>Username</label>
+                style={{ color: 'rgba(255,255,255,0.35)' }}>{t.settings.usernameLabel}</label>
               <input
                 value={username}
                 onChange={e => setUsername(e.target.value)}
-                placeholder="your_username"
+                placeholder={t.settings.usernamePlaceholder}
                 className="w-full h-10 rounded-xl px-4 text-[14px] text-white/80 outline-none transition-colors duration-200"
                 style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)' }}
                 onFocus={e => (e.target.style.borderColor = `${GOLD}66`)}
@@ -126,11 +128,11 @@ export function SettingsPage() {
             </div>
             <div>
               <label className="text-[11px] font-mono tracking-widest uppercase block mb-1.5"
-                style={{ color: 'rgba(255,255,255,0.35)' }}>Bio</label>
+                style={{ color: 'rgba(255,255,255,0.35)' }}>{t.settings.bioLabel}</label>
               <textarea
                 value={bio}
                 onChange={e => setBio(e.target.value)}
-                placeholder="Tell the world about yourself…"
+                placeholder={t.settings.bioPlaceholder}
                 rows={3}
                 className="w-full rounded-xl px-4 py-3 text-[14px] text-white/80 outline-none resize-none transition-colors duration-200"
                 style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)' }}
@@ -143,48 +145,48 @@ export function SettingsPage() {
               style={{ background: saved ? 'rgba(74,222,128,0.15)' : `${GOLD}22`,
                        border: `1px solid ${saved ? 'rgba(74,222,128,0.4)' : `${GOLD}55`}`,
                        color: saved ? '#4ade80' : GOLD }}>
-              {isPending ? 'Saving…' : saved ? '✓ Saved' : 'Save Changes'}
+              {isPending ? t.settings.saving : saved ? t.settings.saved : t.settings.saveChanges}
             </button>
           </div>
         </div>
       </Section>
 
       {/* Notifications */}
-      <Section title="Notifications">
-        <Row label="Trade Alerts" desc="Get notified when your artworks are traded">
+      <Section title={t.settings.notificationsSection}>
+        <Row label={t.settings.tradeAlerts} desc={t.settings.tradeAlertsDesc}>
           <Toggle value={notifTrade} onChange={setNotifTrade} />
         </Row>
-        <Row label="New Followers" desc="When someone follows your profile">
+        <Row label={t.settings.newFollowers} desc={t.settings.newFollowersDesc}>
           <Toggle value={notifFollow} onChange={setNotifFollow} />
         </Row>
-        <Row label="Price Milestones" desc="When an artwork hits a price target">
+        <Row label={t.settings.priceMilestones} desc={t.settings.priceMilestonesDesc}>
           <Toggle value={notifPrice} onChange={setNotifPrice} />
         </Row>
       </Section>
 
       {/* Security */}
-      <Section title="Security">
-        <Row label="Auth Method" desc="How you sign in to ArtCurve">
+      <Section title={t.settings.securitySection}>
+        <Row label={t.settings.authMethod} desc={t.settings.authMethodDesc}>
           <span className="text-[12px] font-mono px-3 py-1 rounded-full"
             style={{ background: 'rgba(201,169,110,0.1)', color: GOLD, border: `1px solid ${GOLD}33` }}>
             GitHub OAuth
           </span>
         </Row>
-        <Row label="Session" desc="You are currently signed in">
+        <Row label={t.settings.session} desc={t.settings.sessionDesc}>
           <span className="flex items-center gap-1.5 text-[12px]" style={{ color: '#4ade80' }}>
-            <span className="w-1.5 h-1.5 rounded-full bg-green-400"/>Active
+            <span className="w-1.5 h-1.5 rounded-full bg-green-400"/>{t.settings.active}
           </span>
         </Row>
       </Section>
 
       {/* Danger zone */}
-      <Section title="Danger Zone">
-        <Row label="Sign Out" desc="Sign out of your account on this device">
+      <Section title={t.settings.dangerZone}>
+        <Row label={t.settings.signOut} desc={t.settings.signOutDesc}>
           <button type="button"
             className="px-4 h-9 rounded-xl text-[12px] font-mono tracking-widest uppercase transition-all duration-200"
             style={{ border: '1px solid rgba(239,68,68,0.3)', color: 'rgba(239,68,68,0.7)', background: 'transparent' }}
             onClick={() => { useAuthStore.getState().clearAuth(); window.location.href = '/' }}>
-            Sign Out
+            {t.settings.signOut}
           </button>
         </Row>
       </Section>

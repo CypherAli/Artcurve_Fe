@@ -1,6 +1,10 @@
+'use client'
+
 import Link from 'next/link'
+import { useLanguage } from '@/context/LanguageContext'
 
 export default function NotFound() {
+  const { t } = useLanguage()
   return (
     <div
       className="min-h-screen flex flex-col items-center justify-center"
@@ -13,10 +17,10 @@ export default function NotFound() {
         </div>
         <div className="font-mono text-[11px] tracking-[0.3em] uppercase"
           style={{ color: 'rgba(255,255,255,0.3)' }}>
-          Page not found
+          {t.notFound.label}
         </div>
         <p className="font-sans text-sm max-w-xs" style={{ color: 'rgba(255,255,255,0.4)' }}>
-          This curve doesn&apos;t exist — or hasn&apos;t been deployed yet.
+          {t.notFound.description}
         </p>
         <Link href="/"
           className="inline-block font-mono text-[10px] tracking-[0.2em] uppercase px-6 py-3 mt-4"
@@ -25,7 +29,7 @@ export default function NotFound() {
             color: '#D4AF37',
             background: 'rgba(212,175,55,0.05)',
           }}>
-          Return to Market
+          {t.notFound.returnToMarket}
         </Link>
       </div>
     </div>

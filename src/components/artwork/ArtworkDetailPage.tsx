@@ -8,6 +8,7 @@ import { reviewService }                     from '@/services/review.service'
 import { artworkService }                    from '@/services/artwork.service'
 import { portfolioService }                  from '@/services/portfolio.service'
 import { authStore }                         from '@/lib/auth-store'
+import { useLanguage }                       from '@/context/LanguageContext'
 import type { Review, Artwork, TopHolder }   from '@/types/api'
 
 // ── Stored artwork shape (set in sessionStorage by MarketplacePage) ──
@@ -241,6 +242,7 @@ function BondingCurveViz({ initPrice, currentPrice, currentSupply }: {
   currentPrice:  number
   currentSupply: number
 }) {
+  const { t } = useLanguage()
   const W = 400, H = 120, PAD = { t: 12, r: 16, b: 28, l: 36 }
   const pw = W - PAD.l - PAD.r
   const ph = H - PAD.t - PAD.b
@@ -274,7 +276,7 @@ function BondingCurveViz({ initPrice, currentPrice, currentSupply }: {
     <div className="mb-8">
       <p className="font-mono text-[8px] uppercase tracking-[0.22em] mb-2"
         style={{ color: 'rgba(255,255,255,0.22)' }}>
-        Bonding Curve
+        {t.artwork.bondingCurve}
       </p>
       <div style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.07)' }}>
         <svg viewBox={`0 0 ${W} ${H}`} className="w-full" style={{ height: 120 }} aria-hidden>
@@ -301,7 +303,7 @@ function BondingCurveViz({ initPrice, currentPrice, currentSupply }: {
           <circle cx={dotX} cy={dotY} r="1.5" fill="white"/>
           <text x={PAD.l - 4} y={PAD.t + ph} fill="rgba(255,255,255,0.2)" fontSize="7" textAnchor="end" dominantBaseline="auto">0</text>
           <text x={PAD.l - 4} y={PAD.t + 4} fill="rgba(255,255,255,0.2)" fontSize="7" textAnchor="end">{maxP.toFixed(4)}</text>
-          <text x={dotX} y={PAD.t + ph + 14} fill="#D4AF37" fontSize="7" textAnchor="middle">now</text>
+          <text x={dotX} y={PAD.t + ph + 14} fill="#D4AF37" fontSize="7" textAnchor="middle">{t.artwork.now}</text>
         </svg>
       </div>
     </div>
@@ -310,6 +312,7 @@ function BondingCurveViz({ initPrice, currentPrice, currentSupply }: {
 
 // ── Top Holders Table ────────────────────────────────────────────────
 function TopHoldersSection({ artworkId }: { artworkId: string }) {
+  const { t } = useLanguage()
   const [holders, setHolders] = useState<TopHolder[] | null>(null)
 
   useEffect(() => {
@@ -325,7 +328,7 @@ function TopHoldersSection({ artworkId }: { artworkId: string }) {
     <div className="mt-12 pt-8" style={{ borderTop: '1px solid rgba(255,255,255,0.07)' }}>
       <p className="font-mono text-[8px] uppercase tracking-[0.32em] mb-5"
         style={{ color: 'rgba(255,255,255,0.22)' }}>
-        Top Holders
+        {t.artwork.topHolders}
       </p>
       <div className="flex flex-col gap-0">
         {holders.map((h, i) => {
@@ -371,6 +374,7 @@ function TopHoldersSection({ artworkId }: { artworkId: string }) {
 
 export function ArtworkDetailPage({ artworkId }: { artworkId: string }) {
   const router = useRouter()
+  const { t } = useLanguage()
 
   // FIX 1: sessionStorage as instant cache; always fetch live data
   const [artwork, setArtwork] = useState<StoredArtwork | null>(() => {
@@ -529,14 +533,14 @@ export function ArtworkDetailPage({ artworkId }: { artworkId: string }) {
     return (
       <div className="min-h-dvh flex flex-col items-center justify-center gap-4" style={{ background: '#0A0A0A' }}>
         <p className="font-mono text-[10px] tracking-[0.28em] uppercase" style={{ color: 'rgba(255,255,255,0.2)' }}>
-          Artwork not found
+          {t.artwork.artworkNotFound}
         </p>
         <Link
           href="/marketplace"
           className="font-mono text-[9px] tracking-widest uppercase px-4 py-2 transition-colors duration-150"
           style={{ border: '1px solid rgba(212,175,55,0.35)', color: '#D4AF37' }}
         >
-          Back to Marketplace
+          {t.artwork.backToMarketplace}
         </Link>
       </div>
     )
@@ -549,14 +553,14 @@ export function ArtworkDetailPage({ artworkId }: { artworkId: string }) {
         style={{ background: '#0A0A0A' }}
       >
         <p className="font-mono text-[10px] tracking-[0.28em] uppercase" style={{ color: 'rgba(255,255,255,0.2)' }}>
-          Artwork data not found
+          {t.artwork.artworkNotFound}
         </p>
         <Link
           href="/marketplace"
           className="font-mono text-[9px] tracking-widest uppercase px-4 py-2 transition-colors duration-150"
           style={{ border: '1px solid rgba(212,175,55,0.35)', color: '#D4AF37' }}
         >
-          Back to Marketplace
+          {t.artwork.backToMarketplace}
         </Link>
       </div>
     )
@@ -592,7 +596,7 @@ export function ArtworkDetailPage({ artworkId }: { artworkId: string }) {
           <svg viewBox="0 0 24 24" className="w-3 h-3" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
             <path d="M19 12H5M12 5l-7 7 7 7"/>
           </svg>
-          Marketplace
+          {t.artwork.backToMarketplace}
         </Link>
       </div>
 
@@ -683,12 +687,12 @@ export function ArtworkDetailPage({ artworkId }: { artworkId: string }) {
             style={{ background: 'rgba(255,255,255,0.06)' }}
           >
             {[
-              { label: 'Market Cap',  value: displayArtwork.marketCapLabel,             color: '' },
-              { label: '24h Change',  value: displayArtwork.change24h,                  color: displayArtwork.changePositive ? '#4ade80' : '#f87171' },
-              { label: 'Holders',     value: String(displayArtwork.holders),            color: '' },
-              { label: 'Volume 24h',  value: displayArtwork.volume24h,                  color: '' },
-              { label: 'Completion',  value: `${displayArtwork.progress}%`,             color: graduated ? '#4ade80' : '#D4AF37' },
-              { label: 'Phase',       value: displayArtwork.phase,                      color: displayArtwork.phaseColor },
+              { label: t.artwork.marketCap,  value: displayArtwork.marketCapLabel,             color: '' },
+              { label: t.artwork.change24h,  value: displayArtwork.change24h,                  color: displayArtwork.changePositive ? '#4ade80' : '#f87171' },
+              { label: t.artwork.holders,    value: String(displayArtwork.holders),            color: '' },
+              { label: t.artwork.volume24h,  value: displayArtwork.volume24h,                  color: '' },
+              { label: t.artwork.completion, value: `${displayArtwork.progress}%`,             color: graduated ? '#4ade80' : '#D4AF37' },
+              { label: t.artwork.phase,      value: displayArtwork.phase,                      color: displayArtwork.phaseColor },
             ].map((stat, i) => (
               <motion.div
                 key={stat.label}
@@ -721,7 +725,7 @@ export function ArtworkDetailPage({ artworkId }: { artworkId: string }) {
                 className="font-mono text-[9px] uppercase tracking-[0.18em]"
                 style={{ color: graduated ? '#4ade80' : '#D4AF37' }}
               >
-                {graduated ? '✦ GRADUATED' : `${displayArtwork.progress}% TO GRADUATION`}
+                {graduated ? t.artwork.graduated : `${displayArtwork.progress}% TO GRADUATION`}
               </span>
             </div>
             <div
@@ -765,7 +769,7 @@ export function ArtworkDetailPage({ artworkId }: { artworkId: string }) {
                 color:      '#0A0A0A',
               }}
             >
-              BUY {displayArtwork.ticker}
+              {t.artwork.buy.replace('{ticker}', displayArtwork.ticker)}
             </motion.button>
 
             {/* FIX 4: Like button */}
@@ -810,7 +814,7 @@ export function ArtworkDetailPage({ artworkId }: { artworkId: string }) {
             <div className="flex items-center justify-between mb-6">
               <p className="font-mono text-[8px] uppercase tracking-[0.32em]"
                 style={{ color: 'rgba(255,255,255,0.22)' }}>
-                Collector Voices
+                {t.artwork.collectorVoices}
               </p>
               {totalReviews > 0 && (
                 <span className="font-mono text-[10px] flex items-center gap-2"
@@ -828,14 +832,14 @@ export function ArtworkDetailPage({ artworkId }: { artworkId: string }) {
                   <StarSelector value={rating} onChange={setRating} />
                   {rating > 0 && (
                     <span className="font-mono text-[9px] tracking-widest" style={{ color: '#D4AF37' }}>
-                      {['', 'Poor', 'Fair', 'Good', 'Great', 'Exceptional'][rating]}
+                      {['', t.artwork.poor, t.artwork.fair, t.artwork.good, t.artwork.great, t.artwork.exceptional][rating]}
                     </span>
                   )}
                 </div>
                 <textarea
                   value={comment}
                   onChange={e => setComment(e.target.value)}
-                  placeholder="Share your perspective on this work…"
+                  placeholder={t.artwork.sharePerspective}
                   maxLength={1000}
                   rows={3}
                   className="w-full bg-transparent resize-none outline-none pb-3"
@@ -875,7 +879,7 @@ export function ArtworkDetailPage({ artworkId }: { artworkId: string }) {
                         cursor:     (rating && comment.trim()) ? 'pointer' : 'not-allowed',
                       }}
                     >
-                      {submitting ? 'Posting…' : 'Post'}
+                      {submitting ? t.artwork.posting : t.artwork.post}
                     </button>
                   </div>
                 </div>
@@ -884,14 +888,14 @@ export function ArtworkDetailPage({ artworkId }: { artworkId: string }) {
               <div className="flex items-center gap-4 mb-8 pb-6"
                 style={{ borderBottom: '1px solid rgba(255,255,255,0.06)' }}>
                 <p style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: '1rem', color: 'rgba(255,255,255,0.3)' }}>
-                  Connect wallet to share a perspective.
+                  {t.artwork.connectToShare}
                 </p>
                 <Link href="/"
                   className="shrink-0 font-mono text-[9px] tracking-widest uppercase px-3 py-1.5 transition-colors"
                   style={{ border: '1px solid rgba(212,175,55,0.35)', color: '#D4AF37' }}
                   onMouseEnter={e => ((e.currentTarget as HTMLElement).style.background = 'rgba(212,175,55,0.08)')}
                   onMouseLeave={e => ((e.currentTarget as HTMLElement).style.background = 'transparent')}>
-                  Connect
+                  {t.artwork.connect}
                 </Link>
               </div>
             )}
@@ -900,7 +904,7 @@ export function ArtworkDetailPage({ artworkId }: { artworkId: string }) {
             {reviews.length === 0 ? (
               <p className="font-mono text-[9px] tracking-widest uppercase py-4"
                 style={{ color: 'rgba(255,255,255,0.15)' }}>
-                No perspectives yet.
+                {t.artwork.noPerspectives}
               </p>
             ) : (
               <AnimatePresence initial={false}>

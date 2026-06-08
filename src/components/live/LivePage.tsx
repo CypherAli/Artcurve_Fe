@@ -4,6 +4,8 @@ import { useState, useMemo, useCallback, useRef } from 'react'
 import { useRouter } from 'next/navigation'
 import { motion, AnimatePresence, type Variants } from 'framer-motion'
 import { authStore } from '@/lib/auth-store'
+import { useLanguage } from '@/context/LanguageContext'
+import { translations, DEFAULT_LOCALE } from '@/i18n'
 
 const API = process.env.NEXT_PUBLIC_API_URL ?? 'https://artcurve-be.onrender.com/api/v1'
 
@@ -150,8 +152,7 @@ const ALL_ITEMS: Item[] = [
   },
 ]
 
-// Chips shown in the bar (Following added for Artists tab)
-const CHIPS = ['All', 'Live', 'Following', 'Videos', 'Painting', 'Drawing', 'Digital', 'Sculpture', 'Mixed Media', 'Trending']
+// Chips are computed from t inside LivePage
 
 // ─────────────────────────────────────────────────────────────────
 // Sidebar — items control chip filter, not page navigation
@@ -167,52 +168,44 @@ interface SidebarItem {
   icon: React.ReactNode
 }
 
-const NAV_ITEMS: SidebarItem[] = [
-  {
-    label: 'Home',
-    chip: 'All',
-    icon: (
-      <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor">
-        <path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/>
-      </svg>
-    ),
-  },
-  {
-    label: 'Live',
-    chip: 'Live',
-    icon: (
-      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-        <circle cx="12" cy="12" r="2"/>
-        <path d="M16.24 7.76a6 6 0 0 1 0 8.49M7.76 7.76a6 6 0 0 0 0 8.49"/>
-        <path d="M19.07 4.93a10 10 0 0 1 0 14.14M4.93 4.93a10 10 0 0 0 0 14.14"/>
-      </svg>
-    ),
-  },
-  {
-    label: 'Artists',
-    chip: 'Following',
-    icon: (
-      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-        <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
-        <circle cx="9" cy="7" r="4"/>
-        <path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/>
-      </svg>
-    ),
-  },
-  {
-    label: 'You',
-    href: '/wallet',
-    icon: (
-      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-        <circle cx="12" cy="8" r="4"/>
-        <path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/>
-      </svg>
-    ),
-  },
-]
+const NAV_ICONS = {
+  home: (
+    <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor">
+      <path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/>
+    </svg>
+  ),
+  live: (
+    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <circle cx="12" cy="12" r="2"/>
+      <path d="M16.24 7.76a6 6 0 0 1 0 8.49M7.76 7.76a6 6 0 0 0 0 8.49"/>
+      <path d="M19.07 4.93a10 10 0 0 1 0 14.14M4.93 4.93a10 10 0 0 0 0 14.14"/>
+    </svg>
+  ),
+  artists: (
+    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
+      <circle cx="9" cy="7" r="4"/>
+      <path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/>
+    </svg>
+  ),
+  you: (
+    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <circle cx="12" cy="8" r="4"/>
+      <path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/>
+    </svg>
+  ),
+}
 
 function Sidebar({ chip, setChip }: { chip: string; setChip: (c: string) => void }) {
   const router = useRouter()
+  const { t } = useLanguage()
+
+  const NAV_ITEMS: SidebarItem[] = [
+    { label: t.live.home,    chip: t.live.all,       icon: NAV_ICONS.home    },
+    { label: t.live.live,    chip: t.live.live,      icon: NAV_ICONS.live    },
+    { label: t.live.artists, chip: t.live.following, icon: NAV_ICONS.artists },
+    { label: t.live.you,     href: '/wallet',        icon: NAV_ICONS.you     },
+  ]
 
   return (
     <aside
@@ -309,9 +302,10 @@ function CheckMark() {
 // ─────────────────────────────────────────────────────────────────
 // Three-dot context menu
 // ─────────────────────────────────────────────────────────────────
-const MENU_ACTIONS = ['Save to playlist', 'Share', 'Report']
-
 function ContextMenu({ visible, open, onToggle }: { visible: boolean; open: boolean; onToggle: () => void }) {
+  const { t } = useLanguage()
+  const menuActions = [t.live.saveToPlaylist, t.live.share, t.live.report]
+
   return (
     <div className="relative" onClick={e => e.stopPropagation()}>
       <motion.button
@@ -338,7 +332,7 @@ function ContextMenu({ visible, open, onToggle }: { visible: boolean; open: bool
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: -4, scale: 0.96 }}
             transition={{ duration: 0.14, ease: 'easeOut' }}>
-            {MENU_ACTIONS.map(action => (
+            {menuActions.map(action => (
               <button key={action} type="button"
                 className="w-full text-left px-4 py-2.5 text-sm transition-colors"
                 style={{ color: 'rgba(255,255,255,0.8)' }}
@@ -360,6 +354,7 @@ function ContextMenu({ visible, open, onToggle }: { visible: boolean; open: bool
 function VideoCard({ item, onClick }: { item: Item; onClick: () => void }) {
   const [hovered,  setHovered]  = useState(false)
   const [menuOpen, setMenuOpen] = useState(false)
+  const { t } = useLanguage()
 
   return (
     <motion.article
@@ -396,7 +391,7 @@ function VideoCard({ item, onClick }: { item: Item; onClick: () => void }) {
         {item.type === 'live' && item.viewers !== undefined && (
           <div className="absolute bottom-2 right-2 px-1.5 py-0.5 rounded-sm text-[10px] font-medium text-white font-sans"
             style={{ background: 'rgba(0,0,0,0.78)' }}>
-            {fmtViewers(item.viewers)} watching
+            {t.live.watching.replace('{count}', fmtViewers(item.viewers))}
           </div>
         )}
 
@@ -463,6 +458,7 @@ const LIVE_CATEGORIES = ['Painting', 'Drawing', 'Digital', 'Sculpture', 'Mixed M
 
 function GoLiveModal({ onClose }: { onClose: () => void }) {
   const router  = useRouter()
+  const { t } = useLanguage()
   const [title,   setTitle]   = useState('')
   const [cat,     setCat]     = useState('Painting')
   const [loading, setLoading] = useState(false)
@@ -513,7 +509,7 @@ function GoLiveModal({ onClose }: { onClose: () => void }) {
                 animate={{ opacity: [1, 0.3, 1] }} transition={{ duration: 1.1, repeat: Infinity }}/>
             </div>
             <span className="font-sans font-semibold text-base" style={{ color: 'rgba(255,255,255,0.92)' }}>
-              Go Live
+              {t.live.goLive}
             </span>
           </div>
           <motion.button
@@ -530,13 +526,13 @@ function GoLiveModal({ onClose }: { onClose: () => void }) {
           {/* Stream title */}
           <div>
             <label className="block text-xs font-medium mb-2" style={{ color: 'rgba(255,255,255,0.48)' }}>
-              Stream Title
+              {t.live.streamTitleLabel}
             </label>
             <input
               value={title}
               onChange={e => setTitle(e.target.value)}
               onKeyDown={e => e.key === 'Enter' && handleStart()}
-              placeholder="What are you creating today?"
+              placeholder={t.live.streamTitlePlaceholder}
               className="w-full bg-transparent text-sm px-3.5 py-2.5 rounded-md outline-hidden"
               style={{
                 border: `1px solid rgba(255,255,255,${title ? '0.22' : '0.1'})`,
@@ -549,7 +545,7 @@ function GoLiveModal({ onClose }: { onClose: () => void }) {
           {/* Category */}
           <div>
             <label className="block text-xs font-medium mb-2" style={{ color: 'rgba(255,255,255,0.48)' }}>
-              Category
+              {t.live.categoryLabel}
             </label>
             <div className="flex flex-wrap gap-2">
               {LIVE_CATEGORIES.map(c => (
@@ -594,7 +590,7 @@ function GoLiveModal({ onClose }: { onClose: () => void }) {
             whileHover={title.trim() && !loading ? { background: '#b91c1c' } : {}}
             whileTap={title.trim() && !loading ? { scale: 0.98 } : {}}
             style={{ opacity: loading ? 0.65 : 1, cursor: title.trim() && !loading ? 'pointer' : 'default' }}>
-            {loading ? 'Starting…' : '● Start Streaming'}
+            {loading ? t.live.starting : t.live.startStreaming}
           </motion.button>
         </div>
       </motion.div>
@@ -607,20 +603,27 @@ function GoLiveModal({ onClose }: { onClose: () => void }) {
 // ─────────────────────────────────────────────────────────────────
 export function LivePage() {
   const router = useRouter()
-  const [chip,       setChip]       = useState('All')
+  const { t } = useLanguage()
+  const [chip,       setChip]       = useState(() => translations[DEFAULT_LOCALE].live.all)
   const [goLiveOpen, setGoLiveOpen] = useState(false)
   const chipsRef = useRef<HTMLDivElement>(null)
 
+  const CHIPS = useMemo(() => [
+    t.live.all, t.live.live, t.live.following, t.live.videos,
+    t.live.painting, t.live.drawing, t.live.digital,
+    t.live.sculpture, t.live.mixedMedia, t.live.trending,
+  ], [t])
+
   const filtered = useMemo(() => {
     switch (chip) {
-      case 'Live':     return ALL_ITEMS.filter(i => i.type === 'live')
-      case 'Videos':    return ALL_ITEMS.filter(i => i.type === 'video')
-      case 'Trending':  return [...ALL_ITEMS].sort((a, b) => (b.viewers ?? 0) - (a.viewers ?? 0))
-      case 'Following': return ALL_ITEMS.filter(i => i.verified)   // artists you follow (verified = subscribed)
-      case 'All':       return ALL_ITEMS
-      default:          return ALL_ITEMS.filter(i => i.category === chip)
+      case t.live.live:      return ALL_ITEMS.filter(i => i.type === 'live')
+      case t.live.videos:    return ALL_ITEMS.filter(i => i.type === 'video')
+      case t.live.trending:  return [...ALL_ITEMS].sort((a, b) => (b.viewers ?? 0) - (a.viewers ?? 0))
+      case t.live.following: return ALL_ITEMS.filter(i => i.verified)
+      case t.live.all:       return ALL_ITEMS
+      default:               return ALL_ITEMS.filter(i => i.category === chip)
     }
-  }, [chip])
+  }, [chip, t])
 
   const totalLive = ALL_ITEMS.filter(i => i.type === 'live').length
 
@@ -666,7 +669,7 @@ export function LivePage() {
                   whileTap={{ scale: 0.95 }}
                   transition={{ duration: 0.13 }}>
                   {c}
-                  {c === 'Live' && (
+                  {c === t.live.live && (
                     <span className="ml-2 inline-flex items-center justify-center w-5 h-5 rounded-full text-[10px] font-bold"
                       style={{ background: chip === c ? '#dc2626' : 'rgba(220,38,38,0.9)', color: 'white', verticalAlign: 'middle' }}>
                       {totalLive}
@@ -691,7 +694,7 @@ export function LivePage() {
                 className="size-2 rounded-full bg-white"
                 animate={{ opacity: [1, 0.35, 1] }}
                 transition={{ duration: 1.1, repeat: Infinity }}/>
-              Go Live
+              {t.live.goLiveButton}
             </motion.button>
           </div>
         </div>
@@ -728,7 +731,7 @@ export function LivePage() {
                   <path d="M15 10l4.553-2.276A1 1 0 0121 8.723v6.554a1 1 0 01-1.447.894L15 14M3 8a2 2 0 012-2h10a2 2 0 012 2v8a2 2 0 01-2 2H5a2 2 0 01-2-2V8z"
                     stroke="white" strokeWidth="1.5" strokeLinecap="round"/>
                 </svg>
-                <p className="text-sm" style={{ color: 'rgba(255,255,255,0.22)' }}>No content in this category</p>
+                <p className="text-sm" style={{ color: 'rgba(255,255,255,0.22)' }}>{t.live.noContent}</p>
               </motion.div>
             )}
           </AnimatePresence>

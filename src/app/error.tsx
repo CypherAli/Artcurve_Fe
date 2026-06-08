@@ -1,6 +1,7 @@
 'use client'
 
 import { useEffect } from 'react'
+import { useLanguage } from '@/context/LanguageContext'
 
 export default function Error({
   error,
@@ -9,6 +10,8 @@ export default function Error({
   error: Error & { digest?: string }
   reset: () => void
 }) {
+  const { t } = useLanguage()
+
   useEffect(() => {
     console.error('[ArtCurve Error]', error)
   }, [error])
@@ -21,11 +24,11 @@ export default function Error({
       <div className="text-center space-y-5 max-w-sm px-4">
         <div className="font-mono text-[10px] tracking-[0.3em] uppercase"
           style={{ color: '#f87171' }}>
-          System Error
+          {t.error.systemError}
         </div>
         <h2 className="font-sans text-lg font-semibold"
           style={{ color: 'rgba(255,255,255,0.75)' }}>
-          Something went wrong
+          {t.error.somethingWentWrong}
         </h2>
         <p className="font-mono text-[10px]"
           style={{ color: 'rgba(255,255,255,0.25)' }}>
@@ -40,7 +43,7 @@ export default function Error({
             background: 'rgba(248,113,113,0.05)',
           }}
         >
-          Try Again
+          {t.error.tryAgain}
         </button>
       </div>
     </div>

@@ -9,6 +9,7 @@ import { motion, AnimatePresence } from 'framer-motion'
 import { api } from '@/lib/api'
 import { useEthBalance } from '@/web3/hooks/useContract'
 import { useAccount } from 'wagmi'
+import { useLanguage } from '@/context/LanguageContext'
 
 // ── Types ─────────────────────────────────────────────────────────
 type StepStatus = 'pending' | 'active' | 'done' | 'error'
@@ -93,6 +94,7 @@ interface UploadFormProps {
 function UploadForm({
   form, fileInfo, onFileSelect, onTitleChange, onTickerChange, onChange, onSubmit, modStatus
 }: UploadFormProps) {
+  const { t } = useLanguage()
   const fileRef = useRef<HTMLInputElement>(null)
   const [dragOver, setDragOver] = useState(false)
 
@@ -113,7 +115,7 @@ function UploadForm({
       style={{ borderRight:'1px solid rgba(255,255,255,0.05)' }}>
       <div className="flex items-center justify-between px-3 shrink-0"
         style={{ height:36, background:'rgba(0,0,0,0.38)', borderBottom:'1px solid rgba(255,255,255,0.05)' }}>
-        <span className="font-mono text-[7px] tracking-[0.2em] uppercase" style={{ color:'rgba(255,255,255,0.22)' }}>CREATE ARTWORK</span>
+        <span className="font-mono text-[7px] tracking-[0.2em] uppercase" style={{ color:'rgba(255,255,255,0.22)' }}>{t.studio.createArtwork}</span>
         {form.ticker !== '$TOKEN' && (
           <motion.span initial={{ opacity:0 }} animate={{ opacity:1 }}
             className="font-mono text-[9px] font-bold" style={{ color:'#D4AF37' }}>
@@ -152,8 +154,8 @@ function UploadForm({
               <svg viewBox="0 0 24 24" className="w-6 h-6" fill="none" stroke="rgba(255,255,255,0.22)" strokeWidth="1.5">
                 <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M17 8l-5-5-5 5M12 3v12"/>
               </svg>
-              <span className="font-mono text-[8px]" style={{ color:'rgba(255,255,255,0.22)' }}>DROP ARTWORK · JPG / PNG / WEBP / MP4</span>
-              <span className="font-mono text-[7px]" style={{ color:'rgba(255,255,255,0.12)' }}>Max 50 MB · Min 1200×1200px</span>
+              <span className="font-mono text-[8px]" style={{ color:'rgba(255,255,255,0.22)' }}>{t.studio.uploadPrompt}</span>
+              <span className="font-mono text-[7px]" style={{ color:'rgba(255,255,255,0.12)' }}>{t.studio.uploadHint}</span>
             </>
           )}
         </motion.div>
@@ -161,11 +163,11 @@ function UploadForm({
         {/* Title */}
         <div>
           <label className="font-mono text-[7px] tracking-wider uppercase block mb-1"
-            style={{ color:'rgba(255,255,255,0.28)' }}>Artwork Title</label>
+            style={{ color:'rgba(255,255,255,0.28)' }}>{t.studio.artworkTitleLabel}</label>
           <input
             value={form.title}
             onChange={e => onTitleChange(e.target.value)}
-            placeholder="e.g. Dissolution Study III"
+            placeholder={t.studio.artworkTitlePlaceholder}
             className="w-full bg-transparent font-sans text-[11px] px-2.5 py-1.5 outline-none"
             style={{ border:'1px solid rgba(255,255,255,0.1)', color:'rgba(255,255,255,0.78)', caretColor:'#D4AF37' }}
           />
@@ -175,8 +177,8 @@ function UploadForm({
         <div>
           <div className="flex items-center justify-between mb-1">
             <label className="font-mono text-[7px] tracking-wider uppercase"
-              style={{ color:'rgba(255,255,255,0.28)' }}>Token Ticker</label>
-            <span className="font-mono text-[6.5px]" style={{ color:'rgba(255,255,255,0.16)' }}>auto-generated · editable</span>
+              style={{ color:'rgba(255,255,255,0.28)' }}>{t.studio.tickerLabel}</label>
+            <span className="font-mono text-[6.5px]" style={{ color:'rgba(255,255,255,0.16)' }}>{t.studio.tickerHint}</span>
           </div>
           <div className="relative">
             <input
@@ -206,7 +208,7 @@ function UploadForm({
         {/* Category */}
         <div>
           <label className="font-mono text-[7px] tracking-wider uppercase block mb-1.5"
-            style={{ color:'rgba(255,255,255,0.28)' }}>Category</label>
+            style={{ color:'rgba(255,255,255,0.28)' }}>{t.studio.categoryLabel}</label>
           <div className="flex flex-wrap gap-1">
             {CATEGORIES.map(cat => {
               const active = form.category === cat
@@ -230,11 +232,11 @@ function UploadForm({
         {/* Description */}
         <div>
           <label className="font-mono text-[7px] tracking-wider uppercase block mb-1"
-            style={{ color:'rgba(255,255,255,0.28)' }}>Description</label>
+            style={{ color:'rgba(255,255,255,0.28)' }}>{t.studio.descriptionLabel}</label>
           <textarea
             value={form.description}
             onChange={e => onChange({ ...form, description:e.target.value })}
-            placeholder="Describe your artwork and its significance…"
+            placeholder={t.studio.descriptionPlaceholder}
             rows={3}
             className="w-full bg-transparent font-sans text-[11px] px-2.5 py-1.5 outline-none resize-none"
             style={{ border:'1px solid rgba(255,255,255,0.1)', color:'rgba(255,255,255,0.78)', caretColor:'#D4AF37' }}
@@ -244,7 +246,7 @@ function UploadForm({
         {/* Curve type */}
         <div>
           <label className="font-mono text-[7px] tracking-wider uppercase block mb-1.5"
-            style={{ color:'rgba(255,255,255,0.28)' }}>Bonding Curve Type</label>
+            style={{ color:'rgba(255,255,255,0.28)' }}>{t.studio.bondingCurveTypeLabel}</label>
           <div className="grid grid-cols-3 gap-1">
             {(['linear','quadratic','exponential'] as const).map(ct => {
               const active = form.curveType === ct
@@ -268,7 +270,7 @@ function UploadForm({
         <div className="grid grid-cols-2 gap-2">
           <div>
             <label className="font-mono text-[7px] tracking-wider uppercase block mb-1"
-              style={{ color:'rgba(255,255,255,0.28)' }}>Total Supply</label>
+              style={{ color:'rgba(255,255,255,0.28)' }}>{t.studio.totalSupplyLabel}</label>
             <input
               type="number" min="1000" max="1000000"
               value={form.supply}
@@ -279,7 +281,7 @@ function UploadForm({
           </div>
           <div>
             <label className="font-mono text-[7px] tracking-wider uppercase block mb-1"
-              style={{ color:'rgba(255,255,255,0.28)' }}>Init Price (ETH)</label>
+              style={{ color:'rgba(255,255,255,0.28)' }}>{t.studio.initPriceLabel}</label>
             <input
               type="number" min="0.0001" step="0.0001"
               value={form.initPrice}
@@ -294,7 +296,7 @@ function UploadForm({
         <div>
           <div className="flex items-center justify-between mb-1.5">
             <label className="font-mono text-[7px] tracking-wider uppercase"
-              style={{ color:'rgba(255,255,255,0.28)' }}>Creator Royalty</label>
+              style={{ color:'rgba(255,255,255,0.28)' }}>{t.studio.creatorRoyaltyLabel}</label>
             <span className="font-mono text-[9px] font-semibold" style={{ color:'#D4AF37' }}>{form.royalty}%</span>
           </div>
           <input type="range" min="0" max="10" step="0.5"
@@ -330,11 +332,11 @@ function UploadForm({
                 className="flex items-center justify-center gap-2">
                 <motion.span animate={{ rotate:360 }} transition={{ duration:0.9,repeat:Infinity,ease:'linear' }}
                   className="inline-block w-3 h-3 border border-current border-t-transparent rounded-full"/>
-                AI MODERATION…
+                {t.studio.aiModeration}
               </motion.span>
             ) : (
               <motion.span key="submit" initial={{ opacity:0,y:4 }} animate={{ opacity:1,y:0 }} exit={{ opacity:0,y:-4 }}>
-                ✦ LAUNCH ARTWORK
+                {t.studio.launchArtwork}
               </motion.span>
             )}
           </AnimatePresence>
@@ -348,6 +350,7 @@ function UploadForm({
 //  Center: Preview card + bonding curve SVG
 // ─────────────────────────────────────────────────────────────────
 function PreviewPanel({ form }: { form: FormData }) {
+  const { t } = useLanguage()
   const curveExp = form.curveType === 'linear' ? 1 : form.curveType === 'quadratic' ? 2 : 3
   const k = form.initPrice / Math.pow(1, curveExp)
   const pts = bondingCurvePoints(form.supply, k, curveExp)
@@ -365,7 +368,7 @@ function PreviewPanel({ form }: { form: FormData }) {
     <div className="flex flex-col h-full">
       <div className="flex items-center justify-between px-4 shrink-0"
         style={{ height:36, background:'rgba(0,0,0,0.38)', borderBottom:'1px solid rgba(255,255,255,0.05)' }}>
-        <span className="font-mono text-[7px] tracking-[0.2em] uppercase" style={{ color:'rgba(255,255,255,0.22)' }}>PREVIEW</span>
+        <span className="font-mono text-[7px] tracking-[0.2em] uppercase" style={{ color:'rgba(255,255,255,0.22)' }}>{t.studio.previewLabel}</span>
         <span className="font-mono text-[7.5px]" style={{ color:'rgba(255,255,255,0.18)' }}>{form.curveType} curve</span>
       </div>
 
@@ -399,15 +402,15 @@ function PreviewPanel({ form }: { form: FormData }) {
             </div>
             <div className="flex items-center gap-3 mt-2">
               <div>
-                <div className="font-mono text-[6px] uppercase" style={{ color:'rgba(255,255,255,0.2)' }}>Init Price</div>
+                <div className="font-mono text-[6px] uppercase" style={{ color:'rgba(255,255,255,0.2)' }}>{t.studio.initPriceCard}</div>
                 <div className="font-mono text-[10px]" style={{ color:'rgba(255,255,255,0.6)' }}>{form.initPrice.toFixed(4)} ETH</div>
               </div>
               <div>
-                <div className="font-mono text-[6px] uppercase" style={{ color:'rgba(255,255,255,0.2)' }}>Supply</div>
+                <div className="font-mono text-[6px] uppercase" style={{ color:'rgba(255,255,255,0.2)' }}>{t.studio.supplyCard}</div>
                 <div className="font-mono text-[10px]" style={{ color:'rgba(255,255,255,0.6)' }}>{form.supply.toLocaleString()}</div>
               </div>
               <div>
-                <div className="font-mono text-[6px] uppercase" style={{ color:'rgba(255,255,255,0.2)' }}>Royalty</div>
+                <div className="font-mono text-[6px] uppercase" style={{ color:'rgba(255,255,255,0.2)' }}>{t.studio.royaltyCard}</div>
                 <div className="font-mono text-[10px]" style={{ color:'rgba(255,255,255,0.6)' }}>{form.royalty}%</div>
               </div>
             </div>
@@ -418,8 +421,8 @@ function PreviewPanel({ form }: { form: FormData }) {
         <div style={{ border:'1px solid rgba(255,255,255,0.06)', background:'rgba(0,0,0,0.3)' }}>
           <div className="flex items-center justify-between px-3 py-1.5"
             style={{ borderBottom:'1px solid rgba(255,255,255,0.05)' }}>
-            <span className="font-mono text-[7px] tracking-wider" style={{ color:'rgba(255,255,255,0.22)' }}>BONDING CURVE</span>
-            <span className="font-mono text-[7px]" style={{ color:'rgba(255,255,255,0.14)' }}>price vs. supply</span>
+            <span className="font-mono text-[7px] tracking-wider" style={{ color:'rgba(255,255,255,0.22)' }}>{t.studio.bondingCurveChart}</span>
+            <span className="font-mono text-[7px]" style={{ color:'rgba(255,255,255,0.14)' }}>{t.studio.priceVsSupply}</span>
           </div>
           <svg width="100%" viewBox="0 0 320 130" style={{ display:'block' }}>
             <defs>
@@ -442,7 +445,7 @@ function PreviewPanel({ form }: { form: FormData }) {
                 <line x1={scaled[40][0].toFixed(1)} y1="12" x2={scaled[40][0].toFixed(1)} y2="118"
                   stroke="rgba(255,255,255,0.12)" strokeDasharray="3,3" strokeWidth="1"/>
                 <text x={Number(scaled[40][0])+3} y="20" fontFamily="monospace" fontSize="7"
-                  fill="rgba(255,255,255,0.3)">80% supply</text>
+                  fill="rgba(255,255,255,0.3)">{t.studio.supply80}</text>
               </>
             )}
             <text x="12" y="126" fontFamily="monospace" fontSize="7" fill="rgba(255,255,255,0.18)">0</text>
@@ -453,8 +456,8 @@ function PreviewPanel({ form }: { form: FormData }) {
         {/* Stats grid */}
         <div className="grid grid-cols-2 gap-2">
           {[
-            { label:'TARGET PRICE',  value:`${targetPrice.toFixed(4)} ETH`,             note:'at 80% supply' },
-            { label:'ETH TO GRAD',   value:`${Math.min(ethToGrad,9999).toFixed(2)} ETH`, note:'graduation threshold' },
+            { label: t.studio.targetPrice,  value:`${targetPrice.toFixed(4)} ETH`,             note: t.studio.at80Supply },
+            { label: t.studio.ethToGrad,    value:`${Math.min(ethToGrad,9999).toFixed(2)} ETH`, note: t.studio.graduationThreshold },
           ].map(({ label, value, note }) => (
             <div key={label} className="px-3 py-2"
               style={{ border:'1px solid rgba(255,255,255,0.06)', background:'rgba(0,0,0,0.2)' }}>
@@ -475,7 +478,7 @@ function PreviewPanel({ form }: { form: FormData }) {
               <path d="M19 10h2"/>
             </svg>
             <div>
-              <div className="font-mono text-[7px] uppercase tracking-wider" style={{ color:'rgba(255,165,0,0.55)' }}>EST. GAS COST</div>
+              <div className="font-mono text-[7px] uppercase tracking-wider" style={{ color:'rgba(255,165,0,0.55)' }}>{t.studio.estGasCost}</div>
               <div className="font-mono text-[6.5px] mt-0.5" style={{ color:'rgba(255,255,255,0.2)' }}>deploy on Base · {form.curveType} curve</div>
             </div>
           </div>
@@ -496,6 +499,7 @@ function PreviewPanel({ form }: { form: FormData }) {
 //  Right: Launch checklist
 // ─────────────────────────────────────────────────────────────────
 function ChecklistPanel({ steps, modStatus, submitError }: { steps:Step[]; modStatus:ModerationStatus; submitError?: string | null }) {
+  const { t } = useLanguage()
   const done  = steps.filter(s => s.status==='done').length
   const total = steps.length
 
@@ -504,7 +508,7 @@ function ChecklistPanel({ steps, modStatus, submitError }: { steps:Step[]; modSt
       style={{ borderLeft:'1px solid rgba(255,255,255,0.05)' }}>
       <div className="flex items-center justify-between px-3 shrink-0"
         style={{ height:36, background:'rgba(0,0,0,0.38)', borderBottom:'1px solid rgba(255,255,255,0.05)' }}>
-        <span className="font-mono text-[7px] tracking-[0.2em] uppercase" style={{ color:'rgba(255,255,255,0.22)' }}>LAUNCH CHECKLIST</span>
+        <span className="font-mono text-[7px] tracking-[0.2em] uppercase" style={{ color:'rgba(255,255,255,0.22)' }}>{t.studio.launchChecklist}</span>
         <span className="font-mono text-[7.5px] font-semibold" style={{ color: done===total?'#4ade80':'rgba(255,255,255,0.28)' }}>
           {done}/{total}
         </span>
@@ -568,9 +572,9 @@ function ChecklistPanel({ steps, modStatus, submitError }: { steps:Step[]; modSt
           <AnimatePresence mode="wait">
             {modStatus === 'idle' && (
               <motion.div key="idle" initial={{ opacity:0 }} animate={{ opacity:1 }} exit={{ opacity:0 }}>
-                <div className="font-mono text-[8px]" style={{ color:'rgba(255,255,255,0.28)' }}>Awaiting submission…</div>
+                <div className="font-mono text-[8px]" style={{ color:'rgba(255,255,255,0.28)' }}>{t.studio.awaitingSubmission}</div>
                 <div className="font-sans text-[7px] mt-1" style={{ color:'rgba(255,255,255,0.16)' }}>
-                  AI checks for IP conflicts, prohibited content, and quality standards.
+                  {t.studio.aiCheckDescription}
                 </div>
               </motion.div>
             )}
@@ -580,17 +584,17 @@ function ChecklistPanel({ steps, modStatus, submitError }: { steps:Step[]; modSt
                 <motion.span animate={{ rotate:360 }} transition={{ duration:1,repeat:Infinity,ease:'linear' }}
                   className="inline-block w-3 h-3 border border-current border-t-transparent rounded-full"
                   style={{ color:'#D4AF37' }}/>
-                <span className="font-mono text-[8px]" style={{ color:'#D4AF37' }}>Analyzing artwork…</span>
+                <span className="font-mono text-[8px]" style={{ color:'#D4AF37' }}>{t.studio.analyzing}</span>
               </motion.div>
             )}
             {modStatus === 'approved' && (
               <motion.div key="approved" initial={{ opacity:0, scale:0.9 }} animate={{ opacity:1, scale:1 }} exit={{ opacity:0 }}>
                 <div className="flex items-center gap-2">
                   <span className="text-[10px]">✓</span>
-                  <span className="font-mono text-[8px]" style={{ color:'#4ade80' }}>APPROVED — Ready to launch</span>
+                  <span className="font-mono text-[8px]" style={{ color:'#4ade80' }}>{t.studio.approved}</span>
                 </div>
                 <div className="font-sans text-[7px] mt-1" style={{ color:'rgba(74,222,128,0.4)' }}>
-                  No IP conflicts · Content standards met · Quality OK
+                  {t.studio.approvedDetails}
                 </div>
               </motion.div>
             )}
@@ -598,10 +602,10 @@ function ChecklistPanel({ steps, modStatus, submitError }: { steps:Step[]; modSt
               <motion.div key="rejected" initial={{ opacity:0 }} animate={{ opacity:1 }} exit={{ opacity:0 }}>
                 <div className="flex items-center gap-2">
                   <span className="text-[10px]">✗</span>
-                  <span className="font-mono text-[8px]" style={{ color:'#f87171' }}>REJECTED</span>
+                  <span className="font-mono text-[8px]" style={{ color:'#f87171' }}>{t.studio.rejected}</span>
                 </div>
                 <div className="font-sans text-[7px] mt-1" style={{ color:'rgba(248,113,113,0.5)' }}>
-                  {submitError ?? 'Possible IP conflict detected. Review and resubmit.'}
+                  {submitError ?? t.studio.rejectedMessage}
                 </div>
               </motion.div>
             )}
@@ -615,19 +619,8 @@ function ChecklistPanel({ steps, modStatus, submitError }: { steps:Step[]; modSt
 // ─────────────────────────────────────────────────────────────────
 //  Main StudioPage
 // ─────────────────────────────────────────────────────────────────
-const INITIAL_STEPS: Step[] = [
-  { id:'upload',    label:'Upload Artwork',            status:'pending' },
-  { id:'metadata',  label:'Fill Title & Description',  status:'pending' },
-  { id:'ticker',    label:'Set Token Ticker',          status:'pending' },
-  { id:'category',  label:'Choose Category',           status:'pending' },
-  { id:'curve',     label:'Configure Bonding Curve',   status:'pending' },
-  { id:'moderation',label:'AI Moderation Check',       status:'pending' },
-  { id:'wallet',    label:'Connect Wallet',            status:'pending' },
-  { id:'gas',       label:'Sufficient Gas Balance',    status:'pending' },
-  { id:'deploy',    label:'Deploy to Base',            status:'pending' },
-]
-
 export function StudioPage() {
+  const { t } = useLanguage()
   const { address, isConnected }        = useAccount()
   const { formatted: ethBal }           = useEthBalance()
   const shortAddr = address ? `${address.slice(0,5)}…${address.slice(-4)}` : null
@@ -668,29 +661,39 @@ export function StudioPage() {
     const hasDesc    = !!form.description.trim()
     const hasTicker  = form.ticker !== '$TOKEN' && form.ticker.length > 1
     const hasCat     = !!form.category
-    return INITIAL_STEPS.map(s => {
+    return [
+      { id:'upload',    label: t.studio.stepUpload,    status:'pending' as StepStatus },
+      { id:'metadata',  label: t.studio.stepTitle,     status:'pending' as StepStatus },
+      { id:'ticker',    label: t.studio.stepTicker,    status:'pending' as StepStatus },
+      { id:'category',  label: t.studio.stepCategory,  status:'pending' as StepStatus },
+      { id:'curve',     label: t.studio.stepCurve,     status:'pending' as StepStatus },
+      { id:'moderation',label: t.studio.stepAiCheck,   status:'pending' as StepStatus },
+      { id:'wallet',    label: t.studio.stepWallet,    status:'pending' as StepStatus },
+      { id:'gas',       label: t.studio.stepGas,       status:'pending' as StepStatus },
+      { id:'deploy',    label: t.studio.stepDeploy,    status:'pending' as StepStatus },
+    ].map(s => {
       if (s.id === 'upload')
-        return { ...s, status: hasFile ? 'done' : 'pending', note: hasFile ? fileInfo?.name : undefined }
+        return { ...s, status: hasFile ? 'done' : 'pending', note: hasFile ? fileInfo?.name : undefined } as Step
       if (s.id === 'metadata')
-        return { ...s, status: hasTitle && hasDesc ? 'done' : hasTitle ? 'active' : 'pending' }
+        return { ...s, status: hasTitle && hasDesc ? 'done' : hasTitle ? 'active' : 'pending' } as Step
       if (s.id === 'ticker')
-        return { ...s, status: hasTicker ? 'done' : hasTitle ? 'active' : 'pending', note: hasTicker ? form.ticker : undefined }
+        return { ...s, status: hasTicker ? 'done' : hasTitle ? 'active' : 'pending', note: hasTicker ? form.ticker : undefined } as Step
       if (s.id === 'category')
-        return { ...s, status: hasCat ? 'done' : 'pending', note: hasCat ? form.category : undefined }
+        return { ...s, status: hasCat ? 'done' : 'pending', note: hasCat ? form.category : undefined } as Step
       if (s.id === 'curve')
-        return { ...s, status: hasTitle ? 'done' : 'pending', note: hasTitle ? form.curveType : undefined }
+        return { ...s, status: hasTitle ? 'done' : 'pending', note: hasTitle ? form.curveType : undefined } as Step
       if (s.id === 'moderation')
         return { ...s,
-          status: modStatus==='approved'?'done':modStatus==='checking'?'active':modStatus==='rejected'?'error':'pending' }
+          status: modStatus==='approved'?'done':modStatus==='checking'?'active':modStatus==='rejected'?'error':'pending' } as Step
       if (s.id === 'wallet')
-        return { ...s, status: isConnected ? 'done' : 'error', note: isConnected && shortAddr ? `${shortAddr} connected` : 'Not connected' }
+        return { ...s, status: isConnected ? 'done' : 'error', note: isConnected && shortAddr ? `${shortAddr} connected` : t.studio.notConnected } as Step
       if (s.id === 'gas')
-        return { ...s, status: isConnected && ethBal >= 0.005 ? 'done' : 'error', note: isConnected ? `${ethBal.toFixed(4)} ETH available` : '—' }
+        return { ...s, status: isConnected && ethBal >= 0.005 ? 'done' : 'error', note: isConnected ? `${ethBal.toFixed(4)} ETH available` : '—' } as Step
       if (s.id === 'deploy')
-        return { ...s, status: modStatus==='approved'?'active':'pending' }
-      return s
+        return { ...s, status: modStatus==='approved'?'active':'pending' } as Step
+      return s as Step
     })
-  }, [form.title, form.description, form.ticker, form.category, form.curveType, fileInfo, modStatus])
+  }, [form.title, form.description, form.ticker, form.category, form.curveType, fileInfo, modStatus, t, isConnected, shortAddr, ethBal])
 
   const handleSubmit = useCallback(async () => {
     if (!form.title) return
@@ -743,9 +746,9 @@ export function StudioPage() {
       <motion.div variants={PANEL_V}
         className="flex items-center gap-3 px-4 shrink-0"
         style={{ height:36, background:'rgba(0,0,0,0.45)', borderBottom:'1px solid rgba(255,255,255,0.06)', marginBottom:0 }}>
-        <span className="font-mono text-[7px] tracking-[0.2em] uppercase" style={{ color:'rgba(255,255,255,0.22)' }}>STUDIO</span>
+        <span className="font-mono text-[7px] tracking-[0.2em] uppercase" style={{ color:'rgba(255,255,255,0.22)' }}>{t.studio.breadcrumbStudio}</span>
         <span style={{ color:'rgba(255,255,255,0.12)' }}>›</span>
-        <span className="font-mono text-[7px]" style={{ color:'rgba(255,255,255,0.16)' }}>New Artwork</span>
+        <span className="font-mono text-[7px]" style={{ color:'rgba(255,255,255,0.16)' }}>{t.studio.breadcrumbNew}</span>
         {form.title && (
           <motion.span initial={{ opacity:0, x:-4 }} animate={{ opacity:1, x:0 }}
             className="font-mono text-[7px]" style={{ color:'rgba(255,255,255,0.3)' }}>
@@ -754,7 +757,7 @@ export function StudioPage() {
         )}
         <div className="ml-auto flex items-center gap-3">
           <span className="font-mono text-[7px]" style={{ color:'rgba(255,255,255,0.16)' }}>
-            {isConnected && shortAddr ? `Connected: ${shortAddr}` : 'Not connected'}
+            {isConnected && shortAddr ? `Connected: ${shortAddr}` : t.studio.notConnected}
           </span>
           <span className="size-1.5 rounded-full" style={{ background: isConnected ? '#22c55e' : '#ef4444' }}/>
         </div>
