@@ -93,7 +93,7 @@ export interface Artwork {
   id:                  string
   title:               string
   description:         string | null
-  image_uri:           string | null   // direct image URL (IPFS or HTTPS)
+  image_uri?:          string | null   // direct image URL (IPFS or HTTPS)
   ipfs_metadata_uri:   string | null
   contract_address:    string | null   // null until deployed
   status:              ArtworkStatus
