@@ -2193,15 +2193,14 @@ function ListItem({
 }
 
 // ── Right column: Inspection Deck ─────────────────────────────────
-function StarRating({ value, count }: { value: number; count: number }) {
-  const full    = Math.floor(value)
-  const partial = value - full          // 0–1 fraction for partial star
-  const empty   = 5 - Math.ceil(value)
-  const uid     = `star-${Math.round(value * 100)}`
+function StarRating({ value, count }: { value: number | null; count: number }) {
+  const uid     = `star-${value != null ? Math.round(value * 100) : 'none'}`
+  const full    = value != null ? Math.floor(value) : 0
+  const partial = value != null ? value - full : 0
 
   return (
     <div className="flex items-center gap-2">
-      {/* Stars */}
+      {/* 5 stars — all grey when no rating */}
       <svg width={5 * 14 + 4 * 2} height={13} viewBox={`0 0 ${5 * 14 + 4 * 2} 13`} fill="none">
         <defs>
           {partial > 0 && (
@@ -2213,11 +2212,13 @@ function StarRating({ value, count }: { value: number; count: number }) {
         </defs>
         {Array.from({ length: 5 }, (_, i) => {
           const x    = i * 16
-          const fill = i < full
-            ? '#D4AF37'
-            : i === full && partial > 0
-              ? `url(#${uid})`
-              : 'rgba(255,255,255,0.12)'
+          const fill = value == null
+            ? 'rgba(255,255,255,0.12)'
+            : i < full
+              ? '#D4AF37'
+              : i === full && partial > 0
+                ? `url(#${uid})`
+                : 'rgba(255,255,255,0.12)'
           return (
             <path
               key={i}
@@ -2229,13 +2230,21 @@ function StarRating({ value, count }: { value: number; count: number }) {
         })}
       </svg>
 
-      {/* Numeric */}
-      <span className="font-mono text-[13px] font-medium" style={{ color: '#D4AF37' }}>
-        {value.toFixed(2)}
-      </span>
-      <span className="font-mono text-[9px]" style={{ color: 'rgba(255,255,255,0.22)' }}>
-        ({count} {count === 1 ? 'review' : 'reviews'})
-      </span>
+      {/* Numeric — show "—" when no reviews yet */}
+      {value != null ? (
+        <>
+          <span className="font-mono text-[13px] font-medium" style={{ color: '#D4AF37' }}>
+            {value.toFixed(2)}
+          </span>
+          <span className="font-mono text-[9px]" style={{ color: 'rgba(255,255,255,0.22)' }}>
+            ({count} {count === 1 ? 'review' : 'reviews'})
+          </span>
+        </>
+      ) : (
+        <span className="font-mono text-[10px]" style={{ color: 'rgba(255,255,255,0.22)' }}>
+          No reviews yet
+        </span>
+      )}
     </div>
   )
 }
@@ -2354,9 +2363,7 @@ function InspectionDeck({
               >
                 {art.title}
               </h2>
-              {avgRating !== null && (
-                <StarRating value={avgRating} count={ratingCount} />
-              )}
+              <StarRating value={avgRating} count={ratingCount} />
             </div>
 
             {/* Artist */}
