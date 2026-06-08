@@ -2193,6 +2193,53 @@ function ListItem({
 }
 
 // ── Right column: Inspection Deck ─────────────────────────────────
+function StarRating({ value, count }: { value: number; count: number }) {
+  const full    = Math.floor(value)
+  const partial = value - full          // 0–1 fraction for partial star
+  const empty   = 5 - Math.ceil(value)
+  const uid     = `star-${Math.round(value * 100)}`
+
+  return (
+    <div className="flex items-center gap-2">
+      {/* Stars */}
+      <svg width={5 * 14 + 4 * 2} height={13} viewBox={`0 0 ${5 * 14 + 4 * 2} 13`} fill="none">
+        <defs>
+          {partial > 0 && (
+            <linearGradient id={uid} x1="0" x2="1" y1="0" y2="0">
+              <stop offset={`${(partial * 100).toFixed(0)}%`} stopColor="#D4AF37"/>
+              <stop offset={`${(partial * 100).toFixed(0)}%`} stopColor="rgba(255,255,255,0.12)"/>
+            </linearGradient>
+          )}
+        </defs>
+        {Array.from({ length: 5 }, (_, i) => {
+          const x    = i * 16
+          const fill = i < full
+            ? '#D4AF37'
+            : i === full && partial > 0
+              ? `url(#${uid})`
+              : 'rgba(255,255,255,0.12)'
+          return (
+            <path
+              key={i}
+              transform={`translate(${x}, 0)`}
+              d="M7 0.5l1.545 3.131 3.455.502-2.5 2.437.59 3.43L7 8.25l-3.09 1.25.59-3.43L2 3.633l3.455-.502L7 .5z"
+              fill={fill}
+            />
+          )
+        })}
+      </svg>
+
+      {/* Numeric */}
+      <span className="font-mono text-[13px] font-medium" style={{ color: '#D4AF37' }}>
+        {value.toFixed(2)}
+      </span>
+      <span className="font-mono text-[9px]" style={{ color: 'rgba(255,255,255,0.22)' }}>
+        ({count} {count === 1 ? 'review' : 'reviews'})
+      </span>
+    </div>
+  )
+}
+
 function InspectionDeck({
   art,
   livePrice,
@@ -2207,13 +2254,33 @@ function InspectionDeck({
   const [chartRange,   setChartRange]   = useState<TimeRange>('1D')
   const [chartHovered, setChartHovered] = useState(false)
   const [tilt,         setTilt]         = useState({ rx: 0, ry: 0 })
+  const [avgRating,    setAvgRating]    = useState<number | null>(null)
+  const [ratingCount,  setRatingCount]  = useState(0)
 
   // Reset state when artwork changes
   useEffect(() => {
     setChartRange('1D')
     setChartHovered(false)
     setTilt({ rx: 0, ry: 0 })
+    setAvgRating(null)
+    setRatingCount(0)
   }, [art.id])
+
+  // Fetch avg_rating from social stats
+  useEffect(() => {
+    if (!art.artworkId || art.artworkId === '') return
+    let alive = true
+    fetch(`${(process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:3001/api/v1').replace(/\/$/, '')}/social/stats/${art.artworkId}`)
+      .then(r => r.ok ? r.json() : null)
+      .then(data => {
+        if (!alive || !data) return
+        const raw = data?.data ?? data   // handle TransformInterceptor wrapper
+        if (raw?.avg_rating != null) setAvgRating(parseFloat(raw.avg_rating.toFixed(2)))
+        if (raw?.comment_count != null) setRatingCount(raw.comment_count)
+      })
+      .catch(() => {})
+    return () => { alive = false }
+  }, [art.artworkId])
 
   const handleTiltMove = useCallback((e: React.MouseEvent<HTMLDivElement>) => {
     const rect = e.currentTarget.getBoundingClientRect()
@@ -2303,6 +2370,11 @@ function InspectionDeck({
             >
               {art.description}
             </p>
+
+            {/* Star rating */}
+            {avgRating !== null && (
+              <StarRating value={avgRating} count={ratingCount} />
+            )}
 
             {/* Key metrics */}
             <div className="grid grid-cols-3 gap-2 mt-1">
