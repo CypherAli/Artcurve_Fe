@@ -304,6 +304,19 @@ function UserMenuDropdown({
             </svg>
           ),
         },
+        {
+          label: 'AI Agent',
+          desc:  'Smart trading & analysis',
+          href:  '/agent',
+          icon: (
+            <svg viewBox="0 0 24 24" className="w-[17px] h-[17px]" fill="none" stroke="currentColor" strokeWidth="1.7">
+              <path d="M12 2a4 4 0 0 1 4 4v1h1a2 2 0 0 1 2 2v3a2 2 0 0 1-2 2h-1v1a4 4 0 0 1-8 0v-1H7a2 2 0 0 1-2-2V9a2 2 0 0 1 2-2h1V6a4 4 0 0 1 4-4z" strokeLinecap="round" strokeLinejoin="round"/>
+              <circle cx="9.5" cy="10.5" r="1" fill="currentColor" stroke="none"/>
+              <circle cx="14.5" cy="10.5" r="1" fill="currentColor" stroke="none"/>
+              <path d="M9 14.5s1 1.5 3 1.5 3-1.5 3-1.5" strokeLinecap="round"/>
+            </svg>
+          ),
+        },
       ],
     },
     {
