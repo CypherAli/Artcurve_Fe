@@ -13,9 +13,10 @@
 
 import type { Metadata, Viewport } from 'next'
 import { Cormorant_Garamond, Inter } from 'next/font/google'
-import { SmoothScrollProvider } from '@/providers/SmoothScrollProvider'
-import { Web3Provider }         from '@/providers/Web3Provider'
-import { ToastContainer }       from '@/components/common/Toast'
+import { SmoothScrollProvider }  from '@/providers/SmoothScrollProvider'
+import { Web3Provider }          from '@/providers/Web3Provider'
+import { ToastContainer }        from '@/components/common/Toast'
+import { LanguageProvider }      from '@/context/LanguageContext'
 import './globals.css'
 
 // ── Font configuration ────────────────────────────────────────────
@@ -82,6 +83,7 @@ export default function RootLayout({
       className={`${inter.variable} ${cormorant.variable}`}
     >
       <body className="min-h-dvh bg-[#FDFBF7] text-[#1A1A1A] antialiased">
+        <LanguageProvider>
         <SmoothScrollProvider>
           <Web3Provider>
             {/* Accessibility: skip to main content */}
@@ -99,6 +101,7 @@ export default function RootLayout({
             <ToastContainer />
           </Web3Provider>
         </SmoothScrollProvider>
+        </LanguageProvider>
       </body>
     </html>
   )

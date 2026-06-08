@@ -10,6 +10,8 @@ import { authStore }                   from '@/lib/auth-store'
 import { userService }                 from '@/services/user.service'
 import { useNotifications }            from '@/hooks/useNotifications'
 import type { AppNotification }        from '@/store/notificationStore'
+import { useLanguage }                 from '@/context/LanguageContext'
+import { LANGUAGES, type LocaleCode }  from '@/i18n'
 
 function NotifTypeIcon({ type }: { type: string }) {
   const wrap = (bg: string, el: React.ReactNode) => (
@@ -457,6 +459,163 @@ function UserMenuDropdown({
   )
 }
 
+// ── LangSwitcher ──────────────────────────────────────────────────
+function LangSwitcher({ theme }: { theme: typeof THEMES[keyof typeof THEMES] }) {
+  const { locale, setLocale, t } = useLanguage()
+  const [open,   setOpen]   = useState(false)
+  const [search, setSearch] = useState('')
+  const panelRef            = useRef<HTMLDivElement>(null)
+  const current             = LANGUAGES.find(l => l.code === locale) ?? LANGUAGES[0]
+
+  // Animate panel
+  useEffect(() => {
+    if (!open || !panelRef.current) return
+    const ctx = gsap.context(() => {
+      gsap.fromTo(panelRef.current,
+        { autoAlpha: 0, y: -8, scale: 0.96 },
+        { autoAlpha: 1, y: 0,  scale: 1, duration: 0.24, ease: 'power3.out' },
+      )
+    })
+    return () => ctx.revert()
+  }, [open])
+
+  // Outside click
+  useEffect(() => {
+    if (!open) return
+    const handler = (e: MouseEvent) => {
+      const root = panelRef.current?.closest('[data-lang-root]')
+      if (!root?.contains(e.target as Node)) { setOpen(false); setSearch('') }
+    }
+    const t = setTimeout(() => document.addEventListener('mousedown', handler), 0)
+    return () => { clearTimeout(t); document.removeEventListener('mousedown', handler) }
+  }, [open])
+
+  const filtered = LANGUAGES.filter(l =>
+    search === '' ||
+    l.label.toLowerCase().includes(search.toLowerCase()) ||
+    l.native.toLowerCase().includes(search.toLowerCase()) ||
+    l.code.toLowerCase().includes(search.toLowerCase())
+  )
+
+  return (
+    <div className="relative" data-lang-root>
+      {/* Trigger */}
+      <button
+        type="button"
+        onClick={() => { setOpen(v => !v); setSearch('') }}
+        className="flex items-center gap-1.5 h-9 px-2.5 rounded-full transition-all duration-200 select-none"
+        style={{
+          color:      open ? theme.navHover : theme.bell,
+          background: open ? theme.bellActiveBg : 'transparent',
+          border:     `1px solid ${open ? theme.gold + '55' : 'transparent'}`,
+        }}
+        onMouseEnter={e => { (e.currentTarget as HTMLElement).style.background = theme.bellHoverBg }}
+        onMouseLeave={e => { (e.currentTarget as HTMLElement).style.background = open ? theme.bellActiveBg : 'transparent' }}
+        aria-label="Switch language"
+      >
+        {/* Globe icon */}
+        <svg viewBox="0 0 24 24" className="w-[18px] h-[18px]" fill="none" stroke="currentColor" strokeWidth="1.6">
+          <circle cx="12" cy="12" r="10"/>
+          <path d="M2 12h20M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z" strokeLinecap="round"/>
+        </svg>
+        <span className="font-mono text-[11px] tracking-wider uppercase font-medium">
+          {current.code}
+        </span>
+        <svg viewBox="0 0 24 24" className={`w-2.5 h-2.5 transition-transform duration-200 ${open ? 'rotate-180' : ''}`}
+          fill="none" stroke="currentColor" strokeWidth="2.5">
+          <path d="M6 9l6 6 6-6" strokeLinecap="round" strokeLinejoin="round"/>
+        </svg>
+      </button>
+
+      {/* Dropdown */}
+      {open && (
+        <div ref={panelRef}
+          className="absolute right-0 top-[calc(100%+10px)] w-[240px] rounded-2xl overflow-hidden"
+          style={{
+            background:      '#0E0E0E',
+            border:          '1px solid rgba(212,175,55,0.18)',
+            boxShadow:       '0 24px 60px rgba(0,0,0,0.6), 0 0 0 1px rgba(255,255,255,0.03) inset',
+            transformOrigin: 'top right',
+            zIndex:          60,
+          }}
+        >
+          {/* Gold accent line */}
+          <div className="h-[2px] w-full"
+            style={{ background: 'linear-gradient(90deg, #D4AF37 0%, rgba(212,175,55,0.3) 60%, transparent 100%)' }}
+          />
+
+          {/* Header */}
+          <div className="px-4 pt-3.5 pb-2.5">
+            <p className="text-[10px] font-mono tracking-[0.22em] uppercase mb-2.5"
+              style={{ color: 'rgba(212,175,55,0.55)' }}>
+              {t.lang.label}
+            </p>
+            {/* Search */}
+            <div className="relative">
+              <svg viewBox="0 0 24 24" className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3 h-3"
+                style={{ color: 'rgba(255,255,255,0.22)' }} fill="none" stroke="currentColor" strokeWidth="2">
+                <circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35" strokeLinecap="round"/>
+              </svg>
+              <input
+                type="text"
+                value={search}
+                onChange={e => setSearch(e.target.value)}
+                placeholder={t.lang.search}
+                autoFocus
+                className="w-full h-7 pl-7 pr-3 rounded-lg text-[11px] outline-none"
+                style={{
+                  background:  'rgba(255,255,255,0.05)',
+                  border:      '1px solid rgba(255,255,255,0.09)',
+                  color:       'rgba(255,255,255,0.72)',
+                }}
+              />
+            </div>
+          </div>
+
+          {/* Language list */}
+          <div className="pb-2 overflow-y-auto" style={{ maxHeight: 260, scrollbarWidth: 'thin', scrollbarColor: 'rgba(212,175,55,0.1) transparent' }}>
+            {filtered.map(lang => {
+              const active = lang.code === locale
+              return (
+                <button
+                  key={lang.code}
+                  type="button"
+                  onClick={() => { setLocale(lang.code as LocaleCode); setOpen(false); setSearch('') }}
+                  className="w-full flex items-center gap-3 px-4 py-2.5 transition-colors duration-150"
+                  style={{
+                    background: active ? 'rgba(212,175,55,0.1)' : 'transparent',
+                    color:      active ? '#D4AF37' : 'rgba(255,255,255,0.55)',
+                  }}
+                  onMouseEnter={e => { if (!active) (e.currentTarget as HTMLElement).style.background = 'rgba(255,255,255,0.04)' }}
+                  onMouseLeave={e => { if (!active) (e.currentTarget as HTMLElement).style.background = 'transparent' }}
+                >
+                  <span className="text-[18px] leading-none">{lang.flag}</span>
+                  <div className="flex-1 text-left min-w-0">
+                    <p className="text-[12px] font-medium leading-tight">{lang.native}</p>
+                    <p className="text-[10px] mt-0.5" style={{ color: active ? 'rgba(212,175,55,0.55)' : 'rgba(255,255,255,0.22)' }}>
+                      {lang.label}
+                    </p>
+                  </div>
+                  {active && (
+                    <svg viewBox="0 0 24 24" className="w-3.5 h-3.5 shrink-0" fill="none" stroke="#D4AF37" strokeWidth="2.5">
+                      <path d="M20 6L9 17l-5-5" strokeLinecap="round" strokeLinejoin="round"/>
+                    </svg>
+                  )}
+                </button>
+              )
+            })}
+            {filtered.length === 0 && (
+              <p className="text-center py-4 text-[11px] font-mono" style={{ color: 'rgba(255,255,255,0.18)' }}>
+                No results
+              </p>
+            )}
+          </div>
+        </div>
+      )}
+    </div>
+  )
+}
+
 const NAV_LINKS_PUBLIC = [
   { label: 'Marketplace', href: '/marketplace' },
   { label: 'Trade',       href: '/trade' },
@@ -638,6 +797,9 @@ export function Header({ dark = false }: HeaderProps) {
 
       {/* ── Right ─────────────────────────────────────────────── */}
       <div className="flex items-center gap-3">
+
+        {/* Language switcher */}
+        <LangSwitcher theme={T} />
 
         {/* Bell */}
         <div className="relative" data-notif-root>

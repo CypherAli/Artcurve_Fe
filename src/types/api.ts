@@ -49,6 +49,7 @@ export interface UpdateProfileDto {
   bio?:            string
   avatar_url?:     string
   twitter_handle?: string
+  language?:       string
 }
 
 // ── Auth ──────────────────────────────────────────────────────────
