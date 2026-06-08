@@ -334,7 +334,8 @@ const ARTWORKS_MOCK: MarketArtwork[] = ([
   // Deterministic plausible ratings per artwork (3.50 – 5.00)
   rating:      parseFloat((3.5 + ((i * 37 + 11) % 16) / 10).toFixed(2)),
   ratingCount: 3 + ((i * 13 + 7) % 28),
-})))
+}))
+
 
 // ── Adapter: backend Artwork → MarketArtwork ──────────────────────
 function adaptArtwork(artwork: Artwork, index: number): MarketArtwork {
