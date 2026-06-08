@@ -2342,17 +2342,22 @@ function InspectionDeck({
               </span>
             </div>
 
-            {/* Title */}
-            <h2
-              className="font-light leading-[1.08]"
-              style={{
-                fontFamily: "'Cormorant Garamond', serif",
-                fontSize:   'clamp(1.6rem, 2.4vw, 2.4rem)',
-                color:      '#FDFBF7',
-              }}
-            >
-              {art.title}
-            </h2>
+            {/* Title + star rating */}
+            <div className="flex items-baseline gap-3 flex-wrap">
+              <h2
+                className="font-light leading-[1.08]"
+                style={{
+                  fontFamily: "'Cormorant Garamond', serif",
+                  fontSize:   'clamp(1.6rem, 2.4vw, 2.4rem)',
+                  color:      '#FDFBF7',
+                }}
+              >
+                {art.title}
+              </h2>
+              {avgRating !== null && (
+                <StarRating value={avgRating} count={ratingCount} />
+              )}
+            </div>
 
             {/* Artist */}
             <p className="text-[10px] tracking-[0.24em] uppercase"
@@ -2370,11 +2375,6 @@ function InspectionDeck({
             >
               {art.description}
             </p>
-
-            {/* Star rating */}
-            {avgRating !== null && (
-              <StarRating value={avgRating} count={ratingCount} />
-            )}
 
             {/* Key metrics */}
             <div className="grid grid-cols-3 gap-2 mt-1">
