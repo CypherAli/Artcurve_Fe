@@ -595,12 +595,13 @@ function LangSwitcher({ theme }: { theme: typeof THEMES[keyof typeof THEMES] }) 
           <div
             className="pb-1.5"
             style={{
-              overflowY:        'auto',
-              maxHeight:        '210px',
+              overflowY:          'auto',
+              maxHeight:          '210px',
               overscrollBehavior: 'contain',
-              scrollbarWidth:   'thin',
-              scrollbarColor:   'rgba(212,175,55,0.3) rgba(255,255,255,0.04)',
+              scrollbarWidth:     'thin',
+              scrollbarColor:     'rgba(212,175,55,0.3) rgba(255,255,255,0.04)',
             }}
+            onWheel={e => e.stopPropagation()}
           >
             {filtered.map(lang => {
               const active = lang.code === locale
