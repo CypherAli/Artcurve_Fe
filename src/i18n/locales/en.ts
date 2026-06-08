@@ -1,4 +1,53 @@
-const en = {
+export interface Translations {
+  nav: {
+    marketplace: string
+    trade:       string
+    live:        string
+    guild:       string
+    vault:       string
+    studio:      string
+  }
+  header: {
+    notifications:   string
+    markAllRead:     string
+    allCaughtUp:     string
+    viewAllActivity: string
+    clearAll:        string
+    all:             string
+    unread:          string
+    signOut:         string
+    connectWallet:   string
+  }
+  lang: {
+    label:  string
+    search: string
+  }
+  common: {
+    viewDetailReviews: string
+    buy:               string
+    sell:              string
+    collect:           string
+    noReviewsYet:      string
+    loading:           string
+    error:             string
+  }
+  marketplace: {
+    title:       string
+    subtitle:    string
+    totalVolume: string
+    listings:    string
+    trades24h:   string
+    all:         string
+    search:      string
+    race:        string
+    marketCap:   string
+    change24h:   string
+    change7d:    string
+    liveActivity:string
+  }
+}
+
+const en: Translations = {
   nav: {
     marketplace: 'Marketplace',
     trade:       'Trade',
@@ -19,8 +68,8 @@ const en = {
     connectWallet:   'Connect Wallet',
   },
   lang: {
-    label:       'Language',
-    search:      'Search language…',
+    label:  'Language',
+    search: 'Search language…',
   },
   common: {
     viewDetailReviews: 'View Detail & Reviews',
@@ -45,7 +94,6 @@ const en = {
     change7d:    '7d Change',
     liveActivity:'Live Activity',
   },
-} as const
+}
 
-export type Translations = typeof en
 export default en
