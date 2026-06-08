@@ -31,8 +31,9 @@ import { PHASE_COLOR, Phase }      from './ArtCard'
 import { CandlestickChart }        from '../common/CandlestickChart'
 import { useMarketplace }          from '@/hooks/useMarketplace'
 import { artworkService }          from '@/services/artwork.service'
+import { tradeService }            from '@/services/trade.service'
 import { useBinanceTicker, fmtUSD, fmtChange, TICKER_COINS } from '@/hooks/useBinanceTicker'
-import type { Artwork }            from '@/types/api'
+import type { Artwork, RecentTrade } from '@/types/api'
 import type { StoredArtwork }      from '@/components/artwork/ArtworkDetailPage'
 
 // ── Extended artwork type ──────────────────────────────────────────
@@ -340,8 +341,8 @@ function adaptArtwork(artwork: Artwork, index: number): MarketArtwork {
     progress >= 50 ? 'FOMO' :
                      'Accumulation'
 
-  // Resolve IPFS image to HTTPS gateway
-  const rawImg = artwork.ipfs_metadata_uri ?? ''
+  // Resolve IPFS image to HTTPS gateway — prefer image_uri (direct), fallback ipfs_metadata_uri
+  const rawImg = artwork.image_uri ?? artwork.ipfs_metadata_uri ?? ''
   const image  = rawImg.startsWith('ipfs://')
     ? `https://gateway.pinata.cloud/ipfs/${rawImg.replace('ipfs://', '')}`
     : rawImg || '/images/artworks/art1.jpg'
@@ -686,6 +687,31 @@ function TickerTape() {
   )
 }
 
+// ── Convert RecentTrade → LiveTrade ────────────────────────────────
+function adaptRecentTrade(t: RecentTrade, idx: number): LiveTrade {
+  const rawImg = t.artwork.image_uri ?? t.artwork.ipfs_metadata_uri ?? ''
+  const image  = rawImg.startsWith('ipfs://')
+    ? `https://gateway.pinata.cloud/ipfs/${rawImg.replace('ipfs://', '')}`
+    : rawImg || '/images/artworks/art1.jpg'
+  const ticker = t.artwork.ticker ? `$${t.artwork.ticker}` : `$TKN${idx + 1}`
+  // Use a neutral phase color since we don't have phase info in RecentTrade
+  const art: MarketArtwork = {
+    id: idx + 1, artworkId: t.artwork.id, title: t.artwork.title, ticker,
+    artist: '', artistAddr: '', phase: 'Accumulation',
+    phaseColor: PHASE_COLOR['Accumulation'], marketCap: 0, marketCapLabel: '',
+    change24h: '', changePositive: true, change7d: '', volume24h: '',
+    holders: 0, progress: 0, image, description: '', sparkline: [],
+  }
+  const addr = t.user.wallet_address
+  return {
+    id:        Date.now() + idx,
+    art,
+    addr:      `${addr.slice(0, 5)}…${addr.slice(-3)}`,
+    action:    t.tx_type === 'BUY' ? 'bought' : 'collected',
+    ethAmount: parseFloat(t.eth_amount).toFixed(3),
+  }
+}
+
 // ── Live activity feed (placed below list items) ──────────────────
 function ActivityFeed() {
   const [trades, setTrades] = useState<LiveTrade[]>(() =>
@@ -699,16 +725,36 @@ function ActivityFeed() {
   )
   const counterRef = useRef(10)
 
+  // Fetch real recent trades on mount, poll every 15s
+  useEffect(() => {
+    let alive = true
+    const load = () => {
+      tradeService.recent(10).then(data => {
+        if (alive && data.length > 0) {
+          setTrades(data.map(adaptRecentTrade))
+        }
+      }).catch(() => { /* keep mock */ })
+    }
+    load()
+    const poll = setInterval(load, 15_000)
+    return () => { alive = false; clearInterval(poll) }
+  }, [])
+
+  // Keep simulated activity when API returns no data
   useEffect(() => {
     const timer = setInterval(() => {
       const c = counterRef.current++
-      setTrades(prev => [{
-        id:        Date.now() + c,
-        art:       ARTWORKS_MOCK[c % ARTWORKS_MOCK.length],
-        addr:      FAKE_WALLETS[c % FAKE_WALLETS.length],
-        action:    (c % 3 === 0 ? 'collected' : 'bought') as LiveTrade['action'],
-        ethAmount: (0.12 + (c % 5) * 0.28).toFixed(2),
-      }, ...prev.slice(0, 6)])
+      setTrades(prev => {
+        // Only inject fake rows if we're still on mock data (no artworkId)
+        if (prev.length > 0 && prev[0].art.artworkId !== '') return prev
+        return [{
+          id:        Date.now() + c,
+          art:       ARTWORKS_MOCK[c % ARTWORKS_MOCK.length],
+          addr:      FAKE_WALLETS[c % FAKE_WALLETS.length],
+          action:    (c % 3 === 0 ? 'collected' : 'bought') as LiveTrade['action'],
+          ethAmount: (0.12 + (c % 5) * 0.28).toFixed(2),
+        }, ...prev.slice(0, 6)]
+      })
     }, 3600)
     return () => clearInterval(timer)
   }, [])
@@ -2641,6 +2687,7 @@ export function MarketplacePage() {
     page,
     setPage,
     pageCount,
+    setSortBy: _setSortBy,
   } = useMarketplace({ initialLimit: 20 })
   const _apiArtworks = useMemo(
     () => _rawArtworks.map(adaptArtwork),
@@ -2904,13 +2951,13 @@ export function MarketplacePage() {
     resumeTimer.current = setTimeout(() => setListHovered(false), 2000)
   }, [])
 
-  // Phase counts
+  // Phase counts — ARTWORKS in deps so counts update when API data arrives
   const counts = useMemo(() => ({
     All:          ARTWORKS.length,
     Accumulation: ARTWORKS.filter(a => a.phase === 'Accumulation').length,
     FOMO:         ARTWORKS.filter(a => a.phase === 'FOMO').length,
     Migration:    ARTWORKS.filter(a => a.phase === 'Migration').length,
-  }), [])
+  }), [ARTWORKS])
 
   // Header entrance
   useEffect(() => {
@@ -3154,7 +3201,16 @@ export function MarketplacePage() {
                     }}>
                     {SORT_OPTIONS.map(s => (
                       <button key={s.key} type="button"
-                        onClick={() => { setSortKey(s.key); setSortOpen(false) }}
+                        onClick={() => {
+                          setSortKey(s.key)
+                          setSortOpen(false)
+                          // Propagate to API — map UI sort keys to backend sortBy param
+                          const apiSort = s.key === 'newest' ? 'created_at'
+                            : s.key === 'price_asc' || s.key === 'price_desc' ? 'price'
+                            : 'created_at'
+                          _setSortBy(apiSort as Parameters<typeof _setSortBy>[0])
+                          setPage(1)
+                        }}
                         className="w-full text-left px-4 py-2.5 text-[10px] tracking-wide
                                    transition-colors duration-100 flex items-center justify-between"
                         style={{
