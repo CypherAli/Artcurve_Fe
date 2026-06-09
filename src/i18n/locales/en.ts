@@ -18,6 +18,9 @@ export interface Translations {
     title: string; subtitle: string; totalVolume: string; listings: string
     trades24h: string; all: string; search: string; race: string
     marketCap: string; change24h: string; change7d: string; liveActivity: string
+    sortMarketCap: string; sortTopGainers: string; sortPriceHigh: string
+    sortPriceLow: string; sortRecent: string
+    curveProgress: string; toGraduation: string; artwork: string
   }
   trade: {
     markets: string; search: string; change24h: string; vol24h: string
@@ -213,6 +216,10 @@ const en: Translations = {
     totalVolume: 'Total Volume', listings: 'Live Listings', trades24h: '24H Trades',
     all: 'All', search: 'Search…', race: 'Race', marketCap: 'Market Cap',
     change24h: '24h Change', change7d: '7d Change', liveActivity: 'Live Activity',
+    sortMarketCap: 'Market Cap', sortTopGainers: 'Top Gainers',
+    sortPriceHigh: 'Price: High → Low', sortPriceLow: 'Price: Low → High',
+    sortRecent: 'Recently Listed',
+    curveProgress: 'Curve Progress', toGraduation: 'to Graduation', artwork: 'Artwork',
   },
   trade: {
     markets: 'Markets', search: 'Search…', change24h: '24H Change',

@@ -390,13 +390,7 @@ function adaptArtwork(artwork: Artwork, index: number): MarketArtwork {
 
 // ── Sort / phase types ─────────────────────────────────────────────
 type SortKey = 'market_cap' | 'price_asc' | 'price_desc' | 'change' | 'newest'
-const SORT_OPTIONS: { key: SortKey; label: string }[] = [
-  { key: 'market_cap', label: 'Market Cap' },
-  { key: 'change',     label: 'Top Gainers' },
-  { key: 'price_desc', label: 'Price: High → Low' },
-  { key: 'price_asc',  label: 'Price: Low → High' },
-  { key: 'newest',     label: 'Recently Listed' },
-]
+// SORT_OPTIONS is built inside MarketplacePage so labels can use t.*
 
 const PHASE_TABS: { key: Phase | 'All'; label: string }[] = [
   { key: 'All',          label: 'ALL' },
@@ -2538,8 +2532,8 @@ function InspectionDeck({
           {/* Progress bar */}
           <div>
             <div className="flex justify-between font-mono text-[9px] mb-1.5">
-              <span style={{ color: 'rgba(255,255,255,0.3)' }}>Curve Progress</span>
-              <span style={{ color: '#D4AF37' }}>{art.progress}% to Graduation</span>
+              <span style={{ color: 'rgba(255,255,255,0.3)' }}>{t.marketplace.curveProgress}</span>
+              <span style={{ color: '#D4AF37' }}>{art.progress}% {t.marketplace.toGraduation}</span>
             </div>
             <div className="h-[5px] w-full rounded-full"
               style={{ background: 'rgba(255,255,255,0.08)' }}>
@@ -2776,6 +2770,15 @@ const ROTATE_MS = 4500
 // ── Main MarketplacePage ───────────────────────────────────────────
 export function MarketplacePage() {
   const { t } = useLanguage()
+
+  const SORT_OPTIONS: { key: SortKey; label: string }[] = [
+    { key: 'market_cap', label: t.marketplace.sortMarketCap },
+    { key: 'change',     label: t.marketplace.sortTopGainers },
+    { key: 'price_desc', label: t.marketplace.sortPriceHigh },
+    { key: 'price_asc',  label: t.marketplace.sortPriceLow },
+    { key: 'newest',     label: t.marketplace.sortRecent },
+  ]
+
   // ── Backend data (falls back to mock when API unreachable) ────────
   const {
     artworks: _rawArtworks,
@@ -3399,7 +3402,7 @@ export function MarketplacePage() {
                 borderBottom:        '1px solid rgba(255,255,255,0.06)',
               }}
             >
-              {['', 'Artwork', 'Cap', '%'].map(h => (
+              {['', t.marketplace.artwork, 'Cap', '%'].map(h => (
                 <p key={h} className="font-mono text-[7.5px] uppercase tracking-[0.2em]"
                   style={{ color: 'rgba(255,255,255,0.22)' }}>
                   {h}

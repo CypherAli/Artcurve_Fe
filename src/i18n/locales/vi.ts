@@ -24,6 +24,10 @@ const vi: Translations = {
     totalVolume: 'Tổng khối lượng', listings: 'Đang niêm yết', trades24h: 'GD 24H',
     all: 'Tất cả', search: 'Tìm kiếm…', race: 'Đua', marketCap: 'Vốn hoá',
     change24h: 'Thay đổi 24h', change7d: 'Thay đổi 7 ngày', liveActivity: 'Hoạt động trực tiếp',
+    sortMarketCap: 'Vốn hoá', sortTopGainers: 'Tăng nhiều nhất',
+    sortPriceHigh: 'Giá: Cao → Thấp', sortPriceLow: 'Giá: Thấp → Cao',
+    sortRecent: 'Mới niêm yết',
+    curveProgress: 'Tiến độ đường cong', toGraduation: 'đến tốt nghiệp', artwork: 'Tác phẩm',
   },
   trade: {
     markets: 'Thị trường', search: 'Tìm kiếm…', change24h: 'Thay đổi 24H',
