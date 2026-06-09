@@ -1234,6 +1234,7 @@ function TradePanel({ art, livePrice }: { art:TradeArtwork; livePrice:number }) 
 //  Main TradePage
 // ─────────────────────────────────────────────────────────────────
 export function TradePage() {
+  const { t } = useLanguage()
   // ── Backend data (falls back to mock when API unreachable) ────────
   const { artworks: _rawArtworks } = useMarketplace({ initialLimit: 50 })
   const _apiArtworks = useMemo(
