@@ -917,7 +917,7 @@ function TradePanel({ art, livePrice }: { art:TradeArtwork; livePrice:number }) 
               className="flex-1 py-2 font-mono text-[9px] tracking-[0.18em] uppercase font-bold relative"
               style={{ background:bg, borderBottom:`2px solid ${bd}`, color:active?c:'rgba(255,255,255,0.22)' }}>
               <span className="mr-1 text-[7.5px]">{s==='buy'?'▲':'▼'}</span>
-              {s.toUpperCase()}
+              {s==='buy' ? t.common.buy.toUpperCase() : t.common.sell.toUpperCase()}
             </motion.button>
           )
         })}

@@ -49,6 +49,7 @@ const vi: Translations = {
     tickerName: 'MÃ / TÊN', price24h: 'GIÁ / 24H',
     chipAll: 'Tất cả', chipAcc: 'TL', chipFomo: 'FOMO', chipMig: 'NY',
     spread: 'Spread', tradeHeader: 'GIAO DỊCH', graduation: 'NIÊM YẾT', candlestick: 'CANDLESTICK',
+    open: 'Mở cửa', high: 'Cao nhất', low: 'Thấp nhất', close: 'Đóng cửa',
   },
   guild: {
     joined: 'Đã tham gia', guilds: 'Hội nhóm', discover: 'Khám phá', myGuilds: 'Hội của tôi',

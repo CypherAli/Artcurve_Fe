@@ -37,6 +37,7 @@ export interface Translations {
     tickerName: string; price24h: string
     chipAll: string; chipAcc: string; chipFomo: string; chipMig: string
     spread: string; tradeHeader: string; graduation: string; candlestick: string
+    open: string; high: string; low: string; close: string
   }
   guild: {
     joined: string; guilds: string; discover: string; myGuilds: string
@@ -247,6 +248,7 @@ const en: Translations = {
     tickerName: 'TICKER / NAME', price24h: 'PRICE / 24H',
     chipAll: 'All', chipAcc: 'ACC', chipFomo: 'FOMO', chipMig: 'MIG',
     spread: 'Spread', tradeHeader: 'TRADE', graduation: 'GRADUATION', candlestick: 'CANDLESTICK',
+    open: 'Open', high: 'High', low: 'Low', close: 'Close',
   },
   guild: {
     joined: 'Joined', guilds: 'Guilds', discover: 'Discover', myGuilds: 'My Guilds',

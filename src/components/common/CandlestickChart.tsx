@@ -13,6 +13,7 @@ import dynamic   from 'next/dynamic'
 import { useMemo } from 'react'
 import type { ApexOptions } from 'apexcharts'
 import type { OhlcvCandle } from '@/types/api'
+import { useLanguage } from '@/context/LanguageContext'
 
 // ── Dynamic import — ApexCharts needs the browser ─────────────────
 const ReactApexChart = dynamic(() => import('react-apexcharts'), {
@@ -141,6 +142,7 @@ export function CandlestickChart({
   height = 160,
   apiCandles,
 }: CandlestickChartProps) {
+  const { t } = useLanguage()
 
   // Ưu tiên dữ liệu thật từ BE; fallback về mock khi chưa có data
   const candles = useMemo(() => {
@@ -234,19 +236,44 @@ export function CandlestickChart({
       ],
     },
 
-    // ── Tooltip ───────────────────────────────────────────────────
+    // ── Tooltip — custom để dịch Open/High/Low/Close ─────────────
     tooltip: {
       enabled: true,
-      theme:   'dark',
-      style:   {
-        fontFamily: '"Courier New", monospace',
-        fontSize:   '10px',
+      custom: ({ seriesIndex, dataPointIndex, w }: {
+        seriesIndex: number; dataPointIndex: number; w: {
+          globals: {
+            seriesCandleO: number[][]
+            seriesCandleH: number[][]
+            seriesCandleL: number[][]
+            seriesCandleC: number[][]
+          }
+        }
+      }) => {
+        const o = w.globals.seriesCandleO[seriesIndex]?.[dataPointIndex] ?? 0
+        const h = w.globals.seriesCandleH[seriesIndex]?.[dataPointIndex] ?? 0
+        const l = w.globals.seriesCandleL[seriesIndex]?.[dataPointIndex] ?? 0
+        const c = w.globals.seriesCandleC[seriesIndex]?.[dataPointIndex] ?? 0
+        const up = c >= o
+        const accent = up ? '#4ADE80' : '#EF4444'
+        const row = (label: string, val: number, color: string) =>
+          `<div style="display:flex;justify-content:space-between;gap:16px">
+            <span style="color:rgba(255,255,255,0.38)">${label}</span>
+            <span style="color:${color};font-weight:600">${val.toFixed(4)}</span>
+          </div>`
+        return `
+          <div style="background:rgba(8,8,8,0.96);border:1px solid rgba(255,255,255,0.1);
+            padding:8px 12px;font-family:'Courier New',monospace;font-size:9px;min-width:140px">
+            ${row(t.trade.open,  o, accent)}
+            ${row(t.trade.high,  h, '#4ADE80')}
+            ${row(t.trade.low,   l, '#EF4444')}
+            ${row(t.trade.close, c, accent)}
+          </div>`
       },
     },
 
     // ── Theme ─────────────────────────────────────────────────────
     theme: { mode: 'dark' },
-  }), [currentPrice, range, height])
+  }), [currentPrice, range, height, t])
 
   return (
     <div
