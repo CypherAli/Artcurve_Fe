@@ -28,7 +28,7 @@ const vi: Translations = {
     sortPriceHigh: 'Giá: Cao → Thấp', sortPriceLow: 'Giá: Thấp → Cao',
     sortRecent: 'Mới niêm yết',
     curveProgress: 'Tiến độ đường cong', toGraduation: 'đến niêm yết DEX', artwork: 'Tác phẩm',
-    phaseAccumulation: 'TÍCH LŨY', phaseFomo: 'FOMO', phaseMigration: 'DI CƯ',
+    phaseAccumulation: 'TÍCH LŨY', phaseFomo: 'FOMO', phaseMigration: 'NIÊM YẾT',
     edition: 'Ấn bản', editionOpen: 'Mở',
     bondingCurveHistory: 'Đường cong · Lịch sử giá',
     currentHolders: 'nhà sưu tập',
