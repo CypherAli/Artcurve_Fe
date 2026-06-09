@@ -46,6 +46,9 @@ const vi: Translations = {
     graduationWarning: 'Giao dịch này sẽ đưa tác phẩm lên DEX',
     youSell: 'Bạn bán', slippage: 'Trượt giá',
     confirming: 'Đang xác nhận…', orderExecuted: 'Lệnh đã khớp', noResults: 'Không có kết quả',
+    tickerName: 'MÃ / TÊN', price24h: 'GIÁ / 24H',
+    chipAll: 'Tất cả', chipAcc: 'TL', chipFomo: 'FOMO', chipMig: 'NY',
+    spread: 'Spread', tradeHeader: 'GIAO DỊCH', graduation: 'NIÊM YẾT', candlestick: 'CANDLESTICK',
   },
   guild: {
     joined: 'Đã tham gia', guilds: 'Hội nhóm', discover: 'Khám phá', myGuilds: 'Hội của tôi',

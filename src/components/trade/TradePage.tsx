@@ -335,7 +335,11 @@ function TokenPickerPanel({
   }, [artworks, sortPrices, search, phaseFilter])
 
   const phases: (Phase|'All')[] = ['All','Accumulation','FOMO','Migration']
-  const chipLabel = (p: Phase|'All') => p==='Accumulation'?'ACC':p==='Migration'?'MIG':p
+  const chipLabel = (p: Phase|'All') =>
+    p==='All' ? t.trade.chipAll :
+    p==='Accumulation' ? t.trade.chipAcc :
+    p==='FOMO' ? t.trade.chipFomo :
+    t.trade.chipMig
 
   return (
     <div className="flex flex-col h-full" style={{ borderRight:'1px solid rgba(255,255,255,0.05)' }}>
@@ -391,8 +395,8 @@ function TokenPickerPanel({
       {/* Column labels */}
       <div className="flex items-center justify-between px-3 py-1 shrink-0"
         style={{ borderBottom:'1px solid rgba(255,255,255,0.03)' }}>
-        <span className="font-mono text-[6.5px] tracking-wider" style={{ color:'rgba(255,255,255,0.14)' }}>TICKER / NAME</span>
-        <span className="font-mono text-[6.5px] tracking-wider" style={{ color:'rgba(255,255,255,0.14)' }}>PRICE / 24H</span>
+        <span className="font-mono text-[6.5px] tracking-wider" style={{ color:'rgba(255,255,255,0.14)' }}>{t.trade.tickerName}</span>
+        <span className="font-mono text-[6.5px] tracking-wider" style={{ color:'rgba(255,255,255,0.14)' }}>{t.trade.price24h}</span>
       </div>
 
       {/* Token list — AnimatePresence popLayout for smooth reorder */}
@@ -521,7 +525,11 @@ function PriceHeader({ art, livePrice }: { art: TradeArtwork; livePrice: number 
         className="ml-auto shrink-0 flex items-center gap-1.5 px-2.5 py-1"
         style={{ border:`1px solid ${art.phaseColor}30`, background:`${art.phaseColor}09` }}>
         <span className="size-1.5 rounded-full animate-pulse" style={{ background:art.phaseColor }}/>
-        <span className="font-mono text-[8px] tracking-[0.18em]" style={{ color:art.phaseColor }}>{art.phase.toUpperCase()}</span>
+        <span className="font-mono text-[8px] tracking-[0.18em]" style={{ color:art.phaseColor }}>
+          {art.phase==='Accumulation' ? t.marketplace.phaseAccumulation :
+           art.phase==='FOMO' ? t.marketplace.phaseFomo :
+           t.marketplace.phaseMigration}
+        </span>
       </motion.div>
     </div>
   )
@@ -574,7 +582,7 @@ function OrderBookPanel({ art, livePrice, bookTick }: { art:TradeArtwork; livePr
           {fmtETH(livePrice)} ETH
         </span>
         <span className="font-mono text-[7.5px]" style={{ color:'rgba(255,255,255,0.2)' }}>
-          Spread {fmtETH(spread)} · {((spread/livePrice)*100).toFixed(3)}%
+          {t.trade.spread} {fmtETH(spread)} · {((spread/livePrice)*100).toFixed(3)}%
         </span>
       </div>
       <div className="flex-1 overflow-hidden">
@@ -659,7 +667,7 @@ function BottomPanel({ art, livePrice, trades, bookTick }: {
         ))}
         <div className="ml-auto flex items-center gap-1.5 px-4">
           <span className="size-1.5 rounded-full animate-pulse" style={{ background:'#22c55e' }}/>
-          <span className="font-mono text-[7px] tracking-widest" style={{ color:'#22c55e' }}>LIVE</span>
+          <span className="font-mono text-[7px] tracking-widest" style={{ color:'#22c55e' }}>{t.common.live.toUpperCase()}</span>
         </div>
       </div>
       <div className="flex-1 min-h-0 overflow-hidden">
@@ -890,7 +898,7 @@ function TradePanel({ art, livePrice }: { art:TradeArtwork; livePrice:number }) 
             : 'linear-gradient(90deg,transparent,rgba(248,113,113,0.7),transparent)' }}
           transition={{ duration:0.4 }}
         />
-        <span className="font-mono text-[6.5px] tracking-[0.24em] uppercase" style={{ color:'rgba(255,255,255,0.22)' }}>TRADE</span>
+        <span className="font-mono text-[6.5px] tracking-[0.24em] uppercase" style={{ color:'rgba(255,255,255,0.22)' }}>{t.trade.tradeHeader}</span>
         <span className="font-mono text-[6.5px]" style={{ color:'rgba(255,255,255,0.14)' }}>{art.ticker} / ETH</span>
       </div>
 
@@ -1170,7 +1178,7 @@ function TradePanel({ art, livePrice }: { art:TradeArtwork; livePrice:number }) 
             }}>
             <AnimatePresence mode="wait">
               {txState==='idle'&&<motion.span key="idle" initial={{ opacity:0,y:5 }} animate={{ opacity:1,y:0 }} exit={{ opacity:0,y:-5 }}>
-                {isBuy?`▲ BUY ${art.ticker}`:`▼ SELL ${art.ticker}`}
+                {isBuy?`▲ ${t.common.buy.toUpperCase()} ${art.ticker}`:`▼ ${t.common.sell.toUpperCase()} ${art.ticker}`}
               </motion.span>}
               {txState==='pending'&&<motion.span key="pending" initial={{ opacity:0 }} animate={{ opacity:1 }} exit={{ opacity:0 }}
                 className="flex items-center justify-center gap-2">
@@ -1205,7 +1213,7 @@ function TradePanel({ art, livePrice }: { art:TradeArtwork; livePrice:number }) 
         {/* ── Graduation bar — ultra-compact ── */}
         <div className="shrink-0 pb-2">
           <div className="flex items-center justify-between mb-0.5">
-            <span className="font-mono text-[6px] tracking-wider uppercase" style={{ color:'rgba(255,255,255,0.14)' }}>GRADUATION</span>
+            <span className="font-mono text-[6px] tracking-wider uppercase" style={{ color:'rgba(255,255,255,0.14)' }}>{t.trade.graduation}</span>
             <span className="font-mono text-[7px] font-semibold" style={{ color:art.phaseColor }}>{art.progress}%</span>
           </div>
           <div className="h-1 w-full overflow-hidden" style={{ background:'rgba(255,255,255,0.05)' }}>
@@ -1458,7 +1466,7 @@ export function TradePage() {
             ))}
             <div className="ml-auto flex items-center gap-2 pr-1">
               <span className="font-mono text-[7.5px]" style={{ color:'rgba(255,255,255,0.16)' }}>
-                {selectedArt.ticker} / ETH · CANDLESTICK
+                {selectedArt.ticker} / ETH · {t.trade.candlestick}
               </span>
             </div>
           </div>

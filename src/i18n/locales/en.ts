@@ -34,6 +34,9 @@ export interface Translations {
     impact: string; minOut: string; graduationWarning: string
     youSell: string; slippage: string; confirming: string; orderExecuted: string
     noResults: string; priceEth: string; bal: string; max: string
+    tickerName: string; price24h: string
+    chipAll: string; chipAcc: string; chipFomo: string; chipMig: string
+    spread: string; tradeHeader: string; graduation: string; candlestick: string
   }
   guild: {
     joined: string; guilds: string; discover: string; myGuilds: string
@@ -241,6 +244,9 @@ const en: Translations = {
     graduationWarning: 'This trade would graduate the artwork to DEX',
     youSell: 'You Sell', slippage: 'Slippage',
     confirming: 'Confirming…', orderExecuted: 'Order Executed', noResults: 'No results',
+    tickerName: 'TICKER / NAME', price24h: 'PRICE / 24H',
+    chipAll: 'All', chipAcc: 'ACC', chipFomo: 'FOMO', chipMig: 'MIG',
+    spread: 'Spread', tradeHeader: 'TRADE', graduation: 'GRADUATION', candlestick: 'CANDLESTICK',
   },
   guild: {
     joined: 'Joined', guilds: 'Guilds', discover: 'Discover', myGuilds: 'My Guilds',
