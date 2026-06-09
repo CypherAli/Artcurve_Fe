@@ -82,6 +82,10 @@ export interface Translations {
     approved: string; approvedDetails: string; rejected: string; rejectedMessage: string
     breadcrumbStudio: string; breadcrumbNew: string
     connected: string; notConnected: string
+    catPainting: string; catDrawing: string; catDigital: string
+    catPhotography: string; catSculpture: string; catMixedMedia: string; catGenerative: string
+    curveLinear: string; curveQuadratic: string; curveExponential: string
+    untitledArtwork: string; clickToChange: string; aiModerationTitle: string
   }
   vault: {
     portfolioValue: string; timeframe7d: string; timeframe30d: string; timeframe90d: string
@@ -309,6 +313,12 @@ const en: Translations = {
     rejectedMessage: 'Possible IP conflict detected. Review and resubmit.',
     breadcrumbStudio: 'Studio', breadcrumbNew: 'New Artwork',
     connected: 'Connected: {addr}', notConnected: 'Not connected',
+    catPainting: 'Painting', catDrawing: 'Drawing', catDigital: 'Digital',
+    catPhotography: 'Photography', catSculpture: 'Sculpture',
+    catMixedMedia: 'Mixed Media', catGenerative: 'Generative',
+    curveLinear: 'Linear', curveQuadratic: 'Quadratic', curveExponential: 'Exponential',
+    untitledArtwork: 'Untitled Artwork', clickToChange: 'click to change',
+    aiModerationTitle: 'AI Moderation',
   },
   vault: {
     portfolioValue: 'Portfolio Value', timeframe7d: '7D', timeframe30d: '30D', timeframe90d: '90D',

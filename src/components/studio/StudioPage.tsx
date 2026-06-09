@@ -98,6 +98,17 @@ function UploadForm({
   const fileRef = useRef<HTMLInputElement>(null)
   const [dragOver, setDragOver] = useState(false)
 
+  const catLabel = (cat: Category): string => ({
+    Painting: t.studio.catPainting, Drawing: t.studio.catDrawing,
+    Digital: t.studio.catDigital, Photography: t.studio.catPhotography,
+    Sculpture: t.studio.catSculpture, 'Mixed Media': t.studio.catMixedMedia,
+    Generative: t.studio.catGenerative,
+  }[cat])
+
+  const curveLabel = (ct: 'linear'|'quadratic'|'exponential'): string =>
+    ct === 'linear' ? t.studio.curveLinear :
+    ct === 'quadratic' ? t.studio.curveQuadratic : t.studio.curveExponential
+
   function handleDrop(e: React.DragEvent) {
     e.preventDefault()
     setDragOver(false)
@@ -147,7 +158,7 @@ function UploadForm({
                 <path d="M9 12l2 2 4-4M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
               </svg>
               <span className="font-mono text-[8px] font-semibold" style={{ color:'#4ade80' }}>{fileInfo.name}</span>
-              <span className="font-mono text-[6.5px]" style={{ color:'rgba(74,222,128,0.45)' }}>{fileInfo.size} · click to change</span>
+              <span className="font-mono text-[6.5px]" style={{ color:'rgba(74,222,128,0.45)' }}>{fileInfo.size} · {t.studio.clickToChange}</span>
             </>
           ) : (
             <>
@@ -222,7 +233,7 @@ function UploadForm({
                     background: active?'rgba(212,175,55,0.1)':'transparent',
                     color: active?'#D4AF37':'rgba(255,255,255,0.3)',
                   }}>
-                  {cat}
+                  {catLabel(cat)}
                 </motion.button>
               )
             })}
@@ -259,7 +270,7 @@ function UploadForm({
                     background: active?'rgba(212,175,55,0.07)':'transparent',
                     color: active?'#D4AF37':'rgba(255,255,255,0.28)',
                   }}>
-                  {ct}
+                  {curveLabel(ct)}
                 </motion.button>
               )
             })}
@@ -351,6 +362,18 @@ function UploadForm({
 // ─────────────────────────────────────────────────────────────────
 function PreviewPanel({ form }: { form: FormData }) {
   const { t } = useLanguage()
+
+  const catLabel = (cat: Category): string => ({
+    Painting: t.studio.catPainting, Drawing: t.studio.catDrawing,
+    Digital: t.studio.catDigital, Photography: t.studio.catPhotography,
+    Sculpture: t.studio.catSculpture, 'Mixed Media': t.studio.catMixedMedia,
+    Generative: t.studio.catGenerative,
+  }[cat])
+
+  const curveLabel = (ct: 'linear'|'quadratic'|'exponential'): string =>
+    ct === 'linear' ? t.studio.curveLinear :
+    ct === 'quadratic' ? t.studio.curveQuadratic : t.studio.curveExponential
+
   const curveExp = form.curveType === 'linear' ? 1 : form.curveType === 'quadratic' ? 2 : 3
   const k = form.initPrice / Math.pow(1, curveExp)
   const pts = bondingCurvePoints(form.supply, k, curveExp)
@@ -369,7 +392,7 @@ function PreviewPanel({ form }: { form: FormData }) {
       <div className="flex items-center justify-between px-4 shrink-0"
         style={{ height:36, background:'rgba(0,0,0,0.38)', borderBottom:'1px solid rgba(255,255,255,0.05)' }}>
         <span className="font-mono text-[7px] tracking-[0.2em] uppercase" style={{ color:'rgba(255,255,255,0.22)' }}>{t.studio.previewLabel}</span>
-        <span className="font-mono text-[7.5px]" style={{ color:'rgba(255,255,255,0.18)' }}>{form.curveType} curve</span>
+        <span className="font-mono text-[7.5px]" style={{ color:'rgba(255,255,255,0.18)' }}>{t.studio.curveLabel.replace('{type}', curveLabel(form.curveType))}</span>
       </div>
 
       <div className="flex-1 overflow-y-auto px-4 py-4 flex flex-col gap-4"
@@ -393,12 +416,12 @@ function PreviewPanel({ form }: { form: FormData }) {
               {form.category && (
                 <span className="font-mono text-[6.5px] px-1.5 py-0.5"
                   style={{ border:'1px solid rgba(255,255,255,0.1)', color:'rgba(255,255,255,0.3)' }}>
-                  {form.category.toUpperCase()}
+                  {catLabel(form.category).toUpperCase()}
                 </span>
               )}
             </div>
             <div className="font-sans text-[10px] mt-0.5 truncate" style={{ color:'rgba(255,255,255,0.55)' }}>
-              {form.title || 'Untitled Artwork'}
+              {form.title || t.studio.untitledArtwork}
             </div>
             <div className="flex items-center gap-3 mt-2">
               <div>
@@ -479,7 +502,7 @@ function PreviewPanel({ form }: { form: FormData }) {
             </svg>
             <div>
               <div className="font-mono text-[7px] uppercase tracking-wider" style={{ color:'rgba(255,165,0,0.55)' }}>{t.studio.estGasCost}</div>
-              <div className="font-mono text-[6.5px] mt-0.5" style={{ color:'rgba(255,255,255,0.2)' }}>deploy on Base · {form.curveType} curve</div>
+              <div className="font-mono text-[6.5px] mt-0.5" style={{ color:'rgba(255,255,255,0.2)' }}>{t.studio.deployDesc.replace('{type}', curveLabel(form.curveType))}</div>
             </div>
           </div>
           <div className="text-right">
@@ -567,7 +590,7 @@ function ChecklistPanel({ steps, modStatus, submitError }: { steps:Step[]; modSt
       <div className="shrink-0 px-3 pb-3">
         <div className="p-3" style={{ border:'1px solid rgba(255,255,255,0.06)', background:'rgba(0,0,0,0.2)' }}>
           <div className="font-mono text-[7px] uppercase tracking-wider mb-2" style={{ color:'rgba(255,255,255,0.22)' }}>
-            AI MODERATION
+            {t.studio.aiModerationTitle}
           </div>
           <AnimatePresence mode="wait">
             {modStatus === 'idle' && (

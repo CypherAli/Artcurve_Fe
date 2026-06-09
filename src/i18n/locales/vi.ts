@@ -110,6 +110,12 @@ const vi: Translations = {
     rejectedMessage: 'Phát hiện xung đột IP tiềm năng. Vui lòng xem lại và gửi lại.',
     breadcrumbStudio: 'Studio', breadcrumbNew: 'Tác phẩm mới',
     connected: 'Đã kết nối: {addr}', notConnected: 'Chưa kết nối',
+    catPainting: 'Hội họa', catDrawing: 'Phác họa', catDigital: 'Kỹ thuật số',
+    catPhotography: 'Nhiếp ảnh', catSculpture: 'Điêu khắc',
+    catMixedMedia: 'Đa chất liệu', catGenerative: 'Sinh thành',
+    curveLinear: 'Tuyến tính', curveQuadratic: 'Bậc hai', curveExponential: 'Hàm mũ',
+    untitledArtwork: 'Tác phẩm chưa đặt tên', clickToChange: 'nhấn để thay đổi',
+    aiModerationTitle: 'Kiểm duyệt AI',
   },
   vault: {
     portfolioValue: 'Giá trị danh mục', timeframe7d: '7N', timeframe30d: '30N', timeframe90d: '90N',
