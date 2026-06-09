@@ -35,6 +35,7 @@ import { tradeService }            from '@/services/trade.service'
 import { useBinanceTicker, fmtUSD, fmtChange, TICKER_COINS } from '@/hooks/useBinanceTicker'
 import type { Artwork, RecentTrade } from '@/types/api'
 import type { StoredArtwork }      from '@/components/artwork/ArtworkDetailPage'
+import { useLanguage }             from '@/context/LanguageContext'
 
 // ── Extended artwork type ──────────────────────────────────────────
 interface MarketArtwork {
@@ -726,6 +727,7 @@ function adaptRecentTrade(t: RecentTrade, idx: number): LiveTrade {
 
 // ── Live activity feed (placed below list items) ──────────────────
 function ActivityFeed() {
+  const { t } = useLanguage()
   const [trades, setTrades] = useState<LiveTrade[]>(() =>
     [0, 1, 2, 3, 4].map(i => ({
       id:        i,
@@ -782,7 +784,7 @@ function ActivityFeed() {
           className="font-mono text-[8px] uppercase tracking-[0.22em]"
           style={{ color: 'rgba(255,255,255,0.22)' }}
         >
-          Live Activity
+          {t.marketplace.liveActivity}
         </span>
         <span className="flex items-center gap-1.5">
           <span
@@ -2206,6 +2208,7 @@ function ListItem({
 
 // ── Right column: Inspection Deck ─────────────────────────────────
 function StarRating({ value, count }: { value: number | null; count: number }) {
+  const { t } = useLanguage()
   const uid     = `star-${value != null ? Math.round(value * 100) : 'none'}`
   const full    = value != null ? Math.floor(value) : 0
   const partial = value != null ? value - full : 0
@@ -2254,7 +2257,7 @@ function StarRating({ value, count }: { value: number | null; count: number }) {
         </>
       ) : (
         <span className="font-mono text-[10px]" style={{ color: 'rgba(255,255,255,0.22)' }}>
-          No reviews yet
+          {t.common.noReviewsYet}
         </span>
       )}
     </div>
@@ -2272,6 +2275,7 @@ function InspectionDeck({
   onCollect:  (art: MarketArtwork) => void
   onLightbox: (art: MarketArtwork) => void
 }) {
+  const { t } = useLanguage()
   const [chartRange,   setChartRange]   = useState<TimeRange>('1D')
   const [chartHovered, setChartHovered] = useState(false)
   const [tilt,         setTilt]         = useState({ rx: 0, ry: 0 })
@@ -2399,9 +2403,9 @@ function InspectionDeck({
             {/* Key metrics */}
             <div className="grid grid-cols-3 gap-2 mt-1">
               {[
-                { label: 'Market Cap',  value: `${fmtETH(livePrice)} ETH`, color: '#FDFBF7' },
-                { label: '24h Change',  value: fmtPct(((livePrice - art.marketCap) / art.marketCap) * 100), color: livePrice >= art.marketCap ? '#4ade80' : '#f87171' },
-                { label: '7d Change',   value: art.change7d,  color: 'rgba(255,255,255,0.7)' },
+                { label: t.marketplace.marketCap, value: `${fmtETH(livePrice)} ETH`, color: '#FDFBF7' },
+                { label: t.marketplace.change24h, value: fmtPct(((livePrice - art.marketCap) / art.marketCap) * 100), color: livePrice >= art.marketCap ? '#4ade80' : '#f87171' },
+                { label: t.marketplace.change7d,  value: art.change7d,  color: 'rgba(255,255,255,0.7)' },
               ].map(m => (
                 <div
                   key={m.label}
@@ -2469,7 +2473,7 @@ function InspectionDeck({
                 stroke="currentColor" strokeWidth="2" strokeLinecap="round">
                 <path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/>
               </svg>
-              View Detail &amp; Reviews
+              {t.common.viewDetailReviews}
             </Link>
           </div>
         </div>
@@ -2488,8 +2492,8 @@ function InspectionDeck({
           {/* Holders + volume micro-stats */}
           <div className="flex items-center gap-6">
             {[
-              { label: 'Volume 24h',  value: art.volume24h },
-              { label: 'Holders',     value: String(art.holders) },
+              { label: t.artwork.volume24h, value: art.volume24h },
+              { label: t.artwork.holders,  value: String(art.holders) },
               { label: 'Edition',     value: 'Open' },
             ].map(s => (
               <div key={s.label}>
@@ -2568,7 +2572,7 @@ function InspectionDeck({
             onMouseEnter={e => (e.currentTarget.style.backgroundPosition = '100% 0')}
             onMouseLeave={e => (e.currentTarget.style.backgroundPosition = '0% 0')}
           >
-            BUY {art.ticker} — {fmtETH(livePrice)} ETH
+            {t.common.buy} {art.ticker} — {fmtETH(livePrice)} ETH
           </button>
 
           <p className="text-center font-mono text-[8px] tracking-[0.14em] uppercase"
@@ -2771,6 +2775,7 @@ const ROTATE_MS = 4500
 
 // ── Main MarketplacePage ───────────────────────────────────────────
 export function MarketplacePage() {
+  const { t } = useLanguage()
   // ── Backend data (falls back to mock when API unreachable) ────────
   const {
     artworks: _rawArtworks,
@@ -3124,22 +3129,22 @@ export function MarketplacePage() {
                   opacity:    0,
                 }}
               >
-                LIVE MARKETPLACE
+                {t.marketplace.title.toUpperCase()}
               </h1>
               <p
                 data-fade
                 className="text-[11px] tracking-[0.18em] mt-1"
                 style={{ color: 'rgba(255,255,255,0.35)', opacity: 0 }}
               >
-                Trade unique artworks on the bonding curve.
+                {t.marketplace.subtitle}
               </p>
             </div>
             {/* Market stats */}
             <div data-fade className="flex gap-2 flex-wrap" style={{ opacity: 0 }}>
               {[
-                { label: 'TOTAL VOLUME', value: '4,218 ETH', gold: true },
-                { label: 'LIVE LISTINGS', value: '2,847' },
-                { label: '24H TRADES', value: '+12.4%', green: true },
+                { label: t.marketplace.totalVolume.toUpperCase(), value: '4,218 ETH', gold: true },
+                { label: t.marketplace.listings.toUpperCase(),   value: '2,847' },
+                { label: t.marketplace.trades24h.toUpperCase(),  value: '+12.4%', green: true },
               ].map(s => (
                 <div key={s.label}
                   className="px-4 py-2.5 text-center"
@@ -3197,7 +3202,7 @@ export function MarketplacePage() {
                   {tab.key !== 'All' && active && (
                     <span className="size-[4px] rounded-full" style={{ background: color }}/>
                   )}
-                  {tab.label}
+                  {tab.key === 'All' ? t.marketplace.all.toUpperCase() : tab.label}
                   <span className="font-mono text-[7.5px] px-1 py-0.5"
                     style={{
                       background: active ? `${color}18` : 'rgba(255,255,255,0.05)',
@@ -3229,7 +3234,7 @@ export function MarketplacePage() {
               stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
               <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>
             </svg>
-            RACE
+            {t.marketplace.race.toUpperCase()}
             {viewMode === 'race' && (
               <span className="absolute bottom-0 left-1 right-1 h-px"
                 style={{ background: '#D4AF37' }}/>
@@ -3255,7 +3260,7 @@ export function MarketplacePage() {
                   <path d="m21 21-4.35-4.35" strokeLinecap="round"/>
                 </svg>
               )}
-              <input type="search" placeholder="Search…"
+              <input type="search" placeholder={t.marketplace.search}
                 value={search} onChange={e => setSearch(e.target.value)}
                 className="h-7 pl-5 pr-2 w-36 text-[10.5px] bg-transparent outline-none
                            placeholder:text-white/20"
@@ -3424,7 +3429,7 @@ export function MarketplacePage() {
             ) : filtered.length === 0 ? (
               <div className="flex flex-col items-center justify-center py-16 gap-3">
                 <p className="font-mono text-[10px]" style={{ color: 'rgba(255,255,255,0.25)' }}>
-                  No results
+                  {t.common.noResults}
                 </p>
                 <button type="button"
                   onClick={() => { setActivePhase('All'); setSearch('') }}
