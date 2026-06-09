@@ -2486,9 +2486,9 @@ function InspectionDeck({
           {/* Holders + volume micro-stats */}
           <div className="flex items-center gap-6">
             {[
-              { label: t.artwork.volume24h, value: art.volume24h },
-              { label: t.artwork.holders,  value: String(art.holders) },
-              { label: 'Edition',     value: 'Open' },
+              { label: t.artwork.volume24h,       value: art.volume24h },
+              { label: t.artwork.holders,         value: String(art.holders) },
+              { label: t.marketplace.edition,     value: t.marketplace.editionOpen },
             ].map(s => (
               <div key={s.label}>
                 <p className="text-[8px] uppercase tracking-[0.2em] mb-0.5"
@@ -2506,7 +2506,7 @@ function InspectionDeck({
                 className="font-mono text-[9px] tracking-[0.22em] uppercase"
                 style={{ color: 'rgba(255,255,255,0.28)' }}
               >
-                Bonding Curve · Price History
+                {t.marketplace.bondingCurveHistory}
               </p>
               <div className="flex items-center gap-1">
                 {(['1H', '6H', '1D', '7D'] as TimeRange[]).map(r => (
@@ -2545,9 +2545,9 @@ function InspectionDeck({
             </div>
             <div className="flex justify-between font-mono text-[7.5px] mt-1.5"
               style={{ color: 'rgba(255,255,255,0.2)' }}>
-              <span>Accumulation</span>
-              <span>FOMO</span>
-              <span>Migration</span>
+              <span>{t.marketplace.phaseAccumulation}</span>
+              <span>{t.marketplace.phaseFomo}</span>
+              <span>{t.marketplace.phaseMigration}</span>
             </div>
           </div>
 
@@ -2571,7 +2571,7 @@ function InspectionDeck({
 
           <p className="text-center font-mono text-[8px] tracking-[0.14em] uppercase"
             style={{ color: 'rgba(255,255,255,0.16)' }}>
-            Base Network · Bonding Curve · {art.holders} current holders
+            Base Network · Bonding Curve · {art.holders} {t.marketplace.currentHolders}
           </p>
         </div>
       </motion.div>
@@ -3205,7 +3205,13 @@ export function MarketplacePage() {
                   {tab.key !== 'All' && active && (
                     <span className="size-[4px] rounded-full" style={{ background: color }}/>
                   )}
-                  {tab.key === 'All' ? t.marketplace.all.toUpperCase() : tab.label}
+                  {tab.key === 'All'
+                    ? t.marketplace.all.toUpperCase()
+                    : tab.key === 'Accumulation'
+                      ? t.marketplace.phaseAccumulation
+                      : tab.key === 'FOMO'
+                        ? t.marketplace.phaseFomo
+                        : t.marketplace.phaseMigration}
                   <span className="font-mono text-[7.5px] px-1 py-0.5"
                     style={{
                       background: active ? `${color}18` : 'rgba(255,255,255,0.05)',

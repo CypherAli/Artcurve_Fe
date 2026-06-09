@@ -21,6 +21,9 @@ export interface Translations {
     sortMarketCap: string; sortTopGainers: string; sortPriceHigh: string
     sortPriceLow: string; sortRecent: string
     curveProgress: string; toGraduation: string; artwork: string
+    phaseAccumulation: string; phaseFomo: string; phaseMigration: string
+    edition: string; editionOpen: string
+    bondingCurveHistory: string; currentHolders: string
   }
   trade: {
     markets: string; search: string; change24h: string; vol24h: string
@@ -220,6 +223,10 @@ const en: Translations = {
     sortPriceHigh: 'Price: High → Low', sortPriceLow: 'Price: Low → High',
     sortRecent: 'Recently Listed',
     curveProgress: 'Curve Progress', toGraduation: 'to Graduation', artwork: 'Artwork',
+    phaseAccumulation: 'ACCUMULATION', phaseFomo: 'FOMO', phaseMigration: 'MIGRATION',
+    edition: 'Edition', editionOpen: 'Open',
+    bondingCurveHistory: 'Bonding Curve · Price History',
+    currentHolders: 'current holders',
   },
   trade: {
     markets: 'Markets', search: 'Search…', change24h: '24H Change',
