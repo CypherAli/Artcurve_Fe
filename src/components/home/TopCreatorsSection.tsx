@@ -19,6 +19,7 @@ import { useEffect, useRef, useState } from 'react'
 import { gsap }                         from '@/lib/gsap'
 import { userService }                  from '@/services/user.service'
 import type { UserProfile }             from '@/types/api'
+import { useLanguage }                  from '@/context/LanguageContext'
 
 const MOCK_CREATORS: UserProfile[] = [
   { id: 'm1', wallet_address: '0xA1b2C3D4e5F6a7B8c9D0e1F2a3B4c5D6e7F8a9B0', username: 'aiko_tanaka',   bio: 'Neo-surrealism meets kawaii. Tokyo-based illustrator.',              avatar_url: 'https://api.dicebear.com/7.x/personas/svg?seed=aiko',   twitter_handle: null, is_verified: true,  role: 'artist', created_at: '' },
@@ -28,7 +29,7 @@ const MOCK_CREATORS: UserProfile[] = [
 ]
 
 // ── ArtistRow ─────────────────────────────────────────────────────
-function ArtistRow({ artist, rank }: { artist: UserProfile; rank: number }) {
+function ArtistRow({ artist, rank, verifiedLabel }: { artist: UserProfile; rank: number; verifiedLabel: string }) {
   const rowRef  = useRef<HTMLDivElement>(null)
   const nameRef = useRef<HTMLHeadingElement>(null)
   const imgRef  = useRef<HTMLDivElement>(null)
@@ -122,7 +123,7 @@ function ArtistRow({ artist, rank }: { artist: UserProfile; rank: number }) {
             </h3>
             {artist.is_verified && (
               <span className="hidden sm:inline-block text-[9px] tracking-[0.3em] uppercase px-2 py-0.5 border border-[#C9A96E]/30 text-[#C9A96E] opacity-0 group-hover:opacity-100 translate-y-1 group-hover:translate-y-0 transition-all duration-400">
-                Verified
+                {verifiedLabel}
               </span>
             )}
           </div>
@@ -155,6 +156,7 @@ function ArtistRow({ artist, rank }: { artist: UserProfile; rank: number }) {
 
 // ── Main Section ──────────────────────────────────────────────────
 export function TopCreatorsSection() {
+  const { t } = useLanguage()
   const [creators, setCreators] = useState<UserProfile[]>(MOCK_CREATORS)
   const sectionRef  = useRef<HTMLElement>(null)
   const labelRef    = useRef<HTMLParagraphElement>(null)
@@ -242,7 +244,7 @@ export function TopCreatorsSection() {
           ref={labelRef}
           className="mb-4 text-[11px] tracking-[0.35em] uppercase text-[#C9A96E]"
         >
-          Featured Artists
+          {t.home.creatorsLabel}
         </p>
 
         <div className="flex items-end justify-between gap-4 flex-wrap">
@@ -255,7 +257,7 @@ export function TopCreatorsSection() {
             }}
             aria-label="Top Creators"
           >
-            {['Top', 'Creators'].map(word => (
+            {[t.home.creatorsHeading1, t.home.creatorsHeading2].map(word => (
               <span
                 key={word}
                 className="overflow-hidden inline-block"
@@ -277,7 +279,7 @@ export function TopCreatorsSection() {
                        border-b border-[#C9A96E]/40 pb-0.5
                        hover:border-[#C9A96E] transition-colors duration-300 shrink-0"
           >
-            All Artists →
+            {t.home.creatorsViewAll}
           </a>
         </div>
       </div>
@@ -292,7 +294,7 @@ export function TopCreatorsSection() {
               style={{ background: 'rgba(255,255,255,0.09)' }}
             />
             <div ref={el => { rowsRef.current[i] = el }}>
-              <ArtistRow artist={artist} rank={i + 1} />
+              <ArtistRow artist={artist} rank={i + 1} verifiedLabel={t.home.creatorsVerified} />
             </div>
           </div>
         ))}

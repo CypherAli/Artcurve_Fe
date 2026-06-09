@@ -17,6 +17,7 @@
 // ─────────────────────────────────────────────────────────────────
 
 import { useRef } from 'react'
+import { useLanguage } from '@/context/LanguageContext'
 
 // ── Marquee content ───────────────────────────────────────────────
 const ROW_1_ITEMS = [
@@ -38,13 +39,6 @@ const ROW_2_ITEMS = [
   'PERMISSIONLESS',
   'TRUSTLESS',
   'IMMUTABLE',
-]
-
-// ── Trust badge data ──────────────────────────────────────────────
-const TRUST_BADGES = [
-  { label: 'Built on Base' },
-  { label: 'Audited by CertiK' },
-  { label: 'Powered by Ethereum' },
 ]
 
 // ── MarqueeRow ────────────────────────────────────────────────────
@@ -111,6 +105,14 @@ function TrustBadge({ label }: { label: string }) {
 
 // ── Main Section ──────────────────────────────────────────────────
 export function EcosystemSection() {
+  const { t } = useLanguage()
+
+  const TRUST_BADGES = [
+    { label: t.home.ecoBuilt },
+    { label: t.home.ecoAudited },
+    { label: t.home.ecoPowered },
+  ]
+
   const sectionRef = useRef<HTMLElement>(null)
 
   return (

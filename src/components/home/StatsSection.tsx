@@ -10,15 +10,9 @@
 
 import { useEffect, useRef } from 'react'
 import { gsap, ScrollTrigger } from '@/lib/gsap'
+import { useLanguage } from '@/context/LanguageContext'
 
-
-
-const STATS = [
-  { value: 2847,   suffix: '+',  label: 'Artworks Traded',   prefix: '' },
-  { value: 12.4,   suffix: 'M',  label: 'ETH Volume',         prefix: '' },
-  { value: 8300,   suffix: '+',  label: 'Collectors',          prefix: '' },
-  { value: 99.8,   suffix: '%',  label: 'Uptime',              prefix: '' },
-]
+type StatItem = { value: number; suffix: string; label: string; prefix: string }
 
 function StatCard({
   value,
@@ -26,7 +20,7 @@ function StatCard({
   label,
   prefix,
   index,
-}: (typeof STATS)[0] & { index: number }) {
+}: StatItem & { index: number }) {
   const numRef = useRef<HTMLSpanElement>(null)
 
   useEffect(() => {
@@ -78,6 +72,15 @@ function StatCard({
 }
 
 export function StatsSection() {
+  const { t } = useLanguage()
+
+  const STATS: StatItem[] = [
+    { value: 2847,   suffix: '+',  label: t.home.statArtworks,   prefix: '' },
+    { value: 12.4,   suffix: 'M',  label: t.home.statVolume,      prefix: '' },
+    { value: 8300,   suffix: '+',  label: t.home.statCollectors,  prefix: '' },
+    { value: 99.8,   suffix: '%',  label: t.home.statUptime,      prefix: '' },
+  ]
+
   return (
     <section
       className="relative bg-[#1A1A1A] py-24 px-6 md:px-16 lg:px-24 overflow-hidden"
@@ -99,7 +102,7 @@ export function StatsSection() {
         className="mb-12 text-xs tracking-[0.35em] uppercase text-[#C9A96E]"
         data-reveal="fade-up"
       >
-        By the Numbers
+        {t.home.statsLabel}
       </p>
 
       {/* Stats grid */}
@@ -119,7 +122,7 @@ export function StatsSection() {
         data-reveal="fade-up"
         data-reveal-delay="0.2"
       >
-        "Art is not what you see, but what you make others see — and on ArtCurve, the market is the brushstroke."
+        &ldquo;{t.home.statsQuote}&rdquo;
       </blockquote>
     </section>
   )

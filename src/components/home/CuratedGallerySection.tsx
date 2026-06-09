@@ -16,6 +16,7 @@ import { useRouter }                    from 'next/navigation'
 import { gsap }                         from '@/lib/gsap'
 import { artworkService }               from '@/services/artwork.service'
 import type { Artwork }                 from '@/types/api'
+import { useLanguage }                  from '@/context/LanguageContext'
 
 // ── Fallback mock artworks (shown when API is unavailable) ─────────
 const MOCK_ARTWORKS: Artwork[] = [
@@ -141,6 +142,7 @@ function SparklineLarge({ data, color, id, price, change }: {
 
 // ── Component ──────────────────────────────────────────────────────
 export function CuratedGallerySection() {
+  const { t } = useLanguage()
   const router      = useRouter()
   const [artworks, setArtworks] = useState<Artwork[]>(MOCK_ARTWORKS)
   const sectionRef  = useRef<HTMLElement>(null)
@@ -257,7 +259,7 @@ export function CuratedGallerySection() {
           ref={labelRef}
           className="mb-4 text-[11px] tracking-[0.35em] uppercase text-[#C9A96E]"
         >
-          Featured Works
+          {t.home.galleryLabel}
         </p>
 
         <div className="flex items-end justify-between gap-4 flex-wrap mb-5">
@@ -267,7 +269,7 @@ export function CuratedGallerySection() {
             style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: 'clamp(2rem, 4vw, 3.5rem)' }}
             aria-label="Curated Gallery"
           >
-            {['Curated', 'Gallery'].map(word => (
+            {[t.home.galleryHeading1, t.home.galleryHeading2].map(word => (
               <span key={word} className="overflow-hidden inline-block" aria-hidden="true">
                 <span className="cg-word inline-block" style={{ willChange: 'transform, opacity' }}>
                   {word}
@@ -280,7 +282,7 @@ export function CuratedGallerySection() {
             href="/marketplace"
             className="text-[11px] tracking-[0.2em] uppercase text-[#C9A96E] border-b border-[#C9A96E]/40 pb-0.5 hover:border-[#C9A96E] transition-colors duration-300 shrink-0"
           >
-            View All →
+            {t.home.galleryViewAll}
           </a>
         </div>
 
@@ -379,7 +381,7 @@ export function CuratedGallerySection() {
               <div className="flex items-end justify-between">
                 <div>
                   <p className="text-[9px] tracking-[0.2em] uppercase text-[#7A7570] mb-0.5">
-                    Current Price
+                    {t.home.galleryPrice}
                   </p>
                   <p
                     className="text-[1.25rem] font-light text-[#1A1A1A] leading-none"
@@ -401,7 +403,7 @@ export function CuratedGallerySection() {
                   className="w-full h-9 text-[10px] tracking-[0.2em] uppercase bg-[#1A1A1A] text-white hover:bg-[#C9A96E] hover:text-[#1A1A1A] transition-colors duration-300 flex items-center justify-center"
                   onClick={e => e.stopPropagation()}
                 >
-                  Collect Now
+                  {t.home.galleryCollect}
                 </a>
               </div>
             </div>

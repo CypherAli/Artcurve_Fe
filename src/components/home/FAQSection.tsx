@@ -12,44 +12,18 @@
 import { useEffect, useRef, useState } from 'react'
 import { AnimatePresence, motion }      from 'framer-motion'
 import { gsap }                         from '@/lib/gsap'
-
-
-
-const FAQS = [
-  {
-    q: 'What exactly is a Bonding Curve?',
-    a: 'A bonding curve is a mathematical formula that automatically sets the price of a token based on its circulating supply. The more tokens are bought, the higher the price becomes — and vice versa. On ArtCurve, each artwork is its own bonding curve token. The smart contract holds the liquidity directly, so there is no need for a traditional order book.',
-  },
-  {
-    q: 'How do I sell my artwork token back?',
-    a: 'Selling is the inverse of buying. You send your tokens back to the bonding curve smart contract, and it returns ETH to your wallet based on the current price. The price decreases slightly with each sale, which is how the curve self-regulates. Gas fees apply, but on Base they are typically under $0.01.',
-  },
-  {
-    q: 'Why does the price automatically increase when others buy?',
-    a: 'The price is a function of supply: P = k / (virtualSupply − soldShares)². As more shares are purchased, the denominator shrinks and price rises exponentially. Early collectors benefit the most — this is the "accumulation zone" before the curve steepens into FOMO territory.',
-  },
-  {
-    q: 'What happens at DEX Migration?',
-    a: 'Once 95% of the maximum supply is purchased, the bonding curve hits its target cap. At that point, the liquidity held in the smart contract is automatically seeded into a decentralized exchange (DEX) liquidity pool. The artwork token is now freely tradeable on the open market — this is graduation.',
-  },
-  {
-    q: 'How are gas fees calculated on Base?',
-    a: 'ArtCurve runs on Base, an Ethereum L2. Gas fees are computed the same way as Ethereum (gasUsed × baseFeePerGas + tip), but because Base batches thousands of transactions into a single Ethereum calldata post, the cost is typically 100–1000× cheaper — often under $0.01 per trade.',
-  },
-  {
-    q: 'Is my investment protected against rug pulls?',
-    a: 'The smart contract holds all liquidity in a non-custodial vault — artists cannot withdraw it. The bonding curve guarantees buy and sell liquidity at any time. Our contracts are audited and the source is verified on-chain. You can always sell back to the curve regardless of the artist\'s actions.',
-  },
-]
+import { useLanguage }                  from '@/context/LanguageContext'
 
 // ── Single accordion item ─────────────────────────────────────────
+interface FAQEntry { q: string; a: string }
+
 function FAQItem({
   faq,
   index,
   isOpen,
   onToggle,
 }: {
-  faq: (typeof FAQS)[0]
+  faq: FAQEntry
   index: number
   isOpen: boolean
   onToggle: () => void
@@ -119,6 +93,17 @@ function FAQItem({
 
 // ── Main section ──────────────────────────────────────────────────
 export function FAQSection() {
+  const { t } = useLanguage()
+
+  const FAQS: FAQEntry[] = [
+    { q: t.home.faq1q, a: t.home.faq1a },
+    { q: t.home.faq2q, a: t.home.faq2a },
+    { q: t.home.faq3q, a: t.home.faq3a },
+    { q: t.home.faq4q, a: t.home.faq4a },
+    { q: t.home.faq5q, a: t.home.faq5a },
+    { q: t.home.faq6q, a: t.home.faq6a },
+  ]
+
   const sectionRef = useRef<HTMLElement>(null)
   const labelRef   = useRef<HTMLParagraphElement>(null)
   const titleRef   = useRef<HTMLHeadingElement>(null)
@@ -175,7 +160,7 @@ export function FAQSection() {
 
         {/* ── Header ─────────────────────────────────────────── */}
         <p ref={labelRef} className="mb-4 text-[11px] tracking-[0.35em] uppercase text-[#C9A96E]">
-          Common Questions
+          {t.home.faqLabel}
         </p>
 
         <div className="flex items-end justify-between gap-4 flex-wrap mb-10">
@@ -188,7 +173,7 @@ export function FAQSection() {
             }}
             aria-label="FAQ"
           >
-            {['Frequently', 'Asked'].map(word => (
+            {[t.home.faqHeading1, t.home.faqHeading2].map(word => (
               <span key={word} className="overflow-hidden inline-block" aria-hidden="true">
                 <span className="faq-word inline-block"
                   style={{ willChange: 'transform, opacity' }}>

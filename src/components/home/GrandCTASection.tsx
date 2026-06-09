@@ -2,6 +2,7 @@
 
 import { useRef, useEffect } from 'react'
 import { gsap, ScrollTrigger } from '@/lib/gsap'
+import { useLanguage }          from '@/context/LanguageContext'
 
 
 
@@ -105,6 +106,7 @@ function GhostLink({ label, href = '#' }: { label: string; href?: string }) {
 
 // ─────────────────────────────────────────────────────────────────
 export function GrandCTASection() {
+  const { t } = useLanguage()
   const sectionRef    = useRef<HTMLElement>(null)
   const videoWrapRef  = useRef<HTMLDivElement>(null)
   const videoInnerRef = useRef<HTMLDivElement>(null)
@@ -212,7 +214,7 @@ export function GrandCTASection() {
                   {/* Eyebrow */}
                   <p className="gc-extra text-[9px] tracking-[0.52em] uppercase font-mono mb-3"
                     style={{ color: '#C9A96E' }}>
-                    ArtCurve · Begin Your Collection
+                    {t.home.grandBadge}
                   </p>
 
                   {/* Gold rule */}
@@ -227,14 +229,14 @@ export function GrandCTASection() {
                       <span className="gc-line block font-light text-white"
                         style={{ fontFamily: "'Cormorant Garamond', serif",
                           fontSize: 'clamp(2.6rem, 5.5vw, 6.5rem)', willChange: 'transform' }}>
-                        Shape the Curve.
+                        {t.home.grandHeading1}
                       </span>
                     </div>
                     <div className="overflow-hidden" style={{ lineHeight: 0.95 }}>
                       <span className="gc-line block font-light italic"
                         style={{ fontFamily: "'Cormorant Garamond', serif",
                           fontSize: 'clamp(2.6rem, 5.5vw, 6.5rem)', color: '#C9A96E', willChange: 'transform' }}>
-                        Own the Art.
+                        {t.home.grandHeading2}
                       </span>
                     </div>
                   </div>
@@ -242,23 +244,22 @@ export function GrandCTASection() {
                   {/* Sub descriptor */}
                   <p className="gc-extra text-[0.78rem] leading-[1.85] font-light mb-8"
                     style={{ color: 'rgba(255,255,255,0.38)', maxWidth: '340px', letterSpacing: '0.01em' }}>
-                    Trade unique artworks as bonding-curve tokens on Base.
-                    Every collector shapes the price.
+                    {t.home.grandDesc}
                   </p>
 
                   {/* Buttons */}
                   <div className="gc-extra flex items-center gap-7">
-                    <PrimaryButton label="Connect Wallet" />
-                    <GhostLink label="Explore Gallery" />
+                    <PrimaryButton label={t.home.grandWallet} />
+                    <GhostLink label={t.home.grandGallery} />
                   </div>
                 </div>
 
                 {/* ── Stats block — bottom right ───────────────── */}
                 <div className="gc-extra hidden md:flex flex-col items-end gap-5 pb-1">
                   {[
-                    { val: '847',   unit: 'ETH', label: 'Total Locked' },
-                    { val: '3,241', unit: '',    label: 'Artworks' },
-                    { val: '9,180', unit: '',    label: 'Collectors' },
+                    { val: '847',   unit: 'ETH', label: t.home.grandLocked },
+                    { val: '3,241', unit: '',    label: t.home.grandArtworks },
+                    { val: '9,180', unit: '',    label: t.home.grandCollectors },
                   ].map(({ val, unit, label }) => (
                     <div key={label} className="text-right">
                       <p className="font-light leading-none"
@@ -300,9 +301,9 @@ export function GrandCTASection() {
 
             <div className="fc-item">
               <p className="text-[1.15rem] text-white/80 font-light leading-none"
-                style={{ fontFamily: "'Cormorant Garamond', serif" }}>ArtCurve</p>
+                style={{ fontFamily: "'Cormorant Garamond', serif" }}>{t.home.grandFooterBrand}</p>
               <p className="mt-1.5 text-[9px] tracking-[0.24em] uppercase text-white/20 font-mono">
-                On-chain art · Built on Base
+                {t.home.grandFooterSub}
               </p>
             </div>
 
@@ -332,7 +333,7 @@ export function GrandCTASection() {
 
             <div className="fc-item">
               <p className="text-[9px] font-mono text-white/15 tracking-wide text-right">
-                © 2025 ArtCurve. All rights reserved.
+                {t.home.grandFooterCopy}
               </p>
             </div>
 

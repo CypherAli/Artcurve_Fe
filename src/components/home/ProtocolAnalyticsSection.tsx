@@ -10,6 +10,7 @@
 
 import { useEffect, useRef } from 'react'
 import { gsap, ScrollTrigger } from '@/lib/gsap'
+import { useLanguage }          from '@/context/LanguageContext'
 
 
 
@@ -18,8 +19,6 @@ const STATS = [
     key:     'tvl',
     value:   847.2,
     suffix:  'ETH',
-    label:   'Total Value Locked',
-    sub:     'Smart Contract Vault',
     decimal: true,
     change:  '+12.4%',
     up:      true,
@@ -28,8 +27,6 @@ const STATS = [
     key:     'minted',
     value:   3241,
     suffix:  'works',
-    label:   'Total Minted',
-    sub:     'Unique On-Chain',
     decimal: false,
     change:  '+284',
     up:      true,
@@ -38,8 +35,6 @@ const STATS = [
     key:     'holders',
     value:   9180,
     suffix:  'wallets',
-    label:   'Holders',
-    sub:     'Active Collectors',
     decimal: false,
     change:  '+1.2K',
     up:      true,
@@ -47,6 +42,13 @@ const STATS = [
 ] as const
 
 export function ProtocolAnalyticsSection() {
+  const { t } = useLanguage()
+  const STAT_LABELS = {
+    tvl:     { label: t.home.analyticsTVL,     sub: t.home.analyticsTVLSub     },
+    minted:  { label: t.home.analyticsMinted,  sub: t.home.analyticsMintedSub  },
+    holders: { label: t.home.analyticsHolders, sub: t.home.analyticsHoldersSub },
+  } as const
+
   const sectionRef = useRef<HTMLElement>(null)
   const labelRef   = useRef<HTMLParagraphElement>(null)
   const colRefs    = useRef<(HTMLDivElement | null)[]>([])
@@ -121,7 +123,7 @@ export function ProtocolAnalyticsSection() {
         {/* Eyebrow + top rule */}
         <div className="flex items-center gap-5 mb-8">
           <p ref={labelRef} className="text-[10px] tracking-[0.42em] uppercase text-[#C9A96E] shrink-0">
-            Protocol Analytics
+            {t.home.analyticsLabel}
           </p>
           <div className="flex-1 h-px" style={{ background: 'rgba(255,255,255,0.08)' }} />
           {/* Live pulse indicator */}
@@ -130,7 +132,7 @@ export function ProtocolAnalyticsSection() {
               <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#4ade80] opacity-60" />
               <span className="relative inline-flex rounded-full size-1.5 bg-[#4ade80]" />
             </span>
-            <span className="text-[9px] tracking-[0.25em] uppercase text-white/20">Live</span>
+            <span className="text-[9px] tracking-[0.25em] uppercase text-white/20">{t.home.analyticsLive}</span>
           </span>
         </div>
 
@@ -169,10 +171,10 @@ export function ProtocolAnalyticsSection() {
               <div className="flex items-end justify-between gap-2">
                 <div>
                   <p className="text-[10px] tracking-[0.28em] uppercase text-white/45">
-                    {stat.label}
+                    {STAT_LABELS[stat.key].label}
                   </p>
                   <p className="font-mono text-[8px] text-white/18 mt-0.5 tracking-wide">
-                    {stat.sub}
+                    {STAT_LABELS[stat.key].sub}
                   </p>
                 </div>
                 <span
@@ -201,10 +203,10 @@ export function ProtocolAnalyticsSection() {
               fontSize:   'clamp(0.9rem, 1.4vw, 1.15rem)',
             }}
           >
-            "Every transaction is a vote. The curve is democracy."
+            {t.home.analyticsQuote}
           </p>
           <p className="shrink-0 font-mono text-[9px] text-white/15 tracking-widest">
-            UPDATED LIVE
+            {t.home.analyticsUpdated}
           </p>
         </div>
 

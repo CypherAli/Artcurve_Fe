@@ -26,6 +26,7 @@
 import { useRef, useEffect } from 'react'
 import Image                 from 'next/image'
 import { gsap }              from '@/lib/gsap'
+import { useLanguage }       from '@/context/LanguageContext'
 
 
 
@@ -128,6 +129,7 @@ const IMAGES = [
 
 // ── Component ─────────────────────────────────────────────────────
 export function ConvergenceGallery() {
+  const { t } = useLanguage()
   const containerRef = useRef<HTMLDivElement>(null)
   const imgRefs      = useRef<(HTMLDivElement | null)[]>([])
   const ruleRef      = useRef<HTMLDivElement>(null)
@@ -270,10 +272,10 @@ export function ConvergenceGallery() {
               fontSize:   'clamp(2.2rem, 4vw, 4.6rem)',
             }}
           >
-            The community
+            {t.home.convergence1}
             <br />
             <em style={{ color: '#C9A96E', fontStyle: 'italic' }}>
-              shapes the curve.
+              {t.home.convergence2}
             </em>
           </h2>
 
@@ -300,7 +302,7 @@ export function ConvergenceGallery() {
               opacity:     0,
             }}
           >
-            Every collector. Every vote. Every transaction.
+            {t.home.convergence3}
           </p>
         </div>
 

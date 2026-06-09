@@ -16,6 +16,7 @@ import { AnimatePresence, motion }      from 'framer-motion'
 import { gsap }                         from '@/lib/gsap'
 import { tradeService }                 from '@/services/trade.service'
 import type { RecentTrade }             from '@/types/api'
+import { useLanguage }                  from '@/context/LanguageContext'
 
 // Normalize RecentTrade → display format
 function normalize(r: RecentTrade, idx: number) {
@@ -53,6 +54,7 @@ const ROW_H      = 76   // px per row — used for fixed container height
 
 // ── TradeRow ───────────────────────────────────────────────────────
 function TradeRow({ trade, isNew }: { trade: Trade; isNew: boolean }) {
+  const { t } = useLanguage()
   const [ripple, setRipple] = useState(false)
 
   return (
@@ -123,7 +125,7 @@ function TradeRow({ trade, isNew }: { trade: Trade; isNew: boolean }) {
         <div className="flex items-baseline gap-1.5 flex-wrap">
           <span className="text-[11px] font-medium tracking-[0.06em] uppercase"
             style={{ color: trade.type === 'BUY' ? '#4ade80' : '#f87171' }}>
-            {trade.type}
+            {trade.type === 'BUY' ? t.common.buy : t.common.sell}
           </span>
           <span className="text-[11px] text-[#7A7570]">·</span>
           <span className="text-[0.85rem] text-[#1A1A1A] italic truncate"
@@ -142,7 +144,7 @@ function TradeRow({ trade, isNew }: { trade: Trade; isNew: boolean }) {
       <div className="shrink-0 text-right">
         <span className="text-[10px] tracking-wide text-[#7A7570] tabular-nums"
           style={{ opacity: trade.time === 'Just now' ? 1 : 0.6 }}>
-          {trade.time}
+          {trade.time === 'Just now' ? t.home.liveJustNow : trade.time}
         </span>
         {trade.time === 'Just now' && (
           <div className="flex justify-end mt-1">
@@ -156,6 +158,7 @@ function TradeRow({ trade, isNew }: { trade: Trade; isNew: boolean }) {
 
 // ── Main Section ───────────────────────────────────────────────────
 export function LiveActivitySection() {
+  const { t } = useLanguage()
   const sectionRef = useRef<HTMLElement>(null)
   const feedRef    = useRef<HTMLDivElement>(null)
 
@@ -272,17 +275,17 @@ export function LiveActivitySection() {
                 <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#4ade80] opacity-75" />
                 <span className="relative inline-flex rounded-full size-2 bg-[#4ade80]" />
               </span>
-              <p className="text-[10px] tracking-[0.35em] uppercase text-[#7A7570]">Live Network</p>
+              <p className="text-[10px] tracking-[0.35em] uppercase text-[#7A7570]">{t.home.liveLabel}</p>
             </div>
 
             <h2 className="font-light text-[#1A1A1A] leading-[1.1] mb-6"
               style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: 'clamp(2.4rem, 4.5vw, 4rem)' }}>
-              The Curve<br />
-              <em className="not-italic text-[#C9A96E]">in Motion.</em>
+              {t.home.liveHeading1}<br />
+              <em className="not-italic text-[#C9A96E]">{t.home.liveHeading2}</em>
             </h2>
 
             <p className="text-[0.9rem] leading-relaxed text-[#7A7570] max-w-[320px] mb-10">
-              Every transaction shifts the curve. Watch collectors shape the price of art in real time.
+              {t.home.liveDesc}
             </p>
 
             <div className="flex gap-8 pt-8 border-t border-[#E4DDD3]">
@@ -292,7 +295,7 @@ export function LiveActivitySection() {
                   suppressHydrationWarning>
                   {mounted ? totalToday : '—'}
                 </p>
-                <p className="text-[9px] tracking-[0.25em] uppercase text-[#7A7570] mt-1">Trades Today</p>
+                <p className="text-[9px] tracking-[0.25em] uppercase text-[#7A7570] mt-1">{t.home.liveTrades}</p>
               </div>
               <div className="w-px bg-[#E4DDD3]" />
               <div>
@@ -302,7 +305,7 @@ export function LiveActivitySection() {
                   {mounted ? volume : '—'}
                   {mounted && <span className="text-[#C9A96E] text-sm ml-1">ETH</span>}
                 </p>
-                <p className="text-[9px] tracking-[0.25em] uppercase text-[#7A7570] mt-1">24h Volume</p>
+                <p className="text-[9px] tracking-[0.25em] uppercase text-[#7A7570] mt-1">{t.home.liveVolume}</p>
               </div>
             </div>
           </div>

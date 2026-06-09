@@ -19,16 +19,17 @@
 import { useEffect, useRef, useState } from 'react'
 import { gsap, ScrollTrigger } from '@/lib/gsap'
 import { artworkService } from '@/services/artwork.service'
-
-const HERO_LINES = ['Where Art', 'Meets the', 'Blockchain.']
-
-const DEFAULT_STATS = [
-  { num: '10K+',  label: 'Artworks'     },
-  { num: '$2.4M', label: 'Total Volume' },
-  { num: '3.2K',  label: 'Collectors'  },
-]
+import { useLanguage } from '@/context/LanguageContext'
 
 export function HeroSection() {
+  const { t } = useLanguage()
+
+  const DEFAULT_STATS = [
+    { num: '10K+',  label: t.home.heroArtworks },
+    { num: '$2.4M', label: t.home.heroVolume   },
+    { num: '3.2K',  label: t.home.heroCollectors },
+  ]
+
   const [stats, setStats] = useState(DEFAULT_STATS)
 
   useEffect(() => {
@@ -36,9 +37,9 @@ export function HeroSection() {
       const vol = parseFloat(data.totalVolumeEth)
       const volLabel = vol >= 1000 ? `$${(vol / 1000).toFixed(1)}K` : `$${vol.toFixed(2)}`
       setStats([
-        { num: data.artworkCount > 999 ? `${(data.artworkCount / 1000).toFixed(0)}K+` : String(data.artworkCount), label: 'Artworks' },
-        { num: volLabel, label: 'Total Volume' },
-        { num: data.collectorCount > 999 ? `${(data.collectorCount / 1000).toFixed(1)}K` : String(data.collectorCount), label: 'Collectors' },
+        { num: data.artworkCount > 999 ? `${(data.artworkCount / 1000).toFixed(0)}K+` : String(data.artworkCount), label: t.home.heroArtworks },
+        { num: volLabel, label: t.home.heroVolume },
+        { num: data.collectorCount > 999 ? `${(data.collectorCount / 1000).toFixed(1)}K` : String(data.collectorCount), label: t.home.heroCollectors },
       ])
     }).catch(() => { /* keep defaults on error */ })
   }, [])
@@ -135,7 +136,7 @@ export function HeroSection() {
 
         {/* Eyebrow */}
         <p className="mb-5 text-[11px] tracking-[0.38em] uppercase text-[#C9A96E] font-medium">
-          Web3 Art Exchange · Built on Base
+          {t.home.heroBadge}
         </p>
 
         {/* Heading — manual line split, masked reveal */}
@@ -147,12 +148,12 @@ export function HeroSection() {
             fontSize:   'clamp(3.2rem, 5.5vw, 7rem)',
             lineHeight: '0.93',
           }}
-          aria-label={HERO_LINES.join(' ')}
+          aria-label={`${t.home.heroLine1} ${t.home.heroLine2} ${t.home.heroLine3}`}
         >
-          {HERO_LINES.map((line, i) => (
+          {([t.home.heroLine1, t.home.heroLine2, t.home.heroLine3] as string[]).map((line, i, arr) => (
             <span key={i} className="motion-line-mask block" aria-hidden="true">
               <span className="motion-line block">
-                {i === HERO_LINES.length - 1
+                {i === arr.length - 1
                   ? <em className="text-gold-shimmer not-italic">{line}</em>
                   : line}
               </span>
@@ -166,9 +167,7 @@ export function HeroSection() {
           className="mb-10 max-w-[420px] text-[15px] leading-[1.75] text-[#7A7570] font-light"
           style={{ opacity: 0 }}
         >
-          Trade unique artworks as bonding-curve tokens.
-          Every brushstroke has a price.
-          Every collector shapes the curve.
+          {t.home.heroDesc}
         </p>
 
         {/* CTAs */}
@@ -184,7 +183,7 @@ export function HeroSection() {
                        hover:bg-[#333] transition-colors duration-300 group"
             data-cursor-label="Explore"
           >
-            Explore Art
+            {t.home.heroCta}
             <svg
               className="group-hover:translate-x-1 transition-transform duration-300"
               width="15" height="15" viewBox="0 0 16 16" fill="none" aria-hidden="true"
@@ -199,7 +198,7 @@ export function HeroSection() {
                        border border-[#D5CCC2] text-[#1A1A1A] text-[11px] tracking-[0.18em] uppercase
                        hover:border-[#C9A96E] hover:text-[#C9A96E] transition-all duration-300"
           >
-            Learn More
+            {t.home.heroLearn}
           </a>
         </div>
 

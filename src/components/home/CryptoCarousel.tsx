@@ -18,6 +18,7 @@
 // ─────────────────────────────────────────────────────────────────
 
 import { useBinanceTicker, fmtUSD, fmtChange, TICKER_COINS } from '@/hooks/useBinanceTicker'
+import { useLanguage } from '@/context/LanguageContext'
 
 // ── Coin color palette (branded per-coin) ─────────────────────────
 const COIN_COLORS: Record<string, { bg: string; text: string }> = {
@@ -136,6 +137,7 @@ function InfiniteRow({
 
 // ── Main component ────────────────────────────────────────────────
 export function CryptoCarousel() {
+  const { t } = useLanguage()
   const { ticks, connected } = useBinanceTicker()
 
   return (
@@ -167,11 +169,11 @@ export function CryptoCarousel() {
         <div>
           <p className="text-[10.5px] font-mono tracking-[0.2em] uppercase mb-1"
             style={{ color: 'rgba(201,169,110,0.7)' }}>
-            Market Prices
+            {t.home.carouselLabel}
           </p>
           <h3 className="text-[1.15rem] text-white/80 font-light"
             style={{ fontFamily: "'Cormorant Garamond',serif" }}>
-            Live Crypto Markets
+            {t.home.carouselLive}
           </h3>
         </div>
         <div className="flex items-center gap-2">
@@ -184,7 +186,7 @@ export function CryptoCarousel() {
           />
           <span className="font-mono text-[9px] tracking-widest"
             style={{ color: connected ? 'rgba(74,222,128,0.7)' : 'rgba(248,113,113,0.6)' }}>
-            {connected ? 'BINANCE · LIVE' : 'CONNECTING…'}
+            {connected ? 'BINANCE · LIVE' : t.home.carouselConnecting}
           </span>
         </div>
       </div>

@@ -22,27 +22,7 @@
 
 import { useRef, useEffect } from 'react'
 import { gsap, ScrollTrigger } from '@/lib/gsap'
-
-
-
-// ── Step data ─────────────────────────────────────────────────────
-const STEPS = [
-  {
-    num:   '01',
-    title: 'Tokenized Masterpieces',
-    body:  "Every brushstroke has a price. Masterpieces are fractionalized into unique tokens. You don't just admire the art — you own a piece of history.",
-  },
-  {
-    num:   '02',
-    title: 'Mathematical Price Discovery',
-    body:  "No traditional order books. The artwork's value is governed by an automated bonding curve. As collective demand rises, the curve seamlessly ascends.",
-  },
-  {
-    num:   '03',
-    title: 'Smart Contract Counterparty',
-    body:  'Powered by Base. Sell your tokens back into the liquidity pool instantly, at any moment. No need to wait for a matching buyer.',
-  },
-]
+import { useLanguage } from '@/context/LanguageContext'
 
 // ── SVG path definition ───────────────────────────────────────────
 const CURVE_D =
@@ -52,6 +32,14 @@ const AREA_D =
 
 // ── Main Section ──────────────────────────────────────────────────
 export function HowItWorksSection() {
+  const { t } = useLanguage()
+
+  const STEPS = [
+    { num: '01', title: t.home.step1Title, body: t.home.step1Desc },
+    { num: '02', title: t.home.step2Title, body: t.home.step2Desc },
+    { num: '03', title: t.home.step3Title, body: t.home.step3Desc },
+  ]
+
   const containerRef   = useRef<HTMLDivElement>(null)
   const progressBarRef = useRef<HTMLDivElement>(null)
   const stepRefs       = useRef<(HTMLDivElement | null)[]>([])
@@ -190,7 +178,7 @@ export function HowItWorksSection() {
             className="mb-2.5 text-[10px] tracking-[0.45em] uppercase font-medium"
             style={{ color: '#00aaff' }}
           >
-            How It Works
+            {t.home.howLabel}
           </p>
 
           {/* Heading */}
@@ -201,8 +189,8 @@ export function HowItWorksSection() {
               fontSize:   'clamp(2.1rem, 3vw, 3.4rem)',
             }}
           >
-            The Art of<br />
-            <em style={{ fontStyle: 'italic', color: '#C9A96E' }}>Liquid Markets.</em>
+            {t.home.howHeading1}<br />
+            <em style={{ fontStyle: 'italic', color: '#C9A96E' }}>{t.home.howHeading2}</em>
           </h2>
 
           {/* Steps */}
@@ -304,17 +292,17 @@ export function HowItWorksSection() {
             <polygon points="36,50 40,42 44,50"        fill="rgba(26,26,26,0.28)" />
             <text x="18" y="200" textAnchor="middle" fontSize="9"
               fill="rgba(26,26,26,0.4)" letterSpacing="2.5" fontFamily="monospace"
-              transform="rotate(-90,18,200)">PRICE</text>
+              transform="rotate(-90,18,200)">{t.home.chartPrice}</text>
             <text x="245" y="396" textAnchor="middle" fontSize="9"
-              fill="rgba(26,26,26,0.4)" letterSpacing="2.5" fontFamily="monospace">SUPPLY</text>
+              fill="rgba(26,26,26,0.4)" letterSpacing="2.5" fontFamily="monospace">{t.home.chartSupply}</text>
 
             {/* Y ticks */}
-            {[{ label: 'HIGH', y: 110 }, { label: 'MID', y: 230 }, { label: 'LOW', y: 340 }].map(t => (
-              <g key={t.label}>
-                <line x1="35" y1={t.y} x2="45" y2={t.y} stroke="rgba(26,26,26,0.22)" strokeWidth="1.2" />
-                <text x="32" y={t.y + 4} textAnchor="end" fontSize="8"
+            {([{ label: t.home.chartHigh, y: 110 }, { label: t.home.chartMid, y: 230 }, { label: t.home.chartLow, y: 340 }] as { label: string; y: number }[]).map(tick => (
+              <g key={tick.label}>
+                <line x1="35" y1={tick.y} x2="45" y2={tick.y} stroke="rgba(26,26,26,0.22)" strokeWidth="1.2" />
+                <text x="32" y={tick.y + 4} textAnchor="end" fontSize="8"
                   fill="rgba(26,26,26,0.38)" letterSpacing="1" fontFamily="monospace">
-                  {t.label}
+                  {tick.label}
                 </text>
               </g>
             ))}

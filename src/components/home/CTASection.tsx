@@ -10,8 +10,10 @@
 
 import { motion, useInView } from 'framer-motion'
 import { useRef }            from 'react'
+import { useLanguage }       from '@/context/LanguageContext'
 
 export function CTASection() {
+  const { t } = useLanguage()
   const ref       = useRef<HTMLElement>(null)
   const isInView  = useInView(ref, { once: true, margin: '-80px 0px' })
 
@@ -65,9 +67,9 @@ export function CTASection() {
           className="text-[clamp(2.5rem,7vw,6rem)]/[0.95] font-light text-[#1A1A1A]"
           style={{ fontFamily: "'Cormorant Garamond', serif" }}
         >
-          Your collection
+          {t.home.ctaHeading1}
           {' '}
-          <em className="text-gold-shimmer not-italic">starts here.</em>
+          <em className="text-gold-shimmer not-italic">{t.home.ctaHeading2}</em>
         </motion.h2>
 
         {/* Sub-copy */}
@@ -75,8 +77,7 @@ export function CTASection() {
           variants={itemVariants}
           className="max-w-lg text-base/7 text-[#7A7570] font-light"
         >
-          Connect your wallet and join thousands of collectors who are
-          shaping the future of digital art ownership on the Base network.
+          {t.home.ctaDesc}
         </motion.p>
 
         {/* CTA button */}
@@ -90,7 +91,7 @@ export function CTASection() {
             ].join(' ')}
             data-cursor-label="Launch App"
           >
-            Launch App
+            {t.home.ctaLaunch}
             <svg
               className="group-hover:translate-x-1.5 transition-transform duration-300"
               width="16" height="16" viewBox="0 0 16 16" fill="none"
@@ -107,7 +108,7 @@ export function CTASection() {
               'hover:border-[#C9A96E] hover:text-[#C9A96E] transition-all duration-300',
             ].join(' ')}
           >
-            Read Docs
+            {t.home.ctaDocs}
           </a>
         </motion.div>
       </motion.div>
@@ -121,7 +122,7 @@ export function CTASection() {
           ArtCurve
         </p>
         <p className="text-xs text-[#7A7570] tracking-wider">
-          © 2025 ArtCurve. Built on Base. Powered by on-chain art.
+          {t.home.ctaFooter}
         </p>
         <div className="flex gap-6">
           {['Twitter', 'Discord', 'GitHub'].map((link) => (
