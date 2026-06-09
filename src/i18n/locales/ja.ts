@@ -2,7 +2,14 @@ import type { Translations } from './en'
 
 const ja: Translations = {
   nav: { marketplace: 'マーケット', trade: 'トレード', live: 'ライブ', guild: 'ギルド', vault: 'ボールト', studio: 'スタジオ' },
-  header: { notifications: '通知', markAllRead: 'すべて既読にする', allCaughtUp: '新しい通知はありません', viewAllActivity: 'すべてのアクティビティを表示', clearAll: 'すべてクリア', all: 'すべて', unread: '未読', signOut: 'サインアウト', connectWallet: 'ウォレット接続' },
+  header: { notifications: '通知', markAllRead: 'すべて既読にする', allCaughtUp: '新しい通知はありません', viewAllActivity: 'すべてのアクティビティを表示', clearAll: 'すべてクリア', all: 'すべて', unread: '未読', signOut: 'サインアウト', connectWallet: 'ウォレット接続',
+    menuAccount: 'アカウント', menuPreferences: '設定',
+    menuEditProfile: 'プロフィール編集', menuEditProfileDesc: 'ユーザー名、自己紹介、アバター',
+    menuPortfolio: 'ポートフォリオ & P&L', menuPortfolioDesc: '保有資産、リターン、履歴',
+    menuMyArtworks: 'マイアートワーク', menuMyArtworksDesc: '作成・ミントした作品',
+    menuAiAgent: 'AIエージェント', menuAiAgentDesc: 'スマート取引と分析',
+    menuWallet: 'ウォレット', menuWalletDesc: '残高、取引、鍵',
+    menuSettings: '設定', menuSettingsDesc: 'アカウント、セキュリティ、設定' },
   lang: { label: '言語', search: '言語を検索…' },
   common: { viewDetailReviews: '詳細とレビューを見る', buy: '購入', sell: '売却', collect: 'コレクト', noReviewsYet: 'まだレビューはありません', loading: '読み込み中…', error: 'エラーが発生しました', search: '検索…', noResults: '結果なし', live: 'ライブ', back: '戻る', cancel: 'キャンセル', confirm: '確認' },
   marketplace: { title: 'ライブマーケット', subtitle: 'ボンディングカーブでユニークな作品を取引。', totalVolume: '総取引量', listings: 'リスト中', trades24h: '24H取引', all: 'すべて', search: '検索…', race: 'レース', marketCap: '時価総額', change24h: '24h変動', change7d: '7d変動', liveActivity: 'ライブアクティビティ',

@@ -10,6 +10,13 @@ const vi: Translations = {
     allCaughtUp: 'Không có thông báo mới', viewAllActivity: 'Xem tất cả hoạt động',
     clearAll: 'Xoá tất cả', all: 'Tất cả', unread: 'Chưa đọc',
     signOut: 'Đăng xuất', connectWallet: 'Kết nối ví',
+    menuAccount: 'Tài khoản', menuPreferences: 'Tuỳ chỉnh',
+    menuEditProfile: 'Chỉnh hồ sơ', menuEditProfileDesc: 'Tên, tiểu sử, ảnh đại diện',
+    menuPortfolio: 'Danh mục & Lợi nhuận', menuPortfolioDesc: 'Tài sản, lợi nhuận, lịch sử',
+    menuMyArtworks: 'Tác phẩm của tôi', menuMyArtworksDesc: 'Tác phẩm đã tạo & đúc',
+    menuAiAgent: 'AI Agent', menuAiAgentDesc: 'Giao dịch & phân tích thông minh',
+    menuWallet: 'Ví', menuWalletDesc: 'Số dư, giao dịch, khoá',
+    menuSettings: 'Cài đặt', menuSettingsDesc: 'Tài khoản, bảo mật, tuỳ chỉnh',
   },
   lang: { label: 'Ngôn ngữ', search: 'Tìm kiếm ngôn ngữ…' },
   common: {

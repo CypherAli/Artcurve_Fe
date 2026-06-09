@@ -2,7 +2,14 @@ import type { Translations } from './en'
 
 const ar: Translations = {
   nav: { marketplace: 'السوق', trade: 'التداول', live: 'مباشر', guild: 'النقابة', vault: 'الخزنة', studio: 'الاستوديو' },
-  header: { notifications: 'الإشعارات', markAllRead: 'تحديد الكل كمقروء', allCaughtUp: 'لا إشعارات جديدة', viewAllActivity: 'عرض كل النشاط', clearAll: 'مسح الكل', all: 'الكل', unread: 'غير مقروء', signOut: 'تسجيل الخروج', connectWallet: 'ربط المحفظة' },
+  header: { notifications: 'الإشعارات', markAllRead: 'تحديد الكل كمقروء', allCaughtUp: 'لا إشعارات جديدة', viewAllActivity: 'عرض كل النشاط', clearAll: 'مسح الكل', all: 'الكل', unread: 'غير مقروء', signOut: 'تسجيل الخروج', connectWallet: 'ربط المحفظة',
+    menuAccount: 'الحساب', menuPreferences: 'التفضيلات',
+    menuEditProfile: 'تعديل الملف الشخصي', menuEditProfileDesc: 'اسم المستخدم، السيرة، الصورة',
+    menuPortfolio: 'المحفظة والأرباح', menuPortfolioDesc: 'الأصول، العوائد، السجل',
+    menuMyArtworks: 'أعمالي', menuMyArtworksDesc: 'الأعمال المنشأة والمسكوكة',
+    menuAiAgent: 'وكيل الذكاء الاصطناعي', menuAiAgentDesc: 'تداول ذكي وتحليل',
+    menuWallet: 'المحفظة', menuWalletDesc: 'الرصيد، المعاملات، المفاتيح',
+    menuSettings: 'الإعدادات', menuSettingsDesc: 'الحساب، الأمان، التفضيلات' },
   lang: { label: 'اللغة', search: 'البحث عن لغة…' },
   common: { viewDetailReviews: 'عرض التفاصيل والمراجعات', buy: 'شراء', sell: 'بيع', collect: 'جمع', noReviewsYet: 'لا مراجعات بعد', loading: 'جارٍ التحميل…', error: 'حدث خطأ ما', search: 'بحث…', noResults: 'لا نتائج', live: 'مباشر', back: 'رجوع', cancel: 'إلغاء', confirm: 'تأكيد' },
   marketplace: { title: 'السوق المباشر', subtitle: 'تداول أعمالاً فنية فريدة على منحنى الربط.', totalVolume: 'إجمالي الحجم', listings: 'المدرجة', trades24h: 'صفقات 24 ساعة', all: 'الكل', search: 'بحث…', race: 'سباق', marketCap: 'القيمة السوقية', change24h: 'تغير 24 ساعة', change7d: 'تغير 7 أيام', liveActivity: 'النشاط المباشر',

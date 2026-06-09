@@ -1,6 +1,7 @@
 'use client'
 
 import { useEffect, useRef, useState } from 'react'
+import Link                            from 'next/link'
 import { ConnectButton }               from '@rainbow-me/rainbowkit'
 import { useAccount }                  from 'wagmi'
 import { gsap }                        from '@/lib/gsap'
@@ -273,11 +274,11 @@ function UserMenuDropdown({
 
   const SECTIONS = [
     {
-      label: 'Account',
+      label: t.header.menuAccount,
       items: [
         {
-          label: 'Edit Profile',
-          desc:  'Username, bio, avatar',
+          label: t.header.menuEditProfile,
+          desc:  t.header.menuEditProfileDesc,
           href:  '/settings',
           icon: (
             <svg viewBox="0 0 24 24" className="w-[17px] h-[17px]" fill="none" stroke="currentColor" strokeWidth="1.7">
@@ -287,8 +288,8 @@ function UserMenuDropdown({
           ),
         },
         {
-          label: 'Portfolio & P&L',
-          desc:  'Holdings, returns, history',
+          label: t.header.menuPortfolio,
+          desc:  t.header.menuPortfolioDesc,
           href:  '/vault',
           icon: (
             <svg viewBox="0 0 24 24" className="w-[17px] h-[17px]" fill="none" stroke="currentColor" strokeWidth="1.7">
@@ -298,8 +299,8 @@ function UserMenuDropdown({
           ),
         },
         {
-          label: 'My Artworks',
-          desc:  'Works you created & minted',
+          label: t.header.menuMyArtworks,
+          desc:  t.header.menuMyArtworksDesc,
           href:  '/studio',
           icon: (
             <svg viewBox="0 0 24 24" className="w-[17px] h-[17px]" fill="none" stroke="currentColor" strokeWidth="1.7">
@@ -309,8 +310,8 @@ function UserMenuDropdown({
           ),
         },
         {
-          label: 'AI Agent',
-          desc:  'Smart trading & analysis',
+          label: t.header.menuAiAgent,
+          desc:  t.header.menuAiAgentDesc,
           href:  '/agent',
           icon: (
             <svg viewBox="0 0 24 24" className="w-[17px] h-[17px]" fill="none" stroke="currentColor" strokeWidth="1.7">
@@ -324,11 +325,11 @@ function UserMenuDropdown({
       ],
     },
     {
-      label: 'Preferences',
+      label: t.header.menuPreferences,
       items: [
         {
-          label: 'Wallet',
-          desc:  'Balance, transactions, keys',
+          label: t.header.menuWallet,
+          desc:  t.header.menuWalletDesc,
           href:  '/wallet',
           icon: (
             <svg viewBox="0 0 24 24" className="w-[17px] h-[17px]" fill="none" stroke="currentColor" strokeWidth="1.7">
@@ -339,8 +340,8 @@ function UserMenuDropdown({
           ),
         },
         {
-          label: 'Settings',
-          desc:  'Account, security, preferences',
+          label: t.header.menuSettings,
+          desc:  t.header.menuSettingsDesc,
           href:  '/settings',
           icon: (
             <svg viewBox="0 0 24 24" className="w-[17px] h-[17px]" fill="none" stroke="currentColor" strokeWidth="1.7">
@@ -413,7 +414,7 @@ function UserMenuDropdown({
             </p>
             <div className="px-2">
               {section.items.map(({ label, desc, href, icon }) => (
-                <a key={label} href={href} onClick={onClose}
+                <Link key={label} href={href} onClick={onClose}
                   className="um-item group flex items-center gap-3 px-3 py-2.5 rounded-xl
                              transition-all duration-150 cursor-pointer"
                   style={{ color: 'rgba(255,255,255,0.55)' }}
@@ -432,7 +433,7 @@ function UserMenuDropdown({
                     fill="none" stroke="currentColor" strokeWidth="2.5">
                     <path d="M9 18l6-6-6-6" strokeLinecap="round" strokeLinejoin="round"/>
                   </svg>
-                </a>
+                </Link>
               ))}
             </div>
           </div>

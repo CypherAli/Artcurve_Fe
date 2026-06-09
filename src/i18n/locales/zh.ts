@@ -2,7 +2,14 @@ import type { Translations } from './en'
 
 const zh: Translations = {
   nav: { marketplace: '市场', trade: '交易', live: '直播', guild: '公会', vault: '金库', studio: '工作室' },
-  header: { notifications: '通知', markAllRead: '全部标为已读', allCaughtUp: '暂无新通知', viewAllActivity: '查看所有活动', clearAll: '清除所有', all: '全部', unread: '未读', signOut: '退出登录', connectWallet: '连接钱包' },
+  header: { notifications: '通知', markAllRead: '全部标为已读', allCaughtUp: '暂无新通知', viewAllActivity: '查看所有活动', clearAll: '清除所有', all: '全部', unread: '未读', signOut: '退出登录', connectWallet: '连接钱包',
+    menuAccount: '账户', menuPreferences: '偏好设置',
+    menuEditProfile: '编辑资料', menuEditProfileDesc: '用户名、简介、头像',
+    menuPortfolio: '投资组合 & 盈亏', menuPortfolioDesc: '持仓、收益、历史',
+    menuMyArtworks: '我的作品', menuMyArtworksDesc: '已创作和铸造的作品',
+    menuAiAgent: 'AI 代理', menuAiAgentDesc: '智能交易与分析',
+    menuWallet: '钱包', menuWalletDesc: '余额、交易、密钥',
+    menuSettings: '设置', menuSettingsDesc: '账户、安全、偏好' },
   lang: { label: '语言', search: '搜索语言…' },
   common: { viewDetailReviews: '查看详情和评论', buy: '购买', sell: '出售', collect: '收藏', noReviewsYet: '暂无评论', loading: '加载中…', error: '出错了', search: '搜索…', noResults: '无结果', live: '直播', back: '返回', cancel: '取消', confirm: '确认' },
   marketplace: { title: '实时市场', subtitle: '在联合曲线上交易独特艺术品。', totalVolume: '总交易量', listings: '上架中', trades24h: '24H交易', all: '全部', search: '搜索…', race: '竞赛', marketCap: '市值', change24h: '24h变动', change7d: '7d变动', liveActivity: '实时活动',

@@ -2,7 +2,14 @@ import type { Translations } from './en'
 
 const es: Translations = {
   nav: { marketplace: 'Mercado', trade: 'Intercambio', live: 'En vivo', guild: 'Gremio', vault: 'Bóveda', studio: 'Estudio' },
-  header: { notifications: 'Notificaciones', markAllRead: 'Marcar todo como leído', allCaughtUp: 'Sin notificaciones nuevas', viewAllActivity: 'Ver toda la actividad', clearAll: 'Borrar todo', all: 'Todos', unread: 'No leídos', signOut: 'Cerrar sesión', connectWallet: 'Conectar billetera' },
+  header: { notifications: 'Notificaciones', markAllRead: 'Marcar todo como leído', allCaughtUp: 'Sin notificaciones nuevas', viewAllActivity: 'Ver toda la actividad', clearAll: 'Borrar todo', all: 'Todos', unread: 'No leídos', signOut: 'Cerrar sesión', connectWallet: 'Conectar billetera',
+    menuAccount: 'Cuenta', menuPreferences: 'Preferencias',
+    menuEditProfile: 'Editar perfil', menuEditProfileDesc: 'Nombre, bio, avatar',
+    menuPortfolio: 'Portafolio & P&L', menuPortfolioDesc: 'Activos, rendimientos, historial',
+    menuMyArtworks: 'Mis obras', menuMyArtworksDesc: 'Obras creadas y acuñadas',
+    menuAiAgent: 'Agente IA', menuAiAgentDesc: 'Trading y análisis inteligente',
+    menuWallet: 'Billetera', menuWalletDesc: 'Saldo, transacciones, claves',
+    menuSettings: 'Configuración', menuSettingsDesc: 'Cuenta, seguridad, preferencias' },
   lang: { label: 'Idioma', search: 'Buscar idioma…' },
   common: { viewDetailReviews: 'Ver detalles y reseñas', buy: 'Comprar', sell: 'Vender', collect: 'Coleccionar', noReviewsYet: 'Sin reseñas aún', loading: 'Cargando…', error: 'Algo salió mal', search: 'Buscar…', noResults: 'Sin resultados', live: 'En vivo', back: 'Volver', cancel: 'Cancelar', confirm: 'Confirmar' },
   marketplace: { title: 'Mercado en vivo', subtitle: 'Intercambia obras únicas en la curva de bonding.', totalVolume: 'Volumen total', listings: 'Listados activos', trades24h: 'Intercambios 24H', all: 'Todos', search: 'Buscar…', race: 'Carrera', marketCap: 'Cap. de mercado', change24h: 'Cambio 24h', change7d: 'Cambio 7d', liveActivity: 'Actividad en vivo',

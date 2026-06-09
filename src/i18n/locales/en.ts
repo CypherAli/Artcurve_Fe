@@ -7,6 +7,13 @@ export interface Translations {
     notifications: string; markAllRead: string; allCaughtUp: string
     viewAllActivity: string; clearAll: string; all: string
     unread: string; signOut: string; connectWallet: string
+    menuAccount: string; menuPreferences: string
+    menuEditProfile: string; menuEditProfileDesc: string
+    menuPortfolio: string; menuPortfolioDesc: string
+    menuMyArtworks: string; menuMyArtworksDesc: string
+    menuAiAgent: string; menuAiAgentDesc: string
+    menuWallet: string; menuWalletDesc: string
+    menuSettings: string; menuSettingsDesc: string
   }
   lang: { label: string; search: string }
   common: {
@@ -213,6 +220,13 @@ const en: Translations = {
     allCaughtUp: 'All caught up', viewAllActivity: 'View all activity',
     clearAll: 'Clear all', all: 'All', unread: 'Unread',
     signOut: 'Sign out', connectWallet: 'Connect Wallet',
+    menuAccount: 'Account', menuPreferences: 'Preferences',
+    menuEditProfile: 'Edit Profile', menuEditProfileDesc: 'Username, bio, avatar',
+    menuPortfolio: 'Portfolio & P&L', menuPortfolioDesc: 'Holdings, returns, history',
+    menuMyArtworks: 'My Artworks', menuMyArtworksDesc: 'Works you created & minted',
+    menuAiAgent: 'AI Agent', menuAiAgentDesc: 'Smart trading & analysis',
+    menuWallet: 'Wallet', menuWalletDesc: 'Balance, transactions, keys',
+    menuSettings: 'Settings', menuSettingsDesc: 'Account, security, preferences',
   },
   lang: { label: 'Language', search: 'Search language…' },
   common: {

@@ -2,7 +2,14 @@ import type { Translations } from './en'
 
 const ko: Translations = {
   nav: { marketplace: '마켓', trade: '거래', live: '라이브', guild: '길드', vault: '볼트', studio: '스튜디오' },
-  header: { notifications: '알림', markAllRead: '모두 읽음으로 표시', allCaughtUp: '새 알림이 없습니다', viewAllActivity: '모든 활동 보기', clearAll: '모두 지우기', all: '전체', unread: '읽지 않음', signOut: '로그아웃', connectWallet: '지갑 연결' },
+  header: { notifications: '알림', markAllRead: '모두 읽음으로 표시', allCaughtUp: '새 알림이 없습니다', viewAllActivity: '모든 활동 보기', clearAll: '모두 지우기', all: '전체', unread: '읽지 않음', signOut: '로그아웃', connectWallet: '지갑 연결',
+    menuAccount: '계정', menuPreferences: '환경설정',
+    menuEditProfile: '프로필 수정', menuEditProfileDesc: '사용자명, 소개, 아바타',
+    menuPortfolio: '포트폴리오 & P&L', menuPortfolioDesc: '보유자산, 수익, 내역',
+    menuMyArtworks: '내 작품', menuMyArtworksDesc: '생성 및 발행한 작품',
+    menuAiAgent: 'AI 에이전트', menuAiAgentDesc: '스마트 거래 및 분석',
+    menuWallet: '지갑', menuWalletDesc: '잔액, 거래, 키',
+    menuSettings: '설정', menuSettingsDesc: '계정, 보안, 환경설정' },
   lang: { label: '언어', search: '언어 검색…' },
   common: { viewDetailReviews: '상세 및 리뷰 보기', buy: '구매', sell: '판매', collect: '수집', noReviewsYet: '아직 리뷰가 없습니다', loading: '로딩 중…', error: '오류가 발생했습니다', search: '검색…', noResults: '결과 없음', live: '라이브', back: '뒤로', cancel: '취소', confirm: '확인' },
   marketplace: { title: '실시간 마켓', subtitle: '본딩 커브에서 독특한 작품을 거래하세요.', totalVolume: '총 거래량', listings: '상장 중', trades24h: '24H 거래', all: '전체', search: '검색…', race: '레이스', marketCap: '시가총액', change24h: '24h 변동', change7d: '7d 변동', liveActivity: '실시간 활동',

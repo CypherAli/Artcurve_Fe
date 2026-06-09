@@ -2,7 +2,14 @@ import type { Translations } from './en'
 
 const de: Translations = {
   nav: { marketplace: 'Marktplatz', trade: 'Handel', live: 'Live', guild: 'Gilde', vault: 'Tresor', studio: 'Studio' },
-  header: { notifications: 'Benachrichtigungen', markAllRead: 'Alle als gelesen markieren', allCaughtUp: 'Keine neuen Benachrichtigungen', viewAllActivity: 'Alle Aktivitäten anzeigen', clearAll: 'Alle löschen', all: 'Alle', unread: 'Ungelesen', signOut: 'Abmelden', connectWallet: 'Wallet verbinden' },
+  header: { notifications: 'Benachrichtigungen', markAllRead: 'Alle als gelesen markieren', allCaughtUp: 'Keine neuen Benachrichtigungen', viewAllActivity: 'Alle Aktivitäten anzeigen', clearAll: 'Alle löschen', all: 'Alle', unread: 'Ungelesen', signOut: 'Abmelden', connectWallet: 'Wallet verbinden',
+    menuAccount: 'Konto', menuPreferences: 'Einstellungen',
+    menuEditProfile: 'Profil bearbeiten', menuEditProfileDesc: 'Benutzername, Bio, Avatar',
+    menuPortfolio: 'Portfolio & G&V', menuPortfolioDesc: 'Bestände, Renditen, Verlauf',
+    menuMyArtworks: 'Meine Werke', menuMyArtworksDesc: 'Erstellte & geprägte Werke',
+    menuAiAgent: 'KI-Agent', menuAiAgentDesc: 'Intelligentes Trading & Analyse',
+    menuWallet: 'Wallet', menuWalletDesc: 'Guthaben, Transaktionen, Schlüssel',
+    menuSettings: 'Einstellungen', menuSettingsDesc: 'Konto, Sicherheit, Einstellungen' },
   lang: { label: 'Sprache', search: 'Sprache suchen…' },
   common: { viewDetailReviews: 'Details & Bewertungen anzeigen', buy: 'Kaufen', sell: 'Verkaufen', collect: 'Sammeln', noReviewsYet: 'Noch keine Bewertungen', loading: 'Lädt…', error: 'Etwas ist schiefgelaufen', search: 'Suchen…', noResults: 'Keine Ergebnisse', live: 'Live', back: 'Zurück', cancel: 'Abbrechen', confirm: 'Bestätigen' },
   marketplace: { title: 'Live-Marktplatz', subtitle: 'Handeln Sie einzigartige Kunstwerke auf der Bonding-Kurve.', totalVolume: 'Gesamtvolumen', listings: 'Aktive Listings', trades24h: '24H-Trades', all: 'Alle', search: 'Suchen…', race: 'Rennen', marketCap: 'Marktkapitalisierung', change24h: '24h-Änderung', change7d: '7d-Änderung', liveActivity: 'Live-Aktivität',

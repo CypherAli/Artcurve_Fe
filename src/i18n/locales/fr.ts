@@ -2,7 +2,14 @@ import type { Translations } from './en'
 
 const fr: Translations = {
   nav: { marketplace: 'Marché', trade: 'Échange', live: 'En direct', guild: 'Guilde', vault: 'Coffre', studio: 'Studio' },
-  header: { notifications: 'Notifications', markAllRead: 'Tout marquer comme lu', allCaughtUp: 'Aucune nouvelle notification', viewAllActivity: "Voir toute l'activité", clearAll: 'Tout effacer', all: 'Tout', unread: 'Non lus', signOut: 'Déconnexion', connectWallet: 'Connecter le portefeuille' },
+  header: { notifications: 'Notifications', markAllRead: 'Tout marquer comme lu', allCaughtUp: 'Aucune nouvelle notification', viewAllActivity: "Voir toute l'activité", clearAll: 'Tout effacer', all: 'Tout', unread: 'Non lus', signOut: 'Déconnexion', connectWallet: 'Connecter le portefeuille',
+    menuAccount: 'Compte', menuPreferences: 'Préférences',
+    menuEditProfile: 'Modifier le profil', menuEditProfileDesc: 'Nom, bio, avatar',
+    menuPortfolio: 'Portefeuille & P&L', menuPortfolioDesc: 'Avoirs, rendements, historique',
+    menuMyArtworks: 'Mes œuvres', menuMyArtworksDesc: 'Œuvres créées & frappées',
+    menuAiAgent: 'Agent IA', menuAiAgentDesc: 'Trading & analyse intelligents',
+    menuWallet: 'Portefeuille', menuWalletDesc: 'Solde, transactions, clés',
+    menuSettings: 'Paramètres', menuSettingsDesc: 'Compte, sécurité, préférences' },
   lang: { label: 'Langue', search: 'Rechercher une langue…' },
   common: { viewDetailReviews: 'Voir les détails & avis', buy: 'Acheter', sell: 'Vendre', collect: 'Collecter', noReviewsYet: "Aucun avis pour l'instant", loading: 'Chargement…', error: "Une erreur s'est produite", search: 'Rechercher…', noResults: 'Aucun résultat', live: 'En direct', back: 'Retour', cancel: 'Annuler', confirm: 'Confirmer' },
   marketplace: { title: 'Marché en direct', subtitle: 'Échangez des œuvres uniques sur la courbe de liaison.', totalVolume: 'Volume total', listings: 'Annonces actives', trades24h: 'Échanges 24H', all: 'Tout', search: 'Rechercher…', race: 'Course', marketCap: 'Capitalisation', change24h: 'Variation 24h', change7d: 'Variation 7j', liveActivity: 'Activité en direct',

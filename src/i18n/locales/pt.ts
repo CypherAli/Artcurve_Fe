@@ -2,7 +2,14 @@ import type { Translations } from './en'
 
 const pt: Translations = {
   nav: { marketplace: 'Mercado', trade: 'Negociar', live: 'Ao vivo', guild: 'Guilda', vault: 'Cofre', studio: 'Estúdio' },
-  header: { notifications: 'Notificações', markAllRead: 'Marcar tudo como lido', allCaughtUp: 'Sem novas notificações', viewAllActivity: 'Ver toda a atividade', clearAll: 'Limpar tudo', all: 'Todos', unread: 'Não lidos', signOut: 'Sair', connectWallet: 'Conectar carteira' },
+  header: { notifications: 'Notificações', markAllRead: 'Marcar tudo como lido', allCaughtUp: 'Sem novas notificações', viewAllActivity: 'Ver toda a atividade', clearAll: 'Limpar tudo', all: 'Todos', unread: 'Não lidos', signOut: 'Sair', connectWallet: 'Conectar carteira',
+    menuAccount: 'Conta', menuPreferences: 'Preferências',
+    menuEditProfile: 'Editar perfil', menuEditProfileDesc: 'Nome, bio, avatar',
+    menuPortfolio: 'Portfólio & L&P', menuPortfolioDesc: 'Ativos, retornos, histórico',
+    menuMyArtworks: 'Minhas obras', menuMyArtworksDesc: 'Obras criadas e cunhadas',
+    menuAiAgent: 'Agente IA', menuAiAgentDesc: 'Trading e análise inteligente',
+    menuWallet: 'Carteira', menuWalletDesc: 'Saldo, transações, chaves',
+    menuSettings: 'Configurações', menuSettingsDesc: 'Conta, segurança, preferências' },
   lang: { label: 'Idioma', search: 'Pesquisar idioma…' },
   common: { viewDetailReviews: 'Ver detalhes e avaliações', buy: 'Comprar', sell: 'Vender', collect: 'Colecionar', noReviewsYet: 'Ainda sem avaliações', loading: 'Carregando…', error: 'Algo deu errado', search: 'Pesquisar…', noResults: 'Sem resultados', live: 'Ao vivo', back: 'Voltar', cancel: 'Cancelar', confirm: 'Confirmar' },
   marketplace: { title: 'Mercado ao vivo', subtitle: 'Negocie obras únicas na curva de bonding.', totalVolume: 'Volume total', listings: 'Listagens ativas', trades24h: 'Negociações 24H', all: 'Todos', search: 'Pesquisar…', race: 'Corrida', marketCap: 'Cap. de mercado', change24h: 'Variação 24h', change7d: 'Variação 7d', liveActivity: 'Atividade ao vivo',
