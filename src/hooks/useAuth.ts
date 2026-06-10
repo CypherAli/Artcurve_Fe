@@ -35,7 +35,7 @@ function parseSiweMessage(raw: string): { domain: string; chainId: number } | nu
 }
 
 const EXPECTED_CHAIN_ID = parseInt(
-  process.env.NEXT_PUBLIC_CHAIN_ID ?? '8453',
+  process.env.NEXT_PUBLIC_CHAIN_ID ?? '84532',
   10,
 )
 
