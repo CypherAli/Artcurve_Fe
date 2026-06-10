@@ -82,7 +82,7 @@ const nextConfig: NextConfig = {
   // ── Bake env vars vào bundle (override Vercel nếu chưa set) ───
   env: {
     NEXT_PUBLIC_API_URL:  rawApiUrl,
-    NEXT_PUBLIC_CHAIN_ID: process.env.NEXT_PUBLIC_CHAIN_ID ?? '8453',
+    NEXT_PUBLIC_CHAIN_ID: process.env.NEXT_PUBLIC_CHAIN_ID ?? '84532',
   },
 
   // ── Three.js / R3F: transpile ESM-only packages ───────────────

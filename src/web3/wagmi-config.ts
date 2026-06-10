@@ -3,13 +3,12 @@
 // ─────────────────────────────────────────────────────────────────
 //  wagmi-config.ts  — Single source of truth cho wagmi + RainbowKit
 //
-//  Chain: Base Mainnet (chainId 8453) — khớp với:
-//    - BE SIWE_CHAIN_ID = 8453
-//    - BE CHAIN_ID      = 8453
-//    - Indexer          = base (viem/chains)
+//  Chain: env-driven qua NEXT_PUBLIC_CHAIN_ID — PHẢI khớp BE CHAIN_ID:
+//    - 84532 (Base Sepolia, mặc định) — contracts đã deploy tại đây
+//    - 8453  (Base Mainnet) — chỉ đổi khi đã deploy contracts mainnet
 //
-//  QUAN TRỌNG: baseSepolia (84532) bị xóa — nếu dùng testnet thì
-//  đổi CẢ BE env SIWE_CHAIN_ID + CHAIN_ID đồng thời.
+//  QUAN TRỌNG: đổi chain thì đổi CẢ FE NEXT_PUBLIC_CHAIN_ID (Vercel)
+//  + BE CHAIN_ID (Render) đồng thời, nếu lệch SIWE login sẽ sai chain.
 //
 //  Wallets: danh sách mở rộng thay vì 4 ví mặc định của
 //  getDefaultConfig. Ví injected/safe vẫn nằm trong nhóm "Khác".
@@ -37,12 +36,15 @@ import {
   safeWallet,
   injectedWallet,
 } from '@rainbow-me/rainbowkit/wallets'
-import { base } from 'wagmi/chains'
+import { base, baseSepolia } from 'wagmi/chains'
+
+const CHAIN_ID = Number(process.env.NEXT_PUBLIC_CHAIN_ID ?? '84532')
+const activeChain = CHAIN_ID === base.id ? base : baseSepolia
 
 export const wagmiConfig = getDefaultConfig({
   appName:   'ArtCurve',
   projectId: process.env.NEXT_PUBLIC_WALLETCONNECT_PROJECT_ID ?? 'cc275f83791b65f859c7acb215931508',
-  chains:    [base],
+  chains:    [activeChain],
   ssr:       true,
   wallets: [
     {
