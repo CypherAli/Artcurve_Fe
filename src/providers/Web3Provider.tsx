@@ -48,7 +48,7 @@ export function Web3Provider({ children }: Web3ProviderProps) {
       <QueryClientProvider client={queryClient}>
         <RainbowKitProvider
           theme={luxuryTheme}
-          modalSize="compact"
+          modalSize="wide"
           appInfo={{
             appName: 'ArtCurve',
             learnMoreUrl: 'https://artcurve.io',

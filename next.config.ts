@@ -2,8 +2,8 @@ import type { NextConfig } from 'next'
 
 const isDev = process.env.NODE_ENV === 'development'
 
-// Fallback sang Railway khi NEXT_PUBLIC_API_URL chưa được set trên Vercel
-const PROD_API = 'https://artcurve-be-production.up.railway.app/api/v1'
+// Fallback sang Render khi NEXT_PUBLIC_API_URL chưa được set trên Vercel
+const PROD_API = 'https://artcurve-be.onrender.com/api/v1'
 const rawApiUrl = process.env.NEXT_PUBLIC_API_URL ?? (isDev ? 'http://localhost:3001/api/v1' : PROD_API)
 
 // Override env ở build time — baked into bundle
@@ -53,8 +53,11 @@ const securityHeaders = [
         'https://gateway.pinata.cloud',
         'https://*.infura.io',
         'https://*.alchemy.com',
-        'https://artcurve-be-production.up.railway.app',
-        'wss://artcurve-be-production.up.railway.app',
+        'https://artcurve-be.onrender.com',
+        'wss://artcurve-be.onrender.com',
+        // Coinbase Wallet SDK (Smart Wallet + analytics)
+        'https://*.coinbase.com',
+        'wss://*.coinbase.com',
         // LiveKit Cloud
         'wss://artcurve-3el8ft2f.livekit.cloud',
         'https://artcurve-3el8ft2f.livekit.cloud',
@@ -64,7 +67,8 @@ const securityHeaders = [
         'https://stream.binance.com',
         'https://api.binance.com',
       ].join(' '),
-      "frame-src 'none'",
+      // WalletConnect Verify dùng iframe; Coinbase Smart Wallet dùng keys.coinbase.com
+      "frame-src https://verify.walletconnect.com https://verify.walletconnect.org https://keys.coinbase.com",
       "frame-ancestors 'none'",
       "object-src 'none'",
       "base-uri 'self'",

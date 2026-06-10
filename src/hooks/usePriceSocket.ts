@@ -7,7 +7,7 @@
 //   server → {"type":"artwork_graduated","data":{...}}
 //   client → {"action":"unsubscribe","artwork_id":"<uuid>"}
 //
-// Env var: NEXT_PUBLIC_WS_HUB_URL  e.g. wss://artcurve-ws-hub.railway.app
+// Env var: NEXT_PUBLIC_WS_HUB_URL  e.g. wss://artcurve-ws-hub.onrender.com
 // Falls back to API_URL host on port 8080 for local dev.
 
 import { useState, useEffect, useRef } from 'react'
