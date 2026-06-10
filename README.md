@@ -115,7 +115,7 @@ Create `.env.local` in the project root:
 # ── Backend API ──────────────────────────────────────────────────────────────
 NEXT_PUBLIC_API_URL=http://localhost:3001/api/v1
 # Production:
-# NEXT_PUBLIC_API_URL=https://artcurve-be-production.up.railway.app/api/v1
+# NEXT_PUBLIC_API_URL=https://artcurve-be.onrender.com/api/v1
 
 # ── LiveKit ──────────────────────────────────────────────────────────────────
 NEXT_PUBLIC_LIVEKIT_URL=wss://artcurve-3el8ft2f.livekit.cloud
