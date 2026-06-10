@@ -617,7 +617,7 @@ function RecentTradesPanel({ trades }: { trades: RecentTrade[] }) {
             exit="exit"
             layout="position"
             transition={{ type:'spring', stiffness:300, damping:28 }}
-            className="flex items-center px-3 py-[3.5px] font-mono hover:bg-white/[0.018] cursor-default"
+            className="flex items-center px-3 py-[3.5px] font-mono hover:bg-[var(--ac-paper)]/[0.018] cursor-default"
             style={{ borderBottom:'1px solid rgba(255,255,255,0.02)' }}
           >
             <span style={{ minWidth:40, fontSize:8, color:'rgba(255,255,255,0.2)' }}>

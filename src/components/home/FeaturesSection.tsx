@@ -20,7 +20,7 @@ const FEATURE_ICONS = [
     <svg width="32" height="32" viewBox="0 0 32 32" fill="none" aria-hidden="true">
       <rect x="6" y="4" width="20" height="24" rx="2" stroke="#C9A96E" strokeWidth="1.5"/>
       <path d="M11 10h10M11 15h10M11 20h6" stroke="#C9A96E" strokeWidth="1.5" strokeLinecap="round"/>
-      <circle cx="24" cy="24" r="5" fill="#FDFBF7" stroke="#C9A96E" strokeWidth="1.5"/>
+      <circle cx="24" cy="24" r="5" fill="var(--ac-paper)" stroke="#C9A96E" strokeWidth="1.5"/>
       <path d="M22 24l1.5 1.5L26 22" stroke="#C9A96E" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
     </svg>
   ),
@@ -60,7 +60,7 @@ export function FeaturesSection() {
   return (
     <section
       id="marketplace"
-      className="relative py-32 px-6 md:px-16 lg:px-24 bg-[#FDFBF7]"
+      className="relative py-32 px-6 md:px-16 lg:px-24 bg-[var(--ac-paper)]"
       aria-labelledby="features-heading"
     >
       {/* Section header */}
@@ -70,7 +70,7 @@ export function FeaturesSection() {
         </p>
         <h2
           id="features-heading"
-          className="text-[clamp(2rem,5vw,3.5rem)]/[1.05] font-light text-[#1A1A1A]"
+          className="text-[clamp(2rem,5vw,3.5rem)]/[1.05] font-light text-[var(--ac-ink)]"
           style={{ fontFamily: "'Cormorant Garamond', serif" }}
           data-motion-text="lines"
         >
@@ -81,19 +81,19 @@ export function FeaturesSection() {
 
       {/* Feature cards — staggered reveal via GSAP data-reveal-group */}
       <div
-        className="grid grid-cols-1 md:grid-cols-3 gap-px bg-[#E4DDD3]"
+        className="grid grid-cols-1 md:grid-cols-3 gap-px bg-[var(--ac-line)]"
         data-reveal-group
       >
         {FEATURES.map(({ number, title, icon, description }) => (
           <article
             key={number}
-            className="bg-[#FDFBF7] p-10 flex flex-col gap-8 group hover:bg-[#F5F0E8] transition-colors duration-500"
+            className="bg-[var(--ac-paper)] p-10 flex flex-col gap-8 group hover:bg-[var(--ac-paper-2)] transition-colors duration-500"
             data-reveal-item
           >
             {/* Number + Icon */}
             <div className="flex items-start justify-between">
               <span
-                className="text-5xl font-light text-[#E4DDD3] leading-none"
+                className="text-5xl font-light text-[var(--ac-line)] leading-none"
                 style={{ fontFamily: "'Cormorant Garamond', serif" }}
                 aria-hidden="true"
               >
@@ -106,14 +106,14 @@ export function FeaturesSection() {
 
             {/* Title */}
             <h3
-              className="text-2xl font-light leading-snug whitespace-pre-line text-[#1A1A1A]"
+              className="text-2xl font-light leading-snug whitespace-pre-line text-[var(--ac-ink)]"
               style={{ fontFamily: "'Cormorant Garamond', serif" }}
             >
               {title}
             </h3>
 
             {/* Description */}
-            <p className="text-sm/6 text-[#7A7570] font-light">
+            <p className="text-sm/6 text-[var(--ac-muted)] font-light">
               {description}
             </p>
 

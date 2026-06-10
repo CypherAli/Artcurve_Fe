@@ -17,6 +17,7 @@ import { SmoothScrollProvider }  from '@/providers/SmoothScrollProvider'
 import { Web3Provider }          from '@/providers/Web3Provider'
 import { ToastContainer }        from '@/components/common/Toast'
 import { LanguageProvider }      from '@/context/LanguageContext'
+import { ThemeProvider }         from '@/context/ThemeContext'
 import './globals.css'
 
 // ── Font configuration ────────────────────────────────────────────
@@ -82,7 +83,14 @@ export default function RootLayout({
       suppressHydrationWarning
       className={`${inter.variable} ${cormorant.variable}`}
     >
-      <body className="min-h-dvh bg-[#FDFBF7] text-[#1A1A1A] antialiased">
+      <body className="min-h-dvh bg-[var(--ac-paper)] text-[var(--ac-ink)] antialiased">
+        {/* Set theme class TRƯỚC hydration — chống flash sai theme */}
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `try{if(localStorage.getItem('artcurve-theme')==='dark')document.documentElement.classList.add('dark')}catch(e){}`,
+          }}
+        />
+        <ThemeProvider>
         <LanguageProvider>
         <SmoothScrollProvider>
           <Web3Provider>
@@ -102,6 +110,7 @@ export default function RootLayout({
           </Web3Provider>
         </SmoothScrollProvider>
         </LanguageProvider>
+        </ThemeProvider>
       </body>
     </html>
   )

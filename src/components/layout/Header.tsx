@@ -12,6 +12,7 @@ import { userService }                 from '@/services/user.service'
 import { useNotifications }            from '@/hooks/useNotifications'
 import type { AppNotification }        from '@/store/notificationStore'
 import { useLanguage }                 from '@/context/LanguageContext'
+import { ThemeToggle }                 from '@/components/common/ThemeToggle'
 import { LANGUAGES, type LocaleCode }  from '@/i18n'
 
 function NotifTypeIcon({ type }: { type: string }) {
@@ -37,7 +38,7 @@ function NotifTypeIcon({ type }: { type: string }) {
       <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" strokeLinecap="round"/>
       <circle cx="9" cy="7" r="4"/><path d="M19 8v6m3-3h-6" strokeLinecap="round"/>
     </svg>)
-  return wrap('bg-white/6 border border-white/10',
+  return wrap('bg-[var(--ac-paper)]/6 border border-white/10',
     <svg viewBox="0 0 24 24" className="w-4 h-4 text-white/35" fill="none" stroke="currentColor" strokeWidth="2">
       <path d="M13 10V3L4 14h7v7l9-11h-7z" strokeLinecap="round" strokeLinejoin="round"/>
     </svg>)
@@ -121,7 +122,7 @@ function NotificationsDropdown({
           </span>
           {unread > 0 && (
             <span className="h-[18px] min-w-[18px] px-1.5 rounded-full bg-[#C9A96E]
-                             text-[8.5px] font-bold text-[#1A1A1A] flex items-center justify-center">
+                             text-[8.5px] font-bold text-[var(--ac-ink)] flex items-center justify-center">
               {unread}
             </span>
           )}
@@ -172,7 +173,7 @@ function NotificationsDropdown({
             className={[
               'ni group relative flex items-start gap-3.5 px-5 py-4 cursor-pointer',
               'transition-colors duration-150',
-              !n.is_read ? 'hover:bg-[#C9A96E]/[0.04]' : 'hover:bg-white/[0.02]',
+              !n.is_read ? 'hover:bg-[#C9A96E]/[0.04]' : 'hover:bg-[var(--ac-paper)]/[0.02]',
             ].join(' ')}
             style={{ borderBottom: '1px solid rgba(255,255,255,0.05)' }}
           >
@@ -204,7 +205,7 @@ function NotificationsDropdown({
               onClick={e => { e.stopPropagation(); onDelete(n.id) }}
               className="absolute right-3.5 top-3.5 w-5 h-5 rounded-full flex items-center justify-center
                          opacity-0 group-hover:opacity-100 text-white/30 hover:text-white/70
-                         hover:bg-white/8 transition-all duration-150">
+                         hover:bg-[var(--ac-paper)]/8 transition-all duration-150">
               <svg viewBox="0 0 24 24" className="w-[10px] h-[10px]" fill="none" stroke="currentColor" strokeWidth="2.5">
                 <path d="M18 6L6 18M6 6l12 12" strokeLinecap="round"/>
               </svg>
@@ -379,7 +380,7 @@ function UserMenuDropdown({
               style={{ boxShadow: '0 0 0 2px rgba(201,169,110,0.4)' }}/>
           ) : (
             <div className="w-11 h-11 rounded-full flex items-center justify-center text-[15px] font-bold"
-              style={{ background: 'linear-gradient(135deg,#C9A96E 0%,#7A5A1E 100%)', color: '#1A1A1A', boxShadow: '0 0 0 2px rgba(201,169,110,0.3)' }}>
+              style={{ background: 'linear-gradient(135deg,#C9A96E 0%,#7A5A1E 100%)', color: 'var(--ac-ink)', boxShadow: '0 0 0 2px rgba(201,169,110,0.3)' }}>
               {initials}
             </div>
           )}
@@ -677,25 +678,25 @@ const NAV_HREFS_AUTH = [
 // ── Theme tokens for light ↔ dark header ─────────────────────────
 const THEMES = {
   light: {
-    bg:          '#FDFBF7',
-    bgScrolled:  '#FDFBF7',
+    bg:          'var(--ac-paper)',
+    bgScrolled:  'var(--ac-paper)',
     border:      'rgba(228,221,211,0.8)',
     shadow:      '0 1px 24px rgba(0,0,0,0.06)',
-    logo:        '#1A1A1A',
-    nav:         '#7A7570',
-    navHover:    '#1A1A1A',
+    logo:        'var(--ac-ink)',
+    nav:         'var(--ac-muted)',
+    navHover:    'var(--ac-ink)',
     gold:        '#C9A96E',
     bell:        '#9A9490',
     bellHoverBg: 'rgba(228,221,211,0.5)',
     bellActiveBg:'rgba(228,221,211,0.6)',
-    ringColor:   '#FDFBF7',
-    chainBorder: '#E4DDD3',
-    chainText:   '#7A7570',
+    ringColor:   'var(--ac-paper)',
+    chainBorder: 'var(--ac-line)',
+    chainText:   'var(--ac-muted)',
     btnBg:       'transparent',
     btnBorder:   '#C9A96E',
     btnText:     '#C9A96E',
     btnHoverBg:  '#C9A96E',
-    btnHoverTxt: '#1A1A1A',
+    btnHoverTxt: 'var(--ac-ink)',
     skeletonBg:  'rgba(228,221,211,0.4)',
   },
   dark: {
@@ -846,6 +847,9 @@ export function Header({ dark = false }: HeaderProps) {
       {/* ── Right ─────────────────────────────────────────────── */}
       <div className="flex items-center gap-3">
 
+        {/* Theme toggle — xé màn light ↔ dark */}
+        <ThemeToggle />
+
         {/* Language switcher */}
         <LangSwitcher theme={T} />
 
@@ -872,7 +876,7 @@ export function Header({ dark = false }: HeaderProps) {
                            text-[9px] font-bold leading-none"
                 style={{
                   background: T.gold,
-                  color:      '#1A1A1A',
+                  color:      'var(--ac-ink)',
                   boxShadow:  `0 0 0 2px ${T.ringColor}`,
                 }}
               >
@@ -907,7 +911,7 @@ export function Header({ dark = false }: HeaderProps) {
                   className="w-6 h-6 rounded-full object-cover"/>
               ) : (
                 <div className="w-6 h-6 rounded-full flex items-center justify-center text-[10px] font-bold"
-                  style={{ background: 'linear-gradient(135deg,#C9A96E,#8B6914)', color: '#1A1A1A' }}>
+                  style={{ background: 'linear-gradient(135deg,#C9A96E,#8B6914)', color: 'var(--ac-ink)' }}>
                   {(user?.username ?? 'U').slice(0, 1).toUpperCase()}
                 </div>
               )}
@@ -1013,7 +1017,7 @@ export function Header({ dark = false }: HeaderProps) {
                 </button>
                 <button onClick={openAccountModal} type="button"
                   className="h-10 px-4 text-sm tracking-wider font-medium transition-colors duration-300"
-                  style={{ background: T.gold, color: '#1A1A1A' }}>
+                  style={{ background: T.gold, color: 'var(--ac-ink)' }}>
                   {account.displayName}
                 </button>
               </div>

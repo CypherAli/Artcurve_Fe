@@ -76,7 +76,7 @@ function TradeRow({ trade, isNew }: { trade: Trade; isNew: boolean }) {
       }
       onAnimationComplete={() => { if (isNew) setRipple(true) }}
       whileHover={{ x: 8, backgroundColor: 'rgba(0,0,0,0.015)', transition: { duration: 0.2 } }}
-      className="relative flex items-center gap-4 py-3.5 cursor-default overflow-hidden border-b border-[#E4DDD3]/60 last:border-b-0"
+      className="relative flex items-center gap-4 py-3.5 cursor-default overflow-hidden border-b border-[var(--ac-line)]/60 last:border-b-0"
       role="listitem"
     >
       {/* Gold ripple */}
@@ -98,7 +98,7 @@ function TradeRow({ trade, isNew }: { trade: Trade; isNew: boolean }) {
       </AnimatePresence>
 
       {/* Artwork thumbnail */}
-      <div className="shrink-0 size-10 overflow-hidden rounded-sm border border-[#E4DDD3]">
+      <div className="shrink-0 size-10 overflow-hidden rounded-sm border border-[var(--ac-line)]">
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img src={trade.img} alt={trade.artwork}
           loading="lazy" decoding="async"
@@ -127,22 +127,22 @@ function TradeRow({ trade, isNew }: { trade: Trade; isNew: boolean }) {
             style={{ color: trade.type === 'BUY' ? '#4ade80' : '#f87171' }}>
             {trade.type === 'BUY' ? t.common.buy : t.common.sell}
           </span>
-          <span className="text-[11px] text-[#7A7570]">·</span>
-          <span className="text-[0.85rem] text-[#1A1A1A] italic truncate"
+          <span className="text-[11px] text-[var(--ac-muted)]">·</span>
+          <span className="text-[0.85rem] text-[var(--ac-ink)] italic truncate"
             style={{ fontFamily: "'Cormorant Garamond', serif" }}>
             {trade.artwork}
           </span>
         </div>
         <div className="flex items-center gap-2 mt-0.5">
-          <span className="font-mono text-[11px] text-[#7A7570] tracking-tight">{trade.wallet}</span>
-          <span className="text-[#E4DDD3]">·</span>
-          <span className="text-[11px] text-[#7A7570]">{trade.amount}</span>
+          <span className="font-mono text-[11px] text-[var(--ac-muted)] tracking-tight">{trade.wallet}</span>
+          <span className="text-[var(--ac-line)]">·</span>
+          <span className="text-[11px] text-[var(--ac-muted)]">{trade.amount}</span>
         </div>
       </div>
 
       {/* Timestamp */}
       <div className="shrink-0 text-right">
-        <span className="text-[10px] tracking-wide text-[#7A7570] tabular-nums"
+        <span className="text-[10px] tracking-wide text-[var(--ac-muted)] tabular-nums"
           style={{ opacity: trade.time === 'Just now' ? 1 : 0.6 }}>
           {trade.time === 'Just now' ? t.home.liveJustNow : trade.time}
         </span>
@@ -259,7 +259,7 @@ export function LiveActivitySection() {
   return (
     <section
       ref={sectionRef}
-      className="relative bg-[#FDFBF7] py-20 overflow-hidden"
+      className="relative bg-[var(--ac-paper)] py-20 overflow-hidden"
       style={{ minHeight: 'calc(100vh - 80px)' }}
       aria-label="Live Activity Feed"
     >
@@ -275,37 +275,37 @@ export function LiveActivitySection() {
                 <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#4ade80] opacity-75" />
                 <span className="relative inline-flex rounded-full size-2 bg-[#4ade80]" />
               </span>
-              <p className="text-[10px] tracking-[0.35em] uppercase text-[#7A7570]">{t.home.liveLabel}</p>
+              <p className="text-[10px] tracking-[0.35em] uppercase text-[var(--ac-muted)]">{t.home.liveLabel}</p>
             </div>
 
-            <h2 className="font-light text-[#1A1A1A] leading-[1.1] mb-6"
+            <h2 className="font-light text-[var(--ac-ink)] leading-[1.1] mb-6"
               style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: 'clamp(2.4rem, 4.5vw, 4rem)' }}>
               {t.home.liveHeading1}<br />
               <em className="not-italic text-[#C9A96E]">{t.home.liveHeading2}</em>
             </h2>
 
-            <p className="text-[0.9rem] leading-relaxed text-[#7A7570] max-w-[320px] mb-10">
+            <p className="text-[0.9rem] leading-relaxed text-[var(--ac-muted)] max-w-[320px] mb-10">
               {t.home.liveDesc}
             </p>
 
-            <div className="flex gap-8 pt-8 border-t border-[#E4DDD3]">
+            <div className="flex gap-8 pt-8 border-t border-[var(--ac-line)]">
               <div>
-                <p className="text-[2rem] font-light text-[#1A1A1A] leading-none"
+                <p className="text-[2rem] font-light text-[var(--ac-ink)] leading-none"
                   style={{ fontFamily: "'Cormorant Garamond', serif" }}
                   suppressHydrationWarning>
                   {mounted ? totalToday : '—'}
                 </p>
-                <p className="text-[9px] tracking-[0.25em] uppercase text-[#7A7570] mt-1">{t.home.liveTrades}</p>
+                <p className="text-[9px] tracking-[0.25em] uppercase text-[var(--ac-muted)] mt-1">{t.home.liveTrades}</p>
               </div>
-              <div className="w-px bg-[#E4DDD3]" />
+              <div className="w-px bg-[var(--ac-line)]" />
               <div>
-                <p className="text-[2rem] font-light text-[#1A1A1A] leading-none"
+                <p className="text-[2rem] font-light text-[var(--ac-ink)] leading-none"
                   style={{ fontFamily: "'Cormorant Garamond', serif" }}
                   suppressHydrationWarning>
                   {mounted ? volume : '—'}
                   {mounted && <span className="text-[#C9A96E] text-sm ml-1">ETH</span>}
                 </p>
-                <p className="text-[9px] tracking-[0.25em] uppercase text-[#7A7570] mt-1">{t.home.liveVolume}</p>
+                <p className="text-[9px] tracking-[0.25em] uppercase text-[var(--ac-muted)] mt-1">{t.home.liveVolume}</p>
               </div>
             </div>
           </div>
@@ -324,7 +324,7 @@ export function LiveActivitySection() {
             <div
               aria-hidden="true"
               className="absolute top-0 inset-x-0 z-20"
-              style={{ height: '2px', background: 'rgba(26,26,26,0.55)' }}
+              style={{ height: '2px', background: 'rgba(var(--ac-ink-rgb),0.55)' }}
             />
 
             {/* Feed container: overflow hidden clips anything above gate */}
@@ -349,7 +349,7 @@ export function LiveActivitySection() {
               {/* Bottom fade */}
               <div
                 className="absolute bottom-0 inset-x-0 h-10 pointer-events-none z-10"
-                style={{ background: 'linear-gradient(to top, #FDFBF7, transparent)' }}
+                style={{ background: 'linear-gradient(to top, var(--ac-paper), transparent)' }}
               />
             </motion.div>
           </div>

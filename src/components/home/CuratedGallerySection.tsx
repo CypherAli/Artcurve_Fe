@@ -247,7 +247,7 @@ export function CuratedGallerySection() {
   return (
     <section
       ref={sectionRef}
-      className="relative bg-white pt-6 pb-16 overflow-hidden"
+      className="relative bg-[var(--ac-paper)] pt-6 pb-16 overflow-hidden"
       aria-label="Curated Gallery"
     >
       {/* Grid overlay — consistent with other sections */}
@@ -265,7 +265,7 @@ export function CuratedGallerySection() {
         <div className="flex items-end justify-between gap-4 flex-wrap mb-5">
           <h2
             ref={titleRef}
-            className="font-light text-[#1A1A1A] flex flex-wrap gap-x-[0.22em]"
+            className="font-light text-[var(--ac-ink)] flex flex-wrap gap-x-[0.22em]"
             style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: 'clamp(2rem, 4vw, 3.5rem)' }}
             aria-label="Curated Gallery"
           >
@@ -320,7 +320,7 @@ export function CuratedGallerySection() {
           <div
             key={art.id}
             ref={el => { cardsRef.current[i] = el }}
-            className="group relative flex-none w-[260px] md:w-[280px] bg-white border border-[#E4DDD3] hover:border-[#C9A96E] transition-[border-color] duration-300 cursor-pointer"
+            className="group relative flex-none w-[260px] md:w-[280px] bg-[var(--ac-paper)] border border-[var(--ac-line)] hover:border-[#C9A96E] transition-[border-color] duration-300 cursor-pointer"
             onClick={() => router.push(`/trade?id=${art.id}`)}
           >
             {/* Artwork image */}
@@ -369,22 +369,22 @@ export function CuratedGallerySection() {
 
             {/* Card info */}
             <div className="p-4">
-              <p className="text-[10px] tracking-[0.22em] uppercase text-[#7A7570] mb-1">
+              <p className="text-[10px] tracking-[0.22em] uppercase text-[var(--ac-muted)] mb-1">
                 {artistName}
               </p>
               <h3
-                className="text-[1.05rem] font-light text-[#1A1A1A] mb-3 leading-tight"
+                className="text-[1.05rem] font-light text-[var(--ac-ink)] mb-3 leading-tight"
                 style={{ fontFamily: "'Cormorant Garamond', serif" }}
               >
                 {art.title}
               </h3>
               <div className="flex items-end justify-between">
                 <div>
-                  <p className="text-[9px] tracking-[0.2em] uppercase text-[#7A7570] mb-0.5">
+                  <p className="text-[9px] tracking-[0.2em] uppercase text-[var(--ac-muted)] mb-0.5">
                     {t.home.galleryPrice}
                   </p>
                   <p
-                    className="text-[1.25rem] font-light text-[#1A1A1A] leading-none"
+                    className="text-[1.25rem] font-light text-[var(--ac-ink)] leading-none"
                     style={{ fontFamily: "'Cormorant Garamond', serif" }}
                   >
                     {parseFloat(art.current_price).toFixed(4)}
@@ -400,7 +400,7 @@ export function CuratedGallerySection() {
               <div className="mt-3 overflow-hidden h-0 group-hover:h-9 transition-all duration-400">
                 <a
                   href={`/trade?id=${art.id}`}
-                  className="w-full h-9 text-[10px] tracking-[0.2em] uppercase bg-[#1A1A1A] text-white hover:bg-[#C9A96E] hover:text-[#1A1A1A] transition-colors duration-300 flex items-center justify-center"
+                  className="w-full h-9 text-[10px] tracking-[0.2em] uppercase bg-[var(--ac-ink)] text-[var(--ac-paper)] hover:bg-[#C9A96E] hover:text-[var(--ac-ink)] transition-colors duration-300 flex items-center justify-center"
                   onClick={e => e.stopPropagation()}
                 >
                   {t.home.galleryCollect}

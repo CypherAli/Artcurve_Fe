@@ -122,7 +122,7 @@ export function HeroSection() {
 
   return (
     <section
-      className="relative min-h-dvh flex overflow-x-hidden bg-white"
+      className="relative min-h-dvh flex overflow-x-hidden bg-[var(--ac-paper)]"
       aria-label="Hero"
     >
 
@@ -142,7 +142,7 @@ export function HeroSection() {
         {/* Heading — manual line split, masked reveal */}
         <h1
           ref={headingRef}
-          className="mb-8 font-light text-[#1A1A1A]"
+          className="mb-8 font-light text-[var(--ac-ink)]"
           style={{
             fontFamily: "'Cormorant Garamond', serif",
             fontSize:   'clamp(3.2rem, 5.5vw, 7rem)',
@@ -164,7 +164,7 @@ export function HeroSection() {
         {/* Sub-copy */}
         <p
           ref={subRef}
-          className="mb-10 max-w-[420px] text-[15px] leading-[1.75] text-[#7A7570] font-light"
+          className="mb-10 max-w-[420px] text-[15px] leading-[1.75] text-[var(--ac-muted)] font-light"
           style={{ opacity: 0 }}
         >
           {t.home.heroDesc}
@@ -179,7 +179,7 @@ export function HeroSection() {
           <a
             href="/marketplace"
             className="h-12 px-7 inline-flex items-center gap-2.5
-                       bg-[#1A1A1A] text-white text-[11px] tracking-[0.18em] uppercase font-medium
+                       bg-[var(--ac-ink)] text-[var(--ac-paper)] text-[11px] tracking-[0.18em] uppercase font-medium
                        hover:bg-[#333] transition-colors duration-300 group"
             data-cursor-label="Explore"
           >
@@ -195,7 +195,7 @@ export function HeroSection() {
           <a
             href="#how-it-works"
             className="h-12 px-7 inline-flex items-center
-                       border border-[#D5CCC2] text-[#1A1A1A] text-[11px] tracking-[0.18em] uppercase
+                       border border-[#D5CCC2] text-[var(--ac-ink)] text-[11px] tracking-[0.18em] uppercase
                        hover:border-[#C9A96E] hover:text-[#C9A96E] transition-all duration-300"
           >
             {t.home.heroLearn}
@@ -208,18 +208,18 @@ export function HeroSection() {
       <div
         ref={statsRef}
         className="absolute bottom-8 left-6 md:left-12 lg:left-20 xl:left-28 z-20
-                   flex gap-10 pt-7 border-t border-[#E4DDD3]"
+                   flex gap-10 pt-7 border-t border-[var(--ac-line)]"
         style={{ opacity: 0 }}
       >
         {stats.map(({ num, label }) => (
           <div key={label}>
             <p
-              className="text-[1.65rem] font-light text-[#1A1A1A] leading-none"
+              className="text-[1.65rem] font-light text-[var(--ac-ink)] leading-none"
               style={{ fontFamily: "'Cormorant Garamond', serif" }}
             >
               {num}
             </p>
-            <p className="mt-1 text-[10px] tracking-[0.25em] uppercase text-[#7A7570]">
+            <p className="mt-1 text-[10px] tracking-[0.25em] uppercase text-[var(--ac-muted)]">
               {label}
             </p>
           </div>
@@ -244,10 +244,10 @@ export function HeroSection() {
         aria-hidden="true"
       >
         {/* Outer: white bg, clips everything */}
-        <div className="relative w-full h-full bg-white overflow-hidden flex items-center justify-center">
+        <div className="relative w-full h-full bg-[var(--ac-paper)] overflow-hidden flex items-center justify-center">
 
           {/* Explicit white backdrop — kills letterbox black */}
-          <div className="absolute inset-0 bg-white z-0" aria-hidden="true" />
+          <div className="absolute inset-0 bg-[var(--ac-paper)] z-0" aria-hidden="true" />
 
           {/* Video wrapper: scale 125% + move down 5px */}
           <div

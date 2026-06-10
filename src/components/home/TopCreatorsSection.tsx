@@ -72,7 +72,7 @@ function ArtistRow({ artist, rank, verifiedLabel }: { artist: UserProfile; rank:
     <div
       ref={rowRef}
       className="group relative cursor-pointer
-                 hover:bg-white/[0.03] transition-colors duration-500"
+                 hover:bg-[var(--ac-paper)]/[0.03] transition-colors duration-500"
     >
       {/* Big rank watermark — depth layer */}
       <span

@@ -83,7 +83,7 @@ export function StatsSection() {
 
   return (
     <section
-      className="relative bg-[#1A1A1A] py-24 px-6 md:px-16 lg:px-24 overflow-hidden"
+      className="relative bg-[var(--ac-ink)] py-24 px-6 md:px-16 lg:px-24 overflow-hidden"
       aria-label="Platform statistics"
       data-mouse-parallax
     >

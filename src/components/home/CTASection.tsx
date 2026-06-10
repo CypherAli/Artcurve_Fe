@@ -37,12 +37,12 @@ export function CTASection() {
     <section
       ref={ref}
       id="about"
-      className="relative py-40 px-6 md:px-16 lg:px-24 bg-[#FDFBF7] overflow-hidden"
+      className="relative py-40 px-6 md:px-16 lg:px-24 bg-[var(--ac-paper)] overflow-hidden"
       aria-labelledby="cta-heading"
     >
       {/* Decorative background line */}
       <div
-        className="absolute inset-x-0 top-1/2 -translate-y-1/2 h-px bg-[#E4DDD3]"
+        className="absolute inset-x-0 top-1/2 -translate-y-1/2 h-px bg-[var(--ac-line)]"
         aria-hidden="true"
       />
 
@@ -64,7 +64,7 @@ export function CTASection() {
         <motion.h2
           variants={itemVariants}
           id="cta-heading"
-          className="text-[clamp(2.5rem,7vw,6rem)]/[0.95] font-light text-[#1A1A1A]"
+          className="text-[clamp(2.5rem,7vw,6rem)]/[0.95] font-light text-[var(--ac-ink)]"
           style={{ fontFamily: "'Cormorant Garamond', serif" }}
         >
           {t.home.ctaHeading1}
@@ -75,7 +75,7 @@ export function CTASection() {
         {/* Sub-copy */}
         <motion.p
           variants={itemVariants}
-          className="max-w-lg text-base/7 text-[#7A7570] font-light"
+          className="max-w-lg text-base/7 text-[var(--ac-muted)] font-light"
         >
           {t.home.ctaDesc}
         </motion.p>
@@ -86,7 +86,7 @@ export function CTASection() {
             href="#"
             className={[
               'h-14 px-10 inline-flex items-center gap-3',
-              'bg-[#1A1A1A] text-white text-sm tracking-widest uppercase font-medium',
+              'bg-[var(--ac-ink)] text-[var(--ac-paper)] text-sm tracking-widest uppercase font-medium',
               'hover:bg-[#2C2C2C] transition-colors duration-300 group',
             ].join(' ')}
             data-cursor-label="Launch App"
@@ -104,7 +104,7 @@ export function CTASection() {
             href="#"
             className={[
               'h-14 px-10 inline-flex items-center',
-              'border border-[#E4DDD3] text-[#1A1A1A] text-sm tracking-widest uppercase',
+              'border border-[var(--ac-line)] text-[var(--ac-ink)] text-sm tracking-widest uppercase',
               'hover:border-[#C9A96E] hover:text-[#C9A96E] transition-all duration-300',
             ].join(' ')}
           >
@@ -114,14 +114,14 @@ export function CTASection() {
       </motion.div>
 
       {/* Footer strip */}
-      <footer className="relative z-10 mt-32 pt-8 border-t border-[#E4DDD3] flex flex-col md:flex-row items-center justify-between gap-4">
+      <footer className="relative z-10 mt-32 pt-8 border-t border-[var(--ac-line)] flex flex-col md:flex-row items-center justify-between gap-4">
         <p
-          className="text-xl text-[#1A1A1A]"
+          className="text-xl text-[var(--ac-ink)]"
           style={{ fontFamily: "'Cormorant Garamond', serif", fontWeight: 500 }}
         >
           ArtCurve
         </p>
-        <p className="text-xs text-[#7A7570] tracking-wider">
+        <p className="text-xs text-[var(--ac-muted)] tracking-wider">
           {t.home.ctaFooter}
         </p>
         <div className="flex gap-6">
@@ -129,7 +129,7 @@ export function CTASection() {
             <a
               key={link}
               href="#"
-              className="text-xs tracking-widest uppercase text-[#7A7570] hover:text-[#C9A96E] transition-colors"
+              className="text-xs tracking-widest uppercase text-[var(--ac-muted)] hover:text-[#C9A96E] transition-colors"
             >
               {link}
             </a>

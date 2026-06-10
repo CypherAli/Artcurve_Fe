@@ -60,11 +60,11 @@ function PrimaryButton({ label }: { label: string }) {
         style={{ transform: 'scaleX(0)', transformOrigin: 'left center' }}
       />
       <span ref={textRef}
-        className="relative z-10 group-hover:text-[#1A1A1A] transition-colors duration-200">
+        className="relative z-10 group-hover:text-[var(--ac-ink)] transition-colors duration-200">
         {label}
       </span>
       <span ref={arrowRef}
-        className="relative z-10 group-hover:text-[#1A1A1A] transition-colors duration-200"
+        className="relative z-10 group-hover:text-[var(--ac-ink)] transition-colors duration-200"
         style={{ display: 'inline-block' }}>
         →
       </span>
@@ -97,7 +97,7 @@ function GhostLink({ label, href = '#' }: { label: string; href?: string }) {
     >
       {label}
       <span ref={lineRef} aria-hidden="true"
-        className="absolute -bottom-0.5 left-0 right-0 h-px bg-white/40"
+        className="absolute -bottom-0.5 left-0 right-0 h-px bg-[var(--ac-paper)]/40"
         style={{ transform: 'scaleX(0)', transformOrigin: 'left center' }}
       />
     </a>
@@ -318,7 +318,7 @@ export function GrandCTASection() {
               ].map(({ name, viewBox, path, hoverColor }) => (
                 <a key={name} href="#" aria-label={name}
                   className="group flex items-center justify-center w-8 h-8 rounded-full
-                             transition-all duration-300 hover:bg-white/8"
+                             transition-all duration-300 hover:bg-[var(--ac-paper)]/8"
                   style={{ color: 'rgba(255,255,255,0.28)' }}
                   onMouseEnter={e => { (e.currentTarget as HTMLElement).style.color = hoverColor }}
                   onMouseLeave={e => { (e.currentTarget as HTMLElement).style.color = 'rgba(255,255,255,0.28)' }}
