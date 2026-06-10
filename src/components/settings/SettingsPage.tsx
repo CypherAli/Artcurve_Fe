@@ -70,7 +70,7 @@ export function SettingsPage() {
       <button type="button" onClick={() => onChange(!value)}
         className="relative w-11 h-6 rounded-full transition-colors duration-250"
         style={{ background: value ? GOLD : 'rgba(255,255,255,0.12)' }}>
-        <span className="absolute top-1 w-4 h-4 rounded-full bg-white transition-all duration-250"
+        <span className="absolute top-1 w-4 h-4 rounded-full bg-[var(--ac-paper)] transition-all duration-250"
           style={{ left: value ? '24px' : '4px', boxShadow: '0 1px 4px rgba(0,0,0,0.3)' }}/>
       </button>
     )
@@ -100,7 +100,7 @@ export function SettingsPage() {
                 style={{ boxShadow: `0 0 0 2px ${GOLD}44` }}/>
             ) : (
               <div className="w-14 h-14 rounded-full flex items-center justify-center text-lg font-bold"
-                style={{ background: `linear-gradient(135deg, ${GOLD}, #7A5A1E)`, color: '#1A1A1A' }}>
+                style={{ background: `linear-gradient(135deg, ${GOLD}, #7A5A1E)`, color: 'var(--ac-ink)' }}>
                 {(user?.username ?? 'U').slice(0, 1).toUpperCase()}
               </div>
             )}

@@ -15,14 +15,23 @@
 import { ReactNode, useState } from 'react'
 import { WagmiProvider }            from 'wagmi'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
-import { RainbowKitProvider, darkTheme }    from '@rainbow-me/rainbowkit'
+import { RainbowKitProvider, darkTheme, lightTheme } from '@rainbow-me/rainbowkit'
 import '@rainbow-me/rainbowkit/styles.css'
 import { wagmiConfig } from '@/web3/wagmi-config'
+import { useTheme }    from '@/context/ThemeContext'
 
-// Custom RainbowKit theme matching Neo-Luxury palette
-const luxuryTheme = darkTheme({
+// Custom RainbowKit themes matching Neo-Luxury palette — đổi theo app theme
+const luxuryDark = darkTheme({
   accentColor:          '#C9A96E', // gold
   accentColorForeground:'#1A1A1A', // charcoal on gold
+  borderRadius:         'small',
+  fontStack:            'system',
+  overlayBlur:          'small',
+})
+
+const luxuryLight = lightTheme({
+  accentColor:          '#C9A96E',
+  accentColorForeground:'#1A1A1A',
   borderRadius:         'small',
   fontStack:            'system',
   overlayBlur:          'small',
@@ -33,6 +42,7 @@ interface Web3ProviderProps {
 }
 
 export function Web3Provider({ children }: Web3ProviderProps) {
+  const { theme } = useTheme()
   // QueryClient created inside component to avoid sharing state between users
   const [queryClient] = useState(() => new QueryClient({
     defaultOptions: {
@@ -47,7 +57,7 @@ export function Web3Provider({ children }: Web3ProviderProps) {
     <WagmiProvider config={wagmiConfig}>
       <QueryClientProvider client={queryClient}>
         <RainbowKitProvider
-          theme={luxuryTheme}
+          theme={theme === 'dark' ? luxuryDark : luxuryLight}
           modalSize="wide"
           appInfo={{
             appName: 'ArtCurve',

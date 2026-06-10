@@ -380,7 +380,7 @@ function VideoCard({ item, onClick }: { item: Item; onClick: () => void }) {
           <div className="absolute bottom-2 left-2 flex items-center gap-1 px-2 py-0.5 rounded-sm"
             style={{ background: '#dc2626' }}>
             <motion.span
-              className="size-[5px] rounded-full bg-white"
+              className="size-[5px] rounded-full bg-[var(--ac-paper)]"
               animate={{ opacity: [1, 0.2, 1] }}
               transition={{ duration: 1.1, repeat: Infinity }}/>
             <span className="text-[10px] font-bold text-white tracking-wide font-sans">LIVE</span>
@@ -505,7 +505,7 @@ function GoLiveModal({ onClose }: { onClose: () => void }) {
           style={{ borderBottom: '1px solid rgba(255,255,255,0.07)' }}>
           <div className="flex items-center gap-2.5">
             <div className="size-7 rounded-full flex items-center justify-center bg-red-600">
-              <motion.span className="size-2 rounded-full bg-white"
+              <motion.span className="size-2 rounded-full bg-[var(--ac-paper)]"
                 animate={{ opacity: [1, 0.3, 1] }} transition={{ duration: 1.1, repeat: Infinity }}/>
             </div>
             <span className="font-sans font-semibold text-base" style={{ color: 'rgba(255,255,255,0.92)' }}>
@@ -691,7 +691,7 @@ export function LivePage() {
               whileHover={{ background: '#b91c1c' }}
               whileTap={{ scale: 0.96 }}>
               <motion.span
-                className="size-2 rounded-full bg-white"
+                className="size-2 rounded-full bg-[var(--ac-paper)]"
                 animate={{ opacity: [1, 0.35, 1] }}
                 transition={{ duration: 1.1, repeat: Infinity }}/>
               {t.live.goLiveButton}

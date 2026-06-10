@@ -899,7 +899,7 @@ function ArtLightbox({ art, onClose }: { art: MarketArtwork; onClose: () => void
             style={{
               fontFamily: "'Cormorant Garamond', serif",
               fontSize:   'clamp(1.4rem, 3vw, 2.2rem)',
-              color:      '#FDFBF7',
+              color:      'var(--ac-paper)',
             }}
           >
             {art.title}
@@ -1648,7 +1648,7 @@ function RankTimelineFullscreen({
                   </span>
                 </div>
                 <h3 className="font-light leading-tight mb-1"
-                  style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: '1.45rem', color: '#FDFBF7' }}>
+                  style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: '1.45rem', color: 'var(--ac-paper)' }}>
                   {selectedArt.title}
                 </h3>
                 <p className="text-[9.5px] tracking-[0.2em] uppercase" style={{ color: 'rgba(255,255,255,0.3)' }}>
@@ -1664,7 +1664,7 @@ function RankTimelineFullscreen({
                   return (<>
                     <div>
                       <p className="font-mono text-[7.5px] uppercase tracking-widest mb-0.5" style={{ color: 'rgba(255,255,255,0.28)' }}>Live Price</p>
-                      <p className="font-mono text-[1.4rem] leading-none" style={{ color: '#FDFBF7' }}>
+                      <p className="font-mono text-[1.4rem] leading-none" style={{ color: 'var(--ac-paper)' }}>
                         {fmtETH(lp)} <span className="text-[0.85rem] opacity-50">ETH</span>
                       </p>
                     </div>
@@ -1762,7 +1762,7 @@ function RankTimelineFullscreen({
                 <p className="font-mono text-[8px] tracking-[0.22em] uppercase mb-1.5"
                   style={{ color: 'rgba(255,255,255,0.28)' }}>Comparing</p>
                 <h3 className="font-light"
-                  style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: '1.35rem', color: '#FDFBF7' }}>
+                  style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: '1.35rem', color: 'var(--ac-paper)' }}>
                   {selectedIds.length} Artworks
                 </h3>
                 <div className="flex flex-wrap gap-1.5 mt-2.5">
@@ -1830,7 +1830,7 @@ function RankTimelineFullscreen({
                           </div>
                           <div className="min-w-0">
                             <p className="font-light text-[11px] truncate leading-tight"
-                              style={{ fontFamily: "'Cormorant Garamond', serif", color: '#FDFBF7' }}>
+                              style={{ fontFamily: "'Cormorant Garamond', serif", color: 'var(--ac-paper)' }}>
                               {art.title}
                             </p>
                             <div className="flex items-center gap-1.5 mt-0.5">
@@ -1842,7 +1842,7 @@ function RankTimelineFullscreen({
 
                         {/* Price + mini spark */}
                         <div className="text-right">
-                          <p className="font-mono text-[11px] leading-none" style={{ color: '#FDFBF7' }}>{fmtETH(lp)}</p>
+                          <p className="font-mono text-[11px] leading-none" style={{ color: 'var(--ac-paper)' }}>{fmtETH(lp)}</p>
                           {sparkPath && (
                             <svg viewBox="0 0 48 20" className="w-12 h-5 ml-auto mt-1" style={{ overflow: 'visible' }}>
                               <path d={sparkPath} fill="none" stroke={up ? '#4ade80' : '#f87171'}
@@ -1945,7 +1945,7 @@ function RaceBar({
       {/* Name + ticker */}
       <div className="w-36 shrink-0">
         <p className="text-[11px] font-light leading-snug truncate"
-          style={{ fontFamily: "'Cormorant Garamond', serif", color: '#FDFBF7' }}>
+          style={{ fontFamily: "'Cormorant Garamond', serif", color: 'var(--ac-paper)' }}>
           {art.title}
         </p>
         <p className="font-mono text-[8px] tracking-wide mt-0.5"
@@ -2147,7 +2147,7 @@ function ListItem({
       <div className="flex-1 min-w-0">
         <p className="truncate text-[12.5px] leading-tight"
           style={{
-            color:      active ? '#FDFBF7' : 'rgba(255,255,255,0.72)',
+            color:      active ? 'var(--ac-paper)' : 'rgba(255,255,255,0.72)',
             fontFamily: "'Cormorant Garamond', serif",
             fontWeight: 400,
           }}>
@@ -2163,7 +2163,7 @@ function ListItem({
       <div className="text-right shrink-0 w-20">
         <p
           className="font-mono text-[11.5px]"
-          style={{ color: active ? '#FDFBF7' : 'rgba(255,255,255,0.65)' }}
+          style={{ color: active ? 'var(--ac-paper)' : 'rgba(255,255,255,0.65)' }}
         >
           {fmtETH(livePrice)} ETH
         </p>
@@ -2369,7 +2369,7 @@ function InspectionDeck({
                 style={{
                   fontFamily: "'Cormorant Garamond', serif",
                   fontSize:   'clamp(1.6rem, 2.4vw, 2.4rem)',
-                  color:      '#FDFBF7',
+                  color:      'var(--ac-paper)',
                 }}
               >
                 {art.title}
@@ -2397,7 +2397,7 @@ function InspectionDeck({
             {/* Key metrics */}
             <div className="grid grid-cols-3 gap-2 mt-1">
               {[
-                { label: t.marketplace.marketCap, value: `${fmtETH(livePrice)} ETH`, color: '#FDFBF7' },
+                { label: t.marketplace.marketCap, value: `${fmtETH(livePrice)} ETH`, color: 'var(--ac-paper)' },
                 { label: t.marketplace.change24h, value: fmtPct(((livePrice - art.marketCap) / art.marketCap) * 100), color: livePrice >= art.marketCap ? '#4ade80' : '#f87171' },
                 { label: t.marketplace.change7d,  value: art.change7d,  color: 'rgba(255,255,255,0.7)' },
               ].map(m => (
@@ -3128,7 +3128,7 @@ export function MarketplacePage() {
                 style={{
                   fontFamily: "'Cormorant Garamond', serif",
                   fontSize:   'clamp(1.6rem, 3vw, 2.6rem)',
-                  color:      '#FDFBF7',
+                  color:      'var(--ac-paper)',
                   opacity:    0,
                 }}
               >

@@ -77,7 +77,7 @@ export function CustomCursor() {
         {/* Inner dot */}
         <div
           ref={dotRef}
-          className="size-1.5 rounded-full bg-white"
+          className="size-1.5 rounded-full bg-[var(--ac-paper)]"
         />
       </div>
     </div>

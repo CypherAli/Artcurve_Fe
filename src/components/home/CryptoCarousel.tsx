@@ -25,10 +25,10 @@ const COIN_COLORS: Record<string, { bg: string; text: string }> = {
   BTC:   { bg: '#F7931A', text: '#fff' },
   ETH:   { bg: '#627EEA', text: '#fff' },
   SOL:   { bg: '#9945FF', text: '#fff' },
-  BNB:   { bg: '#F3BA2F', text: '#1A1A1A' },
+  BNB:   { bg: '#F3BA2F', text: 'var(--ac-ink)' },
   XRP:   { bg: '#00AAE4', text: '#fff' },
   ADA:   { bg: '#0033AD', text: '#fff' },
-  DOGE:  { bg: '#C2A633', text: '#1A1A1A' },
+  DOGE:  { bg: '#C2A633', text: 'var(--ac-ink)' },
   AVAX:  { bg: '#E84142', text: '#fff' },
   LINK:  { bg: '#2A5ADA', text: '#fff' },
   MATIC: { bg: '#8247E5', text: '#fff' },
@@ -57,7 +57,7 @@ function CoinCard({
   symbol: string; name: string
   price: string; change: string; positive: boolean
 }) {
-  const col = COIN_COLORS[symbol] ?? { bg: '#C9A96E', text: '#1A1A1A' }
+  const col = COIN_COLORS[symbol] ?? { bg: '#C9A96E', text: 'var(--ac-ink)' }
 
   return (
     <div

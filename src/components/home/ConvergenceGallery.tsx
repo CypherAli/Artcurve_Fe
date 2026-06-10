@@ -212,7 +212,7 @@ export function ConvergenceGallery() {
       <div
         className="sticky top-0 h-screen w-full overflow-hidden
                    flex items-center justify-center"
-        style={{ background: '#FDFBF7' }}
+        style={{ background: 'var(--ac-paper)' }}
       >
 
         {/* Faint editorial grid */}
@@ -220,8 +220,8 @@ export function ConvergenceGallery() {
           className="absolute inset-0 pointer-events-none"
           style={{
             backgroundImage:
-              'linear-gradient(rgba(26,26,26,0.020) 1px, transparent 1px),' +
-              'linear-gradient(90deg, rgba(26,26,26,0.020) 1px, transparent 1px)',
+              'linear-gradient(rgba(var(--ac-ink-rgb),0.020) 1px, transparent 1px),' +
+              'linear-gradient(90deg, rgba(var(--ac-ink-rgb),0.020) 1px, transparent 1px)',
             backgroundSize: '64px 64px',
           }}
           aria-hidden="true"
@@ -245,7 +245,7 @@ export function ConvergenceGallery() {
               style={{
                 borderRadius: '2px',
                 boxShadow:
-                  '0 6px 28px rgba(26,26,26,0.14), 0 1px 6px rgba(26,26,26,0.08)',
+                  '0 6px 28px rgba(var(--ac-ink-rgb),0.14), 0 1px 6px rgba(var(--ac-ink-rgb),0.08)',
               }}
             />
           </div>
@@ -266,7 +266,7 @@ export function ConvergenceGallery() {
 
           {/* Headline */}
           <h2
-            className="font-light text-[#1A1A1A] leading-[1.06]"
+            className="font-light text-[var(--ac-ink)] leading-[1.06]"
             style={{
               fontFamily: "'Cormorant Garamond', serif",
               fontSize:   'clamp(2.2rem, 4vw, 4.6rem)',
@@ -298,7 +298,7 @@ export function ConvergenceGallery() {
               fontFamily: "'Cormorant Garamond', serif",
               fontSize:   'clamp(1rem, 1.3vw, 1.2rem)',
               fontStyle:  'italic',
-              color:      'rgba(26,26,26,0.42)',
+              color:      'rgba(var(--ac-ink-rgb),0.42)',
               opacity:     0,
             }}
           >

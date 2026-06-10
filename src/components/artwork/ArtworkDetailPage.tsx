@@ -192,7 +192,7 @@ function ReviewCard({
             {name.slice(0, 2).toUpperCase()}
           </div>
           <div>
-            <p className="font-mono text-xs font-semibold leading-tight" style={{ color: '#FDFBF7' }}>
+            <p className="font-mono text-xs font-semibold leading-tight" style={{ color: 'var(--ac-paper)' }}>
               {name}
             </p>
             <div className="mt-1">
@@ -579,7 +579,7 @@ export function ArtworkDetailPage({ artworkId }: { artworkId: string }) {
   const graduated = displayArtwork.progress >= 100
 
   return (
-    <div className="min-h-dvh" style={{ background: '#0A0A0A', color: '#FDFBF7' }}>
+    <div className="min-h-dvh" style={{ background: '#0A0A0A', color: 'var(--ac-paper)' }}>
 
       {/* ── Back nav ─────────────────────────────────────────────── */}
       <div
@@ -675,7 +675,7 @@ export function ArtworkDetailPage({ artworkId }: { artworkId: string }) {
             style={{
               fontFamily: "'Cormorant Garamond', serif",
               fontSize:   'clamp(2rem, 3.5vw, 3rem)',
-              color:      '#FDFBF7',
+              color:      'var(--ac-paper)',
             }}
           >
             {displayArtwork.title}

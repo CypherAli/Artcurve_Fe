@@ -70,7 +70,7 @@ export function LiveBroadcaster({ roomName }: { roomName: string }) {
   if (error) {
     return (
       <div className="min-h-dvh flex flex-col items-center justify-center gap-4"
-        style={{ background: '#0A0A0A', color: '#FDFBF7' }}>
+        style={{ background: '#0A0A0A', color: 'var(--ac-paper)' }}>
         <p className="font-mono text-[10px] tracking-widest uppercase"
           style={{ color: 'rgba(255,255,255,0.3)' }}>
           {error}
@@ -96,7 +96,7 @@ export function LiveBroadcaster({ roomName }: { roomName: string }) {
   }
 
   return (
-    <div data-lenis-prevent className="min-h-dvh" style={{ background: '#0A0A0A', color: '#FDFBF7' }}>
+    <div data-lenis-prevent className="min-h-dvh" style={{ background: '#0A0A0A', color: 'var(--ac-paper)' }}>
       {/* Header */}
       <div className="flex items-center justify-between px-6 py-3"
         style={{ borderBottom: '1px solid rgba(255,255,255,0.06)', background: 'rgba(0,0,0,0.6)' }}>

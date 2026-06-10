@@ -25,7 +25,7 @@ type View = 'main' | 'wallets'
 const SOCIALS = [
   {
     id: 'google', label: 'Continue with Google',
-    bg: '#ffffff', color: '#1A1A1A',
+    bg: '#ffffff', color: 'var(--ac-ink)',
     icon: (
       <svg viewBox="0 0 24 24" className="w-[17px] h-[17px] shrink-0">
         <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/>
@@ -113,7 +113,7 @@ function WalletImg({ connector }: { connector: { name: string; icon?: string } }
 
   // Generic
   return (
-    <div className="w-[28px] h-[28px] rounded-lg bg-white/10 flex items-center justify-center">
+    <div className="w-[28px] h-[28px] rounded-lg bg-[var(--ac-paper)]/10 flex items-center justify-center">
       <svg viewBox="0 0 24 24" className="w-4 h-4 text-white/40" fill="none" stroke="currentColor" strokeWidth="1.5">
         <path d="M21 12V7a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-2" strokeLinecap="round"/>
         <path d="M16 12h5v4h-5a2 2 0 0 1 0-4z" strokeLinecap="round"/>
@@ -136,8 +136,8 @@ function WalletRow({
       onPointerEnter={() => gsap.to(ref.current, { x: 3, duration: 0.28, ease: 'power3.out' })}
       onPointerLeave={() => gsap.to(ref.current, { x: 0, duration: 0.28, ease: 'power3.out' })}
       className="flex items-center gap-3.5 w-full h-[58px] px-4 rounded-xl
-                 border border-white/[0.07] bg-white/[0.03]
-                 hover:border-[#C9A96E]/35 hover:bg-white/[0.06]
+                 border border-white/[0.07] bg-[var(--ac-paper)]/[0.03]
+                 hover:border-[#C9A96E]/35 hover:bg-[var(--ac-paper)]/[0.06]
                  transition-colors duration-200"
       style={{ willChange: 'transform' }}
     >
@@ -286,7 +286,7 @@ export function LoginModal({ onClose }: Props) {
             {/* Close */}
             <button onClick={close}
               className="absolute top-4 right-4 w-8 h-8 rounded-full flex items-center justify-center
-                         text-white/25 hover:text-white/65 hover:bg-white/8 transition-all duration-200">
+                         text-white/25 hover:text-white/65 hover:bg-[var(--ac-paper)]/8 transition-all duration-200">
               <svg width="13" height="13" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5" fill="none">
                 <path d="M18 6L6 18M6 6l12 12" strokeLinecap="round"/>
               </svg>
@@ -340,7 +340,7 @@ export function LoginModal({ onClose }: Props) {
             {/* Email */}
             <div className="lm-row mb-5">
               <div className="flex items-center h-11 rounded-xl px-4 gap-3
-                              border border-white/10 bg-white/[0.04]
+                              border border-white/10 bg-[var(--ac-paper)]/[0.04]
                               focus-within:border-[#C9A96E]/45 transition-colors duration-200">
                 <svg viewBox="0 0 24 24" className="w-[14px] h-[14px] text-white/20 shrink-0"
                   fill="none" stroke="currentColor" strokeWidth="1.5">
@@ -351,7 +351,7 @@ export function LoginModal({ onClose }: Props) {
                   className="flex-1 bg-transparent text-[13px] text-white/75 placeholder:text-white/18 outline-none"/>
                 <span title="Email login chưa khả dụng"
                   className="w-6 h-6 rounded-full flex items-center justify-center
-                             bg-white/4 text-white/15 cursor-not-allowed text-[12px] select-none">
+                             bg-[var(--ac-paper)]/4 text-white/15 cursor-not-allowed text-[12px] select-none">
                   →
                 </span>
               </div>
@@ -359,11 +359,11 @@ export function LoginModal({ onClose }: Props) {
 
             {/* Divider */}
             <div className="lm-row flex items-center gap-3 mb-3.5">
-              <div className="flex-1 h-px bg-white/[0.07]"/>
+              <div className="flex-1 h-px bg-[var(--ac-paper)]/[0.07]"/>
               <span className="text-[10px] text-white/20 tracking-[0.18em] uppercase font-mono">
                 or connect a wallet
               </span>
-              <div className="flex-1 h-px bg-white/[0.07]"/>
+              <div className="flex-1 h-px bg-[var(--ac-paper)]/[0.07]"/>
             </div>
 
             {/* Preview wallets */}
@@ -379,10 +379,10 @@ export function LoginModal({ onClose }: Props) {
               <button type="button" onClick={goWallets}
                 className="group flex items-center justify-between w-full h-12 px-4 rounded-xl
                            border border-white/[0.06] bg-transparent
-                           hover:border-white/12 hover:bg-white/[0.04]
+                           hover:border-white/12 hover:bg-[var(--ac-paper)]/[0.04]
                            transition-all duration-200 mt-0.5">
                 <div className="flex items-center gap-3.5">
-                  <div className="w-[28px] h-[28px] rounded-lg bg-white/8 flex items-center justify-center">
+                  <div className="w-[28px] h-[28px] rounded-lg bg-[var(--ac-paper)]/8 flex items-center justify-center">
                     <svg viewBox="0 0 24 24" className="w-4 h-4 text-white/35" fill="none" stroke="currentColor" strokeWidth="1.5">
                       <path d="M4 6h16M4 12h16M4 18h16" strokeLinecap="round"/>
                     </svg>
@@ -410,7 +410,7 @@ export function LoginModal({ onClose }: Props) {
               style={{ borderBottom: '1px solid rgba(255,255,255,0.07)' }}>
               <button type="button" onClick={goMain}
                 className="w-8 h-8 flex items-center justify-center rounded-full
-                           text-white/35 hover:text-white/70 hover:bg-white/8 transition-all duration-200">
+                           text-white/35 hover:text-white/70 hover:bg-[var(--ac-paper)]/8 transition-all duration-200">
                 <svg viewBox="0 0 24 24" className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2">
                   <path d="M15 18l-6-6 6-6" strokeLinecap="round" strokeLinejoin="round"/>
                 </svg>
@@ -420,7 +420,7 @@ export function LoginModal({ onClose }: Props) {
               </span>
               <button type="button" onClick={close}
                 className="w-8 h-8 flex items-center justify-center rounded-full
-                           text-white/35 hover:text-white/70 hover:bg-white/8 transition-all duration-200">
+                           text-white/35 hover:text-white/70 hover:bg-[var(--ac-paper)]/8 transition-all duration-200">
                 <svg width="13" height="13" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5" fill="none">
                   <path d="M18 6L6 18M6 6l12 12" strokeLinecap="round"/>
                 </svg>
@@ -485,7 +485,7 @@ export function LoginModal({ onClose }: Props) {
                 style={{ boxShadow: '0 0 0 2px rgba(201,169,110,0.3)' }}/>
             ) : (
               <div className="w-10 h-10 rounded-full flex items-center justify-center text-[14px] font-bold shrink-0"
-                style={{ background: 'linear-gradient(135deg,#C9A96E,#7A5A1E)', color: '#1A1A1A' }}>
+                style={{ background: 'linear-gradient(135deg,#C9A96E,#7A5A1E)', color: 'var(--ac-ink)' }}>
                 {lastTwitter.username.slice(0,1).toUpperCase()}
               </div>
             )}
@@ -566,7 +566,7 @@ export function LoginModal({ onClose }: Props) {
                 style={{ boxShadow: '0 0 0 2px rgba(201,169,110,0.3)' }}/>
             ) : (
               <div className="w-10 h-10 rounded-full flex items-center justify-center text-[14px] font-bold shrink-0"
-                style={{ background: 'linear-gradient(135deg,#C9A96E,#7A5A1E)', color: '#1A1A1A' }}>
+                style={{ background: 'linear-gradient(135deg,#C9A96E,#7A5A1E)', color: 'var(--ac-ink)' }}>
                 {lastGithub.username.slice(0,1).toUpperCase()}
               </div>
             )}

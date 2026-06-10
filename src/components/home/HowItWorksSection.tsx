@@ -145,14 +145,14 @@ export function HowItWorksSection() {
   }, [])
 
   return (
-    <div ref={containerRef} className="relative h-[300vh] bg-[#FDFBF7]">
+    <div ref={containerRef} className="relative h-[300vh] bg-[var(--ac-paper)]">
 
       {/* Technical grid overlay */}
       <div
         className="absolute inset-0 pointer-events-none"
         style={{
           backgroundImage:
-            'linear-gradient(rgba(26,26,26,0.042) 1px, transparent 1px), linear-gradient(90deg, rgba(26,26,26,0.042) 1px, transparent 1px)',
+            'linear-gradient(rgba(var(--ac-ink-rgb),0.042) 1px, transparent 1px), linear-gradient(90deg, rgba(var(--ac-ink-rgb),0.042) 1px, transparent 1px)',
           backgroundSize: '52px 52px',
         }}
         aria-hidden="true"
@@ -183,7 +183,7 @@ export function HowItWorksSection() {
 
           {/* Heading */}
           <h2
-            className="mb-11 font-light text-[#1A1A1A] leading-[1.06]"
+            className="mb-11 font-light text-[var(--ac-ink)] leading-[1.06]"
             style={{
               fontFamily: "'Cormorant Garamond', serif",
               fontSize:   'clamp(2.1rem, 3vw, 3.4rem)',
@@ -209,7 +209,7 @@ export function HowItWorksSection() {
                 </span>
                 <div>
                   <h3
-                    className="mb-2 font-light text-[#1A1A1A] leading-tight"
+                    className="mb-2 font-light text-[var(--ac-ink)] leading-tight"
                     style={{
                       fontFamily: "'Cormorant Garamond', serif",
                       fontSize:   'clamp(1.4rem, 1.8vw, 1.75rem)',
@@ -278,30 +278,30 @@ export function HowItWorksSection() {
             {/* ── Grid ────────────────────────────────────────────── */}
             {[60, 120, 180, 240, 300, 360].map(y => (
               <line key={`hy${y}`} x1="40" y1={y} x2="440" y2={y}
-                stroke="rgba(26,26,26,0.07)" strokeWidth="1" />
+                stroke="rgba(var(--ac-ink-rgb),0.07)" strokeWidth="1" />
             ))}
             {[100, 160, 220, 280, 340, 400].map(x => (
               <line key={`vx${x}`} x1={x} y1="50" x2={x} y2="378"
-                stroke="rgba(26,26,26,0.07)" strokeWidth="1" />
+                stroke="rgba(var(--ac-ink-rgb),0.07)" strokeWidth="1" />
             ))}
 
             {/* ── Axes ────────────────────────────────────────────── */}
-            <line x1="40" y1="375" x2="448" y2="375" stroke="rgba(26,26,26,0.28)" strokeWidth="1.5" />
-            <line x1="40" y1="50"  x2="40"  y2="378" stroke="rgba(26,26,26,0.28)" strokeWidth="1.5" />
-            <polygon points="448,371 457,375 448,379" fill="rgba(26,26,26,0.28)" />
-            <polygon points="36,50 40,42 44,50"        fill="rgba(26,26,26,0.28)" />
+            <line x1="40" y1="375" x2="448" y2="375" stroke="rgba(var(--ac-ink-rgb),0.28)" strokeWidth="1.5" />
+            <line x1="40" y1="50"  x2="40"  y2="378" stroke="rgba(var(--ac-ink-rgb),0.28)" strokeWidth="1.5" />
+            <polygon points="448,371 457,375 448,379" fill="rgba(var(--ac-ink-rgb),0.28)" />
+            <polygon points="36,50 40,42 44,50"        fill="rgba(var(--ac-ink-rgb),0.28)" />
             <text x="18" y="200" textAnchor="middle" fontSize="9"
-              fill="rgba(26,26,26,0.4)" letterSpacing="2.5" fontFamily="monospace"
+              fill="rgba(var(--ac-ink-rgb),0.4)" letterSpacing="2.5" fontFamily="monospace"
               transform="rotate(-90,18,200)">{t.home.chartPrice}</text>
             <text x="245" y="396" textAnchor="middle" fontSize="9"
-              fill="rgba(26,26,26,0.4)" letterSpacing="2.5" fontFamily="monospace">{t.home.chartSupply}</text>
+              fill="rgba(var(--ac-ink-rgb),0.4)" letterSpacing="2.5" fontFamily="monospace">{t.home.chartSupply}</text>
 
             {/* Y ticks */}
             {([{ label: t.home.chartHigh, y: 110 }, { label: t.home.chartMid, y: 230 }, { label: t.home.chartLow, y: 340 }] as { label: string; y: number }[]).map(tick => (
               <g key={tick.label}>
-                <line x1="35" y1={tick.y} x2="45" y2={tick.y} stroke="rgba(26,26,26,0.22)" strokeWidth="1.2" />
+                <line x1="35" y1={tick.y} x2="45" y2={tick.y} stroke="rgba(var(--ac-ink-rgb),0.22)" strokeWidth="1.2" />
                 <text x="32" y={tick.y + 4} textAnchor="end" fontSize="8"
-                  fill="rgba(26,26,26,0.38)" letterSpacing="1" fontFamily="monospace">
+                  fill="rgba(var(--ac-ink-rgb),0.38)" letterSpacing="1" fontFamily="monospace">
                   {tick.label}
                 </text>
               </g>

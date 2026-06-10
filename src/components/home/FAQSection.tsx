@@ -29,7 +29,7 @@ function FAQItem({
   onToggle: () => void
 }) {
   return (
-    <div className="border-t border-[#E4DDD3]">
+    <div className="border-t border-[var(--ac-line)]">
       <button
         type="button"
         onClick={onToggle}
@@ -42,7 +42,7 @@ function FAQItem({
             {String(index + 1).padStart(2, '0')}
           </span>
           <h3
-            className="text-[1.15rem] md:text-[1.35rem] font-light text-[#1A1A1A] leading-snug
+            className="text-[1.15rem] md:text-[1.35rem] font-light text-[var(--ac-ink)] leading-snug
                        italic group-hover:text-[#C9A96E] transition-colors duration-300"
             style={{ fontFamily: "'Cormorant Garamond', serif" }}
           >
@@ -80,7 +80,7 @@ function FAQItem({
             style={{ overflow: 'hidden' }}
           >
             <p
-              className="pl-9 pb-5 text-[0.88rem] leading-[1.75] text-[#7A7570] font-light"
+              className="pl-9 pb-5 text-[0.88rem] leading-[1.75] text-[var(--ac-muted)] font-light"
             >
               {faq.a}
             </p>
@@ -151,7 +151,7 @@ export function FAQSection() {
   return (
     <section
       ref={sectionRef}
-      className="relative bg-[#FDFBF7] py-14 overflow-hidden"
+      className="relative bg-[var(--ac-paper)] py-14 overflow-hidden"
       aria-label="FAQ"
     >
       <div className="grid-overlay" aria-hidden="true" />
@@ -166,7 +166,7 @@ export function FAQSection() {
         <div className="flex items-end justify-between gap-4 flex-wrap mb-10">
           <h2
             ref={titleRef}
-            className="font-light text-[#1A1A1A] flex flex-wrap gap-x-[0.22em]"
+            className="font-light text-[var(--ac-ink)] flex flex-wrap gap-x-[0.22em]"
             style={{
               fontFamily: "'Cormorant Garamond', serif",
               fontSize:   'clamp(2rem, 4vw, 3.5rem)',
@@ -200,7 +200,7 @@ export function FAQSection() {
         ))}
 
         {/* Bottom border */}
-        <div className="border-t border-[#E4DDD3]" />
+        <div className="border-t border-[var(--ac-line)]" />
       </div>
     </section>
   )

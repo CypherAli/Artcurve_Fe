@@ -35,10 +35,10 @@ function StickyLine() {
       style={{ top: HEADER_H }}
       aria-hidden="true"
     >
-      <div className="w-full h-[2px] bg-[#1A1A1A]/60" />
+      <div className="w-full h-[2px] bg-[var(--ac-ink)]/60" />
       <div
         className="w-full h-12"
-        style={{ background: 'linear-gradient(to bottom, rgba(26,26,26,0.04) 0%, transparent 100%)' }}
+        style={{ background: 'linear-gradient(to bottom, rgba(var(--ac-ink-rgb),0.04) 0%, transparent 100%)' }}
       />
     </div>
   )

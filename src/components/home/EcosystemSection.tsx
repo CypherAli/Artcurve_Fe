@@ -3,7 +3,7 @@
 // ─────────────────────────────────────────────────────────────────
 //  EcosystemSection.tsx  —  Infrastructure / Trust Signals
 //
-//  Cream bg (#FDFBF7) minimal trust section.
+//  Cream bg (var(--ac-paper)) minimal trust section.
 //  No header — just marquee rows + trust badges.
 //
 //  Marquee:
@@ -69,7 +69,7 @@ function MarqueeRow({
           <span key={i} className="inline-flex items-center">
             <span
               className="font-mono text-[11px] tracking-[0.3em] uppercase"
-              style={{ color: 'rgba(26,26,26,0.50)' }}
+              style={{ color: 'rgba(var(--ac-ink-rgb),0.50)' }}
             >
               {item}
             </span>
@@ -95,7 +95,7 @@ function TrustBadge({ label }: { label: string }) {
       </svg>
       <span
         className="text-[10px] tracking-[0.28em] uppercase"
-        style={{ color: '#7A7570' }}
+        style={{ color: 'var(--ac-muted)' }}
       >
         {label}
       </span>
@@ -118,7 +118,7 @@ export function EcosystemSection() {
   return (
     <section
       ref={sectionRef}
-      className="relative bg-[#FDFBF7] pt-0 pb-5 overflow-hidden"
+      className="relative bg-[var(--ac-paper)] pt-0 pb-5 overflow-hidden"
       aria-label="Infrastructure"
     >
       <style>{`
@@ -137,7 +137,7 @@ export function EcosystemSection() {
         {/* ── Marquee block ────────────────────────────────────────── */}
         <div>
           {/* Top divider */}
-          <div className="h-px bg-[#E4DDD3]" aria-hidden="true" />
+          <div className="h-px bg-[var(--ac-line)]" aria-hidden="true" />
 
           {/* Row 1 — scrolls LEFT, 35s */}
           <div className="py-3">
@@ -145,7 +145,7 @@ export function EcosystemSection() {
           </div>
 
           {/* Middle divider */}
-          <div className="h-px bg-[#E4DDD3]" aria-hidden="true" />
+          <div className="h-px bg-[var(--ac-line)]" aria-hidden="true" />
 
           {/* Row 2 — scrolls RIGHT, 28s */}
           <div className="py-3">
@@ -153,7 +153,7 @@ export function EcosystemSection() {
           </div>
 
           {/* Bottom divider */}
-          <div className="h-px bg-[#E4DDD3]" aria-hidden="true" />
+          <div className="h-px bg-[var(--ac-line)]" aria-hidden="true" />
         </div>
 
         {/* ── Trust badges ─────────────────────────────────────────── */}
@@ -164,7 +164,7 @@ export function EcosystemSection() {
               {i < TRUST_BADGES.length - 1 && (
                 <div
                   className="mx-6 w-px h-3 self-center"
-                  style={{ background: '#E4DDD3' }}
+                  style={{ background: 'var(--ac-line)' }}
                   aria-hidden="true"
                 />
               )}

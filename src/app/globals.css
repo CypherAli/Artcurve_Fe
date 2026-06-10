@@ -29,6 +29,32 @@
   --ease-reveal:  cubic-bezier(0.77, 0, 0.175, 1);
 }
 
+/* ── Semantic theme tokens (light ↔ dark) ───────────────────────────
+   Mọi màu trung tính trong components trỏ về đây qua var(--ac-*).
+   Dark mode = remap biến dưới html.dark — không cần sửa component.
+──────────────────────────────────────────────────────────────────── */
+:root {
+  --ac-paper:      #FDFBF7;   /* nền chính (cream) */
+  --ac-paper-2:    #F5F0E8;   /* nền phụ */
+  --ac-ink:        #1A1A1A;   /* chữ chính (charcoal) */
+  --ac-muted:      #7A7570;   /* chữ phụ */
+  --ac-line:       #E4DDD3;   /* border */
+  --ac-ink-rgb:    26, 26, 26;
+  --ac-paper-rgb:  253, 251, 247;
+  color-scheme: light;
+}
+
+html.dark {
+  --ac-paper:      #0F0E0C;   /* nền than đêm ấm */
+  --ac-paper-2:    #181613;
+  --ac-ink:        #F0EBE1;   /* ivory */
+  --ac-muted:      #8E877B;
+  --ac-line:       #2B2823;
+  --ac-ink-rgb:    240, 235, 225;
+  --ac-paper-rgb:  15, 14, 12;
+  color-scheme: dark;
+}
+
 /* ── Base Reset ─────────────────────────────────────────────────── */
 *, *::before, *::after { box-sizing: border-box; }
 
@@ -39,11 +65,12 @@ html {
 }
 
 body {
-  background-color: #FDFBF7;
-  color: #1A1A1A;
+  background-color: var(--ac-paper);
+  color: var(--ac-ink);
   font-family: var(--font-sans);
   overflow-x: hidden;
   background-image: none;
+  transition: background-color 0.25s ease, color 0.25s ease;
 }
 
 /* ── Grid ruler overlay ───────────────────────────────────────────
@@ -95,14 +122,68 @@ body {
 
 /* ── Selection ──────────────────────────────────────────────────── */
 ::selection {
-  background-color: #E8D5B0;
+  background-color: #C9A96E;
   color: #1A1A1A;
 }
 
 /* ── Scrollbar ──────────────────────────────────────────────────── */
 ::-webkit-scrollbar          { width: 3px; }
-::-webkit-scrollbar-track    { background: #FDFBF7; }
+::-webkit-scrollbar-track    { background: var(--ac-paper); }
 ::-webkit-scrollbar-thumb    { background: #C9A96E; border-radius: 2px; }
+
+/* ── Dark-mode tweaks cho overlay hiệu ứng ──────────────────────── */
+html.dark .grid-overlay  { mix-blend-mode: screen;  opacity: 0.4; }
+html.dark .grain-overlay::after { mix-blend-mode: screen; opacity: 0.05; }
+
+/* ── Theme tear transition — "xé toạc bức màn" ───────────────────────
+   View Transition API: snapshot theme cũ nằm trên, bị xé theo mép
+   răng cưa (clip-path) quét từ phải sang trái, kèm xoay nhẹ + bóng đổ
+   như tờ giấy bị giật khỏi khung — lộ ra theme mới phía dưới.
+──────────────────────────────────────────────────────────────────── */
+@keyframes ac-curtain-tear {
+  0% {
+    clip-path: polygon(
+      -20% 0%, 118% 0%, 113% 9%, 119% 17%, 112% 28%, 118% 38%,
+      111% 50%, 117% 61%, 112% 72%, 118% 81%, 113% 91%, 117% 100%,
+      -20% 100%
+    );
+    transform: none;
+    filter: drop-shadow(-14px 0 28px rgba(0, 0, 0, 0.40));
+  }
+  60% {
+    clip-path: polygon(
+      -20% 0%, 52% 0%, 44% 9%, 54% 17%, 43% 28%, 53% 38%,
+      42% 50%, 52% 61%, 44% 72%, 53% 81%, 45% 91%, 51% 100%,
+      -20% 100%
+    );
+    transform: translateX(-1.5%) rotate(-0.8deg);
+    filter: drop-shadow(-18px 0 36px rgba(0, 0, 0, 0.45));
+  }
+  100% {
+    clip-path: polygon(
+      -20% 0%, -22% 0%, -30% 9%, -21% 17%, -32% 28%, -22% 38%,
+      -33% 50%, -23% 61%, -31% 72%, -22% 81%, -30% 91%, -24% 100%,
+      -20% 100%
+    );
+    transform: translateX(-7%) rotate(-2.4deg);
+    filter: drop-shadow(-22px 0 44px rgba(0, 0, 0, 0.50));
+  }
+}
+
+::view-transition-old(root),
+::view-transition-new(root) {
+  animation: none;
+  mix-blend-mode: normal;
+}
+::view-transition-new(root) { z-index: 1; }
+::view-transition-old(root) {
+  z-index: 10;
+  animation: ac-curtain-tear 950ms cubic-bezier(0.77, 0, 0.175, 1) forwards;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  ::view-transition-old(root) { animation: none; }
+}
 
 /* ── GSAP Motion System (cinematic-gsap-lenis skill pattern) ─────── */
 html.has-motion [data-motion-text],

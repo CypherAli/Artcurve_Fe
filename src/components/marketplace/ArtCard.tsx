@@ -115,7 +115,7 @@ export function ArtCard({
             style={{
               fontFamily: "'Cormorant Garamond', serif",
               fontSize:   '1.05rem',
-              color:      '#FDFBF7',
+              color:      'var(--ac-paper)',
             }}
           >
             {data.title}
