@@ -1,8 +1,11 @@
 'use client'
 
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useRef, useState, useCallback } from 'react'
+import { useAccount, useSignMessage }  from 'wagmi'
+import { useConnectModal }             from '@rainbow-me/rainbowkit'
 import { useAuthStore }                from '@/store/authStore'
 import { useUpdateProfile }            from '@/hooks/useProfile'
+import { userService, type LinkedWallet } from '@/services/user.service'
 import { gsap }                        from '@/lib/gsap'
 import { useLanguage }                 from '@/context/LanguageContext'
 
@@ -33,6 +36,104 @@ function Row({ label, desc, children }: { label: string; desc?: string; children
       </div>
       <div className="ml-4 shrink-0">{children}</div>
     </div>
+  )
+}
+
+// ── Linked Wallets — multi-wallet cho 1 tài khoản ──────────────────
+// Link ví mới: ký SIWE bằng chính ví đó (proof of ownership) → BE verify.
+function LinkedWalletsSection() {
+  const { isAuthenticated: isLoggedIn } = useAuthStore()
+  const { address, isConnected } = useAccount()
+  const { signMessageAsync } = useSignMessage()
+  const { openConnectModal } = useConnectModal()
+
+  const [wallets, setWallets] = useState<LinkedWallet[]>([])
+  const [busy,    setBusy]    = useState(false)
+  const [error,   setError]   = useState<string | null>(null)
+
+  const reload = useCallback(() => {
+    if (!isLoggedIn) return
+    userService.listWallets().then(setWallets).catch(() => {})
+  }, [isLoggedIn])
+
+  useEffect(() => { reload() }, [reload])
+
+  const connectedIsLinked = !!address &&
+    wallets.some(w => w.wallet_address === address.toLowerCase())
+
+  async function handleLink() {
+    setError(null)
+    if (!isConnected || !address) { openConnectModal?.(); return }
+    setBusy(true)
+    try {
+      const { message } = await userService.linkWalletNonce(address)
+      const signature   = await signMessageAsync({ message })
+      const list        = await userService.linkWallet({ wallet_address: address, signature, message })
+      setWallets(list)
+    } catch (e) {
+      setError(e instanceof Error ? e.message : 'Link wallet failed')
+    } finally {
+      setBusy(false)
+    }
+  }
+
+  async function handleUnlink(wallet_address: string) {
+    setError(null)
+    setBusy(true)
+    try {
+      setWallets(await userService.unlinkWallet(wallet_address))
+    } catch (e) {
+      setError(e instanceof Error ? e.message : 'Unlink failed')
+    } finally {
+      setBusy(false)
+    }
+  }
+
+  if (!isLoggedIn) return null
+
+  return (
+    <Section title="Linked Wallets">
+      {wallets.map(w => (
+        <Row key={w.id}
+          label={`${w.wallet_address.slice(0, 8)}…${w.wallet_address.slice(-6)}`}
+          desc={w.label ?? (w.is_primary ? 'Primary — ví định danh tài khoản' : undefined)}>
+          {w.is_primary ? (
+            <span className="text-[11px] font-mono px-3 py-1 rounded-full uppercase tracking-widest"
+              style={{ background: 'rgba(201,169,110,0.1)', color: GOLD, border: `1px solid ${GOLD}33` }}>
+              Primary
+            </span>
+          ) : (
+            <button type="button" disabled={busy}
+              onClick={() => handleUnlink(w.wallet_address)}
+              className="px-3 h-8 rounded-xl text-[11px] font-mono tracking-widest uppercase transition-all duration-200"
+              style={{ border: '1px solid rgba(239,68,68,0.3)', color: 'rgba(239,68,68,0.7)', background: 'transparent' }}>
+              Unlink
+            </button>
+          )}
+        </Row>
+      ))}
+      <div className="px-5 py-4" style={{ background: DARK }}>
+        <button type="button" disabled={busy || connectedIsLinked}
+          onClick={handleLink}
+          className="px-5 h-10 rounded-xl text-[12px] font-mono tracking-widest uppercase transition-all duration-200 disabled:opacity-40"
+          style={{ background: `${GOLD}22`, border: `1px solid ${GOLD}55`, color: GOLD }}>
+          {busy
+            ? 'Signing…'
+            : !isConnected
+              ? 'Connect wallet to link'
+              : connectedIsLinked
+                ? 'Connected wallet already linked'
+                : `Link ${address?.slice(0, 6)}…${address?.slice(-4)}`}
+        </button>
+        {error && (
+          <p className="text-[12px] mt-2" style={{ color: 'rgba(239,68,68,0.8)' }}>{error}</p>
+        )}
+        <p className="text-[12px] mt-2" style={{ color: 'rgba(255,255,255,0.3)' }}>
+          Kết nối ví muốn liên kết, ký một message (miễn phí gas) để chứng minh sở hữu.
+          Mọi ví liên kết đều đăng nhập về cùng tài khoản này.
+        </p>
+      </div>
+    </Section>
   )
 }
 
@@ -178,6 +279,9 @@ export function SettingsPage() {
           </span>
         </Row>
       </Section>
+
+      {/* Linked wallets — multi-wallet */}
+      <LinkedWalletsSection />
 
       {/* Danger zone */}
       <Section title={t.settings.dangerZone}>
