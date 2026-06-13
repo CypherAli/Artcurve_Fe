@@ -33,6 +33,7 @@ import { authStore }                    from '@/lib/auth-store'
 import { parseEther }                   from 'viem'
 import type { Artwork, OhlcvCandle, OhlcvTimeframe } from '@/types/api'
 import { useLanguage } from '@/context/LanguageContext'
+import { ConfirmDialog } from '@/components/common/ConfirmDialog'
 
 const API_URL = (process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:3001/api/v1').replace(/\/$/, '')
 
@@ -735,6 +736,7 @@ function TradePanel({ art, livePrice }: { art:TradeArtwork; livePrice:number }) 
   const [tokenInput, setTokenInput] = useState('')   // SELL: tokens to sell
   const [slippage,   setSlippage]   = useState('1.0')
   const [txState,    setTxState]    = useState<'idle'|'pending'|'success'>('idle')
+  const [showConfirm, setShowConfirm] = useState(false)
 
   // FIX 5: Quote from API
   const [quote,        setQuote]        = useState<QuoteResult | null>(null)
@@ -1161,7 +1163,7 @@ function TradePanel({ art, livePrice }: { art:TradeArtwork; livePrice:number }) 
         {/* ── Execute button ── */}
         <div className="relative overflow-hidden shrink-0">
           <motion.button
-            type="button" onClick={handleExecute} disabled={!canTrade}
+            type="button" onClick={() => { if (canTrade) setShowConfirm(true) }} disabled={!canTrade}
             whileHover={canTrade?{ scale:1.012 }:{}}
             whileTap={canTrade?{ scale:0.984 }:{}}
             transition={{ type:'spring', stiffness:380, damping:18 }}
@@ -1226,6 +1228,29 @@ function TradePanel({ art, livePrice }: { art:TradeArtwork; livePrice:number }) 
           </div>
         </div>
       </div>
+
+      {/* ── Trade confirmation dialog ── */}
+      <ConfirmDialog
+        open={showConfirm}
+        title={side === 'buy' ? 'Confirm Purchase' : 'Confirm Sale'}
+        confirmLabel={side === 'buy' ? 'Buy' : 'Sell'}
+        cancelLabel="Cancel"
+        confirmColor={side === 'buy' ? '#4ade80' : '#f87171'}
+        onConfirm={() => { setShowConfirm(false); handleExecute() }}
+        onCancel={() => setShowConfirm(false)}
+      >
+        <p>
+          {side === 'buy'
+            ? `Are you sure you want to buy ~${tokensOut.toFixed(4)} ${art.ticker} tokens for ${ethAmt.toFixed(6)} ETH?`
+            : `Are you sure you want to sell ${tokenAmt.toFixed(4)} ${art.ticker} tokens for ~${ethOut.toFixed(6)} ETH?`
+          }
+        </p>
+        {impactPct > 1 && (
+          <p className="mt-2" style={{ color: impactColor }}>
+            Price impact: {impactPct.toFixed(2)}%
+          </p>
+        )}
+      </ConfirmDialog>
     </motion.div>
   )
 }

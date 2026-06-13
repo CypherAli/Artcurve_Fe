@@ -16,6 +16,7 @@ import { Cormorant_Garamond, Inter } from 'next/font/google'
 import { SmoothScrollProvider }  from '@/providers/SmoothScrollProvider'
 import { Web3Provider }          from '@/providers/Web3Provider'
 import { ToastContainer }        from '@/components/common/Toast'
+import { ErrorBoundaryWrapper } from '@/components/common/ErrorBoundaryWrapper'
 import { LanguageProvider }      from '@/context/LanguageContext'
 import { ThemeProvider }         from '@/context/ThemeContext'
 import './globals.css'
@@ -104,7 +105,9 @@ export default function RootLayout({
 
 
             <main id="main-content">
-              {children}
+              <ErrorBoundaryWrapper>
+                {children}
+              </ErrorBoundaryWrapper>
             </main>
             <ToastContainer />
           </Web3Provider>

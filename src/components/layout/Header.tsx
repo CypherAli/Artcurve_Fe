@@ -734,6 +734,7 @@ export function Header({ dark = false }: HeaderProps) {
   const [showNotifs,  setShowNotifs] = useState(false)
   const [showUserMenu,setShowUserMenu] = useState(false)
   const [hoveredNav,  setHoveredNav] = useState<string | null>(null)
+  const [mobileMenu,  setMobileMenu] = useState(false)
   const headerRef                   = useRef<HTMLElement>(null)
   const {
     items: notifData,
@@ -843,6 +844,22 @@ export function Header({ dark = false }: HeaderProps) {
           </a>
         ))}
       </nav>
+
+      {/* ── Hamburger (mobile only) ────────────────────────────── */}
+      <button
+        type="button"
+        className="md:hidden flex items-center justify-center w-10 h-10 rounded-lg transition-colors duration-200"
+        style={{ color: T.nav }}
+        onClick={() => setMobileMenu(v => !v)}
+        aria-label="Toggle menu"
+      >
+        <svg viewBox="0 0 24 24" className="w-6 h-6" fill="none" stroke="currentColor" strokeWidth="1.8">
+          {mobileMenu
+            ? <path d="M18 6L6 18M6 6l12 12" strokeLinecap="round" strokeLinejoin="round"/>
+            : <path d="M4 6h16M4 12h16M4 18h16" strokeLinecap="round" strokeLinejoin="round"/>
+          }
+        </svg>
+      </button>
 
       {/* ── Right ─────────────────────────────────────────────── */}
       <div className="flex items-center gap-3">
@@ -1026,6 +1043,57 @@ export function Header({ dark = false }: HeaderProps) {
         </ConnectButton.Custom>
       </div>
     </header>
+
+    {/* ── Mobile slide-out menu ──────────────────────────────── */}
+    {mobileMenu && (
+      <>
+        {/* Backdrop */}
+        <div
+          className="fixed inset-0 z-40 md:hidden"
+          style={{ background: 'rgba(0,0,0,0.6)', backdropFilter: 'blur(4px)' }}
+          onClick={() => setMobileMenu(false)}
+        />
+        {/* Panel */}
+        <div
+          className="fixed top-0 right-0 z-50 h-full w-72 flex flex-col md:hidden"
+          style={{
+            background: dark ? '#0E0E0E' : 'var(--ac-paper)',
+            borderLeft: `1px solid ${T.border}`,
+            boxShadow: '-8px 0 32px rgba(0,0,0,0.3)',
+          }}
+        >
+          {/* Close */}
+          <div className="flex items-center justify-between px-5 py-5">
+            <span className="text-lg tracking-wider" style={{ fontFamily: "'Cormorant Garamond',serif", fontWeight: 600, color: T.logo }}>
+              Menu
+            </span>
+            <button type="button" onClick={() => setMobileMenu(false)} aria-label="Close menu"
+              className="w-9 h-9 flex items-center justify-center rounded-full transition-colors"
+              style={{ color: T.nav }}>
+              <svg viewBox="0 0 24 24" className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="2">
+                <path d="M18 6L6 18M6 6l12 12" strokeLinecap="round" strokeLinejoin="round"/>
+              </svg>
+            </button>
+          </div>
+          {/* Gold line */}
+          <div className="h-px mx-5" style={{ background: `linear-gradient(90deg, ${T.gold}, transparent)` }} />
+          {/* Links */}
+          <nav className="flex flex-col gap-1 px-4 py-4" aria-label="Mobile navigation">
+            {NAV_LINKS.map(({ label, href }) => (
+              <a key={label} href={href}
+                onClick={() => setMobileMenu(false)}
+                className="block px-3 py-3 text-sm tracking-widest uppercase transition-colors duration-200 rounded-lg"
+                style={{ color: T.nav }}
+                onMouseEnter={e => { (e.currentTarget as HTMLElement).style.color = T.navHover; (e.currentTarget as HTMLElement).style.background = dark ? 'rgba(255,255,255,0.04)' : 'rgba(0,0,0,0.03)' }}
+                onMouseLeave={e => { (e.currentTarget as HTMLElement).style.color = T.nav; (e.currentTarget as HTMLElement).style.background = 'transparent' }}
+              >
+                {label}
+              </a>
+            ))}
+          </nav>
+        </div>
+      </>
+    )}
 
     {showLogin && <LoginModal onClose={() => setShowLogin(false)} />}
     </>
