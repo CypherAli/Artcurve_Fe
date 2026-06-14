@@ -49,7 +49,8 @@ function CallbackHandler() {
     })
       .then(async (res) => {
         if (!res.ok) throw new Error('Exchange failed')
-        return res.json()
+        const json = await res.json()
+        return json.data ?? json
       })
       .then((data: { access_token: string; address: string; name: string; avatar: string; provider: string }) => {
         const token   = data.access_token

@@ -45,6 +45,7 @@ const securityHeaders = [
         'https://*.walletconnect.com',
         'wss://*.walletconnect.com',
         'https://*.walletconnect.org',
+        'wss://*.walletconnect.org',
         'https://api.web3modal.com',
         'https://api.web3modal.org',
         'https://rpc.walletconnect.com',
