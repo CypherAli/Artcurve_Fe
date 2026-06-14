@@ -293,7 +293,7 @@ export function LiveActivitySection() {
                 <p className="text-[2rem] font-light text-[var(--ac-ink)] leading-none"
                   style={{ fontFamily: "'Cormorant Garamond', serif" }}
                   suppressHydrationWarning>
-                  {mounted ? totalToday : '—'}
+                  {mounted ? totalToday : '-'}
                 </p>
                 <p className="text-[9px] tracking-[0.25em] uppercase text-[var(--ac-muted)] mt-1">{t.home.liveTrades}</p>
               </div>
@@ -302,7 +302,7 @@ export function LiveActivitySection() {
                 <p className="text-[2rem] font-light text-[var(--ac-ink)] leading-none"
                   style={{ fontFamily: "'Cormorant Garamond', serif" }}
                   suppressHydrationWarning>
-                  {mounted ? volume : '—'}
+                  {mounted ? volume : '-'}
                   {mounted && <span className="text-[#C9A96E] text-sm ml-1">ETH</span>}
                 </p>
                 <p className="text-[9px] tracking-[0.25em] uppercase text-[var(--ac-muted)] mt-1">{t.home.liveVolume}</p>

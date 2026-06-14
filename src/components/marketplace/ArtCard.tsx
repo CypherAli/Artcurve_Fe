@@ -1,13 +1,13 @@
 'use client'
 
 // ─────────────────────────────────────────────────────────────────
-//  ArtCard.tsx  —  "Neo-Luxury Trading Floor" Card
+//  ArtCard.tsx  | "Neo-Luxury Trading Floor" Card
 //
 //  Design law: ART and DATA never mix.
 //    · Top half  → full-bleed square image, ZERO overlays
 //    · Bottom half → data terminal: ticker / market cap / curve bar
 //
-//  Phase is communicated via a 3px left-edge accent — the same
+//  Phase is communicated via a 3px left-edge accent |the same
 //  convention used on Bloomberg / TradingView watchlist rows.
 //
 //  FOMO Weapon = bonding curve progress bar. Seeing "85% TO
@@ -66,13 +66,13 @@ export function ArtCard({
     <motion.article
       variants={cardVariants}
       onClick={() => onCollect(data)}
-      aria-label={`${data.title} — ${data.marketCapLabel}`}
+      aria-label={`${data.title} |${data.marketCapLabel}`}
       className="group relative rounded-sm overflow-hidden cursor-pointer select-none
                  transition-[border-color,box-shadow] duration-300
                  border border-white/10 bg-[#111111]
                  hover:border-[#D4AF37]/50 hover:shadow-[0_0_32px_-8px_rgba(212,175,55,0.15)]"
     >
-      {/* ── Phase accent  (3px left edge — trading terminal convention) ─── */}
+      {/* ── Phase accent  (3px left edge |trading terminal convention) ─── */}
       <span
         aria-hidden="true"
         className="absolute left-0 top-0 bottom-0 w-[3px] z-10"
@@ -80,7 +80,7 @@ export function ArtCard({
       />
 
       {/* ─────────────────────────────────────────────────────────────
-          ART ZONE — ABSOLUTELY CLEAN
+          ART ZONE |ABSOLUTELY CLEAN
           Rule: no badge, no text, no gradient, no overlay of any kind.
           The artwork speaks for itself.
       ───────────────────────────────────────────────────────────── */}
@@ -100,7 +100,7 @@ export function ArtCard({
 
       {/* ─────────────────────────────────────────────────────────────
           DATA TERMINAL
-          Three rows of financial data — clean mono / serif typography.
+          Three rows of financial data |clean mono / serif typography.
           Nothing decorative, everything meaningful.
       ───────────────────────────────────────────────────────────── */}
       <div
@@ -163,7 +163,7 @@ export function ArtCard({
           </div>
         </div>
 
-        {/* ── Row 3: Bonding Curve Progress — "The FOMO Weapon" ── */}
+        {/* ── Row 3: Bonding Curve Progress |"The FOMO Weapon" ── */}
         <div className="mt-4">
           {/* Label row: progress text  +  phase label */}
           <div className="flex items-center justify-between mb-[7px]">

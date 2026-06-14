@@ -125,7 +125,7 @@ function InfiniteRow({
               symbol={coin.symbol}
               name={coin.name}
               price={t ? fmtUSD(t.price) : '…'}
-              change={t ? fmtChange(t.change) : '—'}
+              change={t ? fmtChange(t.change) : '-'}
               positive={t ? t.change >= 0 : true}
             />
           )

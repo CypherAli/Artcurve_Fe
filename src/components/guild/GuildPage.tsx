@@ -65,7 +65,7 @@ type DetailTab = 'activity' | 'chat' | 'members' | 'holdings'
 // ── Data ──────────────────────────────────────────────────────────
 const GUILDS: Guild[] = [
   { id:'g1', name:'The Pale Archive',   tagline:'Collectors of muted tones and negative space', members:84,  focus:'Minimalist', tier:'Founding', color:'#a78bfa', cover:'linear-gradient(145deg,#1a1a2e 0%,#2d2d4a 100%)', joined:true,  holdings:'42.3 ETH', tags:['Minimalist','Monochrome','Architecture'] },
-  { id:'g2', name:'After Midnight',     tagline:'Nocturnal art — darkness as medium',           members:156, focus:'Dark Art',   tier:'Founding', color:'#60a5fa', cover:'linear-gradient(145deg,#0d1520 0%,#1a2a40 100%)', joined:true,  holdings:'88.7 ETH', tags:['Nocturnal','Atmospheric','Blue Hour']   },
+  { id:'g2', name:'After Midnight',     tagline:'Nocturnal art, darkness as medium',           members:156, focus:'Dark Art',   tier:'Founding', color:'#60a5fa', cover:'linear-gradient(145deg,#0d1520 0%,#1a2a40 100%)', joined:true,  holdings:'88.7 ETH', tags:['Nocturnal','Atmospheric','Blue Hour']   },
   { id:'g3', name:'Bloom Collective',   tagline:'Generative & digital art enthusiasts',         members:203, focus:'Generative', tier:'Active',   color:'#4ade80', cover:'linear-gradient(145deg,#0a2818 0%,#163d24 100%)', joined:false, holdings:'31.1 ETH', tags:['Generative','p5.js','Digital']         },
   { id:'g4', name:'Old Masters Reborn', tagline:'Classical technique in the Web3 era',          members:67,  focus:'Classical',  tier:'Active',   color:'#D4AF37', cover:'linear-gradient(145deg,#1c1410 0%,#2e1f10 100%)', joined:false, holdings:'19.4 ETH', tags:['Classical','Oil','Masters']            },
   { id:'g5', name:'Signal / Noise',     tagline:'Experimental, glitch, and new media art',     members:91,  focus:'Experimental',tier:'Growing', color:'#f87171', cover:'linear-gradient(145deg,#200a0a 0%,#3d1515 100%)', joined:false, holdings:'8.2 ETH',  tags:['Glitch','Experimental','New Media']    },
@@ -73,7 +73,7 @@ const GUILDS: Guild[] = [
 ]
 
 const FEED: GuildPost[] = [
-  { id:'p1', guildName:'The Pale Archive',   author:'soo_ah.eth',       authorColor:'#a78bfa', content:'finishing the third panel of Pale Architecture tonight — come watch the stream',          likes:18, ts:'3m',  type:'post'      },
+  { id:'p1', guildName:'The Pale Archive',   author:'soo_ah.eth',       authorColor:'#a78bfa', content:'finishing the third panel of Pale Architecture tonight, come watch the stream',          likes:18, ts:'3m',  type:'post'      },
   { id:'p2', guildName:'After Midnight',     author:'ivan_sorokin.eth', authorColor:'#60a5fa', content:'the nocturne series feels different at night. the way light disappears in this piece',    likes:34, ts:'11m', type:'post'      },
   { id:'p3', guildName:'The Pale Archive',   author:'markus.eth',       authorColor:'#D4AF37', content:'collected 0.8 $PALE today. accumulation phase is almost done',                           likes:9,  ts:'19m', type:'collect'   },
   { id:'p4', guildName:'Bloom Collective',   author:'aiko.base',        authorColor:'#4ade80', content:'dropped a new generative series. 500 unique variations, each one seeds differently',     likes:41, ts:'26m', type:'post'      },

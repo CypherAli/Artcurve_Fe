@@ -3,7 +3,7 @@ import { Header }       from '@/components/layout/Header'
 import { SettingsPage } from '@/components/settings/SettingsPage'
 
 export const metadata: Metadata = {
-  title: 'Settings — ArtCurve',
+  title: 'Settings | ArtCurve',
   description: 'Account settings, security, and preferences.',
 }
 

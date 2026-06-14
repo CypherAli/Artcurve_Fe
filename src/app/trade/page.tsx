@@ -9,7 +9,7 @@ import { TradePage }     from '@/components/trade/TradePage'
 export const metadata: Metadata = {
   title: 'Trade',
   description:
-    'Trade art tokens on ArtCurve — real-time candlestick charts, bonding curve pricing, ' +
+    'Trade art tokens on ArtCurve: real-time candlestick charts, bonding curve pricing, ' +
     'and instant on-chain execution on Base.',
 }
 

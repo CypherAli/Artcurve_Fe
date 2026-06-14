@@ -3,8 +3,8 @@ import { Header }     from '@/components/layout/Header'
 import { WalletPage } from '@/components/wallet/WalletPage'
 
 export const metadata: Metadata = {
-  title: 'Wallet — ArtCurve',
-  description: 'Your connected wallet — balance, transactions, and keys.',
+  title: 'Wallet | ArtCurve',
+  description: 'Your connected wallet: balance, transactions, and keys.',
 }
 
 export default function Wallet() {

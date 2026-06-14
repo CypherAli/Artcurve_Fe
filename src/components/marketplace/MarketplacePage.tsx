@@ -1,7 +1,7 @@
 'use client'
 
 // ─────────────────────────────────────────────────────────────────
-//  MarketplacePage.tsx  —  Split-Pane Trading Terminal
+//  MarketplacePage.tsx , Split-Pane Trading Terminal
 //
 //  Layout (Master-Detail, 100% viewport height):
 //
@@ -62,7 +62,7 @@ interface MarketArtwork {
   ratingCount:    number
 }
 
-// ── Artwork catalogue (mock — used when backend is unreachable) ───
+// ── Artwork catalogue (mock,used when backend is unreachable) ───
 const ARTWORKS_MOCK: MarketArtwork[] = ([
   {
     id: 1, title: 'Nocturne at the Bridge', ticker: '$NOCTURNE',
@@ -72,7 +72,7 @@ const ARTWORKS_MOCK: MarketArtwork[] = ([
     change24h: '+18.4%', changePositive: true, change7d: '+31.2%',
     volume24h: '1.42 ETH', holders: 24, progress: 62,
     image: '/images/artworks/art1.jpg',
-    description: 'A cinematic study of artificial light fracturing across still water — painted at the precise moment before the bridge lamps extinguish for dawn.',
+    description: 'A cinematic study of artificial light fracturing across still water,painted at the precise moment before the bridge lamps extinguish for dawn.',
     sparkline: [4, 5.2, 6.8, 6.1, 5.4, 7.0, 9.5, 14.2, 19.8, 23.4],
   },
   {
@@ -83,7 +83,7 @@ const ARTWORKS_MOCK: MarketArtwork[] = ([
     change24h: '+7.2%', changePositive: true, change7d: '+9.8%',
     volume24h: '0.38 ETH', holders: 8, progress: 28,
     image: '/images/artworks/art2.jpg',
-    description: 'Porcelain figures frozen mid-collapse — an allegory for the tension between intimacy and inevitability. Early collectors form the foundation of this bonding curve.',
+    description: 'Porcelain figures frozen mid-collapse,an allegory for the tension between intimacy and inevitability. Early collectors form the foundation of this bonding curve.',
     sparkline: [5, 4.8, 5.3, 5.1, 5.6, 5.4, 6.2, 7.1, 7.8, 8.9],
   },
   {
@@ -94,7 +94,7 @@ const ARTWORKS_MOCK: MarketArtwork[] = ([
     change24h: '+29.3%', changePositive: true, change7d: '+58.4%',
     volume24h: '2.87 ETH', holders: 31, progress: 71,
     image: '/images/artworks/art3.jpg',
-    description: 'Cherry blossoms edged in obsidian — the duality of beauty and violence rendered in hyper-saturated ink. Demand has accelerated beyond early projections.',
+    description: 'Cherry blossoms edged in obsidian,the duality of beauty and violence rendered in hyper-saturated ink. Demand has accelerated beyond early projections.',
     sparkline: [3, 7.5, 14.0, 9.2, 6.8, 10.5, 16.0, 12.4, 28.0, 41.2],
   },
   {
@@ -105,7 +105,7 @@ const ARTWORKS_MOCK: MarketArtwork[] = ([
     change24h: '+44.1%', changePositive: true, change7d: '+112.3%',
     volume24h: '8.62 ETH', holders: 47, progress: 94,
     image: '/images/artworks/art4.jpg',
-    description: 'The master stares down his own mortality — a 19th-century meditation on time tokenised on-chain for the first time. 94% toward graduation liquidity.',
+    description: 'The master stares down his own mortality,a 19th-century meditation on time tokenised on-chain for the first time. 94% toward graduation liquidity.',
     sparkline: [2, 2.3, 2.8, 3.5, 5.0, 9.0, 22.0, 58.0, 120.0, 182.0],
   },
   {
@@ -116,7 +116,7 @@ const ARTWORKS_MOCK: MarketArtwork[] = ([
     change24h: '+33.7%', changePositive: true, change7d: '+71.0%',
     volume24h: '3.21 ETH', holders: 28, progress: 78,
     image: '/images/artworks/art5.jpg',
-    description: "Soldiers dissolving into fog — a requiem for certainty. The bonding curve reflects the market's collective dirge: slow at first, then all at once.",
+    description: "Soldiers dissolving into fog,a requiem for certainty. The bonding curve reflects the market's collective dirge: slow at first, then all at once.",
     sparkline: [8, 6.0, 4.2, 5.8, 8.5, 6.5, 9.0, 14.5, 22.0, 55.1],
   },
   {
@@ -127,7 +127,7 @@ const ARTWORKS_MOCK: MarketArtwork[] = ([
     change24h: '+3.1%', changePositive: true, change7d: '+4.8%',
     volume24h: '0.14 ETH', holders: 5, progress: 12,
     image: '/images/artworks/art1.jpg',
-    description: 'A cartographic ghost — the meridian line that never existed, traced in oil. Accumulation phase. The curve is waiting for discovery.',
+    description: 'A cartographic ghost,the meridian line that never existed, traced in oil. Accumulation phase. The curve is waiting for discovery.',
     sparkline: [4, 4.2, 3.9, 4.5, 4.3, 5.1, 5.4, 5.8, 5.9, 6.1],
   },
   {
@@ -138,7 +138,7 @@ const ARTWORKS_MOCK: MarketArtwork[] = ([
     change24h: '+51.8%', changePositive: true, change7d: '+138.0%',
     volume24h: '12.40 ETH', holders: 53, progress: 97,
     image: '/images/artworks/art2.jpg',
-    description: 'Brutalism made spectral — load-bearing columns rendered translucent. 97% to graduation. The final 3% of this curve carries maximum price velocity.',
+    description: 'Brutalism made spectral,load-bearing columns rendered translucent. 97% to graduation. The final 3% of this curve carries maximum price velocity.',
     sparkline: [1, 1.5, 2.2, 4.0, 8.5, 18.0, 42.0, 88.0, 164.0, 234.0],
   },
   {
@@ -149,7 +149,7 @@ const ARTWORKS_MOCK: MarketArtwork[] = ([
     change24h: '+28.1%', changePositive: true, change7d: '+62.4%',
     volume24h: '4.03 ETH', holders: 33, progress: 66,
     image: '/images/artworks/art3.jpg',
-    description: "Gothic spires reclaimed by fire — what remains after belief burns away. Vasquez's most ambitious work on-chain, with consistent inflow since mint.",
+    description: "Gothic spires reclaimed by fire,what remains after belief burns away. Vasquez's most ambitious work on-chain, with consistent inflow since mint.",
     sparkline: [5, 6.2, 7.8, 9.5, 8.1, 11.0, 15.5, 20.3, 29.0, 67.7],
   },
   // ── Extended catalogue using convergence imagery ──────────────
@@ -161,7 +161,7 @@ const ARTWORKS_MOCK: MarketArtwork[] = ([
     change24h: '+5.8%', changePositive: true, change7d: '+12.1%',
     volume24h: '0.62 ETH', holders: 11, progress: 34,
     image: '/convergence/img1.jpg',
-    description: 'The first in a series exploring the liminal space where digital forms bleed into organic matter. Slow accumulation phase — patient collectors are rewarded.',
+    description: 'The first in a series exploring the liminal space where digital forms bleed into organic matter. Slow accumulation phase,patient collectors are rewarded.',
     sparkline: [3, 3.4, 3.1, 3.8, 4.2, 4.0, 4.8, 5.5, 6.1, 7.0],
   },
   {
@@ -172,7 +172,7 @@ const ARTWORKS_MOCK: MarketArtwork[] = ([
     change24h: '+22.4%', changePositive: true, change7d: '+44.0%',
     volume24h: '2.11 ETH', holders: 22, progress: 58,
     image: '/convergence/img2.jpg',
-    description: 'Painted erosion — identity dissolving into its constituent pigments. A meditation on impermanence with a bonding curve that mirrors the subject matter.',
+    description: 'Painted erosion,identity dissolving into its constituent pigments. A meditation on impermanence with a bonding curve that mirrors the subject matter.',
     sparkline: [2, 3.1, 2.8, 4.5, 3.9, 5.6, 7.2, 9.8, 14.0, 19.4],
   },
   {
@@ -183,7 +183,7 @@ const ARTWORKS_MOCK: MarketArtwork[] = ([
     change24h: '+67.2%', changePositive: true, change7d: '+189.4%',
     volume24h: '18.40 ETH', holders: 61, progress: 99,
     image: '/convergence/img3.jpg',
-    description: 'The artwork that defines the boundary — standing at the threshold of graduated liquidity. 99% complete. Final fragment of the curve.',
+    description: 'The artwork that defines the boundary,standing at the threshold of graduated liquidity. 99% complete. Final fragment of the curve.',
     sparkline: [1, 1.8, 3.2, 7.0, 15.0, 38.0, 95.0, 198.0, 280.0, 315.0],
   },
   {
@@ -194,7 +194,7 @@ const ARTWORKS_MOCK: MarketArtwork[] = ([
     change24h: '+2.3%', changePositive: true, change7d: '+3.1%',
     volume24h: '0.09 ETH', holders: 4, progress: 8,
     image: '/convergence/img4.jpg',
-    description: 'Radio-wave aesthetics — the beautiful noise between stations. Ultra-early accumulation. The curve has barely moved, which is the point.',
+    description: 'Radio-wave aesthetics,the beautiful noise between stations. Ultra-early accumulation. The curve has barely moved, which is the point.',
     sparkline: [4, 4.1, 3.9, 4.3, 4.2, 4.4, 4.3, 4.5, 4.4, 4.6],
   },
   {
@@ -205,7 +205,7 @@ const ARTWORKS_MOCK: MarketArtwork[] = ([
     change24h: '+35.6%', changePositive: true, change7d: '+82.0%',
     volume24h: '5.44 ETH', holders: 38, progress: 74,
     image: '/convergence/img5.jpg',
-    description: 'The photographic residue of a 30-second exposure — city lights bleeding into dark matter. FOMO phase: each holder intensifies the luminosity.',
+    description: 'The photographic residue of a 30-second exposure,city lights bleeding into dark matter. FOMO phase: each holder intensifies the luminosity.',
     sparkline: [6, 5.8, 7.2, 8.9, 7.5, 10.2, 16.8, 22.4, 38.0, 89.0],
   },
   {
@@ -216,7 +216,7 @@ const ARTWORKS_MOCK: MarketArtwork[] = ([
     change24h: '+48.9%', changePositive: true, change7d: '+124.0%',
     volume24h: '9.20 ETH', holders: 44, progress: 91,
     image: '/convergence/img6.jpg',
-    description: 'Topographic maps of grief — contour lines that chart emotional elevation. Migration phase, 91% to graduation.',
+    description: 'Topographic maps of grief,contour lines that chart emotional elevation. Migration phase, 91% to graduation.',
     sparkline: [2, 2.5, 3.4, 5.8, 9.0, 16.0, 36.0, 76.0, 128.0, 147.0],
   },
   {
@@ -227,7 +227,7 @@ const ARTWORKS_MOCK: MarketArtwork[] = ([
     change24h: '+26.7%', changePositive: true, change7d: '+53.0%',
     volume24h: '3.08 ETH', holders: 27, progress: 63,
     image: '/convergence/img7.jpg',
-    description: "A painting of a painting of a painting — recursive self-reference rendered in oil. Chen's most ambitious work since Shattered Embrace.",
+    description: "A painting of a painting of a painting,recursive self-reference rendered in oil. Chen's most ambitious work since Shattered Embrace.",
     sparkline: [4, 4.8, 6.0, 5.2, 7.1, 9.4, 12.8, 17.5, 28.0, 52.2],
   },
   {
@@ -238,7 +238,7 @@ const ARTWORKS_MOCK: MarketArtwork[] = ([
     change24h: '+9.4%', changePositive: true, change7d: '+16.8%',
     volume24h: '0.88 ETH', holders: 14, progress: 42,
     image: '/convergence/img8.jpg',
-    description: 'The protocol of decay — algorithmic systems running toward maximum disorder. Accumulation phase: entropy is being priced in.',
+    description: 'The protocol of decay,algorithmic systems running toward maximum disorder. Accumulation phase: entropy is being priced in.',
     sparkline: [5, 5.3, 4.9, 5.8, 6.4, 6.1, 7.5, 8.8, 10.2, 12.4],
   },
   {
@@ -249,7 +249,7 @@ const ARTWORKS_MOCK: MarketArtwork[] = ([
     change24h: '+31.2%', changePositive: true, change7d: '+69.5%',
     volume24h: '4.65 ETH', holders: 35, progress: 71,
     image: '/convergence/img9.jpg',
-    description: 'The exact cartographic moment a ship crosses longitude zero — frozen in paint. Nakamura explores navigation as existential metaphor.',
+    description: 'The exact cartographic moment a ship crosses longitude zero,frozen in paint. Nakamura explores navigation as existential metaphor.',
     sparkline: [3, 4.2, 5.8, 4.9, 6.5, 8.2, 11.5, 16.8, 24.0, 43.2],
   },
   {
@@ -260,7 +260,7 @@ const ARTWORKS_MOCK: MarketArtwork[] = ([
     change24h: '+59.3%', changePositive: true, change7d: '+155.0%',
     volume24h: '16.10 ETH', holders: 58, progress: 96,
     image: '/convergence/img10.jpg',
-    description: "Mapping the territory that doesn't exist — Böcklin's late-period exploration of negative space and the cartography of absence. 96% to graduation.",
+    description: "Mapping the territory that doesn't exist,Böcklin's late-period exploration of negative space and the cartography of absence. 96% to graduation.",
     sparkline: [1, 1.6, 2.8, 5.5, 12.0, 28.0, 68.0, 142.0, 232.0, 278.0],
   },
   {
@@ -271,7 +271,7 @@ const ARTWORKS_MOCK: MarketArtwork[] = ([
     change24h: '+8.1%', changePositive: true, change7d: '+18.4%',
     volume24h: '0.94 ETH', holders: 16, progress: 38,
     image: '/images/artworks/art1.jpg',
-    description: 'Preserved in digital amber — moments of kinetic motion frozen at their most vivid. The bonding curve is finding its first collectors.',
+    description: 'Preserved in digital amber,moments of kinetic motion frozen at their most vivid. The bonding curve is finding its first collectors.',
     sparkline: [6, 6.4, 5.9, 7.1, 7.8, 7.3, 8.6, 9.5, 11.0, 12.8],
   },
   {
@@ -282,7 +282,7 @@ const ARTWORKS_MOCK: MarketArtwork[] = ([
     change24h: '+38.4%', changePositive: true, change7d: '+91.0%',
     volume24h: '6.12 ETH', holders: 41, progress: 76,
     image: '/images/artworks/art2.jpg',
-    description: 'The exact point where a material fails — rendered in hyper-detail. The fracture line between stability and collapse is exactly where the FOMO curve accelerates.',
+    description: 'The exact point where a material fails,rendered in hyper-detail. The fracture line between stability and collapse is exactly where the FOMO curve accelerates.',
     sparkline: [4, 5.1, 6.8, 5.4, 8.2, 11.0, 15.8, 22.5, 42.0, 79.4],
   },
   {
@@ -293,7 +293,7 @@ const ARTWORKS_MOCK: MarketArtwork[] = ([
     change24h: '+4.2%', changePositive: true, change7d: '+7.0%',
     volume24h: '0.22 ETH', holders: 7, progress: 19,
     image: '/images/artworks/art4.jpg',
-    description: 'Long-exposure photography of a clockface — time rendered as smear. One of the most patient bonding curves on the platform. Early.',
+    description: 'Long-exposure photography of a clockface,time rendered as smear. One of the most patient bonding curves on the platform. Early.',
     sparkline: [5, 5.2, 4.8, 5.5, 5.3, 5.7, 5.9, 6.2, 6.5, 6.9],
   },
   {
@@ -304,7 +304,7 @@ const ARTWORKS_MOCK: MarketArtwork[] = ([
     change24h: '+55.1%', changePositive: true, change7d: '+141.0%',
     volume24h: '13.20 ETH', holders: 50, progress: 93,
     image: '/images/artworks/art5.jpg',
-    description: 'Sacred geometries that govern — forms that predate language. Migration phase, 93% complete. The curve approaches its final inflection.',
+    description: 'Sacred geometries that govern,forms that predate language. Migration phase, 93% complete. The curve approaches its final inflection.',
     sparkline: [2, 2.6, 4.0, 8.0, 17.0, 42.0, 98.0, 154.0, 188.0, 199.0],
   },
   {
@@ -315,7 +315,7 @@ const ARTWORKS_MOCK: MarketArtwork[] = ([
     change24h: '+24.7%', changePositive: true, change7d: '+48.0%',
     volume24h: '2.66 ETH', holders: 25, progress: 60,
     image: '/convergence/img3.jpg',
-    description: "Vasquez explores the spectrum of mourning — each colour a stage, each gradient a transition. The bonding curve mirrors the non-linearity of grief itself.",
+    description: "Vasquez explores the spectrum of mourning,each colour a stage, each gradient a transition. The bonding curve mirrors the non-linearity of grief itself.",
     sparkline: [3, 3.8, 5.0, 4.2, 6.1, 8.0, 11.5, 15.8, 26.0, 45.5],
   },
   {
@@ -326,7 +326,7 @@ const ARTWORKS_MOCK: MarketArtwork[] = ([
     change24h: '+30.5%', changePositive: true, change7d: '+67.2%',
     volume24h: '4.28 ETH', holders: 32, progress: 69,
     image: '/convergence/img7.jpg',
-    description: 'Buildings that absorb sound — spaces designed for contemplation. Sorokin documents structures that resist the noise of the modern city. High FOMO phase.',
+    description: 'Buildings that absorb sound,spaces designed for contemplation. Sorokin documents structures that resist the noise of the modern city. High FOMO phase.',
     sparkline: [5, 5.8, 7.5, 6.3, 9.1, 12.5, 17.0, 23.8, 38.5, 71.0],
   },
 ] as Omit<MarketArtwork, 'artworkId' | 'rating' | 'ratingCount'>[]).map((a, i) => ({
@@ -351,7 +351,7 @@ function adaptArtwork(artwork: Artwork, index: number): MarketArtwork {
     progress >= 50 ? 'FOMO' :
                      'Accumulation'
 
-  // Resolve IPFS image to HTTPS gateway — prefer image_uri (direct), fallback ipfs_metadata_uri
+  // Resolve IPFS image to HTTPS gateway,prefer image_uri (direct), fallback ipfs_metadata_uri
   const rawImg = artwork.image_uri ?? artwork.ipfs_metadata_uri ?? ''
   const image  = rawImg.startsWith('ipfs://')
     ? `https://gateway.pinata.cloud/ipfs/${rawImg.replace('ipfs://', '')}`
@@ -374,10 +374,10 @@ function adaptArtwork(artwork: Artwork, index: number): MarketArtwork {
     phaseColor:     PHASE_COLOR[phase],
     marketCap:      mc,
     marketCapLabel: `${mc.toFixed(4)} ETH`,
-    change24h:      '—',
+    change24h:      '-',
     changePositive: true,
-    change7d:       '—',
-    volume24h:      '—',
+    change7d:       '-',
+    volume24h:      '-',
     holders:        0,
     progress,
     image,
@@ -402,7 +402,7 @@ const PHASE_TABS: { key: Phase | 'All'; label: string }[] = [
 // ── Price / percentage formatters ────────────────────────────────
 /** Smart ETH formatter: 0.003 → "0.003", 1234.5 → "1.23k", 1.2M → "1.20M" */
 function fmtETH(v: number): string {
-  if (!isFinite(v) || isNaN(v)) return '—'
+  if (!isFinite(v) || isNaN(v)) return '-'
   if (v >= 1e9)  return `${(v / 1e9).toFixed(2)}B`
   if (v >= 1e6)  return `${(v / 1e6).toFixed(2)}M`
   if (v >= 1e3)  return `${(v / 1e3).toFixed(2)}k`
@@ -410,9 +410,9 @@ function fmtETH(v: number): string {
   if (v >= 10)   return v.toFixed(2)
   return v.toFixed(3)
 }
-/** Smart % formatter — handles astronomical values gracefully */
+/** Smart % formatter,handles astronomical values gracefully */
 function fmtPct(pct: number): string {
-  if (!isFinite(pct) || isNaN(pct)) return '—'
+  if (!isFinite(pct) || isNaN(pct)) return '-'
   const sign = pct >= 0 ? '+' : ''
   const abs  = Math.abs(pct)
   if (abs >= 1e9) return `${sign}${(pct / 1e9).toFixed(1)}B%`
@@ -460,7 +460,7 @@ const FAKE_WALLETS = [
 
 // ── Animated background chart for the Command Center header ──────
 //
-//  Jagged price-chart aesthetic (gập khúc) — sparse angular points,
+//  Jagged price-chart aesthetic (gập khúc),sparse angular points,
 //  straight L commands only, no bezier smoothing.
 //  Seamless loop: mainPts[0].y === mainPts[last].y (both = 45)
 //                 accentPts[0].y === accentPts[last].y (both = 52)
@@ -509,7 +509,7 @@ function HeaderChartBg() {
       [1200, 42],  // +14  ← = open ⟹ seamless ✓
     ]
 
-    // ── Accent line: white ghost — same rule, different rhythm ────
+    // ── Accent line: white ghost,same rule, different rhythm ────
     // First Y = Last Y = 52 ⟹ seamless tile
     const accentPts: [number, number][] = [
       [0,    52],
@@ -554,7 +554,7 @@ function HeaderChartBg() {
       areaD:   `${mainStr} L${W},${H} L0,${H} Z`,
       accentD: toD(accentPts),
     }
-  }, [])  // deps [] — deterministic, runs once
+  }, [])  // deps [],deterministic, runs once
 
   return (
     <div
@@ -614,7 +614,7 @@ function HeaderChartBg() {
   )
 }
 
-// ── Scrolling trade ticker tape — Binance realtime ────────────────
+// ── Scrolling trade ticker tape,Binance realtime ────────────────
 function TickerTape() {
   const { ticks, connected } = useBinanceTicker()
 
@@ -625,7 +625,7 @@ function TickerTape() {
       symbol:   coin.symbol,
       name:     coin.name,
       price:    t ? fmtUSD(t.price)     : '…',
-      change:   t ? fmtChange(t.change) : '—',
+      change:   t ? fmtChange(t.change) : '-',
       positive: t ? t.change >= 0       : true,
     }
   })
@@ -962,7 +962,7 @@ function ArtworkWithChart({
         draggable={false}
       />
 
-      {/* Phase badge — top left */}
+      {/* Phase badge,top left */}
       <div
         className="absolute top-3 left-3 z-10 flex items-center gap-1.5 px-2 py-1
                    text-[9px] tracking-[0.24em] uppercase font-medium"
@@ -976,7 +976,7 @@ function ArtworkWithChart({
         {art.phase}
       </div>
 
-      {/* 24h badge — top right */}
+      {/* 24h badge,top right */}
       <div
         className="absolute top-3 right-3 z-10 px-2 py-1 font-mono text-[10px] font-semibold"
         style={{
@@ -988,7 +988,7 @@ function ArtworkWithChart({
         {art.change24h}
       </div>
 
-      {/* Bottom gradient — deepens when chart is expanded */}
+      {/* Bottom gradient,deepens when chart is expanded */}
       <div
         className="absolute inset-x-0 bottom-0 pointer-events-none"
         style={{
@@ -998,7 +998,7 @@ function ArtworkWithChart({
         }}
       />
 
-      {/* Sparkline chart — slides up from bottom on hover */}
+      {/* Sparkline chart,slides up from bottom on hover */}
       <div
         className="absolute inset-x-0 bottom-0 pointer-events-none overflow-hidden"
         style={{
@@ -1076,7 +1076,7 @@ function ArtworkWithChart({
   )
 }
 
-// ── Tiny pure-SVG sparkline — used when chart is collapsed (h ≤ 60) ──
+// ── Tiny pure-SVG sparkline,used when chart is collapsed (h ≤ 60) ──
 //  No ApexCharts overhead; instant render with a glow line + end dot.
 function MiniSparkline({ art, height }: { art: MarketArtwork; height: number }) {
   const W = 800
@@ -1132,7 +1132,7 @@ function MiniSparkline({ art, height }: { art: MarketArtwork; height: number }) 
   )
 }
 
-// ── Bonding curve chart — candlestick via ApexCharts (full) ──────
+// ── Bonding curve chart,candlestick via ApexCharts (full) ──────
 //  Falls back to pure-SVG MiniSparkline when height ≤ 60 to avoid
 //  a half-rendered ApexCharts instance in the collapsed state.
 function BondingCurveChart({
@@ -1195,8 +1195,8 @@ function useRankTraces(
   }, [artworks, priceHistory])
 }
 
-// ── SVG chart body — pure, no header chrome ──────────────────────
-// ── SVG-only lines (no circles — avoids preserveAspectRatio distortion) ──
+// ── SVG chart body,pure, no header chrome ──────────────────────
+// ── SVG-only lines (no circles,avoids preserveAspectRatio distortion) ──
 //  svgH must equal the container's actual pixel height so viewBox matches.
 function RankTimelineSVG({
   traces, ticks, N, highlightIds, svgH,
@@ -1270,7 +1270,7 @@ function RankTimelineSVG({
   )
 }
 
-// ── HTML avatar column — plain DOM elements, zero distortion ─────
+// ── HTML avatar column,plain DOM elements, zero distortion ─────
 //  Positioned absolutely on the right side of the chart container.
 //  Each artwork's thumbnail sits exactly at its current rank lane.
 function RankAvatarColumn({
@@ -1532,7 +1532,7 @@ function RankTimelineFullscreen({
           className="flex flex-col min-h-0"
           style={{ width: selectedArt ? '55%' : '100%', transition: 'width 0.3s ease', borderRight: selectedArt ? '1px solid rgba(255,255,255,0.06)' : 'none' }}
         >
-          {/* SVG chart — fills available height */}
+          {/* SVG chart,fills available height */}
           <div ref={chartRef} className="flex-1 min-h-0 relative" style={{ background: 'rgba(0,0,0,0.15)' }}>
             {/* Y-axis labels */}
             <div className="absolute top-0 bottom-0 flex flex-col justify-between py-4 pointer-events-none"
@@ -1548,7 +1548,7 @@ function RankTimelineFullscreen({
             <RankAvatarColumn traces={traces} N={N} svgH={svgH} highlightIds={selectedIds} avatarSize={22} />
           </div>
 
-          {/* Legend grid — scrollable */}
+          {/* Legend grid,scrollable */}
           <div
             className="shrink-0 overflow-y-auto p-3"
             style={{
@@ -1624,7 +1624,7 @@ function RankTimelineFullscreen({
           </div>
         </div>
 
-        {/* Right panel — single view OR comparison view */}
+        {/* Right panel,single view OR comparison view */}
         <AnimatePresence mode="wait">
           {selectedIds.length === 1 && selectedArt && (
             /* ── SINGLE VIEW ─────────────────────────────────────── */
@@ -1789,7 +1789,7 @@ function RankTimelineFullscreen({
                   <span className="text-right">Rank</span>
                 </div>
 
-                {/* Rows — sorted by live price desc */}
+                {/* Rows,sorted by live price desc */}
                 {artworks
                   .filter(a => selectedIds.includes(a.id))
                   .sort((a, b) => (livePrices[b.id] ?? b.marketCap) - (livePrices[a.id] ?? a.marketCap))
@@ -1954,7 +1954,7 @@ function RaceBar({
         </p>
       </div>
 
-      {/* Progress bar — animated width */}
+      {/* Progress bar,animated width */}
       <div className="flex-1 flex items-center gap-2.5">
         <div
           className="h-[4px] flex-1 overflow-hidden rounded-full"
@@ -2088,7 +2088,7 @@ function ListItem({
   const liveUp       = liveDelta >= 0
   const liveDeltaStr = fmtPct(liveDelta)
 
-  // Mini sparkline helper (inline — no external dep needed)
+  // Mini sparkline helper (inline,no external dep needed)
   const sparkW = hovered ? 72 : 40
   const sparkH = hovered ? 28 : 16
   const { d: sd, areaD: sad } = useMemo(() => {
@@ -2175,7 +2175,7 @@ function ListItem({
         </p>
       </div>
 
-      {/* ── Mini sparkline — small by default, expands on row hover ── */}
+      {/* ── Mini sparkline,small by default, expands on row hover ── */}
       <div
         className="shrink-0 overflow-hidden"
         style={{
@@ -2209,7 +2209,7 @@ function StarRating({ value, count }: { value: number | null; count: number }) {
 
   return (
     <div className="flex items-center gap-2">
-      {/* 5 stars — all grey when no rating */}
+      {/* 5 stars,all grey when no rating */}
       <svg width={5 * 14 + 4 * 2} height={13} viewBox={`0 0 ${5 * 14 + 4 * 2} 13`} fill="none">
         <defs>
           {partial > 0 && (
@@ -2239,7 +2239,7 @@ function StarRating({ value, count }: { value: number | null; count: number }) {
         })}
       </svg>
 
-      {/* Numeric — show "—" when no reviews yet */}
+      {/* Numeric,show "—" when no reviews yet */}
       {value != null ? (
         <>
           <span className="font-mono text-[13px] font-medium" style={{ color: '#D4AF37' }}>
@@ -2323,7 +2323,7 @@ function InspectionDeck({
         {/* ── Top Half: Art + Typography ── */}
         <div className="flex gap-6">
 
-          {/* Left: Artwork — click to lightbox, hover to 3-D tilt */}
+          {/* Left: Artwork,click to lightbox, hover to 3-D tilt */}
           <div
             className="w-1/2 shrink-0 cursor-zoom-in"
             onMouseMove={handleTiltMove}
@@ -2418,7 +2418,7 @@ function InspectionDeck({
               ))}
             </div>
 
-            {/* View Detail & Reviews — right below stats */}
+            {/* View Detail & Reviews,right below stats */}
             <Link
               href={`/artwork/${art.artworkId || `mock-${art.id}`}`}
               onClick={() => {
@@ -2499,7 +2499,7 @@ function InspectionDeck({
             ))}
           </div>
 
-          {/* Bonding curve chart + timeframe switcher — always expanded */}
+          {/* Bonding curve chart + timeframe switcher,always expanded */}
           <div>
             <div className="flex items-center justify-between mb-2.5">
               <p
@@ -2566,7 +2566,7 @@ function InspectionDeck({
             onMouseEnter={e => (e.currentTarget.style.backgroundPosition = '100% 0')}
             onMouseLeave={e => (e.currentTarget.style.backgroundPosition = '0% 0')}
           >
-            {t.common.buy} {art.ticker} — {fmtETH(livePrice)} ETH
+            {t.common.buy} {art.ticker},{fmtETH(livePrice)} ETH
           </button>
 
           <p className="text-center font-mono text-[8px] tracking-[0.14em] uppercase"
@@ -2715,7 +2715,7 @@ function BuyModal({ art, livePrice, onClose }: { art: MarketArtwork; livePrice: 
                 onMouseEnter={e => (e.currentTarget.style.opacity = '0.9')}
                 onMouseLeave={e => (e.currentTarget.style.opacity = '1')}
               >
-                BUY {buyAmount} — {art.ticker}
+                BUY {buyAmount},{art.ticker}
               </button>
             </>
           )}
@@ -2870,9 +2870,9 @@ export function MarketplacePage() {
   }, [_apiArtworks])
 
   // ── Three-tier price simulation ────────────────────────────────
-  //  Tier 1 — micro tick every 2.4s: ±5%  (UI noise, no rank change)
-  //  Tier 2 — spike event every 4.5s: +20% to +130% (causes rank jumps)
-  //  Tier 3 — mean-reversion every 9s: pulls price back toward seed × 4
+  //  Tier 1,micro tick every 2.4s: ±5%  (UI noise, no rank change)
+  //  Tier 2,spike event every 4.5s: +20% to +130% (causes rank jumps)
+  //  Tier 3,mean-reversion every 9s: pulls price back toward seed × 4
   //  Cap: no artwork exceeds 20× its seed marketCap
   const MAX_MULT = 20
   useEffect(() => {
@@ -2886,7 +2886,7 @@ export function MarketplacePage() {
     const cap = (id: number, raw: number) =>
       Math.min(raw, (ARTWORKS.find(a => a.id === id)?.marketCap ?? raw) * MAX_MULT)
 
-    // Tier 1: small ticks — visual activity only
+    // Tier 1: small ticks,visual activity only
     const microTimer = setInterval(() => {
       const art   = ARTWORKS[Math.floor(Math.random() * ARTWORKS.length)]
       const delta = 1 + (Math.random() * 0.08 - 0.03) // -3% to +5%
@@ -2897,7 +2897,7 @@ export function MarketplacePage() {
       doFlash(art.id, 600)
     }, 2400)
 
-    // Tier 2: spike events — cause visible rank changes
+    // Tier 2: spike events,cause visible rank changes
     const spikeTimer = setInterval(() => {
       const art   = ARTWORKS[Math.floor(Math.random() * ARTWORKS.length)]
       const spike = 1 + (Math.random() * 1.1 + 0.20) // +20% to +130%
@@ -2908,7 +2908,7 @@ export function MarketplacePage() {
       doFlash(art.id, 1200)
     }, 4500)
 
-    // Tier 3: mean-reversion — gently pull capped artwork back toward seed × 4
+    // Tier 3: mean-reversion,gently pull capped artwork back toward seed × 4
     const reversionTimer = setInterval(() => {
       setLivePrices(prev => {
         const next = { ...prev }
@@ -2988,7 +2988,7 @@ export function MarketplacePage() {
   }, [livePrices])
 
   // Auto-follow rank-1: when the top-ranked item changes, snap the right
-  // panel to it — unless the user manually picked something in the last 12 s.
+  // panel to it,unless the user manually picked something in the last 12 s.
   const top1Id = filtered[0]?.id
   useEffect(() => {
     if (top1Id == null || userPickedRef.current) return
@@ -2999,7 +2999,7 @@ export function MarketplacePage() {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [top1Id])
 
-  // ── Auto-rotation — cycles every ROTATE_MS, pauses on hover ──
+  // ── Auto-rotation,cycles every ROTATE_MS, pauses on hover ──
   useEffect(() => {
     if (listHovered || filtered.length <= 1) {
       setNextId(null)
@@ -3051,7 +3051,7 @@ export function MarketplacePage() {
     resumeTimer.current = setTimeout(() => setListHovered(false), 2000)
   }, [])
 
-  // Phase counts — ARTWORKS in deps so counts update when API data arrives
+  // Phase counts,ARTWORKS in deps so counts update when API data arrives
   const counts = useMemo(() => ({
     All:          ARTWORKS.length,
     Accumulation: ARTWORKS.filter(a => a.phase === 'Accumulation').length,
@@ -3083,7 +3083,7 @@ export function MarketplacePage() {
     return () => { clearTimeout(t); document.removeEventListener('mousedown', h) }
   }, [sortOpen])
 
-  // Manual select — stops auto-rotate briefly + pauses top-1 auto-follow 12 s
+  // Manual select,stops auto-rotate briefly + pauses top-1 auto-follow 12 s
   const handleSelect = (art: MarketArtwork) => {
     setSelected(art)
     setListHovered(true)
@@ -3119,7 +3119,7 @@ export function MarketplacePage() {
           {/* Animated background chart */}
           <HeaderChartBg />
 
-          {/* Content — above the background */}
+          {/* Content,above the background */}
           <div className="relative z-10 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
             <div>
               <h1
@@ -3180,7 +3180,7 @@ export function MarketplacePage() {
             height:       48,
           }}
         >
-          {/* Phase tabs — dimmed when RACE mode is active */}
+          {/* Phase tabs,dimmed when RACE mode is active */}
           <div
             className="flex items-center h-full overflow-x-auto"
             style={{
@@ -3228,7 +3228,7 @@ export function MarketplacePage() {
             })}
           </div>
 
-          {/* Race view toggle — separator + RACE button */}
+          {/* Race view toggle,separator + RACE button */}
           <div className="h-4 w-px mx-1 shrink-0"
             style={{ background: 'rgba(255,255,255,0.1)' }}/>
           <button
@@ -3310,7 +3310,7 @@ export function MarketplacePage() {
                         onClick={() => {
                           setSortKey(s.key)
                           setSortOpen(false)
-                          // Propagate to API — map UI sort keys to backend sortBy param
+                          // Propagate to API,map UI sort keys to backend sortBy param
                           const apiSort = s.key === 'newest' ? 'created_at'
                             : s.key === 'price_asc' || s.key === 'price_desc' ? 'price'
                             : 'created_at'
@@ -3398,7 +3398,7 @@ export function MarketplacePage() {
               scrollbarColor: 'rgba(212,175,55,0.15) transparent',
             }}
           >
-            {/* List header — sticky at top of this scroll container */}
+            {/* List header,sticky at top of this scroll container */}
             <div
               className="grid gap-3 sticky z-10 px-4 py-2"
               style={{

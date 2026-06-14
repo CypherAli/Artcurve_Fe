@@ -711,7 +711,7 @@ export function StudioPage() {
       if (s.id === 'wallet')
         return { ...s, status: isConnected ? 'done' : 'error', note: isConnected && shortAddr ? `${shortAddr} connected` : t.studio.notConnected } as Step
       if (s.id === 'gas')
-        return { ...s, status: isConnected && ethBal >= 0.005 ? 'done' : 'error', note: isConnected ? `${ethBal.toFixed(4)} ETH available` : '—' } as Step
+        return { ...s, status: isConnected && ethBal >= 0.005 ? 'done' : 'error', note: isConnected ? `${ethBal.toFixed(4)} ETH available` : '-' } as Step
       if (s.id === 'deploy')
         return { ...s, status: modStatus==='approved'?'active':'pending' } as Step
       return s as Step

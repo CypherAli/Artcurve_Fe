@@ -40,7 +40,7 @@ interface Item {
 const ALL_ITEMS: Item[] = [
   {
     id:'s1', type:'live', artist:'Soo-ah Kim', handle:'soo_ah.eth', verified:true,
-    title:'Pale Architecture — panel 3, oil on canvas · live from the studio',
+    title:'Pale Architecture,panel 3, oil on canvas · live from the studio',
     ticker:'$PALE', category:'Painting', viewers:3420, liveFor:'1h 23m', marketCap:'$84.2K',
     color:'#a78bfa', glow1:'rgba(139,92,246,0.38)', glow2:'rgba(91,33,182,0.20)',
     base:'linear-gradient(158deg,#09091e 0%,#0f0f2a 60%,#0a0a1c 100%)',
@@ -48,7 +48,7 @@ const ALL_ITEMS: Item[] = [
   },
   {
     id:'s2', type:'live', artist:'Marcus Adler', handle:'markus.eth', verified:true,
-    title:'Threshold Fragment — oil painting, live session from Berlin',
+    title:'Threshold Fragment,oil painting, live session from Berlin',
     ticker:'$THRESH', category:'Painting', viewers:1890, liveFor:'42m', marketCap:'$31.5K',
     color:'#f87171', glow1:'rgba(239,68,68,0.32)', glow2:'rgba(185,28,28,0.16)',
     base:'linear-gradient(158deg,#1a0808 0%,#220d0d 60%,#160606 100%)',
@@ -56,7 +56,7 @@ const ALL_ITEMS: Item[] = [
   },
   {
     id:'s3', type:'live', artist:'Aiko Tanaka', handle:'aiko.base', verified:false,
-    title:'Generative Bloom — live coding in p5.js, open canvas session',
+    title:'Generative Bloom,live coding in p5.js, open canvas session',
     ticker:'$BLOOM', category:'Digital', viewers:970, liveFor:'18m', marketCap:'$4.1K',
     color:'#4ade80', glow1:'rgba(74,222,128,0.28)', glow2:'rgba(22,163,74,0.15)',
     base:'linear-gradient(158deg,#040f08 0%,#07180d 60%,#040d07 100%)',
@@ -64,7 +64,7 @@ const ALL_ITEMS: Item[] = [
   },
   {
     id:'s4', type:'live', artist:'Böcklin', handle:'böcklin.eth', verified:true,
-    title:'Self-Portrait with Death — oil reinterpretation, live commentary',
+    title:'Self-Portrait with Death,oil reinterpretation, live commentary',
     ticker:'$BÖCKLIN', category:'Drawing', viewers:2340, liveFor:'3h 1m', marketCap:'$18.2K',
     color:'#D4AF37', glow1:'rgba(212,175,55,0.30)', glow2:'rgba(161,120,24,0.15)',
     base:'linear-gradient(158deg,#0f0a03 0%,#180f05 60%,#0d0903 100%)',
@@ -72,7 +72,7 @@ const ALL_ITEMS: Item[] = [
   },
   {
     id:'s5', type:'live', artist:'Lena Volkov', handle:'lena_v.base', verified:false,
-    title:'Dissolution Study No.4 — charcoal & shadow, watching the process',
+    title:'Dissolution Study No.4,charcoal & shadow, watching the process',
     ticker:'$DISS', category:'Drawing', viewers:560, liveFor:'31m', marketCap:'$3.9K',
     color:'#60a5fa', glow1:'rgba(96,165,250,0.25)', glow2:'rgba(37,99,235,0.12)',
     base:'linear-gradient(158deg,#050810 0%,#080c18 60%,#050810 100%)',
@@ -80,7 +80,7 @@ const ALL_ITEMS: Item[] = [
   },
   {
     id:'s6', type:'live', artist:'Ivan Sorokin', handle:'ivan_sorokin.eth', verified:true,
-    title:'Nocturne at the Bridge — watercolor session, live from Warsaw',
+    title:'Nocturne at the Bridge,watercolor session, live from Warsaw',
     ticker:'$NOCTURNE', category:'Painting', viewers:1430, liveFor:'2h 7m', marketCap:'$2.4K',
     color:'#38bdf8', glow1:'rgba(56,189,248,0.28)', glow2:'rgba(14,116,144,0.14)',
     base:'linear-gradient(158deg,#030c14 0%,#05121e 60%,#030c14 100%)',
@@ -88,7 +88,7 @@ const ALL_ITEMS: Item[] = [
   },
   {
     id:'s7', type:'live', artist:'Yui Nakamura', handle:'yui_n.base', verified:false,
-    title:'Amber Protocol — abstract mixed media experiment',
+    title:'Amber Protocol,abstract mixed media experiment',
     ticker:'$AMBER', category:'Mixed Media', viewers:780, liveFor:'55m', marketCap:'$3.2K',
     color:'#fb923c', glow1:'rgba(251,146,60,0.28)', glow2:'rgba(194,65,12,0.14)',
     base:'linear-gradient(158deg,#100804 0%,#180f05 60%,#100804 100%)',
@@ -96,7 +96,7 @@ const ALL_ITEMS: Item[] = [
   },
   {
     id:'s8', type:'live', artist:'Paulo Rodrigues', handle:'paulo_r.base', verified:false,
-    title:'Convergence I — live sculpture, clay session vol.3',
+    title:'Convergence I,live sculpture, clay session vol.3',
     ticker:'$CONV1', category:'Sculpture', viewers:410, liveFor:'22m', marketCap:'$1.3K',
     color:'#94a3b8', glow1:'rgba(148,163,184,0.20)', glow2:'rgba(71,85,105,0.12)',
     base:'linear-gradient(158deg,#080a0e 0%,#0c0f14 60%,#080a0e 100%)',
@@ -104,7 +104,7 @@ const ALL_ITEMS: Item[] = [
   },
   {
     id:'v1', type:'video', artist:'Böcklin', handle:'böcklin.eth', verified:true,
-    title:'Self-Portrait with Death — full 4-hour process timelapse',
+    title:'Self-Portrait with Death,full 4-hour process timelapse',
     ticker:'$BÖCKLIN', category:'Painting',
     views:'12.4K', duration:'4:02:11', uploadedAt:'3 days ago', marketCap:'$18.2K',
     color:'#D4AF37', glow1:'rgba(212,175,55,0.30)', glow2:'rgba(161,120,24,0.15)',
@@ -112,7 +112,7 @@ const ALL_ITEMS: Item[] = [
   },
   {
     id:'v2', type:'video', artist:'Lena Volkov', handle:'lena_v.base', verified:false,
-    title:'Dissolution Study No.1 — charcoal technique full walkthrough',
+    title:'Dissolution Study No.1,charcoal technique full walkthrough',
     ticker:'$DISS', category:'Drawing',
     views:'5.8K', duration:'38:22', uploadedAt:'1 week ago', marketCap:'$3.9K',
     color:'#60a5fa', glow1:'rgba(96,165,250,0.25)', glow2:'rgba(37,99,235,0.12)',
@@ -120,7 +120,7 @@ const ALL_ITEMS: Item[] = [
   },
   {
     id:'v3', type:'video', artist:'Ivan Sorokin', handle:'ivan_sorokin.eth', verified:true,
-    title:'Nocturne at the Bridge — full watercolor, sketch to finish',
+    title:'Nocturne at the Bridge,full watercolor, sketch to finish',
     ticker:'$NOCTURNE', category:'Painting',
     views:'8.1K', duration:'1:14:39', uploadedAt:'2 days ago', marketCap:'$2.4K',
     color:'#38bdf8', glow1:'rgba(56,189,248,0.28)', glow2:'rgba(14,116,144,0.14)',
@@ -128,7 +128,7 @@ const ALL_ITEMS: Item[] = [
   },
   {
     id:'v4', type:'video', artist:'Yui Nakamura', handle:'yui_n.base', verified:false,
-    title:'Amber Protocol — full process recording, mixed media on digital canvas',
+    title:'Amber Protocol,full process recording, mixed media on digital canvas',
     ticker:'$AMBER', category:'Mixed Media',
     views:'3.2K', duration:'55:40', uploadedAt:'5 days ago', marketCap:'$3.2K',
     color:'#fb923c', glow1:'rgba(251,146,60,0.28)', glow2:'rgba(194,65,12,0.14)',
@@ -136,7 +136,7 @@ const ALL_ITEMS: Item[] = [
   },
   {
     id:'v5', type:'video', artist:'Soo-ah Kim', handle:'soo_ah.eth', verified:true,
-    title:'Pale Architecture — panels 1 & 2 completed, full session recording',
+    title:'Pale Architecture,panels 1 & 2 completed, full session recording',
     ticker:'$PALE', category:'Painting',
     views:'9.7K', duration:'2:33:05', uploadedAt:'1 week ago', marketCap:'$84.2K',
     color:'#a78bfa', glow1:'rgba(139,92,246,0.38)', glow2:'rgba(91,33,182,0.20)',
@@ -144,7 +144,7 @@ const ALL_ITEMS: Item[] = [
   },
   {
     id:'v6', type:'video', artist:'Aiko Tanaka', handle:'aiko.base', verified:false,
-    title:'Generative Art Workshop — full 3-hour p5.js session recording',
+    title:'Generative Art Workshop,full 3-hour p5.js session recording',
     ticker:'$BLOOM', category:'Digital',
     views:'4.4K', duration:'3:01:18', uploadedAt:'3 days ago', marketCap:'$4.1K',
     color:'#4ade80', glow1:'rgba(74,222,128,0.28)', glow2:'rgba(22,163,74,0.15)',
@@ -155,7 +155,7 @@ const ALL_ITEMS: Item[] = [
 // Chips are computed from t inside LivePage
 
 // ─────────────────────────────────────────────────────────────────
-// Sidebar — items control chip filter, not page navigation
+// Sidebar,items control chip filter, not page navigation
 // Home   → chip "All"       (recommended feed like YT home)
 // Live   → chip "Live"      (live streams only)
 // Artists→ chip "Following" (channels you subscribed to)

@@ -17,7 +17,7 @@ export async function generateMetadata({
       if (name) {
         return {
           title: name,
-          description: `View "${name}" — bonding curve stats, collector reviews, and trading on ArtCurve.`,
+          description: `View "${name}" on ArtCurve. Bonding curve stats, collector reviews, and trading.`,
         }
       }
     }

@@ -44,7 +44,7 @@ export const metadata: Metadata = {
     process.env.NEXT_PUBLIC_SITE_URL ?? 'https://artcurve.io'
   ),
   title: {
-    default:  'ArtCurve — On-Chain Art Trading',
+    default:  'ArtCurve | On-Chain Art Trading',
     template: '%s | ArtCurve',
   },
   description: 'Trade fractionalised art on a bonding curve DEX. Discover, collect, and speculate on digital artworks tokenised on Base.',
@@ -55,13 +55,13 @@ export const metadata: Metadata = {
     locale:      'en_US',
     url:         'https://artcurve.io',
     siteName:    'ArtCurve',
-    title:       'ArtCurve — On-Chain Art Trading',
+    title:       'ArtCurve | On-Chain Art Trading',
     description: 'Trade fractionalised art on a bonding curve DEX on Base.',
     images: [{ url: '/og-image.png', width: 1200, height: 630, alt: 'ArtCurve' }],
   },
   twitter: {
     card:        'summary_large_image',
-    title:       'ArtCurve — On-Chain Art Trading',
+    title:       'ArtCurve | On-Chain Art Trading',
     description: 'Trade fractionalised art on a bonding curve DEX on Base.',
     images:      ['/og-image.png'],
   },

@@ -36,7 +36,7 @@ const MOCK_REVIEWS: Review[] = [
   {
     id: 'mock-1', artwork_id: 'mock', user_id: 'u1',
     interaction_type: 'COMMENT', rating: 5,
-    content: 'The interplay of light and shadow is extraordinary. This piece commands a presence that photographs cannot fully capture — an essential hold for any serious collector.',
+    content: 'The interplay of light and shadow is extraordinary. This piece commands a presence that photographs cannot fully capture. An essential hold for any serious collector.',
     created_at: new Date(Date.now() - 2 * 864e5).toISOString(),
     user: { wallet_address: '0x4f2a91b3c7d8e9f0', username: 'Elena V.', avatar_url: null },
   },
@@ -57,7 +57,7 @@ const MOCK_REVIEWS: Review[] = [
   {
     id: 'mock-4', artwork_id: 'mock', user_id: 'u4',
     interaction_type: 'COMMENT', rating: 5,
-    content: 'Bought in accumulation phase. The visual language is unlike anything on-chain right now — completely sui generis. Patient money wins.',
+    content: 'Bought in accumulation phase. The visual language is unlike anything on-chain right now, completely sui generis. Patient money wins.',
     created_at: new Date(Date.now() - 12 * 864e5).toISOString(),
     user: { wallet_address: '0x7e1b22c3d4e5f6a7', username: 'Aiko T.', avatar_url: null },
   },

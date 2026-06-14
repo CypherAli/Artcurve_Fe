@@ -774,9 +774,15 @@ export function Header({ dark = false }: HeaderProps) {
   const NAV_LINKS  = NAV_HREFS.map(({ key, href }) => ({ label: t.nav[key], href }))
 
   useEffect(() => {
-    const onScroll = () => setScrolled(window.scrollY > 80)
-    window.addEventListener('scroll', onScroll, { passive: true })
-    return () => window.removeEventListener('scroll', onScroll)
+    const sentinel = document.createElement('div')
+    sentinel.style.cssText = 'position:absolute;top:80px;height:1px;width:1px;pointer-events:none'
+    document.body.prepend(sentinel)
+    const obs = new IntersectionObserver(
+      ([e]) => setScrolled(!e.isIntersecting),
+      { threshold: 1 },
+    )
+    obs.observe(sentinel)
+    return () => { obs.disconnect(); sentinel.remove() }
   }, [])
 
   useEffect(() => {

@@ -96,7 +96,7 @@ function LinkedWalletsSection() {
       {wallets.map(w => (
         <Row key={w.id}
           label={`${w.wallet_address.slice(0, 8)}…${w.wallet_address.slice(-6)}`}
-          desc={w.label ?? (w.is_primary ? 'Primary — ví định danh tài khoản' : undefined)}>
+          desc={w.label ?? (w.is_primary ? 'Primary, ví định danh tài khoản' : undefined)}>
           {w.is_primary ? (
             <span className="text-[11px] font-mono px-3 py-1 rounded-full uppercase tracking-widest"
               style={{ background: 'rgba(201,169,110,0.1)', color: GOLD, border: `1px solid ${GOLD}33` }}>

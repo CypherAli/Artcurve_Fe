@@ -131,7 +131,7 @@ export function HeroSection() {
         relative z-10 flex flex-col justify-center
         w-full md:w-[52%] shrink-0
         px-6 md:px-12 lg:px-20 xl:px-28
-        pt-28 pb-20
+        pt-24 pb-20
       ">
 
         {/* Eyebrow */}

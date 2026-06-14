@@ -14,12 +14,12 @@ const GOLD = '#C9A96E'
 // ── Helpers ──────────────────────────────────────────────────────────
 
 function fmt(n: number | null, decimals = 4) {
-  if (n === null) return '—'
+  if (n === null) return '-'
   return n.toFixed(decimals)
 }
 
 function fmtPct(n: number | null) {
-  if (n === null) return '—'
+  if (n === null) return '-'
   return `${n >= 0 ? '+' : ''}${n.toFixed(2)}%`
 }
 
@@ -385,20 +385,20 @@ export function WalletPage() {
       <div className="wpage-item grid grid-cols-2 md:grid-cols-4 gap-3 mb-6">
         <StatCard
           label={t.wallet.ethBalance}
-          value={ethRaw !== null ? `${fmt(ethRaw, 4)} ETH` : '—'}
+          value={ethRaw !== null ? `${fmt(ethRaw, 4)} ETH` : '-'}
           sub={ethRaw !== null && ethRaw > 0 ? `≈ $${(ethRaw * 3420).toLocaleString('en', { maximumFractionDigits: 0 })}` : isConnected ? t.wallet.emptyWallet : t.wallet.walletNotConnected}
           highlight={ethRaw !== null && ethRaw > 0}
           icon={<svg viewBox="0 0 24 24" className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="1.7"><path d="M12 2L2 12l10 10 10-10L12 2z" strokeLinecap="round" strokeLinejoin="round"/><path d="M12 6v12M6 12h12" strokeLinecap="round"/></svg>}
         />
         <StatCard
           label={t.wallet.portfolio}
-          value={totalValue !== null ? `${fmt(totalValue, 4)} ETH` : pfLoading ? '...' : '—'}
+          value={totalValue !== null ? `${fmt(totalValue, 4)} ETH` : pfLoading ? '...' : '-'}
           sub={holdings.length > 0 ? (holdings.length === 1 ? t.wallet.holdingsCount.replace('{count}', '1') : t.wallet.holdingsCountPlural.replace('{count}', String(holdings.length))) : t.wallet.noPositions}
           icon={<svg viewBox="0 0 24 24" className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="1.7"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2" strokeLinecap="round"/></svg>}
         />
         <StatCard
           label={t.wallet.network}
-          value={chain?.name ?? (isAuthenticated ? 'Base Sepolia' : '—')}
+          value={chain?.name ?? (isAuthenticated ? 'Base Sepolia' : '-')}
           sub={chain ? `Chain ID ${chain.id}` : 'Testnet'}
           icon={<svg viewBox="0 0 24 24" className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="1.7"><circle cx="12" cy="12" r="10"/><path d="M2 12h20M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z" strokeLinecap="round"/></svg>}
         />
@@ -609,7 +609,7 @@ export function WalletPage() {
             },
             {
               label: t.wallet.userId,
-              value: user?.id ?? '—',
+              value: user?.id ?? '-',
               mono: true,
               ok: true,
             },

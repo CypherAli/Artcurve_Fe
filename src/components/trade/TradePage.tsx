@@ -145,7 +145,7 @@ function adaptTradeArtwork(artwork: Artwork, index: number): TradeArtwork {
 //  Utilities
 // ─────────────────────────────────────────────────────────────────
 function fmtETH(v: number): string {
-  if (!isFinite(v) || isNaN(v)) return '—'
+  if (!isFinite(v) || isNaN(v)) return '-'
   if (v >= 1e9)  return `${(v/1e9).toFixed(2)}B`
   if (v >= 1e6)  return `${(v/1e6).toFixed(2)}M`
   if (v >= 1e3)  return `${(v/1e3).toFixed(2)}k`
@@ -155,7 +155,7 @@ function fmtETH(v: number): string {
 }
 
 function fmtPct(pct: number): string {
-  if (!isFinite(pct) || isNaN(pct)) return '—'
+  if (!isFinite(pct) || isNaN(pct)) return '-'
   const sign = pct >= 0 ? '+' : ''
   const abs  = Math.abs(pct)
   if (abs >= 1e6) return `${sign}${(pct/1e6).toFixed(1)}M%`
@@ -1025,8 +1025,8 @@ function TradePanel({ art, livePrice }: { art:TradeArtwork; livePrice:number }) 
                 style={{ background:'rgba(74,222,128,0.03)', border:'1px solid rgba(74,222,128,0.08)' }}>
                 {[
                   { label:t.trade.price,        value: quoteFetching ? '…' : `${fmtETH(quote?.pricePerToken ?? livePrice)} ETH` },
-                  { label:t.trade.impact,        value: quoteFetching ? '…' : (ethAmt>0?`${buyImpact.toFixed(2)}%`:'—'), color:impactColor },
-                  { label:t.trade.minOut,        value: quoteFetching ? '…' : (tokensOut>0?`${minReceived.toFixed(3)} ${art.ticker}`:'—') },
+                  { label:t.trade.impact,        value: quoteFetching ? '…' : (ethAmt>0?`${buyImpact.toFixed(2)}%`:'-'), color:impactColor },
+                  { label:t.trade.minOut,        value: quoteFetching ? '…' : (tokensOut>0?`${minReceived.toFixed(3)} ${art.ticker}`:'-') },
                 ].map(({ label, value, color }) => (
                   <div key={label} className="flex items-center justify-between">
                     <span className="font-mono text-[7px]" style={{ color:'rgba(255,255,255,0.22)' }}>{label}</span>
@@ -1122,8 +1122,8 @@ function TradePanel({ art, livePrice }: { art:TradeArtwork; livePrice:number }) 
                 style={{ background:'rgba(248,113,113,0.03)', border:'1px solid rgba(248,113,113,0.08)' }}>
                 {[
                   { label:t.trade.price,    value: quoteFetching ? '…' : `${fmtETH(quote?.pricePerToken ?? livePrice)} ETH` },
-                  { label:t.trade.impact,   value: quoteFetching ? '…' : (tokenAmt>0?`${sellImpact.toFixed(2)}%`:'—'), color:impactColor },
-                  { label:t.trade.minOut,   value: quoteFetching ? '…' : (ethOut>0?`${minEthOut.toFixed(4)} ETH`:'—') },
+                  { label:t.trade.impact,   value: quoteFetching ? '…' : (tokenAmt>0?`${sellImpact.toFixed(2)}%`:'-'), color:impactColor },
+                  { label:t.trade.minOut,   value: quoteFetching ? '…' : (ethOut>0?`${minEthOut.toFixed(4)} ETH`:'-') },
                 ].map(({ label, value, color }) => (
                   <div key={label} className="flex items-center justify-between">
                     <span className="font-mono text-[7px]" style={{ color:'rgba(255,255,255,0.22)' }}>{label}</span>
