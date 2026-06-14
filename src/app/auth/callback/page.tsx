@@ -27,68 +27,87 @@ function CallbackHandler() {
   const searchParams = useSearchParams()
 
   useEffect(() => {
-    const token   = searchParams.get('token')
-    const address = searchParams.get('address')
-    const name    = searchParams.get('name')
-    const avatar  = searchParams.get('avatar')
-    const error   = searchParams.get('auth_error')
+    const error = searchParams.get('auth_error')
+    const code  = searchParams.get('code')
 
-    if (error || !token || !address) {
+    if (error || !code) {
       router.replace('/?auth_error=1')
       return
     }
 
-    const tempUser = {
-      id:             address,
-      wallet_address: address,
-      username:       name ?? null,
-      avatar_url:     avatar || null,
-      role:           'user' as const,
-      is_verified:    false,
-    }
-
-    // Xóa token khỏi URL ngay lập tức — tránh JWT lộ qua browser history / Referer header
+    // Xóa code khỏi URL ngay lập tức — tránh lộ qua browser history
     if (typeof window !== 'undefined') {
       window.history.replaceState({}, '', '/auth/callback')
     }
 
-    // Sync both stores so http.ts (authStore) and UI (useAuthStore) both work
-    useAuthStore.getState().setAuth(token, tempUser)
-    authStore.setJwt(token)
-    authStore.setUser(tempUser)
+    // Exchange one-time code for JWT via backend
+    const BASE = (process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:3001/api/v1').replace(/\/$/, '')
 
-    // Hydrate with real UUID and full profile from backend
-    userService.me()
-      .then(profile => {
-        const fullUser = {
-          ...tempUser,
-          id:          profile.id,
-          avatar_url:  profile.avatar_url ?? tempUser.avatar_url,
-          username:    profile.username   ?? tempUser.username,
-          role:        profile.role       ?? tempUser.role,
-          is_verified: profile.is_verified ?? tempUser.is_verified,
-        }
-        useAuthStore.getState().setAuth(token, fullUser)
-        authStore.setUser(fullUser)
+    fetch(`${BASE}/auth/exchange`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ code }),
+    })
+      .then(async (res) => {
+        if (!res.ok) throw new Error('Exchange failed')
+        return res.json()
       })
-      .catch(() => { /* giữ nguyên tempUser nếu request fail */ })
+      .then((data: { access_token: string; address: string; name: string; avatar: string; provider: string }) => {
+        const token   = data.access_token
+        const address = data.address
+        const name    = data.name
+        const avatar  = data.avatar
+        const provider = data.provider
 
-    // Remember last social account for account picker in LoginModal
-    const provider = searchParams.get('provider') ?? 'github'
-    const storageKey =
-      provider === 'google'   ? 'artcurve_google_account'   :
-      provider === 'twitter'  ? 'artcurve_twitter_account'  :
-      provider === 'telegram' ? 'artcurve_telegram_account' :
-      provider === 'apple'    ? 'artcurve_apple_account'    :
-      'artcurve_github_account'
-    localStorage.setItem(storageKey, JSON.stringify({
-      username:   name ?? '',
-      avatar_url: avatar ?? '',
-    }))
+        const tempUser = {
+          id:             address,
+          wallet_address: address,
+          username:       name || null,
+          avatar_url:     avatar || null,
+          role:           'user' as const,
+          is_verified:    false,
+        }
 
-    const from = sessionStorage.getItem('auth_redirect') ?? '/marketplace'
-    sessionStorage.removeItem('auth_redirect')
-    router.replace(from)
+        // Sync both stores so http.ts (authStore) and UI (useAuthStore) both work
+        useAuthStore.getState().setAuth(token, tempUser)
+        authStore.setJwt(token)
+        authStore.setUser(tempUser)
+
+        // Hydrate with real UUID and full profile from backend
+        userService.me()
+          .then(profile => {
+            const fullUser = {
+              ...tempUser,
+              id:          profile.id,
+              avatar_url:  profile.avatar_url ?? tempUser.avatar_url,
+              username:    profile.username   ?? tempUser.username,
+              role:        profile.role       ?? tempUser.role,
+              is_verified: profile.is_verified ?? tempUser.is_verified,
+            }
+            useAuthStore.getState().setAuth(token, fullUser)
+            authStore.setUser(fullUser)
+          })
+          .catch(() => { /* giữ nguyên tempUser nếu request fail */ })
+
+        // Remember last social account for account picker in LoginModal
+        const storageKey =
+          provider === 'google'   ? 'artcurve_google_account'   :
+          provider === 'twitter'  ? 'artcurve_twitter_account'  :
+          provider === 'telegram' ? 'artcurve_telegram_account' :
+          provider === 'apple'    ? 'artcurve_apple_account'    :
+          'artcurve_github_account'
+        localStorage.setItem(storageKey, JSON.stringify({
+          username:   name ?? '',
+          avatar_url: avatar ?? '',
+        }))
+
+        const from = sessionStorage.getItem('auth_redirect') ?? '/marketplace'
+        sessionStorage.removeItem('auth_redirect')
+        router.replace(from)
+      })
+      .catch(() => {
+        router.replace('/?auth_error=exchange_failed')
+      })
   }, [searchParams, router])
 
   return <Spinner />
