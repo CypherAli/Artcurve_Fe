@@ -11,13 +11,13 @@ import { useLanguage } from '@/context/LanguageContext'
 
 const FEATURE_ICONS = [
   (
-    <svg width="32" height="32" viewBox="0 0 32 32" fill="none" aria-hidden="true">
+    <svg key="curve" width="32" height="32" viewBox="0 0 32 32" fill="none" aria-hidden="true">
       <path d="M4 24 C8 20, 12 8, 16 12 C20 16, 24 4, 28 8" stroke="#C9A96E" strokeWidth="1.5" strokeLinecap="round" fill="none"/>
       <circle cx="16" cy="12" r="2" fill="#C9A96E"/>
     </svg>
   ),
   (
-    <svg width="32" height="32" viewBox="0 0 32 32" fill="none" aria-hidden="true">
+    <svg key="doc" width="32" height="32" viewBox="0 0 32 32" fill="none" aria-hidden="true">
       <rect x="6" y="4" width="20" height="24" rx="2" stroke="#C9A96E" strokeWidth="1.5"/>
       <path d="M11 10h10M11 15h10M11 20h6" stroke="#C9A96E" strokeWidth="1.5" strokeLinecap="round"/>
       <circle cx="24" cy="24" r="5" fill="var(--ac-paper)" stroke="#C9A96E" strokeWidth="1.5"/>
@@ -25,7 +25,7 @@ const FEATURE_ICONS = [
     </svg>
   ),
   (
-    <svg width="32" height="32" viewBox="0 0 32 32" fill="none" aria-hidden="true">
+    <svg key="hex" width="32" height="32" viewBox="0 0 32 32" fill="none" aria-hidden="true">
       <path d="M16 4 L28 10 L28 22 L16 28 L4 22 L4 10 Z" stroke="#C9A96E" strokeWidth="1.5" fill="none"/>
       <path d="M16 4v24M4 10l12 6 12-6" stroke="#C9A96E" strokeWidth="1" strokeOpacity="0.4"/>
       <circle cx="16" cy="16" r="3" fill="#C9A96E" opacity="0.8"/>

@@ -235,26 +235,28 @@ function AllocationDonut({ holdings }: { holdings: Holding[] }) {
   const total = holdings.reduce((s, h) => s + h.qty * h.curPrice, 0)
   type Seg = { path: string; color: string; pct: number; ticker: string }
   const segments = useMemo<Seg[]>(() => {
-    let cum = -90
-    return holdings.map(h => {
+    const result: Seg[] = []
+    let offset = -90
+    for (const h of holdings) {
       const val = h.qty * h.curPrice
       const pct = val / total
       const angle = pct * 360
-      const start = cum
-      cum += angle
+      const start = offset
+      offset += angle
       const r = 44, cx = 56, cy = 56
       const x1 = cx + r * Math.cos((start * Math.PI) / 180)
       const y1 = cy + r * Math.sin((start * Math.PI) / 180)
       const x2 = cx + r * Math.cos(((start + angle) * Math.PI) / 180)
       const y2 = cy + r * Math.sin(((start + angle) * Math.PI) / 180)
       const large = angle > 180 ? 1 : 0
-      return {
+      result.push({
         path:   `M ${cx} ${cy} L ${x1} ${y1} A ${r} ${r} 0 ${large} 1 ${x2} ${y2} Z`,
         color:   PHASE_COLOR[h.phase],
         pct,
         ticker: h.ticker,
-      }
-    })
+      })
+    }
+    return result
   }, [holdings, total])
 
   return (

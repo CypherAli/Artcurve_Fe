@@ -36,13 +36,14 @@ function timeAgo(iso: string) {
 }
 
 function useDetectedAuthMethod(): { label: string; sub: string } {
-  const [method, setMethod] = useState({ label: 'Social login', sub: 'OAuth' })
-  useEffect(() => {
+  const [method] = useState(() => {
+    if (typeof window === 'undefined') return { label: 'Social login', sub: 'OAuth' }
     try {
-      if (localStorage.getItem('artcurve_github_account'))  setMethod({ label: 'GitHub OAuth',    sub: 'Social login' })
-      if (localStorage.getItem('artcurve_twitter_account')) setMethod({ label: 'X / Twitter',     sub: 'Social login' })
+      if (localStorage.getItem('artcurve_github_account'))  return { label: 'GitHub OAuth',    sub: 'Social login' }
+      if (localStorage.getItem('artcurve_twitter_account')) return { label: 'X / Twitter',     sub: 'Social login' }
     } catch { /* SSR */ }
-  }, [])
+    return { label: 'Social login', sub: 'OAuth' }
+  })
   return method
 }
 
@@ -531,7 +532,7 @@ export function WalletPage() {
                       e.currentTarget.style.borderColor = 'rgba(255,255,255,0.07)'
                       e.currentTarget.style.background  = 'rgba(255,255,255,0.03)'
                     }}>
-                    <WalletConnectorIcon name={connector.name} icon={(connector as any).icon ?? undefined} />
+                    <WalletConnectorIcon name={connector.name} icon={(connector as unknown as { icon?: string }).icon ?? undefined} />
                     <span className="flex-1 text-left text-[13.5px] font-medium" style={{ color: 'rgba(255,255,255,0.75)' }}>
                       {connector.name}
                     </span>

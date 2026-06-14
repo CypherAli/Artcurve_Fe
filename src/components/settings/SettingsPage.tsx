@@ -13,6 +13,17 @@ const GOLD  = '#C9A96E'
 const DARK  = 'rgba(255,255,255,0.03)'
 const BORD  = '1px solid rgba(255,255,255,0.07)'
 
+function Toggle({ value, onChange }: { value: boolean; onChange: (v: boolean) => void }) {
+  return (
+    <button type="button" onClick={() => onChange(!value)}
+      className="relative w-11 h-6 rounded-full transition-colors duration-250"
+      style={{ background: value ? GOLD : 'rgba(255,255,255,0.12)' }}>
+      <span className="absolute top-1 w-4 h-4 rounded-full bg-[var(--ac-paper)] transition-all duration-250"
+        style={{ left: value ? '24px' : '4px', boxShadow: '0 1px 4px rgba(0,0,0,0.3)' }}/>
+    </button>
+  )
+}
+
 function Section({ title, children }: { title: string; children: React.ReactNode }) {
   return (
     <div className="settings-section mb-8">
@@ -164,17 +175,6 @@ export function SettingsPage() {
     mutate({ username: username || undefined })
     setSaved(true)
     setTimeout(() => setSaved(false), 2500)
-  }
-
-  function Toggle({ value, onChange }: { value: boolean; onChange: (v: boolean) => void }) {
-    return (
-      <button type="button" onClick={() => onChange(!value)}
-        className="relative w-11 h-6 rounded-full transition-colors duration-250"
-        style={{ background: value ? GOLD : 'rgba(255,255,255,0.12)' }}>
-        <span className="absolute top-1 w-4 h-4 rounded-full bg-[var(--ac-paper)] transition-all duration-250"
-          style={{ left: value ? '24px' : '4px', boxShadow: '0 1px 4px rgba(0,0,0,0.3)' }}/>
-      </button>
-    )
   }
 
   return (

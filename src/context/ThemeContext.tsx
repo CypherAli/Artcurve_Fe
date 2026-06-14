@@ -40,13 +40,12 @@ function applyThemeToDom(theme: Theme) {
 
 export function ThemeProvider({ children }: { children: ReactNode }) {
   // Khởi tạo 'light' cho SSR; đồng bộ với DOM (do inline script set) sau mount
-  const [theme, setThemeState] = useState<Theme>('light')
-
-  useEffect(() => {
-    setThemeState(
-      document.documentElement.classList.contains('dark') ? 'dark' : 'light',
-    )
-  }, [])
+  const [theme, setThemeState] = useState<Theme>(() => {
+    if (typeof document !== 'undefined') {
+      return document.documentElement.classList.contains('dark') ? 'dark' : 'light'
+    }
+    return 'light'
+  })
 
   const setTheme = useCallback((next: Theme) => {
     const prefersReduced =

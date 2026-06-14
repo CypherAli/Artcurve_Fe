@@ -180,7 +180,7 @@ export function LiveActivitySection() {
       }
       // else: keep MOCK_TRADES
     }).catch(() => { /* keep MOCK_TRADES */ })
-    setMounted(true)
+    setMounted(true) // eslint-disable-line react-hooks/set-state-in-effect
   }, [])
 
   // ── Section wipe: pin + clip-path scrub khi scroll qua ────────

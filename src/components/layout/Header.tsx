@@ -87,8 +87,9 @@ function NotificationsDropdown({
     return () => { clearTimeout(t); document.removeEventListener('mousedown', handler) }
   }, [onClose])
 
+  const [mountTime] = useState(() => Date.now())
   function relativeTime(dateStr: string): string {
-    const diff = Date.now() - new Date(dateStr).getTime()
+    const diff = mountTime - new Date(dateStr).getTime()
     const m = Math.floor(diff / 60000)
     if (m < 1)  return 'vừa xong'
     if (m < 60) return `${m}m ago`
@@ -822,14 +823,14 @@ export function Header({ dark = false }: HeaderProps) {
       }}
     >
       {/* ── Logo ──────────────────────────────────────────────── */}
-      <a href="/" className="flex items-center gap-2 group" aria-label="ArtCurve home">
+      <Link href="/" className="flex items-center gap-2 group" aria-label="ArtCurve home">
         <span className="size-2 rounded-full group-hover:scale-150 transition-transform duration-500"
           style={{ background: T.gold }} aria-hidden/>
         <span className="text-2xl tracking-wider transition-colors duration-300"
           style={{ fontFamily:"'Cormorant Garamond',serif", fontWeight:600, color: T.logo }}>
           ArtCurve
         </span>
-      </a>
+      </Link>
 
       {/* ── Navigation ────────────────────────────────────────── */}
       <nav className="hidden md:flex items-center gap-8" aria-label="Main navigation">

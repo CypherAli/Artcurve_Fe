@@ -1,3 +1,4 @@
+/* eslint-disable react-hooks/set-state-in-effect */
 'use client'
 
 // ─────────────────────────────────────────────────────────────────
@@ -780,7 +781,7 @@ function TradePanel({ art, livePrice }: { art:TradeArtwork; livePrice:number }) 
     return () => {
       if (quoteDebounceRef.current) clearTimeout(quoteDebounceRef.current)
     }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+   
   }, [ethInput, tokenInput, side, art.artworkId])
 
   // ── BUY calculations (use quote if available, else approximation) ──
@@ -1264,7 +1265,7 @@ export function TradePage() {
   const { artworks: _rawArtworks } = useMarketplace({ initialLimit: 50 })
   const _apiArtworks = useMemo(
     () => _rawArtworks.map(adaptTradeArtwork),
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+     
     [_rawArtworks],
   )
   const ARTWORKS = _apiArtworks.length > 0 ? _apiArtworks : ARTWORKS_MOCK

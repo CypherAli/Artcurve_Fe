@@ -241,7 +241,7 @@ export function CuratedGallerySection() {
       }
     })
     return () => ctx.revert()
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+   
   }, [artworks])
 
   return (

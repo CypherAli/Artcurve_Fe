@@ -44,15 +44,16 @@ export function LiveBroadcaster({ roomName }: { roomName: string }) {
   const [ending, setEnding] = useState(false)
 
   // Lấy host token từ sessionStorage (set bởi GoLiveModal sau khi tạo room)
+  /* eslint-disable react-hooks/set-state-in-effect */
   useEffect(() => {
     const stored = sessionStorage.getItem(`livekit_host_token_${roomName}`)
     if (stored) {
       setToken(stored)
       return
     }
-    // Nếu không có token → redirect về /live
     setError('No host token. Please start stream from the Live page.')
   }, [roomName])
+  /* eslint-enable react-hooks/set-state-in-effect */
 
   const handleEndStream = useCallback(async () => {
     setEnding(true)

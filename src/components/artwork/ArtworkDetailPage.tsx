@@ -1,3 +1,4 @@
+/* eslint-disable react-hooks/set-state-in-effect */
 'use client'
 
 import { useState, useEffect, useCallback } from 'react'
@@ -230,7 +231,7 @@ function ReviewCard({
           lineHeight: 1.8,
         }}
       >
-        "{review.content}"
+        &ldquo;{review.content}&rdquo;
       </p>
     </motion.div>
   )
@@ -377,13 +378,13 @@ export function ArtworkDetailPage({ artworkId }: { artworkId: string }) {
   const { t } = useLanguage()
 
   // FIX 1: sessionStorage as instant cache; always fetch live data
-  const [artwork, setArtwork] = useState<StoredArtwork | null>(() => {
+  const [artwork] = useState<StoredArtwork | null>(() => {
     try {
       return JSON.parse(sessionStorage.getItem('artcurve_detail') || 'null')
     } catch { return null }
   })
   const [liveArtwork,  setLiveArtwork]  = useState<Artwork | null>(null)
-  const [loading,      setLoading]      = useState(false)
+  const [loading,      setLoading]      = useState(!artworkId?.startsWith('mock-'))
   const [fetchError,   setFetchError]   = useState(false)
 
   const [reviews,    setReviews]    = useState<Review[]>(MOCK_REVIEWS)
@@ -403,17 +404,20 @@ export function ArtworkDetailPage({ artworkId }: { artworkId: string }) {
   // FIX 1: Always fetch live data from API
   useEffect(() => {
     if (isMock) return
-    if (!artwork) setLoading(true)
+    let cancelled = false
     artworkService.getById(artworkId)
       .then(data => {
+        if (cancelled) return
         setLiveArtwork(data)
         setLoading(false)
         setFetchError(false)
       })
       .catch(() => {
+        if (cancelled) return
         setLoading(false)
         if (!artwork) setFetchError(true)
       })
+    return () => { cancelled = true }
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [artworkId, isMock])
 
@@ -482,7 +486,7 @@ export function ArtworkDetailPage({ artworkId }: { artworkId: string }) {
     star,
     count: reviews.filter(r => r.rating === star).length,
   }))
-  const maxCount = Math.max(...distribution.map(d => d.count), 1)
+  const _maxCount = Math.max(...distribution.map(d => d.count), 1)
 
   // FIX 4: Like handler
   const handleLike = useCallback(async () => {
@@ -929,7 +933,7 @@ export function ArtworkDetailPage({ artworkId }: { artworkId: string }) {
                         fontStyle:    'italic',
                         marginBottom: '0.75rem',
                       }}>
-                        "{review.content}"
+                        &ldquo;{review.content}&rdquo;
                       </p>
                       <div className="flex items-center justify-between">
                         <div className="flex items-center gap-3">

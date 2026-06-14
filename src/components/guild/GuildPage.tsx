@@ -450,10 +450,12 @@ function GuildDetail({ guild }: { guild: Guild }) {
   const [joined, setJoined] = useState(guild.joined)
   const [tab,    setTab]    = useState<DetailTab>('activity')
 
+  /* eslint-disable react-hooks/set-state-in-effect */
   useEffect(() => {
     setJoined(guild.joined)
     setTab('activity')
   }, [guild.id, guild.joined])
+  /* eslint-enable react-hooks/set-state-in-effect */
 
   const TABS: { id: DetailTab; label: string }[] = [
     { id:'activity', label: t.guild.activity  },

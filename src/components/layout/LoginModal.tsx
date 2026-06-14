@@ -1,19 +1,19 @@
 'use client'
 
-import { useEffect, useRef, useState } from 'react'
+import { useCallback, useMemo, useEffect, useRef, useState } from 'react'
 import { useConnect, useConnectors }    from 'wagmi'
 import { gsap }                         from '@/lib/gsap'
 
 interface SocialAccount { username: string; avatar_url: string }
 
 function useLastSocialAccount(key: string): SocialAccount | null {
-  const [account, setAccount] = useState<SocialAccount | null>(null)
-  useEffect(() => {
+  const [account] = useState<SocialAccount | null>(() => {
+    if (typeof window === 'undefined') return null
     try {
       const raw = localStorage.getItem(key)
-      if (raw) setAccount(JSON.parse(raw))
-    } catch { /* ignore */ }
-  }, [key])
+      return raw ? JSON.parse(raw) : null
+    } catch { return null }
+  })
   return account
 }
 
@@ -141,7 +141,7 @@ function WalletRow({
                  transition-colors duration-200"
       style={{ willChange: 'transform' }}
     >
-      <WalletImg connector={{ name: connector.name, icon: (connector as any).icon ?? undefined }} />
+      <WalletImg connector={{ name: connector.name, icon: (connector as unknown as { icon?: string }).icon ?? undefined }} />
       <span className="flex-1 text-left text-[13.5px] font-medium text-white/70 group-hover:text-white/90">
         {connector.name}
       </span>
@@ -167,28 +167,23 @@ export function LoginModal({ onClose }: Props) {
   const [showGhPicker, setShowGhPicker] = useState(false)
   const [showXPicker,  setShowXPicker]  = useState(false)
 
-  const API_BASE = (() => {
+  const API_BASE = useMemo(() => {
     const raw = process.env.NEXT_PUBLIC_API_URL?.replace('/api/v1', '')
     if (!raw) {
       if (process.env.NODE_ENV === 'production') {
-        console.error('[LoginModal] NEXT_PUBLIC_API_URL is not set — OAuth will fail')
+        console.error('[LoginModal] NEXT_PUBLIC_API_URL is not set, OAuth will fail')
       }
       return 'http://localhost:3001'
     }
     return raw
-  })()
-  function goGoogle()          { window.location.href = `${API_BASE}/api/v1/auth/google` }
-  function goGithub()          { window.location.href = `${API_BASE}/api/v1/auth/github` }
-  function goGithubDifferent() { window.location.href = `https://github.com/logout?return_to=${encodeURIComponent(`${API_BASE}/api/v1/auth/github`)}` }
-  function onGithubClick()     { lastGithub ? setShowGhPicker(true) : goGithub() }
-  function goTwitter()         { window.location.href = `${API_BASE}/api/v1/auth/twitter` }
-  function onTwitterClick()    { lastTwitter ? setShowXPicker(true) : goTwitter() }
-  function goTelegram()        { window.location.href = `${API_BASE}/api/v1/auth/telegram` }
-
-  function showToast(msg: string) {
-    setToast(msg)
-    setTimeout(() => setToast(null), 3000)
-  }
+  }, [])
+  const goGoogle          = useCallback(() => { window.location.assign(`${API_BASE}/api/v1/auth/google`) }, [API_BASE])
+  const goGithub          = useCallback(() => { window.location.assign(`${API_BASE}/api/v1/auth/github`) }, [API_BASE])
+  const goGithubDifferent = useCallback(() => { window.location.assign(`https://github.com/logout?return_to=${encodeURIComponent(`${API_BASE}/api/v1/auth/github`)}`) }, [API_BASE])
+  const onGithubClick     = useCallback(() => { lastGithub ? setShowGhPicker(true) : goGithub() }, [lastGithub, goGithub])
+  const goTwitter         = useCallback(() => { window.location.assign(`${API_BASE}/api/v1/auth/twitter`) }, [API_BASE])
+  const onTwitterClick    = useCallback(() => { lastTwitter ? setShowXPicker(true) : goTwitter() }, [lastTwitter, goTwitter])
+  const goTelegram        = useCallback(() => { window.location.assign(`${API_BASE}/api/v1/auth/telegram`) }, [API_BASE])
 
   const overlayRef  = useRef<HTMLDivElement>(null)
   const cardRef     = useRef<HTMLDivElement>(null)

@@ -23,14 +23,14 @@ const LanguageContext = createContext<LanguageContextValue>({
 })
 
 export function LanguageProvider({ children }: { children: ReactNode }) {
-  const [locale, setLocaleState] = useState<LocaleCode>(DEFAULT_LOCALE)
-
-  // Hydrate from localStorage on mount
-  useEffect(() => {
-    if (typeof window === 'undefined') return
-    const saved = localStorage.getItem(LS_KEY) as LocaleCode | null
-    if (saved && translations[saved]) setLocaleState(saved)
-  }, [])
+  const [locale, setLocaleState] = useState<LocaleCode>(() => {
+    if (typeof window === 'undefined') return DEFAULT_LOCALE
+    try {
+      const saved = localStorage.getItem(LS_KEY) as LocaleCode | null
+      if (saved && translations[saved]) return saved
+    } catch { /* SSR */ }
+    return DEFAULT_LOCALE
+  })
 
   const setLocale = useCallback((code: LocaleCode) => {
     if (!translations[code]) return

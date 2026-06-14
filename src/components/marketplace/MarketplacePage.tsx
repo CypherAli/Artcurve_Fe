@@ -1,3 +1,4 @@
+/* eslint-disable react-hooks/set-state-in-effect */
 'use client'
 
 // ─────────────────────────────────────────────────────────────────
@@ -2103,7 +2104,7 @@ function ListItem({
     const last = pts[pts.length - 1]
     const areaD = `${d} L${last.x.toFixed(1)},${(1 + ph).toFixed(1)} L1,${(1 + ph).toFixed(1)} Z`
     return { d, areaD }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+   
   }, [art.sparkline, sparkW, sparkH])
 
   return (
@@ -2791,7 +2792,7 @@ export function MarketplacePage() {
   } = useMarketplace({ initialLimit: 20 })
   const _apiArtworks = useMemo(
     () => _rawArtworks.map(adaptArtwork),
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+     
     [_rawArtworks],
   )
   const ARTWORKS = _apiArtworks.length > 0 ? _apiArtworks : ARTWORKS_MOCK

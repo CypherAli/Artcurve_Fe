@@ -45,7 +45,7 @@ describe('request', () => {
       json: async () => ({ data: [{ id: '1' }], total: 1, page: 1 }),
     })
 
-    const result = await request<any>('/artworks')
+    const result = await request<{ data: { id: string }[]; total: number; page: number }>('/artworks')
     expect(result).toHaveProperty('total')
     expect(result).toHaveProperty('data')
   })

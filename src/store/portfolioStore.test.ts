@@ -1,4 +1,5 @@
 import { usePortfolioStore } from './portfolioStore'
+import type { PortfolioPnL } from '@/types/api'
 
 beforeEach(() => {
   usePortfolioStore.setState({ pnl: null, lastSync: null })
@@ -6,7 +7,7 @@ beforeEach(() => {
 
 describe('usePortfolioStore', () => {
   it('setPnL stores pnl and sets lastSync', () => {
-    const pnl = { total_invested: '1.0', current_value: '1.5', pnl_percent: 50, holdings: [] } as any
+    const pnl = { total_invested: '1.0', current_value: '1.5', pnl_percent: 50, holdings: [] } as unknown as PortfolioPnL
     usePortfolioStore.getState().setPnL(pnl)
     const s = usePortfolioStore.getState()
     expect(s.pnl).toEqual(pnl)
@@ -14,7 +15,7 @@ describe('usePortfolioStore', () => {
   })
 
   it('clear resets state', () => {
-    usePortfolioStore.getState().setPnL({ total_invested: '1' } as any)
+    usePortfolioStore.getState().setPnL({ total_invested: '1' } as unknown as PortfolioPnL)
     usePortfolioStore.getState().clear()
     const s = usePortfolioStore.getState()
     expect(s.pnl).toBeNull()

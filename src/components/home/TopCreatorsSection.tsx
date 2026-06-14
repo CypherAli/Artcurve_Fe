@@ -219,7 +219,7 @@ export function TopCreatorsSection() {
       })
     })
     return () => ctx.revert()
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+   
   }, [creators])
 
   return (
