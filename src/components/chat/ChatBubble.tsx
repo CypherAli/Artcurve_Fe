@@ -104,7 +104,7 @@ export function ChatBubble() {
               <h3 className="text-[#C9A96E] font-[family-name:var(--font-cormorant)] text-lg font-semibold">
                 ArtCurve Support
               </h3>
-              <p className="text-[10px] text-[#6A6A6A]">AI-powered assistance</p>
+              <p className="text-[10px] text-[#6A6A6A]">We&apos;re here to help</p>
             </div>
             <div className="flex items-center gap-1">
               {sessionId && (

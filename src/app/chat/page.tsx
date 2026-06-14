@@ -141,7 +141,7 @@ export default function ChatPage() {
         <header className="flex items-center justify-between px-6 py-3 border-b border-[#2A2926]">
           <div>
             <h1 className="font-[family-name:var(--font-cormorant)] text-lg text-[#E5E5E5]">
-              ArtCurve AI Support
+              ArtCurve Support
             </h1>
             <p className="text-xs text-[#6A6A6A]">
               {sessionId ? `Session ${sessionId.slice(0, 8)}...` : 'New conversation'}

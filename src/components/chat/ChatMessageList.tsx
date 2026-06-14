@@ -37,11 +37,6 @@ export function ChatMessageList({ compact = false }: { compact?: boolean }) {
                   : 'bg-[#1A1917] text-[#E5E5E5] border border-[#2A2926]'
             }`}
           >
-            {msg.sender !== 'user' && (
-              <span className="text-[10px] uppercase tracking-wider text-[#8A8A8A] block mb-1">
-                {msg.sender === 'staff' ? 'Staff' : 'ArtCurve AI'}
-              </span>
-            )}
             <p>{msg.content}</p>
           </div>
         </div>
