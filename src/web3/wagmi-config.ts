@@ -43,7 +43,7 @@ const activeChain = CHAIN_ID === base.id ? base : baseSepolia
 
 export const wagmiConfig = getDefaultConfig({
   appName:   'ArtCurve',
-  projectId: process.env.NEXT_PUBLIC_WALLETCONNECT_PROJECT_ID!,
+  projectId: process.env.NEXT_PUBLIC_WALLETCONNECT_PROJECT_ID || 'PLACEHOLDER_BUILD',
   chains:    [activeChain],
   ssr:       true,
   wallets: [

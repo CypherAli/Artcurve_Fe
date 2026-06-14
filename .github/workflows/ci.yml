@@ -25,6 +25,8 @@ jobs:
 
       - name: Build (type-check + production bundle)
         run: npm run build
+        env:
+          NEXT_PUBLIC_WALLETCONNECT_PROJECT_ID: CI_PLACEHOLDER
 
   # CD: Vercel tự deploy khi push main.
   # Job này hiển thị bước deploy trong tab Actions + đợi FE live.
