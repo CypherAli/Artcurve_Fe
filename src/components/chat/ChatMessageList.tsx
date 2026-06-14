@@ -13,20 +13,22 @@ export function ChatMessageList({ compact = false }: { compact?: boolean }) {
   }, [messages.length])
 
   return (
-    <div className={`flex-1 overflow-y-auto px-4 py-3 space-y-3 ${compact ? 'text-sm' : ''}`}>
+    <div className={`flex-1 overflow-y-auto px-4 py-4 space-y-2.5 ${compact ? 'text-[13px]' : 'text-sm'}`}
+      style={{ minHeight: compact ? '320px' : undefined }}
+    >
       {messages.length === 0 && (
-        <div className="flex flex-col items-center justify-center h-full text-[#6A6A6A] gap-3 px-6">
-          <div className="w-16 h-16 rounded-full bg-gradient-to-br from-[#C9A96E]/20 to-[#C9A96E]/5 flex items-center justify-center">
-            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#C9A96E" strokeWidth="1.5" strokeLinecap="round">
+        <div className="flex flex-col items-center justify-center h-full gap-4 py-10">
+          <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-[#C9A96E]/15 to-[#C9A96E]/5 flex items-center justify-center">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#C9A96E" strokeWidth="1.5" strokeLinecap="round">
               <path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z" />
             </svg>
           </div>
-          <div className="text-center">
-            <p className="font-[family-name:var(--font-cormorant)] text-lg text-[#8A8A8A]">
-              How can we help you today?
+          <div className="text-center space-y-1.5">
+            <p className="font-[family-name:var(--font-cormorant)] text-[17px] text-[#9A9890] font-medium">
+              Welcome to ArtCurve Support
             </p>
-            <p className="text-xs text-[#5A5A5A] mt-1">
-              Ask anything about ArtCurve
+            <p className="text-[12px] text-[#5A5850] leading-relaxed max-w-[240px] mx-auto">
+              Ask about bonding curves, art tokens, trading, or anything else
             </p>
           </div>
         </div>
@@ -35,31 +37,29 @@ export function ChatMessageList({ compact = false }: { compact?: boolean }) {
       {messages.map((msg, i) => {
         const isUser = msg.sender === 'user'
         const isStaff = msg.sender === 'staff'
-        const showAvatar = !isUser && (i === 0 || messages[i - 1]?.sender === 'user')
+        const prevSender = i > 0 ? messages[i - 1]?.sender : null
+        const showAvatar = !isUser && prevSender !== msg.sender
 
         return (
-          <div
-            key={msg.id}
-            className={`flex gap-2 ${isUser ? 'justify-end' : 'justify-start'}`}
-          >
+          <div key={msg.id} className={`flex items-end gap-2 ${isUser ? 'justify-end pl-10' : 'justify-start pr-10'}`}>
             {!isUser && (
-              <div className={`flex-shrink-0 w-7 h-7 mt-1 ${showAvatar ? '' : 'invisible'}`}>
-                <div className={`w-7 h-7 rounded-full flex items-center justify-center text-[10px] font-bold ${
+              <div className={`flex-shrink-0 w-6 h-6 ${showAvatar ? '' : 'invisible'}`}>
+                <div className={`w-6 h-6 rounded-lg flex items-center justify-center ${
                   isStaff
-                    ? 'bg-gradient-to-br from-emerald-500 to-emerald-700 text-white'
-                    : 'bg-gradient-to-br from-[#C9A96E]/30 to-[#C9A96E]/10 text-[#C9A96E]'
+                    ? 'bg-emerald-500/20 text-emerald-400'
+                    : 'bg-[#C9A96E]/15 text-[#C9A96E]'
                 }`}>
-                  {isStaff ? 'S' : 'A'}
+                  <span className="text-[9px] font-bold">{isStaff ? 'S' : 'AC'}</span>
                 </div>
               </div>
             )}
             <div
-              className={`max-w-[78%] rounded-2xl px-4 py-2.5 whitespace-pre-wrap break-words leading-relaxed ${
+              className={`max-w-[85%] px-3.5 py-2.5 whitespace-pre-wrap break-words leading-[1.5] ${
                 isUser
-                  ? 'bg-gradient-to-br from-[#C9A96E] to-[#B08A4A] text-[#0F0E0C] rounded-br-md'
+                  ? 'bg-gradient-to-br from-[#C9A96E] to-[#B39055] text-[#0F0E0C] rounded-[16px] rounded-br-[4px]'
                   : isStaff
-                    ? 'bg-[#1A2E22] text-[#E5E5E5] border border-emerald-800/40 rounded-bl-md'
-                    : 'bg-[#1A1917] text-[#E5E5E5] border border-[#2A2926] rounded-bl-md'
+                    ? 'bg-[#182A1F] text-[#E0E0DC] border border-emerald-900/30 rounded-[16px] rounded-bl-[4px]'
+                    : 'bg-[#1C1B18] text-[#E0E0DC] border border-[#2A2825] rounded-[16px] rounded-bl-[4px]'
               }`}
             >
               <p>{msg.content}</p>
@@ -69,17 +69,15 @@ export function ChatMessageList({ compact = false }: { compact?: boolean }) {
       })}
 
       {isLoading && (
-        <div className="flex gap-2 justify-start">
-          <div className="flex-shrink-0 w-7 h-7 mt-1">
-            <div className="w-7 h-7 rounded-full bg-gradient-to-br from-[#C9A96E]/30 to-[#C9A96E]/10 flex items-center justify-center text-[10px] font-bold text-[#C9A96E]">
-              A
-            </div>
+        <div className="flex items-end gap-2 justify-start pr-10">
+          <div className="w-6 h-6 rounded-lg bg-[#C9A96E]/15 flex items-center justify-center flex-shrink-0">
+            <span className="text-[9px] font-bold text-[#C9A96E]">AC</span>
           </div>
-          <div className="bg-[#1A1917] border border-[#2A2926] rounded-2xl rounded-bl-md px-4 py-3">
-            <div className="flex gap-1.5">
-              <span className="w-2 h-2 bg-[#C9A96E] rounded-full animate-bounce [animation-delay:0ms]" />
-              <span className="w-2 h-2 bg-[#C9A96E] rounded-full animate-bounce [animation-delay:150ms]" />
-              <span className="w-2 h-2 bg-[#C9A96E] rounded-full animate-bounce [animation-delay:300ms]" />
+          <div className="bg-[#1C1B18] border border-[#2A2825] rounded-[16px] rounded-bl-[4px] px-4 py-3">
+            <div className="flex gap-1">
+              <span className="w-[6px] h-[6px] bg-[#C9A96E]/60 rounded-full animate-bounce [animation-delay:0ms]" />
+              <span className="w-[6px] h-[6px] bg-[#C9A96E]/60 rounded-full animate-bounce [animation-delay:150ms]" />
+              <span className="w-[6px] h-[6px] bg-[#C9A96E]/60 rounded-full animate-bounce [animation-delay:300ms]" />
             </div>
           </div>
         </div>

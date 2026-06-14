@@ -18,15 +18,16 @@ export function ChatBubble() {
 
   const [showEscalation, setShowEscalation] = useState(false)
   const [escalating, setEscalating] = useState(false)
-  const [mounted, setMounted] = useState(false)
+  const [visible, setVisible] = useState(false)
 
   const { sendMessage: sendViaSocket } = useChatSocket()
 
   useEffect(() => {
     if (isOpen) {
-      requestAnimationFrame(() => setMounted(true))
+      const t = setTimeout(() => setVisible(true), 20)
+      return () => clearTimeout(t)
     } else {
-      setMounted(false)
+      setVisible(false)
     }
   }, [isOpen])
 
@@ -76,108 +77,113 @@ export function ChatBubble() {
         created_at: new Date().toISOString(),
       })
       setShowEscalation(false)
-    } catch {
-      // keep dialog open on error
-    } finally {
-      setEscalating(false)
-    }
+    } catch { /* keep dialog open */ }
+    finally { setEscalating(false) }
   }, [sessionId])
 
   if (!isAuthenticated) return null
 
   return (
     <>
-      {/* Floating bubble */}
+      {/* Floating button */}
       <button
         onClick={toggleChat}
-        className={`fixed bottom-6 right-6 z-[9998] w-14 h-14 rounded-full shadow-lg transition-all duration-300 flex items-center justify-center ${
-          isOpen
-            ? 'bg-[#1A1917] border border-[#C9A96E]/40 text-[#C9A96E] rotate-0 hover:bg-[#2A2926]'
-            : 'bg-gradient-to-br from-[#C9A96E] to-[#A67C3D] text-[#0F0E0C] hover:scale-110 hover:shadow-[0_0_24px_rgba(201,169,110,0.3)]'
-        }`}
         aria-label="Toggle chat"
+        className="fixed bottom-5 right-5 z-[9998] group"
       >
-        {isOpen ? (
-          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
-            <path d="M18 6L6 18M6 6l12 12" />
+        <div className={`relative w-[56px] h-[56px] rounded-full flex items-center justify-center transition-all duration-300 ${
+          isOpen
+            ? 'bg-[#1C1B18] border border-[#3A3732] shadow-lg'
+            : 'bg-gradient-to-br from-[#D4B37F] via-[#C9A96E] to-[#A8873E] shadow-[0_4px_20px_rgba(201,169,110,0.35)] group-hover:shadow-[0_4px_28px_rgba(201,169,110,0.5)] group-hover:scale-105'
+        }`}>
+          <svg
+            width="24" height="24" viewBox="0 0 24 24" fill="none"
+            stroke={isOpen ? '#C9A96E' : '#0F0E0C'}
+            strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"
+            className="transition-transform duration-300"
+            style={{ transform: isOpen ? 'rotate(90deg)' : 'rotate(0deg)' }}
+          >
+            {isOpen ? (
+              <path d="M18 6L6 18M6 6l12 12" />
+            ) : (
+              <path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z" />
+            )}
           </svg>
-        ) : (
-          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-            <path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z" />
-          </svg>
-        )}
+          {!isOpen && (
+            <span className="absolute -top-0.5 -right-0.5 w-3 h-3 rounded-full bg-emerald-400 border-2 border-[#0F0E0C]" />
+          )}
+        </div>
       </button>
 
-      {/* Chat panel */}
+      {/* Chat window */}
       {isOpen && (
         <div
-          className={`fixed bottom-24 right-6 z-[9998] w-[400px] h-[540px] rounded-2xl shadow-2xl flex flex-col overflow-hidden transition-all duration-300 origin-bottom-right ${
-            mounted
-              ? 'opacity-100 scale-100 translate-y-0'
-              : 'opacity-0 scale-95 translate-y-4'
+          className={`fixed bottom-[88px] right-5 z-[9998] w-[380px] max-h-[min(560px,calc(100vh-120px))] flex flex-col overflow-hidden transition-all duration-300 origin-bottom-right ${
+            visible ? 'opacity-100 scale-100' : 'opacity-0 scale-[0.92] translate-y-3'
           }`}
           style={{
-            background: 'linear-gradient(180deg, #141311 0%, #0F0E0C 100%)',
-            border: '1px solid rgba(201, 169, 110, 0.15)',
-            boxShadow: '0 25px 60px rgba(0,0,0,0.5), 0 0 40px rgba(201,169,110,0.05)',
+            borderRadius: '20px',
+            background: '#111110',
+            border: '1px solid #2A2825',
+            boxShadow: '0 20px 60px -10px rgba(0,0,0,0.6), 0 0 0 1px rgba(201,169,110,0.06)',
           }}
         >
           {/* Header */}
-          <div
-            className="flex items-center justify-between px-5 py-4"
-            style={{
-              background: 'linear-gradient(135deg, rgba(201,169,110,0.12) 0%, rgba(201,169,110,0.04) 100%)',
-              borderBottom: '1px solid rgba(201,169,110,0.1)',
-            }}
-          >
-            <div className="flex items-center gap-3">
-              <div className="w-9 h-9 rounded-full bg-gradient-to-br from-[#C9A96E] to-[#A67C3D] flex items-center justify-center flex-shrink-0">
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#0F0E0C" strokeWidth="2">
-                  <path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z" />
-                </svg>
-              </div>
-              <div>
-                <h3 className="text-[#E5E5E5] font-[family-name:var(--font-cormorant)] text-[17px] font-semibold leading-tight">
-                  ArtCurve Support
-                </h3>
-                <div className="flex items-center gap-1.5 mt-0.5">
-                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
-                  <p className="text-[11px] text-[#8A8A8A]">Online</p>
+          <div className="relative px-5 pt-5 pb-4" style={{ background: 'linear-gradient(180deg, #1A1916 0%, #111110 100%)' }}>
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-3.5">
+                <div className="relative">
+                  <div className="w-10 h-10 rounded-[14px] bg-gradient-to-br from-[#D4B37F] to-[#A8873E] flex items-center justify-center shadow-md">
+                    <span className="text-[#0F0E0C] text-sm font-bold tracking-tight">AC</span>
+                  </div>
+                  <span className="absolute -bottom-0.5 -right-0.5 w-3 h-3 rounded-full bg-emerald-400 border-2 border-[#1A1916]" />
+                </div>
+                <div>
+                  <h3 className="text-[15px] font-semibold text-[#F0EDE6] tracking-tight">
+                    ArtCurve Support
+                  </h3>
+                  <p className="text-[11px] text-[#7A7870] mt-0.5">
+                    Typically replies instantly
+                  </p>
                 </div>
               </div>
-            </div>
-            <div className="flex items-center gap-0.5">
-              {sessionId && (
-                <button
-                  onClick={() => setShowEscalation(true)}
-                  className="p-2 rounded-lg text-[#6A6A6A] hover:text-[#C9A96E] hover:bg-[#C9A96E]/10 transition-all"
-                  title="Contact staff"
+              <div className="flex items-center">
+                {sessionId && (
+                  <button
+                    onClick={() => setShowEscalation(true)}
+                    className="w-8 h-8 rounded-lg flex items-center justify-center text-[#7A7870] hover:text-[#C9A96E] hover:bg-white/5 transition-all"
+                    title="Contact staff"
+                  >
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
+                      <path d="M16 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2" />
+                      <circle cx="8.5" cy="7" r="4" />
+                      <path d="M20 8v6M23 11h-6" />
+                    </svg>
+                  </button>
+                )}
+                <a
+                  href="/chat"
+                  className="w-8 h-8 rounded-lg flex items-center justify-center text-[#7A7870] hover:text-[#C9A96E] hover:bg-white/5 transition-all"
+                  title="Open full chat"
                 >
-                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                    <path d="M16 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2" />
-                    <circle cx="8.5" cy="7" r="4" />
-                    <path d="M20 8v6M23 11h-6" />
+                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
+                    <path d="M15 3h6v6M9 21H3v-6M21 3l-7 7M3 21l7-7" />
                   </svg>
-                </button>
-              )}
-              <a
-                href="/chat"
-                className="p-2 rounded-lg text-[#6A6A6A] hover:text-[#C9A96E] hover:bg-[#C9A96E]/10 transition-all"
-                title="Open full chat"
-              >
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                  <path d="M15 3h6v6M9 21H3v-6M21 3l-7 7M3 21l7-7" />
-                </svg>
-              </a>
+                </a>
+              </div>
             </div>
           </div>
 
+          {/* Separator */}
+          <div className="h-px bg-[#2A2825]" />
+
+          {/* Messages */}
           <ChatMessageList compact />
 
-          {/* Divider line */}
-          <div className="h-px bg-gradient-to-r from-transparent via-[#C9A96E]/20 to-transparent" />
-
-          <ChatInput onSend={handleSend} disabled={isLoading} />
+          {/* Input area */}
+          <div className="border-t border-[#2A2825] bg-[#141312]">
+            <ChatInput onSend={handleSend} disabled={isLoading} />
+          </div>
         </div>
       )}
 
