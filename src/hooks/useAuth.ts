@@ -7,7 +7,6 @@ import { useState, useEffect, useCallback, useRef } from 'react'
 import { useAccount, useSignMessage, useDisconnect } from 'wagmi'
 import { authService }   from '@/services/auth.service'
 import { ApiError }      from '@/lib/http'
-import { authStore }     from '@/lib/auth-store'
 import { useAuthStore }  from '@/store/authStore'
 import type { AuthUser } from '@/types/api'
 
@@ -47,8 +46,7 @@ export function useAuth() {
   const loginInProgressRef = useRef(false)
 
   const [state, setState] = useState<AuthState>(() => {
-    const user = authStore.getUser()
-    const jwt  = authStore.getJwt()
+    const { jwt, user } = useAuthStore.getState()
     return {
       status: user && jwt ? 'authenticated' : 'idle',
       user,
@@ -93,9 +91,7 @@ export function useAuth() {
       setState(s => ({ ...s, status: 'verifying' }))
       const auth = await authService.verify(address, signature, message)
 
-      // 5. Persist — sync cả 2 stores
-      authStore.setJwt(auth.access_token)
-      authStore.setUser(auth.user)
+      // 5. Persist
       useAuthStore.getState().setAuth(auth.access_token, auth.user)
 
       setState({ status: 'authenticated', user: auth.user, error: null })
@@ -105,7 +101,7 @@ export function useAuth() {
         err instanceof Error    ? err.message :
         'Authentication failed'
       setState({ status: 'error', user: null, error: msg })
-      authStore.clear()
+      useAuthStore.getState().clearAuth()
     } finally {
       loginInProgressRef.current = false
     }
@@ -114,8 +110,15 @@ export function useAuth() {
   // ── Logout ─────────────────────────────────────────────────────
   const logout = useCallback(async () => {
     await authService.logout().catch(() => {})
-    authStore.clear()
     useAuthStore.getState().clearAuth()
+    // Clear cached social account keys
+    if (typeof window !== 'undefined') {
+      localStorage.removeItem('artcurve_github_account')
+      localStorage.removeItem('artcurve_twitter_account')
+      localStorage.removeItem('artcurve_google_account')
+      localStorage.removeItem('artcurve_telegram_account')
+      localStorage.removeItem('artcurve_apple_account')
+    }
     disconnect()
     setState({ status: 'idle', user: null, error: null })
   }, [disconnect])
@@ -123,7 +126,7 @@ export function useAuth() {
   // ── Auto-trigger SIWE khi wallet connect và chưa có JWT ───────
   // Dùng state.status trong deps để tránh stale closure khi status thay đổi
   useEffect(() => {
-    if (isConnected && address && state.status === 'idle' && !authStore.getJwt()) {
+    if (isConnected && address && state.status === 'idle' && !useAuthStore.getState().jwt) {
       login()
     }
     // login được wrap bằng useCallback với deps [address, signMessageAsync, state.status]
@@ -135,7 +138,6 @@ export function useAuth() {
     if (!isConnected && state.status === 'authenticated') {
       // Logout API best-effort
       authService.logout().catch(() => {})
-      authStore.clear()
       useAuthStore.getState().clearAuth()
       setState({ status: 'idle', user: null, error: null })
     }

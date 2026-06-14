@@ -3,7 +3,6 @@
 import { Suspense, useEffect } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { useAuthStore } from '@/store/authStore'
-import { authStore }    from '@/lib/auth-store'
 import { userService }  from '@/services/user.service'
 import { useLanguage }  from '@/context/LanguageContext'
 
@@ -68,10 +67,7 @@ function CallbackHandler() {
           is_verified:    false,
         }
 
-        // Sync both stores so http.ts (authStore) and UI (useAuthStore) both work
         useAuthStore.getState().setAuth(token, tempUser)
-        authStore.setJwt(token)
-        authStore.setUser(tempUser)
 
         // Hydrate with real UUID and full profile from backend
         userService.me()
@@ -85,7 +81,6 @@ function CallbackHandler() {
               is_verified: profile.is_verified ?? tempUser.is_verified,
             }
             useAuthStore.getState().setAuth(token, fullUser)
-            authStore.setUser(fullUser)
           })
           .catch(() => { /* giữ nguyên tempUser nếu request fail */ })
 

@@ -1,31 +1,36 @@
 // ─────────────────────────────────────────────────────────────────
-//  lib/auth-store.ts  —  Thin localStorage wrapper for JWT + user
+//  lib/auth-store.ts  —  Thin wrapper over Zustand authStore
 //
-//  All reads are SSR-safe (typeof window guard).
-//  Import anywhere — server components won't throw.
+//  Delegates ALL reads/writes to useAuthStore (single source of truth).
+//  Kept as a compatibility shim so non-React code (http.ts, etc.)
+//  can access auth state without React hooks.
+//  SSR-safe — returns null on the server side.
 // ─────────────────────────────────────────────────────────────────
 
 import type { AuthUser } from '@/types/api'
-
-const JWT_KEY  = 'artcurve_jwt'
-const USER_KEY = 'artcurve_user'
-
-const ok = () => typeof window !== 'undefined'
+import { useAuthStore } from '@/store/authStore'
 
 export const authStore = {
   // JWT
-  getJwt():              string | null { return ok() ? localStorage.getItem(JWT_KEY)  : null },
-  setJwt(t: string):     void          { if (ok()) localStorage.setItem(JWT_KEY, t) },
+  getJwt(): string | null {
+    return useAuthStore.getState().jwt
+  },
+  setJwt(t: string): void {
+    const { user } = useAuthStore.getState()
+    // If user already exists, keep it; otherwise set jwt with null user
+    useAuthStore.getState().setAuth(t, user!)
+  },
 
   // User
   getUser(): AuthUser | null {
-    if (!ok()) return null
-    const raw = localStorage.getItem(USER_KEY)
-    if (!raw) return null
-    try   { return JSON.parse(raw) as AuthUser }
-    catch { return null }
+    return useAuthStore.getState().user
   },
-  setUser(u: AuthUser): void { if (ok()) localStorage.setItem(USER_KEY, JSON.stringify(u)) },
+  setUser(u: AuthUser): void {
+    const { jwt } = useAuthStore.getState()
+    if (jwt) {
+      useAuthStore.getState().setAuth(jwt, u)
+    }
+  },
 
   // Convenience
   bearerHeader(): string | null {
@@ -34,8 +39,6 @@ export const authStore = {
   },
 
   clear(): void {
-    if (!ok()) return
-    localStorage.removeItem(JWT_KEY)
-    localStorage.removeItem(USER_KEY)
+    useAuthStore.getState().clearAuth()
   },
 }

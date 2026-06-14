@@ -1,23 +1,15 @@
 import { authStore } from './auth-store'
-
-const mockStorage: Record<string, string> = {}
+import { useAuthStore } from '@/store/authStore'
 
 beforeEach(() => {
-  Object.keys(mockStorage).forEach(k => delete mockStorage[k])
-  Object.defineProperty(window, 'localStorage', {
-    value: {
-      getItem: jest.fn((key: string) => mockStorage[key] ?? null),
-      setItem: jest.fn((key: string, val: string) => { mockStorage[key] = val }),
-      removeItem: jest.fn((key: string) => { delete mockStorage[key] }),
-    },
-    writable: true,
-  })
+  // Reset Zustand store before each test
+  useAuthStore.getState().clearAuth()
 })
 
-describe('authStore', () => {
+describe('authStore (Zustand wrapper)', () => {
   describe('JWT', () => {
     it('should store and retrieve JWT', () => {
-      authStore.setJwt('my-token')
+      useAuthStore.getState().setAuth('my-token', { id: '1', wallet_address: '0x1', username: null, avatar_url: null, role: 'user', is_verified: false })
       expect(authStore.getJwt()).toBe('my-token')
     })
 
@@ -28,24 +20,19 @@ describe('authStore', () => {
 
   describe('User', () => {
     it('should store and retrieve user', () => {
-      const user = { id: '1', wallet_address: '0x123', username: 'test' }
-      authStore.setUser(user as any)
+      const user = { id: '1', wallet_address: '0x123', username: 'test', avatar_url: null, role: 'user' as const, is_verified: false }
+      useAuthStore.getState().setAuth('tok', user)
       expect(authStore.getUser()).toEqual(user)
     })
 
     it('should return null when no user stored', () => {
       expect(authStore.getUser()).toBeNull()
     })
-
-    it('should return null for invalid JSON', () => {
-      mockStorage['artcurve_user'] = 'invalid-json'
-      expect(authStore.getUser()).toBeNull()
-    })
   })
 
   describe('bearerHeader', () => {
     it('should return Bearer token when JWT exists', () => {
-      authStore.setJwt('abc123')
+      useAuthStore.getState().setAuth('abc123', { id: '1', wallet_address: '0x1', username: null, avatar_url: null, role: 'user', is_verified: false })
       expect(authStore.bearerHeader()).toBe('Bearer abc123')
     })
 
@@ -56,11 +43,31 @@ describe('authStore', () => {
 
   describe('clear', () => {
     it('should remove JWT and user', () => {
-      authStore.setJwt('token')
-      authStore.setUser({ id: '1' } as any)
+      useAuthStore.getState().setAuth('token', { id: '1', wallet_address: '0x1', username: null, avatar_url: null, role: 'user', is_verified: false })
       authStore.clear()
       expect(authStore.getJwt()).toBeNull()
       expect(authStore.getUser()).toBeNull()
+    })
+  })
+
+  describe('setJwt', () => {
+    it('should update JWT while keeping user', () => {
+      const user = { id: '1', wallet_address: '0x1', username: null, avatar_url: null, role: 'user' as const, is_verified: false }
+      useAuthStore.getState().setAuth('old', user)
+      authStore.setJwt('new-token')
+      expect(authStore.getJwt()).toBe('new-token')
+      expect(authStore.getUser()).toEqual(user)
+    })
+  })
+
+  describe('setUser', () => {
+    it('should update user while keeping JWT', () => {
+      const user1 = { id: '1', wallet_address: '0x1', username: null, avatar_url: null, role: 'user' as const, is_verified: false }
+      const user2 = { id: '2', wallet_address: '0x2', username: 'updated', avatar_url: null, role: 'user' as const, is_verified: true }
+      useAuthStore.getState().setAuth('tok', user1)
+      authStore.setUser(user2)
+      expect(authStore.getUser()).toEqual(user2)
+      expect(authStore.getJwt()).toBe('tok')
     })
   })
 })
