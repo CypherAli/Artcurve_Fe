@@ -23,12 +23,9 @@ export function ChatBubble() {
   const { sendMessage: sendViaSocket } = useChatSocket()
 
   useEffect(() => {
-    if (isOpen) {
-      const t = setTimeout(() => setVisible(true), 20)
-      return () => clearTimeout(t)
-    } else {
-      setVisible(false)
-    }
+    if (!isOpen) return
+    const t = setTimeout(() => setVisible(true), 20)
+    return () => { clearTimeout(t); setVisible(false) }
   }, [isOpen])
 
   const handleSend = useCallback(async (content: string) => {
