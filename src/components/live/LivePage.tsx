@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useMemo, useCallback, useRef } from 'react'
+import { useState, useMemo, useCallback, useRef, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { motion, AnimatePresence, type Variants } from 'framer-motion'
 import { authStore } from '@/lib/auth-store'
@@ -8,6 +8,7 @@ import { useLanguage } from '@/context/LanguageContext'
 import { translations, DEFAULT_LOCALE } from '@/i18n'
 
 const API = process.env.NEXT_PUBLIC_API_URL ?? 'https://artcurve-be.onrender.com/api/v1'
+const POLL_INTERVAL = 20_000
 
 // ─────────────────────────────────────────────────────────────────
 // Types
@@ -32,6 +33,79 @@ interface Item {
   glow2: string
   base: string
   roomName?: string
+  isReal?: boolean
+}
+
+interface ApiStream {
+  id: string
+  room_name: string
+  title: string
+  category: string
+  host_id: string
+  host_name: string
+  viewer_count: number
+  is_live: boolean
+  artwork_ticker: string | null
+  started_at: string
+  ended_at: string | null
+}
+
+const PALETTE = [
+  { color: '#a78bfa', glow1: 'rgba(139,92,246,0.38)', glow2: 'rgba(91,33,182,0.20)', base: 'linear-gradient(158deg,#09091e 0%,#0f0f2a 60%,#0a0a1c 100%)' },
+  { color: '#f87171', glow1: 'rgba(239,68,68,0.32)', glow2: 'rgba(185,28,28,0.16)', base: 'linear-gradient(158deg,#1a0808 0%,#220d0d 60%,#160606 100%)' },
+  { color: '#4ade80', glow1: 'rgba(74,222,128,0.28)', glow2: 'rgba(22,163,74,0.15)', base: 'linear-gradient(158deg,#040f08 0%,#07180d 60%,#040d07 100%)' },
+  { color: '#D4AF37', glow1: 'rgba(212,175,55,0.30)', glow2: 'rgba(161,120,24,0.15)', base: 'linear-gradient(158deg,#0f0a03 0%,#180f05 60%,#0d0903 100%)' },
+  { color: '#60a5fa', glow1: 'rgba(96,165,250,0.25)', glow2: 'rgba(37,99,235,0.12)', base: 'linear-gradient(158deg,#050810 0%,#080c18 60%,#050810 100%)' },
+  { color: '#38bdf8', glow1: 'rgba(56,189,248,0.28)', glow2: 'rgba(14,116,144,0.14)', base: 'linear-gradient(158deg,#030c14 0%,#05121e 60%,#030c14 100%)' },
+  { color: '#fb923c', glow1: 'rgba(251,146,60,0.28)', glow2: 'rgba(194,65,12,0.14)', base: 'linear-gradient(158deg,#100804 0%,#180f05 60%,#100804 100%)' },
+  { color: '#94a3b8', glow1: 'rgba(148,163,184,0.20)', glow2: 'rgba(71,85,105,0.12)', base: 'linear-gradient(158deg,#080a0e 0%,#0c0f14 60%,#080a0e 100%)' },
+]
+
+function apiStreamToItem(s: ApiStream, index: number): Item {
+  const p = PALETTE[index % PALETTE.length]
+  const elapsed = Date.now() - new Date(s.started_at).getTime()
+  const mins = Math.floor(elapsed / 60_000)
+  const liveFor = mins >= 60 ? `${Math.floor(mins / 60)}h ${mins % 60}m` : `${mins}m`
+
+  return {
+    id: `real-${s.id}`,
+    type: 'live',
+    artist: s.host_name,
+    handle: s.host_id.slice(0, 12),
+    verified: false,
+    title: s.title,
+    ticker: s.artwork_ticker ?? '',
+    category: s.category,
+    viewers: s.viewer_count,
+    liveFor,
+    marketCap: '',
+    ...p,
+    roomName: s.room_name,
+    isReal: true,
+  }
+}
+
+function useRealStreams() {
+  const [streams, setStreams] = useState<Item[]>([])
+  const [loading, setLoading] = useState(true)
+
+  useEffect(() => {
+    let active = true
+    const fetchStreams = async () => {
+      try {
+        const res = await fetch(`${API}/live`)
+        if (!res.ok) return
+        const data: ApiStream[] = await res.json()
+        if (active) setStreams(data.map(apiStreamToItem))
+      } catch { /* network error — keep last known state */ }
+      if (active) setLoading(false)
+    }
+    fetchStreams()
+    const id = setInterval(fetchStreams, POLL_INTERVAL)
+    return () => { active = false; clearInterval(id) }
+  }, [])
+
+  return { streams, loading }
 }
 
 // ─────────────────────────────────────────────────────────────────
@@ -608,24 +682,35 @@ export function LivePage() {
   const [goLiveOpen, setGoLiveOpen] = useState(false)
   const chipsRef = useRef<HTMLDivElement>(null)
 
+  const { streams: realStreams, loading } = useRealStreams()
+
   const CHIPS = useMemo(() => [
     t.live.all, t.live.live, t.live.following, t.live.videos,
     t.live.painting, t.live.drawing, t.live.digital,
     t.live.sculpture, t.live.mixedMedia, t.live.trending,
   ], [t])
 
+  // Merge real + mock: real streams first, mock fills the rest
+  const MOCK_THRESHOLD = 5
+  const mockItems = useMemo(() => {
+    if (realStreams.length >= MOCK_THRESHOLD) return []
+    return ALL_ITEMS
+  }, [realStreams.length])
+
+  const allItems = useMemo(() => [...realStreams, ...mockItems], [realStreams, mockItems])
+
   const filtered = useMemo(() => {
     switch (chip) {
-      case t.live.live:      return ALL_ITEMS.filter(i => i.type === 'live')
-      case t.live.videos:    return ALL_ITEMS.filter(i => i.type === 'video')
-      case t.live.trending:  return [...ALL_ITEMS].sort((a, b) => (b.viewers ?? 0) - (a.viewers ?? 0))
-      case t.live.following: return ALL_ITEMS.filter(i => i.verified)
-      case t.live.all:       return ALL_ITEMS
-      default:               return ALL_ITEMS.filter(i => i.category === chip)
+      case t.live.live:      return allItems.filter(i => i.type === 'live')
+      case t.live.videos:    return allItems.filter(i => i.type === 'video')
+      case t.live.trending:  return [...allItems].sort((a, b) => (b.viewers ?? 0) - (a.viewers ?? 0))
+      case t.live.following: return allItems.filter(i => i.verified)
+      case t.live.all:       return allItems
+      default:               return allItems.filter(i => i.category === chip)
     }
-  }, [chip, t])
+  }, [chip, t, allItems])
 
-  const totalLive = ALL_ITEMS.filter(i => i.type === 'live').length
+  const totalLive = allItems.filter(i => i.type === 'live').length
 
   return (
     <>
@@ -701,40 +786,153 @@ export function LivePage() {
 
         {/* ── Grid ── */}
         <div className="px-6 py-8">
-          <AnimatePresence mode="wait">
-            {filtered.length > 0 ? (
+          {/* Real streams section */}
+          {realStreams.length > 0 && (chip === t.live.all || chip === t.live.live) && (
+            <div className="mb-10">
+              <div className="flex items-center gap-3 mb-5">
+                <motion.span
+                  className="size-2.5 rounded-full"
+                  style={{ background: '#dc2626' }}
+                  animate={{ opacity: [1, 0.3, 1] }}
+                  transition={{ duration: 1.1, repeat: Infinity }}/>
+                <h2 className="font-sans text-base font-semibold tracking-tight" style={{ color: 'rgba(255,255,255,0.88)' }}>
+                  Live Now
+                </h2>
+                <span className="font-mono text-[10px] tracking-widest uppercase px-2 py-0.5 rounded-full"
+                  style={{ background: 'rgba(220,38,38,0.12)', color: '#f87171', border: '1px solid rgba(220,38,38,0.25)' }}>
+                  {realStreams.length}
+                </span>
+              </div>
               <motion.div
-                key={chip}
                 className="grid grid-cols-4 gap-x-5 gap-y-9"
                 variants={gridVariants}
                 initial="hidden"
                 animate="show">
-                {filtered.map(item => (
-                  <VideoCard
-                    key={item.id}
-                    item={item}
-                    onClick={() => {
-                      if (item.type === 'live' && item.roomName) {
-                        router.push(`/live/${item.roomName}`)
-                      } else if (item.type === 'video') {
-                        router.push('/marketplace')
-                      }
-                    }}/>
-                ))}
+                {realStreams
+                  .filter(i => chip === t.live.all || i.type === 'live')
+                  .map(item => (
+                    <VideoCard
+                      key={item.id}
+                      item={item}
+                      onClick={() => {
+                        if (item.roomName) router.push(`/live/${item.roomName}`)
+                      }}/>
+                  ))}
               </motion.div>
-            ) : (
-              <motion.div
-                key="empty"
-                initial={{ opacity: 0 }} animate={{ opacity: 1 }}
-                className="flex flex-col items-center justify-center py-40 gap-3">
-                <svg width="52" height="52" viewBox="0 0 24 24" fill="none" style={{ opacity: 0.12 }}>
-                  <path d="M15 10l4.553-2.276A1 1 0 0121 8.723v6.554a1 1 0 01-1.447.894L15 14M3 8a2 2 0 012-2h10a2 2 0 012 2v8a2 2 0 01-2 2H5a2 2 0 01-2-2V8z"
-                    stroke="white" strokeWidth="1.5" strokeLinecap="round"/>
-                </svg>
-                <p className="text-sm" style={{ color: 'rgba(255,255,255,0.22)' }}>{t.live.noContent}</p>
-              </motion.div>
-            )}
-          </AnimatePresence>
+            </div>
+          )}
+
+          {/* Mock / recommended section */}
+          {mockItems.length > 0 && (
+            <div>
+              {realStreams.length > 0 && (chip === t.live.all || chip === t.live.live) && (
+                <div className="flex items-center gap-3 mb-5">
+                  <h2 className="font-sans text-base font-semibold tracking-tight" style={{ color: 'rgba(255,255,255,0.5)' }}>
+                    Featured
+                  </h2>
+                </div>
+              )}
+              <AnimatePresence mode="wait">
+                {(() => {
+                  const mockFiltered = (() => {
+                    switch (chip) {
+                      case t.live.live:      return mockItems.filter(i => i.type === 'live')
+                      case t.live.videos:    return mockItems.filter(i => i.type === 'video')
+                      case t.live.trending:  return [...mockItems].sort((a, b) => (b.viewers ?? 0) - (a.viewers ?? 0))
+                      case t.live.following: return mockItems.filter(i => i.verified)
+                      case t.live.all:       return mockItems
+                      default:               return mockItems.filter(i => i.category === chip)
+                    }
+                  })()
+
+                  return mockFiltered.length > 0 ? (
+                    <motion.div
+                      key={chip}
+                      className="grid grid-cols-4 gap-x-5 gap-y-9"
+                      variants={gridVariants}
+                      initial="hidden"
+                      animate="show">
+                      {mockFiltered.map(item => (
+                        <VideoCard
+                          key={item.id}
+                          item={item}
+                          onClick={() => {
+                            if (item.type === 'live' && item.roomName) {
+                              router.push(`/live/${item.roomName}`)
+                            } else if (item.type === 'video') {
+                              router.push('/marketplace')
+                            }
+                          }}/>
+                      ))}
+                    </motion.div>
+                  ) : (
+                    <motion.div
+                      key="empty"
+                      initial={{ opacity: 0 }} animate={{ opacity: 1 }}
+                      className="flex flex-col items-center justify-center py-40 gap-3">
+                      <svg width="52" height="52" viewBox="0 0 24 24" fill="none" style={{ opacity: 0.12 }}>
+                        <path d="M15 10l4.553-2.276A1 1 0 0121 8.723v6.554a1 1 0 01-1.447.894L15 14M3 8a2 2 0 012-2h10a2 2 0 012 2v8a2 2 0 01-2 2H5a2 2 0 01-2-2V8z"
+                          stroke="white" strokeWidth="1.5" strokeLinecap="round"/>
+                      </svg>
+                      <p className="text-sm" style={{ color: 'rgba(255,255,255,0.22)' }}>{t.live.noContent}</p>
+                    </motion.div>
+                  )
+                })()}
+              </AnimatePresence>
+            </div>
+          )}
+
+          {/* All real, no mock — handle empty filtered */}
+          {mockItems.length === 0 && (
+            <AnimatePresence mode="wait">
+              {filtered.length > 0 ? (
+                <motion.div
+                  key={chip}
+                  className="grid grid-cols-4 gap-x-5 gap-y-9"
+                  variants={gridVariants}
+                  initial="hidden"
+                  animate="show">
+                  {filtered.map(item => (
+                    <VideoCard
+                      key={item.id}
+                      item={item}
+                      onClick={() => {
+                        if (item.roomName) router.push(`/live/${item.roomName}`)
+                      }}/>
+                  ))}
+                </motion.div>
+              ) : (
+                <motion.div
+                  key="empty"
+                  initial={{ opacity: 0 }} animate={{ opacity: 1 }}
+                  className="flex flex-col items-center justify-center py-40 gap-3">
+                  <svg width="52" height="52" viewBox="0 0 24 24" fill="none" style={{ opacity: 0.12 }}>
+                    <path d="M15 10l4.553-2.276A1 1 0 0121 8.723v6.554a1 1 0 01-1.447.894L15 14M3 8a2 2 0 012-2h10a2 2 0 012 2v8a2 2 0 01-2 2H5a2 2 0 01-2-2V8z"
+                      stroke="white" strokeWidth="1.5" strokeLinecap="round"/>
+                  </svg>
+                  <p className="text-sm" style={{ color: 'rgba(255,255,255,0.22)' }}>{t.live.noContent}</p>
+                </motion.div>
+              )}
+            </AnimatePresence>
+          )}
+
+          {/* Loading skeleton on first load */}
+          {loading && realStreams.length === 0 && mockItems.length === 0 && (
+            <div className="grid grid-cols-4 gap-x-5 gap-y-9">
+              {Array.from({ length: 8 }).map((_, i) => (
+                <div key={i} className="animate-pulse">
+                  <div className="rounded-xl" style={{ aspectRatio: '16/9', background: 'rgba(255,255,255,0.05)' }}/>
+                  <div className="flex gap-3 mt-3">
+                    <div className="size-9 rounded-full shrink-0" style={{ background: 'rgba(255,255,255,0.05)' }}/>
+                    <div className="flex-1 space-y-2">
+                      <div className="h-3 rounded" style={{ background: 'rgba(255,255,255,0.05)', width: '80%' }}/>
+                      <div className="h-2.5 rounded" style={{ background: 'rgba(255,255,255,0.04)', width: '50%' }}/>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
         </div>
 
       </div>
