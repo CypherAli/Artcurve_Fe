@@ -76,9 +76,10 @@ export interface AuthUser {
 }
 
 export interface AuthResponse {
-  access_token: string
-  expires_in:   number        // seconds
-  user:         AuthUser
+  access_token:  string
+  refresh_token: string
+  expires_in:    number        // seconds
+  user:          AuthUser
 }
 
 // ── Artworks ──────────────────────────────────────────────────────

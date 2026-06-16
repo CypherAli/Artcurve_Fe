@@ -32,6 +32,14 @@ export const authStore = {
     }
   },
 
+  // Refresh token (dùng bởi http.ts để silent-refresh khi 401)
+  getRefreshToken(): string | null {
+    return useAuthStore.getState().refreshToken
+  },
+  setTokens(jwt: string, refreshToken?: string): void {
+    useAuthStore.getState().setTokens(jwt, refreshToken)
+  },
+
   // Convenience
   bearerHeader(): string | null {
     const t = this.getJwt()

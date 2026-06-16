@@ -30,17 +30,63 @@ async function fetchWithTimeout(url: string, init: RequestInit, timeoutMs = DEFA
   }
 }
 
+// ── Silent token refresh (single-flight) ─────────────────────────────────────
+// Khi access token hết hạn (401), tự gọi /auth/refresh đúng MỘT lần dù có nhiều
+// request song song cùng fail — các request khác chờ chung 1 promise rồi retry.
+let refreshPromise: Promise<boolean> | null = null
+
+async function tryRefresh(): Promise<boolean> {
+  const rt = authStore.getRefreshToken()
+  if (!rt) return false
+
+  if (!refreshPromise) {
+    refreshPromise = (async () => {
+      try {
+        const res = await fetchWithTimeout(`${BASE}/auth/refresh`, {
+          method:  'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body:    JSON.stringify({ refresh_token: rt }),
+        })
+        if (!res.ok) { authStore.clear(); return false }
+        const json = await res.json()
+        const data = (json?.data ?? json) as { access_token?: string; refresh_token?: string }
+        if (!data?.access_token) { authStore.clear(); return false }
+        authStore.setTokens(data.access_token, data.refresh_token)
+        return true
+      } catch {
+        // Lỗi mạng — không clear auth (có thể chỉ là tạm thời), để request gốc fail bình thường
+        return false
+      } finally {
+        refreshPromise = null
+      }
+    })()
+  }
+  return refreshPromise
+}
+
 export async function request<T>(path: string, options: RequestInit & { auth?: boolean } = {}): Promise<T> {
   const { auth = false, headers: extraHeaders, ...rest } = options
-  const headers: Record<string, string> = {
-    'Content-Type': 'application/json',
-    ...(extraHeaders as Record<string, string> | undefined ?? {}),
+
+  const doFetch = () => {
+    const headers: Record<string, string> = {
+      'Content-Type': 'application/json',
+      ...(extraHeaders as Record<string, string> | undefined ?? {}),
+    }
+    if (auth) {
+      const bearer = authStore.bearerHeader()
+      if (bearer) headers['Authorization'] = bearer
+    }
+    return fetchWithTimeout(`${BASE}${path}`, { ...rest, headers })
   }
-  if (auth) {
-    const bearer = authStore.bearerHeader()
-    if (bearer) headers['Authorization'] = bearer
+
+  let res = await doFetch()
+
+  // Access token hết hạn → thử refresh rồi retry đúng 1 lần
+  if (res.status === 401 && auth) {
+    const refreshed = await tryRefresh()
+    if (refreshed) res = await doFetch()
   }
-  const res = await fetchWithTimeout(`${BASE}${path}`, { ...rest, headers })
+
   if (!res.ok) {
     let msg = res.statusText
     try {

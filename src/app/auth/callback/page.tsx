@@ -52,7 +52,7 @@ function CallbackHandler() {
         const json = await res.json()
         return json.data ?? json
       })
-      .then((data: { access_token: string; address: string; name: string; avatar: string; provider: string }) => {
+      .then((data: { access_token: string; refresh_token?: string; address: string; name: string; avatar: string; provider: string }) => {
         const token   = data.access_token
         const address = data.address
         const name    = data.name
@@ -68,7 +68,7 @@ function CallbackHandler() {
           is_verified:    false,
         }
 
-        useAuthStore.getState().setAuth(token, tempUser)
+        useAuthStore.getState().setAuth(token, tempUser, data.refresh_token)
 
         // Hydrate with real UUID and full profile from backend
         userService.me()

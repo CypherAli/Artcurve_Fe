@@ -92,8 +92,8 @@ export function useAuth() {
       setState(s => ({ ...s, status: 'verifying' }))
       const auth = await authService.verify(address, signature, message)
 
-      // 5. Persist
-      useAuthStore.getState().setAuth(auth.access_token, auth.user)
+      // 5. Persist (kèm refresh_token để silent-refresh khi access token hết hạn)
+      useAuthStore.getState().setAuth(auth.access_token, auth.user, auth.refresh_token)
 
       setState({ status: 'authenticated', user: auth.user, error: null })
     } catch (err) {
