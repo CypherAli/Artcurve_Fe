@@ -12,6 +12,24 @@ export class ApiError extends Error {
   get isNotFound()     { return this.status === 404 }
 }
 
+// Timeout mặc định 30s — tránh request treo vô hạn trên mạng chậm
+const DEFAULT_TIMEOUT_MS = 30_000
+
+async function fetchWithTimeout(url: string, init: RequestInit, timeoutMs = DEFAULT_TIMEOUT_MS): Promise<Response> {
+  const controller = new AbortController()
+  const timer = setTimeout(() => controller.abort(), timeoutMs)
+  try {
+    return await fetch(url, { ...init, signal: controller.signal })
+  } catch (err) {
+    if (err instanceof DOMException && err.name === 'AbortError') {
+      throw new ApiError(408, 'Yêu cầu quá thời gian chờ. Vui lòng thử lại.')
+    }
+    throw err
+  } finally {
+    clearTimeout(timer)
+  }
+}
+
 export async function request<T>(path: string, options: RequestInit & { auth?: boolean } = {}): Promise<T> {
   const { auth = false, headers: extraHeaders, ...rest } = options
   const headers: Record<string, string> = {
@@ -22,7 +40,7 @@ export async function request<T>(path: string, options: RequestInit & { auth?: b
     const bearer = authStore.bearerHeader()
     if (bearer) headers['Authorization'] = bearer
   }
-  const res = await fetch(`${BASE}${path}`, { ...rest, headers })
+  const res = await fetchWithTimeout(`${BASE}${path}`, { ...rest, headers })
   if (!res.ok) {
     let msg = res.statusText
     try {
@@ -61,7 +79,8 @@ export async function postForm<T>(path: string, formData: FormData): Promise<T> 
   const bearer = authStore.bearerHeader()
   const headers: Record<string, string> = {}
   if (bearer) headers['Authorization'] = bearer
-  const res = await fetch(`${BASE}${path}`, { method: 'POST', headers, body: formData })
+  // Upload có thể lớn → cho timeout dài hơn (60s)
+  const res = await fetchWithTimeout(`${BASE}${path}`, { method: 'POST', headers, body: formData }, 60_000)
   if (!res.ok) {
     let msg = res.statusText
     try { const b = await res.json(); msg = Array.isArray(b.message) ? b.message[0] : b.message ?? msg } catch { /* ignore */ }
