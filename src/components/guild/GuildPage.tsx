@@ -97,6 +97,24 @@ function FoundationCrest({ size = 150 }: { size?: number }) {
   )
 }
 
+// Ảnh thật từ /public; lỗi (chưa có file) → fallback vector/icon
+function ImgFallback({ src, alt, w, h, fallback }: { src: string; alt: string; w: number; h: number; fallback: React.ReactNode }) {
+  const [err, setErr] = useState(false)
+  if (err) return <>{fallback}</>
+  return (
+    // eslint-disable-next-line @next/next/no-img-element
+    <img src={src} alt={alt} width={w} height={h} style={{ objectFit: 'contain', display: 'block' }} onError={() => setErr(true)} />
+  )
+}
+
+// Phần thưởng nhận được trong guild (ảnh ở public/guild/reward-1..4.png)
+const REWARD_FALLBACK = [
+  <IconCoin key="1" size={22} color={C.gold} />,
+  <IconDroplet key="2" size={22} color="#9ec5e3" />,
+  <IconTrendingUp key="3" size={22} color="#8fce9f" />,
+  <IconShieldChevron key="4" size={22} color={C.goldLight} />,
+]
+
 // Emblem riêng cho mỗi guild (giống tower / fleur-de-lis của game)
 const ROW_EMBLEMS = [IconChessRook, IconCrown, IconBuildingCastle, IconShieldChevron]
 function RowEmblem({ idx, featured }: { idx: number; featured?: boolean }) {
@@ -147,15 +165,19 @@ function FinderView({ guilds, onEnter }: { guilds: GuildView[]; onEnter: () => v
         <div style={{ fontFamily: SERIF, fontSize: 23, fontWeight: 600, letterSpacing: 2, color: C.goldLight }}>Guild Foundation</div>
         <Filigree w="62%" />
         <div style={{ position: 'relative', display: 'flex', justifyContent: 'center', margin: '10px auto 6px' }}>
-          <div style={{ position: 'absolute', top: '46%', left: '50%', transform: 'translate(-50%,-50%)', width: 170, height: 170, borderRadius: '50%', background: 'radial-gradient(circle, rgba(201,169,110,0.20), transparent 66%)' }} />
-          <div style={{ position: 'relative' }}><FoundationCrest size={150} /></div>
+          <div style={{ position: 'absolute', top: '46%', left: '50%', transform: 'translate(-50%,-50%)', width: 200, height: 200, borderRadius: '50%', background: 'radial-gradient(circle, rgba(201,169,110,0.18), transparent 66%)' }} />
+          <div style={{ position: 'relative' }}>
+            <ImgFallback src="/guild/crest.png" alt="Guild crest" w={172} h={206} fallback={<FoundationCrest size={150} />} />
+          </div>
         </div>
         <p style={{ fontSize: 12.5, color: C.muted, lineHeight: 1.75, margin: '8px 0 16px' }}>
           Lập hội của riêng bạn hoặc gia nhập một guild sưu tầm. Cùng giao dịch để nhận thưởng tập thể mỗi tuần.
         </p>
         <div style={{ display: 'flex', gap: 9, justifyContent: 'center', marginBottom: 16 }}>
-          {[<IconCoin key="a" size={20} color={C.gold} />, <IconDroplet key="b" size={20} color="#9ec5e3" />, <IconTrendingUp key="c" size={20} color="#8fce9f" />, <IconShieldChevron key="d" size={20} color={C.goldLight} />].map((ic, i) => (
-            <div key={i} style={{ width: 44, height: 44, borderRadius: 10, border: `1px solid ${C.lineGold}`, background: C.panel2, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>{ic}</div>
+          {REWARD_FALLBACK.map((ic, i) => (
+            <div key={i} style={{ width: 46, height: 46, borderRadius: 10, border: `1px solid ${C.lineGold}`, background: C.panel2, display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden' }}>
+              <ImgFallback src={`/guild/reward-${i + 1}.png`} alt={`Reward ${i + 1}`} w={44} h={44} fallback={ic} />
+            </div>
           ))}
         </div>
         <div style={{ display: 'flex', alignItems: 'center', border: `1px solid ${C.lineGold}`, borderRadius: 11, overflow: 'hidden' }}>
