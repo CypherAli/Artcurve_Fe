@@ -1,720 +1,261 @@
 'use client'
 // ─────────────────────────────────────────────────────────────────
-//  GuildPage.tsx  —  Art community groups & collector clubs
-//  Added: Chat tab, Members tab, Holdings tab, Create Guild modal
+//  GuildPage — game-style guild experience cho ArtCurve.
+//  2 trạng thái:
+//    finder  → Guild Foundation + Recommended (chưa vào guild)
+//    hall    → Sảnh guild với các node chức năng (đã vào guild)
+//  Tông: Neo-Luxury dark (near-black #0F0E0C + vàng #C9A96E) — KHÔNG nâu.
 // ─────────────────────────────────────────────────────────────────
 
 import { useState, useEffect } from 'react'
-import { motion, AnimatePresence } from 'framer-motion'
-import { useLanguage } from '@/context/LanguageContext'
+import { motion } from 'framer-motion'
+import {
+  IconDiamond, IconCoin, IconDroplet, IconTrendingUp, IconShieldChevron,
+  IconMail, IconHash, IconSearch, IconRefresh, IconBuildingBank, IconPalette,
+  IconChevronLeft, IconChevronDown, IconBell, IconMessageCircle,
+  IconChecklist, IconWand, IconGift, IconTrophy, IconPhoto, IconGavel,
+  IconUsers, IconMessage2,
+} from '@tabler/icons-react'
+import { guildService, GUILD_FOUNDATION_FEE_ETH, type ApiGuild } from '@/services/guild.service'
 
-// ── Types ─────────────────────────────────────────────────────────
-interface Guild {
-  id:       string
-  name:     string
-  tagline:  string
-  members:  number
-  focus:    string
-  tier:     'Founding' | 'Active' | 'Growing'
-  color:    string
-  cover:    string
-  joined:   boolean
-  holdings: string
-  tags:     string[]
+// ── Brand tokens (dark-locked, khớp html.dark trong globals.css) ──
+const C = {
+  bg:    '#0F0E0C', panel: '#181613', panel2: '#100E0B',
+  line:  '#2B2823', lineGold: 'rgba(201,169,110,0.30)',
+  ink:   '#F0EBE1', muted: '#8E877B',
+  gold:  '#C9A96E', goldLight: '#E8D5B0',
+}
+const SERIF = "'Cormorant Garamond', Georgia, serif"
+const EASE: [number, number, number, number] = [0.16, 1, 0.3, 1]
+
+interface GuildView extends ApiGuild {
+  level: number; weeklyVolume: number; maxMembers: number; acceptance: 'auto' | 'manual'; tag: string
 }
 
-interface GuildPost {
-  id:          string
-  guildName:   string
-  author:      string
-  authorColor: string
-  content:     string
-  likes:       number
-  ts:          string
-  type:        'post' | 'collect' | 'tip' | 'milestone'
-}
-
-interface GuildMember {
-  rank:   number
-  name:   string
-  addr:   string
-  tier:   'Founder' | 'Patron' | 'Collector'
-  tokens: number
-  joined: string
-  color:  string
-}
-
-interface CollectiveHolding {
-  ticker:  string
-  title:   string
-  members: number
-  qty:     number
-  value:   string
-  color:   string
-}
-
-interface ChatMsg {
-  id:    string
-  user:  string
-  msg:   string
-  color: string
-}
-
-type DetailTab = 'activity' | 'chat' | 'members' | 'holdings'
-
-// ── Data ──────────────────────────────────────────────────────────
-const GUILDS: Guild[] = [
-  { id:'g1', name:'The Pale Archive',   tagline:'Collectors of muted tones and negative space', members:84,  focus:'Minimalist', tier:'Founding', color:'#a78bfa', cover:'linear-gradient(145deg,#1a1a2e 0%,#2d2d4a 100%)', joined:true,  holdings:'42.3 ETH', tags:['Minimalist','Monochrome','Architecture'] },
-  { id:'g2', name:'After Midnight',     tagline:'Nocturnal art, darkness as medium',           members:156, focus:'Dark Art',   tier:'Founding', color:'#60a5fa', cover:'linear-gradient(145deg,#0d1520 0%,#1a2a40 100%)', joined:true,  holdings:'88.7 ETH', tags:['Nocturnal','Atmospheric','Blue Hour']   },
-  { id:'g3', name:'Bloom Collective',   tagline:'Generative & digital art enthusiasts',         members:203, focus:'Generative', tier:'Active',   color:'#4ade80', cover:'linear-gradient(145deg,#0a2818 0%,#163d24 100%)', joined:false, holdings:'31.1 ETH', tags:['Generative','p5.js','Digital']         },
-  { id:'g4', name:'Old Masters Reborn', tagline:'Classical technique in the Web3 era',          members:67,  focus:'Classical',  tier:'Active',   color:'#D4AF37', cover:'linear-gradient(145deg,#1c1410 0%,#2e1f10 100%)', joined:false, holdings:'19.4 ETH', tags:['Classical','Oil','Masters']            },
-  { id:'g5', name:'Signal / Noise',     tagline:'Experimental, glitch, and new media art',     members:91,  focus:'Experimental',tier:'Growing', color:'#f87171', cover:'linear-gradient(145deg,#200a0a 0%,#3d1515 100%)', joined:false, holdings:'8.2 ETH',  tags:['Glitch','Experimental','New Media']    },
-  { id:'g6', name:'Convergence',        tagline:'Multi-disciplinary artists and collectors',    members:118, focus:'Mixed Media', tier:'Growing', color:'#38bdf8', cover:'linear-gradient(145deg,#061520 0%,#0c2030 100%)', joined:false, holdings:'15.6 ETH', tags:['Mixed Media','Collaborative','Cross-genre'] },
+const MOCK: GuildView[] = [
+  { id:'g1', name:'BlueChipDAO',   description:null, focus:'Collectors',  avatar_color:'#C9A96E', member_count:22, level:8,  weeklyVolume:1240, maxMembers:30, acceptance:'auto',   tag:'Collectors~' },
+  { id:'g2', name:'GenesisCircle', description:null, focus:'Blue chip',   avatar_color:'#E8D5B0', member_count:14, level:11, weeklyVolume:3580, maxMembers:27, acceptance:'manual', tag:'Đang tuyển~' },
+  { id:'g3', name:'NeoPatrons',    description:null, focus:'Newcomers',   avatar_color:'#C9A96E', member_count:6,  level:3,  weeklyVolume:210,  maxMembers:16, acceptance:'auto',   tag:'Người mới~' },
 ]
 
-const FEED: GuildPost[] = [
-  { id:'p1', guildName:'The Pale Archive',   author:'soo_ah.eth',       authorColor:'#a78bfa', content:'finishing the third panel of Pale Architecture tonight, come watch the stream',          likes:18, ts:'3m',  type:'post'      },
-  { id:'p2', guildName:'After Midnight',     author:'ivan_sorokin.eth', authorColor:'#60a5fa', content:'the nocturne series feels different at night. the way light disappears in this piece',    likes:34, ts:'11m', type:'post'      },
-  { id:'p3', guildName:'The Pale Archive',   author:'markus.eth',       authorColor:'#D4AF37', content:'collected 0.8 $PALE today. accumulation phase is almost done',                           likes:9,  ts:'19m', type:'collect'   },
-  { id:'p4', guildName:'Bloom Collective',   author:'aiko.base',        authorColor:'#4ade80', content:'dropped a new generative series. 500 unique variations, each one seeds differently',     likes:41, ts:'26m', type:'post'      },
-  { id:'p5', guildName:'Old Masters Reborn', author:'böcklin.eth',      authorColor:'#D4AF37', content:'Self-Portrait with Death is now 60% through the bonding curve 🎓',                       likes:27, ts:'39m', type:'milestone' },
-  { id:'p6', guildName:'After Midnight',     author:'yui_n.base',       authorColor:'#f9a8d4', content:'just tipped 0.2 ETH to the Nocturne stream. this work deserves more eyes',              likes:11, ts:'51m', type:'tip'       },
-  { id:'p7', guildName:'The Pale Archive',   author:'lena_v.base',      authorColor:'#60a5fa', content:'anyone want to do a group stream watch this Friday evening?',                            likes:23, ts:'1h',  type:'post'      },
-  { id:'p8', guildName:'Signal / Noise',     author:'paulo_r.base',     authorColor:'#f87171', content:'new glitch series drops next week. chaos as composition. nothing is an accident',        likes:15, ts:'1h',  type:'post'      },
-]
-
-const MEMBERS_BY_GUILD: Record<string, GuildMember[]> = {
-  g1: [
-    { rank:1, name:'soo_ah.eth',     addr:'0x4f2…a91', tier:'Founder',   tokens:12, joined:'Mar 2024', color:'#a78bfa' },
-    { rank:2, name:'markus.eth',     addr:'0x8d3…f44', tier:'Founder',   tokens:9,  joined:'Mar 2024', color:'#D4AF37' },
-    { rank:3, name:'lena_v.base',    addr:'0x1a9…c33', tier:'Patron',    tokens:6,  joined:'Apr 2024', color:'#60a5fa' },
-    { rank:4, name:'böcklin.eth',    addr:'0x7e1…b22', tier:'Collector', tokens:4,  joined:'May 2024', color:'#D4AF37' },
-    { rank:5, name:'yui_n.base',     addr:'0x2b5…d81', tier:'Collector', tokens:3,  joined:'Jun 2024', color:'#f9a8d4' },
-  ],
-  g2: [
-    { rank:1, name:'ivan_sorokin.eth',addr:'0x9c4…e17', tier:'Founder',  tokens:15, joined:'Mar 2024', color:'#60a5fa' },
-    { rank:2, name:'yui_n.base',     addr:'0x2b5…d81', tier:'Patron',    tokens:11, joined:'Apr 2024', color:'#f9a8d4' },
-    { rank:3, name:'aiko.base',      addr:'0x3f7…a04', tier:'Collector', tokens:8,  joined:'May 2024', color:'#4ade80' },
-  ],
+function toView(g: ApiGuild): GuildView {
+  return {
+    ...g,
+    level:        g.level ?? Math.max(1, Math.round((g.member_count ?? 1) / 3)),
+    weeklyVolume: g.weekly_volume_eth ?? 0,
+    maxMembers:   g.max_members ?? 30,
+    acceptance:   g.acceptance ?? 'auto',
+    tag:          g.focus ? `${g.focus}~` : 'Mới~',
+  }
 }
 
-const HOLDINGS_BY_GUILD: Record<string, CollectiveHolding[]> = {
-  g1: [
-    { ticker:'$PALE',    title:'Pale Architecture',      members:62, qty:8.42,  value:'22.8 ETH', color:'#a78bfa' },
-    { ticker:'$THRESH',  title:'Threshold Fragment',     members:41, qty:3.10,  value:'9.7 ETH',  color:'#D4AF37' },
-    { ticker:'$BLOOM',   title:'Bloom & Blade',          members:28, qty:12.50, value:'6.5 ETH',  color:'#4ade80' },
-    { ticker:'$DISS',    title:'Dissolution Study',      members:18, qty:5.20,  value:'3.3 ETH',  color:'#60a5fa' },
-  ],
-  g2: [
-    { ticker:'$NOCTURNE',title:'Nocturne at the Bridge', members:88, qty:44.20, value:'54.1 ETH', color:'#38bdf8' },
-    { ticker:'$DISS',    title:'Dissolution Study',      members:54, qty:22.30, value:'21.8 ETH', color:'#60a5fa' },
-    { ticker:'$GHOST',   title:'Ghost of the Meridian',  members:31, qty:15.60, value:'9.5 ETH',  color:'#94a3b8' },
-    { ticker:'$AMBER',   title:'Amber Protocol',         members:20, qty:8.80,  value:'3.3 ETH',  color:'#fb923c' },
-  ],
-}
-
-const CHAT_SEED: ChatMsg[] = [
-  { id:'c1', user:'markus.eth',    msg:'did you see the new soo_ah stream? incredible',         color:'#D4AF37' },
-  { id:'c2', user:'lena_v.base',   msg:'$PALE accumulation phase almost done 👀',               color:'#60a5fa' },
-  { id:'c3', user:'böcklin.eth',   msg:'I\'ve been saying this piece would go to Migration',    color:'#D4AF37' },
-  { id:'c4', user:'soo_ah.eth',    msg:'thank you all 🙏 streaming again tonight',              color:'#a78bfa' },
-  { id:'c5', user:'yui_n.base',    msg:'count me in for the group watch Friday',                color:'#f9a8d4' },
-]
-
-const CHAT_INCOMING = [
-  { user:'markus.eth',    msg:'anyone got the tip link?',              color:'#D4AF37'               },
-  { user:'aiko.base',     msg:'just minted a new piece ✨',            color:'#4ade80'               },
-  { user:'0x1a9…c33',    msg:'accumulation phase almost done',        color:'rgba(255,255,255,0.38)' },
-  { user:'lena_v.base',   msg:'stream starting in 10 min',            color:'#60a5fa'               },
-  { user:'böcklin.eth',   msg:'legendary work from soo_ah as always', color:'#D4AF37'               },
-]
-
-const TIER_COLOR: Record<string, string> = { Founding:'#D4AF37', Active:'#a78bfa', Growing:'#4ade80' }
-const MEMBER_TIER_COLOR: Record<string, string> = { Founder:'#D4AF37', Patron:'#a78bfa', Collector:'rgba(255,255,255,0.45)' }
-
-const POST_ICON: Record<GuildPost['type'], string> = { post:'◎', collect:'◆', tip:'✦', milestone:'⬡' }
-const POST_COLOR: Record<GuildPost['type'], string> = { post:'rgba(255,255,255,0.3)', collect:'#D4AF37', tip:'#4ade80', milestone:'#a78bfa' }
-
-const EASE: [number,number,number,number] = [0.215,0.61,0.355,1.0]
-
-const CARD_V = {
-  hidden: { opacity:0, y:18 },
-  show:   { opacity:1, y:0, transition:{ type:'tween' as const, duration:0.42, ease:EASE } },
-}
-const LIST_V = {
-  hidden: { opacity:0 },
-  show:   { opacity:1, transition:{ staggerChildren:0.065, delayChildren:0.05 } },
-}
-
-// ─────────────────────────────────────────────────────────────────
-//  Guild card
-// ─────────────────────────────────────────────────────────────────
-function GuildCard({ guild, selected, onClick }: {
-  guild: Guild; selected: boolean; onClick: () => void
-}) {
-  const { t } = useLanguage()
+// ── Reusable bits ────────────────────────────────────────────────
+function Medallion({ size = 46, children, featured = false }: { size?: number; children: React.ReactNode; featured?: boolean }) {
   return (
-    <motion.div variants={CARD_V} onClick={onClick}
-      className="cursor-pointer overflow-hidden"
-      style={{ border: selected ? `1px solid ${guild.color}45` : '1px solid rgba(255,255,255,0.06)', background:'rgba(0,0,0,0.42)' }}
-      whileHover={{ borderColor:`${guild.color}28` }}>
-      <div className="relative" style={{ height:52, background:guild.cover }}>
-        {guild.joined && (
-          <div className="absolute top-2 right-2 font-mono text-[6.5px] px-1.5 py-0.5"
-            style={{ background:`${guild.color}18`, color:guild.color, border:`1px solid ${guild.color}28` }}>
-            {t.guild.joined}
-          </div>
-        )}
-        <div className="absolute bottom-0 left-0 right-0 h-8"
-          style={{ background:'linear-gradient(to top,rgba(0,0,0,0.75),transparent)' }}/>
-      </div>
-      <div className="px-3 py-2.5">
-        <div className="flex items-start gap-2 mb-2">
-          <div className="flex-1 min-w-0">
-            <div className="font-sans text-[10px] font-semibold leading-tight"
-              style={{ color:'rgba(255,255,255,0.85)', letterSpacing:'-0.01em' }}>{guild.name}</div>
-            <div className="font-sans text-[7.5px] mt-0.5 leading-snug"
-              style={{ color:'rgba(255,255,255,0.35)' }}>{guild.tagline}</div>
-          </div>
-          <span className="font-mono text-[6.5px] px-1.5 py-0.5 shrink-0 mt-0.5"
-            style={{ color:TIER_COLOR[guild.tier], border:`1px solid ${TIER_COLOR[guild.tier]}28`, background:`${TIER_COLOR[guild.tier]}0d` }}>
-            {guild.tier}
-          </span>
+    <div style={{
+      width: size, height: size, borderRadius: '50%',
+      border: `1px solid ${featured ? C.gold : C.lineGold}`,
+      background: C.panel2, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0,
+    }}>{children}</div>
+  )
+}
+
+function Filigree() {
+  return (
+    <div style={{ position: 'relative', height: 1, background: `linear-gradient(90deg,transparent,${C.lineGold},transparent)`, margin: '12px 0' }}>
+      <span style={{ position: 'absolute', left: '50%', top: -3, width: 6, height: 6, marginLeft: -3, transform: 'rotate(45deg)', background: C.gold }} />
+    </div>
+  )
+}
+
+// ── Finder: 1 hàng guild ─────────────────────────────────────────
+function GuildRow({ g, featured, onInfo }: { g: GuildView; featured?: boolean; onInfo: () => void }) {
+  return (
+    <motion.div variants={{ hidden: { opacity: 0, y: 14 }, show: { opacity: 1, y: 0 } }}
+      whileHover={{ borderColor: C.gold }}
+      style={{
+        display: 'flex', alignItems: 'center', gap: 13, padding: 12, marginBottom: 9,
+        borderRadius: 12, background: featured ? '#15120c' : C.panel,
+        border: `${featured ? 2 : 1}px solid ${featured ? C.gold : C.line}`,
+      }}>
+      <Medallion featured={featured}>
+        {featured ? <IconPalette size={24} color={C.goldLight} /> : <IconBuildingBank size={24} color={C.gold} />}
+      </Medallion>
+      <div style={{ flex: 1, minWidth: 0 }}>
+        <div style={{ fontSize: 13, color: C.ink }}>
+          <span style={{ fontFamily: SERIF, fontSize: 16, fontWeight: 600, color: featured ? C.goldLight : C.gold }}>Lv.{g.level}</span>
+          {' '}{g.name}
         </div>
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-1.5">
-            <span className="size-1.5 rounded-full" style={{ background:guild.color }}/>
-            <span className="font-mono text-[7.5px]" style={{ color:'rgba(255,255,255,0.32)' }}>
-              {guild.members} members
-            </span>
-          </div>
-          <span className="font-mono text-[7px]" style={{ color:'rgba(255,255,255,0.22)' }}>
-            {guild.holdings}
-          </span>
-        </div>
+        <div style={{ fontSize: 11, color: C.muted, marginTop: 1 }}>Khối lượng tuần: {g.weeklyVolume.toLocaleString()} ETH</div>
+        <span style={{ display: 'inline-block', marginTop: 4, border: `1px solid ${C.lineGold}`, borderRadius: 20, padding: '1px 10px', fontSize: 10, color: C.gold }}>{g.tag}</span>
       </div>
+      <div style={{ textAlign: 'right', fontSize: 10, color: C.muted, lineHeight: 1.6 }}>
+        Thành viên {g.member_count}/{g.maxMembers}<br />Không giới hạn rank<br />Duyệt: {g.acceptance === 'auto' ? 'Tự động' : 'Thủ công'}
+      </div>
+      <motion.button type="button" onClick={onInfo} whileTap={{ scale: 0.97 }}
+        style={{
+          fontFamily: featured ? SERIF : undefined, borderRadius: 9, padding: featured ? '9px 18px' : '9px 16px',
+          fontSize: featured ? 13 : 12, fontWeight: featured ? 600 : 400, cursor: 'pointer',
+          color: featured ? '#221905' : C.ink,
+          background: featured ? C.gold : 'transparent',
+          border: `1px solid ${featured ? C.gold : C.lineGold}`,
+        }}>Info</motion.button>
     </motion.div>
   )
 }
 
-// ─────────────────────────────────────────────────────────────────
-//  Activity tab content
-// ─────────────────────────────────────────────────────────────────
-function ActivityTab() {
-  const { t } = useLanguage()
+// ── Finder view ──────────────────────────────────────────────────
+function FinderView({ guilds, onEnter }: { guilds: GuildView[]; onEnter: () => void }) {
   return (
-    <div className="flex-1 overflow-y-auto"
-      style={{ scrollbarWidth:'thin', scrollbarColor:'rgba(255,255,255,0.05) transparent' }}>
-      <div className="px-5 py-1">
-        {FEED.map(post => (
-          <div key={post.id} className="flex items-start gap-3 py-3"
-            style={{ borderBottom:'1px solid rgba(255,255,255,0.04)' }}>
-            <span className="shrink-0 text-[11px] mt-0.5" style={{ color:POST_COLOR[post.type] }}>
-              {POST_ICON[post.type]}
-            </span>
-            <div className="size-6 rounded-full shrink-0 flex items-center justify-center font-mono text-[8px] font-bold"
-              style={{ background:`${post.authorColor}12`, border:`1px solid ${post.authorColor}30`, color:post.authorColor }}>
-              {post.author[0].toUpperCase()}
-            </div>
-            <div className="flex-1 min-w-0">
-              <div className="flex items-center gap-2 flex-wrap mb-1">
-                <span className="font-mono text-[8.5px] font-semibold" style={{ color:'rgba(255,255,255,0.72)' }}>
-                  {post.author}
-                </span>
-                <span className="font-mono text-[7px] px-1.5 py-0.5"
-                  style={{ color:'rgba(255,255,255,0.22)', border:'1px solid rgba(255,255,255,0.07)', background:'rgba(255,255,255,0.03)' }}>
-                  {post.guildName}
-                </span>
-                <span className="font-mono text-[7px] ml-auto" style={{ color:'rgba(255,255,255,0.2)' }}>{post.ts}</span>
-              </div>
-              <div className="font-sans text-[8.5px] leading-snug" style={{ color:'rgba(255,255,255,0.52)' }}>
-                {post.content}
-              </div>
-              <div className="flex items-center gap-3 mt-1.5">
-                <button type="button" className="flex items-center gap-1 font-mono text-[7px]" style={{ color:'rgba(255,255,255,0.22)' }}>
-                  ♡ {post.likes}
-                </button>
-                <button type="button" className="font-mono text-[7px]" style={{ color:'rgba(255,255,255,0.16)' }}>
-                  {t.guild.reply}
-                </button>
-              </div>
-            </div>
-          </div>
-        ))}
-      </div>
-    </div>
-  )
-}
-
-// ─────────────────────────────────────────────────────────────────
-//  Chat tab content
-// ─────────────────────────────────────────────────────────────────
-function ChatTab({ guild }: { guild: Guild }) {
-  const { t } = useLanguage()
-  const [messages, setMessages] = useState<ChatMsg[]>(CHAT_SEED)
-  const [input, setInput] = useState('')
-
-  useEffect(() => {
-    let idx = 0
-    const schedule = () => {
-      const delay = 4500 + Math.random() * 4000
-      return setTimeout(() => {
-        const m = CHAT_INCOMING[idx % CHAT_INCOMING.length]
-        setMessages(prev => [...prev.slice(-40), { id:`gc-${Date.now()}-${idx}`, ...m }])
-        idx++
-        schedule()
-      }, delay)
-    }
-    const t = schedule()
-    return () => clearTimeout(t)
-  }, [guild.id])
-
-  return (
-    <div className="flex flex-col flex-1 min-h-0">
-      <div className="flex-1 overflow-y-auto px-4 py-3 flex flex-col gap-2"
-        style={{ scrollbarWidth:'none' }}>
-        <AnimatePresence mode="popLayout" initial={false}>
-          {messages.map(msg => (
-            <motion.div key={msg.id}
-              initial={{ opacity:0, y:5 }} animate={{ opacity:1, y:0 }}
-              transition={{ type:'tween', duration:0.18 }}
-              className="flex items-start gap-2">
-              <div className="size-5 rounded-full shrink-0 flex items-center justify-center font-mono text-[7px] font-bold mt-0.5"
-                style={{ background:`${msg.color}15`, border:`1px solid ${msg.color}30`, color:msg.color }}>
-                {msg.user[0].toUpperCase()}
-              </div>
-              <div className="flex-1 min-w-0">
-                <span className="font-mono text-[7.5px] font-semibold" style={{ color:msg.color }}>
-                  {msg.user}
-                </span>
-                <span className="font-sans text-[8px] ml-1.5" style={{ color:'rgba(255,255,255,0.5)' }}>
-                  {msg.msg}
-                </span>
-              </div>
-            </motion.div>
+    <div style={{ display: 'grid', gridTemplateColumns: '360px 1fr', gap: 18, padding: 18, maxWidth: 1180, margin: '0 auto' }}>
+      {/* Foundation */}
+      <div style={{ border: `1px solid ${C.line}`, borderRadius: 14, padding: '20px 18px', textAlign: 'center', background: C.panel }}>
+        <div style={{ fontFamily: SERIF, fontSize: 22, fontWeight: 600, letterSpacing: 2, color: C.gold }}>Guild Foundation</div>
+        <div style={{ width: 112, height: 112, margin: '16px auto', borderRadius: '50%', border: `1px solid ${C.lineGold}`, background: C.panel2, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+          <IconDiamond size={52} color={C.gold} />
+        </div>
+        <Filigree />
+        <p style={{ fontSize: 12.5, color: C.muted, lineHeight: 1.7, margin: '0 0 16px' }}>
+          Lập hội của riêng bạn hoặc gia nhập một guild sưu tầm. Cùng giao dịch để nhận thưởng tập thể mỗi tuần.
+        </p>
+        <div style={{ display: 'flex', gap: 9, justifyContent: 'center', marginBottom: 16 }}>
+          {[<IconCoin key="a" size={20} color={C.gold} />, <IconDroplet key="b" size={20} color="#9ec5e3" />, <IconTrendingUp key="c" size={20} color="#8fce9f" />, <IconShieldChevron key="d" size={20} color={C.goldLight} />].map((ic, i) => (
+            <div key={i} style={{ width: 42, height: 42, borderRadius: 9, border: `1px solid ${C.lineGold}`, background: C.panel2, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>{ic}</div>
           ))}
-        </AnimatePresence>
-      </div>
-      <div className="px-4 py-2.5 shrink-0" style={{ borderTop:'1px solid rgba(255,255,255,0.05)' }}>
-        <div className="flex items-center gap-2"
-          style={{ border:'1px solid rgba(255,255,255,0.07)', background:'rgba(255,255,255,0.02)', padding:'5px 10px' }}>
-          <input value={input} onChange={e => setInput(e.target.value)}
-            placeholder={t.guild.chatPlaceholder.replace('{name}', guild.name)}
-            className="flex-1 bg-transparent outline-none font-sans text-[8.5px] placeholder:opacity-25"
-            style={{ color:'rgba(255,255,255,0.7)' }}
-            onKeyDown={e => {
-              if (e.key === 'Enter' && input.trim()) {
-                setMessages(prev => [...prev.slice(-40), { id:`me-${Date.now()}`, user:'you', msg:input.trim(), color:'#D4AF37' }])
-                setInput('')
-              }
-            }}/>
-          <span className="font-mono text-[7px] shrink-0" style={{ color:'rgba(255,255,255,0.18)' }}>↵</span>
         </div>
-      </div>
-    </div>
-  )
-}
-
-// ─────────────────────────────────────────────────────────────────
-//  Members tab content
-// ─────────────────────────────────────────────────────────────────
-function MembersTab({ guild }: { guild: Guild }) {
-  const { t } = useLanguage()
-  const members = MEMBERS_BY_GUILD[guild.id] ?? []
-  const extra = guild.members - members.length
-
-  return (
-    <div className="flex-1 overflow-y-auto"
-      style={{ scrollbarWidth:'thin', scrollbarColor:'rgba(255,255,255,0.05) transparent' }}>
-      <div className="px-5 py-2">
-        {members.map(m => (
-          <div key={m.rank} className="flex items-center gap-3 py-2.5"
-            style={{ borderBottom:'1px solid rgba(255,255,255,0.04)' }}>
-            <span className="font-mono text-[8px] shrink-0" style={{ color:'rgba(255,255,255,0.2)', width:18 }}>
-              {m.rank}
-            </span>
-            <div className="size-7 rounded-full shrink-0 flex items-center justify-center font-mono text-[9px] font-bold"
-              style={{ background:`${m.color}15`, border:`1.5px solid ${m.color}35`, color:m.color }}>
-              {m.name[0].toUpperCase()}
-            </div>
-            <div className="flex-1 min-w-0">
-              <div className="font-mono text-[9px] font-semibold" style={{ color:'rgba(255,255,255,0.72)' }}>{m.name}</div>
-              <div className="flex items-center gap-2 mt-0.5">
-                <span className="font-mono text-[7px]" style={{ color:MEMBER_TIER_COLOR[m.tier] }}>{m.tier}</span>
-                <span className="font-mono text-[6.5px]" style={{ color:'rgba(255,255,255,0.18)' }}>joined {m.joined}</span>
-              </div>
-            </div>
-            <div className="text-right shrink-0">
-              <div className="font-mono text-[9px] font-semibold" style={{ color:'rgba(255,255,255,0.55)' }}>{m.tokens}</div>
-              <div className="font-mono text-[6.5px] mt-0.5" style={{ color:'rgba(255,255,255,0.2)' }}>tokens</div>
-            </div>
+        <div style={{ display: 'flex', alignItems: 'center', border: `1px solid ${C.lineGold}`, borderRadius: 10, overflow: 'hidden' }}>
+          <div style={{ flex: 1, display: 'flex', alignItems: 'center', gap: 6, padding: '10px 12px' }}>
+            <IconCoin size={16} color={C.gold} />
+            <span style={{ fontSize: 14, color: C.ink, letterSpacing: 0.3 }}>{GUILD_FOUNDATION_FEE_ETH} ETH</span>
           </div>
-        ))}
-        {extra > 0 && (
-          <div className="py-3 text-center">
-            <span className="font-mono text-[7.5px]" style={{ color:'rgba(255,255,255,0.22)' }}>
-              {t.guild.moreMembers.replace('{count}', String(extra))}
-            </span>
-          </div>
-        )}
-      </div>
-    </div>
-  )
-}
-
-// ─────────────────────────────────────────────────────────────────
-//  Holdings tab content
-// ─────────────────────────────────────────────────────────────────
-function HoldingsTab({ guild }: { guild: Guild }) {
-  const { t } = useLanguage()
-  const holdings = HOLDINGS_BY_GUILD[guild.id] ?? []
-  const totalETH = holdings.reduce((s, h) => s + parseFloat(h.value), 0)
-
-  return (
-    <div className="flex-1 overflow-y-auto"
-      style={{ scrollbarWidth:'thin', scrollbarColor:'rgba(255,255,255,0.05) transparent' }}>
-      {/* Summary */}
-      <div className="flex items-center justify-between px-5 py-3"
-        style={{ borderBottom:'1px solid rgba(255,255,255,0.05)', background:'rgba(0,0,0,0.2)' }}>
-        <div>
-          <div className="font-mono text-[6.5px] tracking-wider uppercase" style={{ color:'rgba(255,255,255,0.2)' }}>
-            {t.guild.collectiveHoldings}
-          </div>
-          <div className="font-sans text-[15px] font-semibold mt-0.5"
-            style={{ color:'rgba(255,255,255,0.8)', letterSpacing:'-0.02em' }}>
-            {guild.holdings}
-          </div>
-        </div>
-        <div className="text-right">
-          <div className="font-mono text-[6.5px] tracking-wider uppercase" style={{ color:'rgba(255,255,255,0.2)' }}>
-            {t.guild.positions}
-          </div>
-          <div className="font-sans text-[15px] font-semibold mt-0.5"
-            style={{ color:'rgba(255,255,255,0.6)', letterSpacing:'-0.02em' }}>
-            {t.guild.tokens.replace('{count}', String(holdings.length))}
-          </div>
-        </div>
-      </div>
-
-      {holdings.length === 0 ? (
-        <div className="flex items-center justify-center py-10">
-          <span className="font-mono text-[8px]" style={{ color:'rgba(255,255,255,0.2)' }}>
-            {t.guild.noHoldingsData}
-          </span>
-        </div>
-      ) : (
-        <div className="px-5 py-2">
-          {/* Bar chart style breakdown */}
-          {holdings.map(h => {
-            const valNum = parseFloat(h.value)
-            const pct = (valNum / totalETH * 100)
-            return (
-              <div key={h.ticker} className="py-3" style={{ borderBottom:'1px solid rgba(255,255,255,0.04)' }}>
-                <div className="flex items-center justify-between mb-1.5">
-                  <div className="flex items-center gap-2">
-                    <span className="font-mono text-[10px] font-bold" style={{ color:h.color }}>{h.ticker}</span>
-                    <span className="font-sans text-[8.5px]" style={{ color:'rgba(255,255,255,0.38)' }}>{h.title}</span>
-                  </div>
-                  <div className="flex items-center gap-3 text-right">
-                    <span className="font-mono text-[7.5px]" style={{ color:'rgba(255,255,255,0.3)' }}>
-                      {h.members} members · {h.qty.toFixed(2)} {t.guild.qty}
-                    </span>
-                    <span className="font-mono text-[9px] font-semibold" style={{ color:'rgba(255,255,255,0.65)' }}>
-                      {h.value}
-                    </span>
-                  </div>
-                </div>
-                {/* Progress bar */}
-                <div style={{ height:3, background:'rgba(255,255,255,0.05)', overflow:'hidden' }}>
-                  <motion.div style={{ height:'100%', background:h.color, opacity:0.7 }}
-                    initial={{ width:0 }} animate={{ width:`${pct}%` }}
-                    transition={{ duration:0.6, ease:EASE }}/>
-                </div>
-                <div className="font-mono text-[6.5px] mt-1" style={{ color:'rgba(255,255,255,0.18)' }}>
-                  {pct.toFixed(1)}{t.guild.pctCollective}
-                </div>
-              </div>
-            )
-          })}
-        </div>
-      )}
-    </div>
-  )
-}
-
-// ─────────────────────────────────────────────────────────────────
-//  Guild detail panel
-// ─────────────────────────────────────────────────────────────────
-function GuildDetail({ guild }: { guild: Guild }) {
-  const { t } = useLanguage()
-  const [joined, setJoined] = useState(guild.joined)
-  const [tab,    setTab]    = useState<DetailTab>('activity')
-
-  /* eslint-disable react-hooks/set-state-in-effect */
-  useEffect(() => {
-    setJoined(guild.joined)
-    setTab('activity')
-  }, [guild.id, guild.joined])
-  /* eslint-enable react-hooks/set-state-in-effect */
-
-  const TABS: { id: DetailTab; label: string }[] = [
-    { id:'activity', label: t.guild.activity  },
-    { id:'chat',     label: t.guild.chat      },
-    { id:'members',  label: t.guild.members   },
-    { id:'holdings', label: t.guild.holdings  },
-  ]
-
-  return (
-    <AnimatePresence mode="wait">
-      <motion.div key={guild.id} className="flex flex-col h-full"
-        initial={{ opacity:0 }} animate={{ opacity:1 }} exit={{ opacity:0 }}
-        transition={{ duration:0.22 }}>
-
-        {/* Cover */}
-        <div className="relative shrink-0" style={{ height:88, background:guild.cover }}>
-          <div className="absolute inset-0 px-5 flex flex-col justify-end pb-3"
-            style={{ background:'linear-gradient(to top,rgba(0,0,0,0.75),rgba(0,0,0,0.1))' }}>
-            <div className="flex items-end justify-between gap-4">
-              <div>
-                <div style={{ fontFamily:"'Cormorant Garamond', serif", fontSize:15, fontWeight:600, color:'rgba(255,255,255,0.92)', letterSpacing:'-0.02em' }}>
-                  {guild.name}
-                </div>
-                <div className="font-sans text-[8.5px] mt-0.5" style={{ color:'rgba(255,255,255,0.42)' }}>
-                  {guild.tagline}
-                </div>
-              </div>
-              <motion.button type="button" onClick={() => setJoined(v => !v)}
-                className="px-4 py-1.5 font-mono text-[8px] font-semibold shrink-0"
-                style={{
-                  background: joined ? 'rgba(255,255,255,0.05)' : `${guild.color}18`,
-                  border:     `1px solid ${joined ? 'rgba(255,255,255,0.1)' : `${guild.color}38`}`,
-                  color:      joined ? 'rgba(255,255,255,0.45)' : guild.color,
-                }}
-                whileHover={{ scale:1.02 }} whileTap={{ scale:0.97 }}>
-                {joined ? t.guild.leave : t.guild.joinGuild}
-              </motion.button>
-            </div>
-          </div>
-        </div>
-
-        {/* Stats strip */}
-        <div className="flex items-center gap-5 px-5 shrink-0"
-          style={{ height:38, borderBottom:'1px solid rgba(255,255,255,0.05)', background:'rgba(0,0,0,0.45)' }}>
-          {[
-            { label:'Members',  value:String(guild.members) },
-            { label:'Holdings', value:guild.holdings        },
-            { label:'Focus',    value:guild.focus           },
-          ].map(s => (
-            <div key={s.label} className="flex items-center gap-2">
-              <span className="font-mono text-[6.5px] tracking-wider uppercase" style={{ color:'rgba(255,255,255,0.2)' }}>{s.label}</span>
-              <span className="font-sans text-[9px] font-semibold" style={{ color:'rgba(255,255,255,0.58)' }}>{s.value}</span>
-            </div>
-          ))}
-          <div className="ml-auto flex items-center gap-1.5">
-            {guild.tags.map(tag => (
-              <span key={tag} className="font-mono text-[6.5px] px-1.5 py-0.5"
-                style={{ border:`1px solid ${guild.color}20`, color:`${guild.color}88`, background:`${guild.color}08` }}>
-                {tag}
-              </span>
-            ))}
-          </div>
-        </div>
-
-        {/* Tab bar */}
-        <div className="flex shrink-0"
-          style={{ borderBottom:'1px solid rgba(255,255,255,0.05)', background:'rgba(0,0,0,0.3)' }}>
-          {TABS.map(t => (
-            <motion.button key={t.id} type="button" onClick={() => setTab(t.id)}
-              className="relative px-4 py-2 font-mono text-[7.5px] tracking-wider uppercase"
-              style={{ color: tab===t.id ? 'rgba(255,255,255,0.75)' : 'rgba(255,255,255,0.25)' }}
-              whileTap={{ scale:0.97 }}>
-              {t.label}
-              {tab===t.id && (
-                <motion.div layoutId="guild-tab" className="absolute bottom-0 left-0 right-0 h-[2px]"
-                  style={{ background:guild.color }}/>
-              )}
-            </motion.button>
-          ))}
-          {/* Live dot for chat */}
-          {tab === 'chat' && (
-            <div className="flex items-center ml-auto mr-4 gap-1.5">
-              <motion.span className="size-1.5 rounded-full"
-                style={{ background:'#22c55e', display:'inline-block' }}
-                animate={{ opacity:[1,0.3,1] }} transition={{ duration:1.4, repeat:Infinity }}/>
-              <span className="font-mono text-[7px]" style={{ color:'rgba(255,255,255,0.28)' }}>{t.common.live}</span>
-            </div>
-          )}
-        </div>
-
-        {/* Tab content */}
-        <AnimatePresence mode="wait">
-          <motion.div key={tab} className="flex flex-col flex-1 min-h-0"
-            initial={{ opacity:0, y:6 }} animate={{ opacity:1, y:0 }} exit={{ opacity:0 }}
-            transition={{ type:'tween', duration:0.2 }}>
-            {tab === 'activity' && <ActivityTab/>}
-            {tab === 'chat'     && <ChatTab guild={guild}/>}
-            {tab === 'members'  && <MembersTab guild={guild}/>}
-            {tab === 'holdings' && <HoldingsTab guild={guild}/>}
-          </motion.div>
-        </AnimatePresence>
-      </motion.div>
-    </AnimatePresence>
-  )
-}
-
-// ─────────────────────────────────────────────────────────────────
-//  Create Guild modal
-// ─────────────────────────────────────────────────────────────────
-function CreateGuildModal({ onClose }: { onClose: () => void }) {
-  const { t } = useLanguage()
-  const [name, setName]   = useState('')
-  const [desc, setDesc]   = useState('')
-  const [focus, setFocus] = useState('Painting')
-  const FOCUSES = ['Painting','Drawing','Digital','Sculpture','Mixed Media','Photography','Generative']
-
-  return (
-    <motion.div className="fixed inset-0 z-50 flex items-center justify-center"
-      style={{ background:'rgba(0,0,0,0.72)', backdropFilter:'blur(6px)' }}
-      initial={{ opacity:0 }} animate={{ opacity:1 }} exit={{ opacity:0 }}
-      onClick={e => { if (e.target === e.currentTarget) onClose() }}>
-      <motion.div className="w-[440px] overflow-hidden"
-        style={{ background:'#0c0c0e', border:'1px solid rgba(255,255,255,0.1)' }}
-        initial={{ opacity:0, y:14 }} animate={{ opacity:1, y:0 }}
-        transition={{ type:'tween', duration:0.22 }}>
-        {/* Header */}
-        <div className="flex items-center justify-between px-5 py-3.5"
-          style={{ borderBottom:'1px solid rgba(255,255,255,0.07)' }}>
-          <span style={{ fontFamily:"'Cormorant Garamond', serif", fontSize:16, fontWeight:600, color:'rgba(255,255,255,0.85)' }}>
-            {t.guild.createModalTitle}
-          </span>
-          <button type="button" onClick={onClose}
-            className="font-mono text-[11px]" style={{ color:'rgba(255,255,255,0.3)' }}>✕</button>
-        </div>
-        <div className="px-5 py-4 flex flex-col gap-3.5">
-          <div>
-            <label className="font-mono text-[7px] tracking-wider uppercase block mb-1.5"
-              style={{ color:'rgba(255,255,255,0.28)' }}>{t.guild.guildNameLabel}</label>
-            <input value={name} onChange={e => setName(e.target.value)}
-              placeholder={t.guild.guildNamePlaceholder}
-              className="w-full bg-transparent font-sans text-[11px] px-3 py-2 outline-none"
-              style={{ border:'1px solid rgba(255,255,255,0.1)', color:'rgba(255,255,255,0.78)', caretColor:'#D4AF37' }}/>
-          </div>
-          <div>
-            <label className="font-mono text-[7px] tracking-wider uppercase block mb-1.5"
-              style={{ color:'rgba(255,255,255,0.28)' }}>{t.guild.descriptionLabel}</label>
-            <textarea value={desc} onChange={e => setDesc(e.target.value)}
-              placeholder={t.guild.descriptionPlaceholder}
-              rows={2}
-              className="w-full bg-transparent font-sans text-[11px] px-3 py-2 outline-none resize-none"
-              style={{ border:'1px solid rgba(255,255,255,0.1)', color:'rgba(255,255,255,0.78)', caretColor:'#D4AF37' }}/>
-          </div>
-          <div>
-            <label className="font-mono text-[7px] tracking-wider uppercase block mb-1.5"
-              style={{ color:'rgba(255,255,255,0.28)' }}>{t.guild.focusLabel}</label>
-            <div className="flex flex-wrap gap-1.5">
-              {FOCUSES.map(f => (
-                <button key={f} type="button" onClick={() => setFocus(f)}
-                  className="px-2.5 py-1 font-mono text-[7px]"
-                  style={{
-                    border:`1px solid ${focus===f ? 'rgba(212,175,55,0.4)' : 'rgba(255,255,255,0.07)'}`,
-                    background: focus===f ? 'rgba(212,175,55,0.08)' : 'transparent',
-                    color: focus===f ? '#D4AF37' : 'rgba(255,255,255,0.3)',
-                  }}>{f}</button>
-              ))}
-            </div>
-          </div>
-          <motion.button type="button"
-            className="w-full py-2.5 font-mono text-[8.5px] tracking-widest font-semibold"
-            style={{
-              background: name ? 'rgba(212,175,55,0.14)' : 'rgba(255,255,255,0.03)',
-              border:     `1px solid ${name ? 'rgba(212,175,55,0.38)' : 'rgba(255,255,255,0.07)'}`,
-              color:      name ? '#D4AF37' : 'rgba(255,255,255,0.18)',
-              cursor:     name ? 'pointer' : 'default',
-            }}
-            whileHover={name ? { background:'rgba(212,175,55,0.22)' } : {}}
-            whileTap={name ? { scale:0.98 } : {}}>
-            {t.guild.createButton}
+          <motion.button type="button" onClick={onEnter} whileTap={{ scale: 0.97 }}
+            style={{ fontFamily: SERIF, background: C.gold, color: '#221905', fontSize: 15, fontWeight: 600, letterSpacing: 1, padding: '11px 22px', cursor: 'pointer', border: 'none' }}>
+            Lập Guild
           </motion.button>
         </div>
-      </motion.div>
+        <div style={{ fontSize: 10.5, color: C.muted, marginTop: 8 }}>Phí một lần · chống spam</div>
+      </div>
+
+      {/* Recommended */}
+      <div>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 6 }}>
+          <span style={{ fontFamily: SERIF, fontSize: 22, fontWeight: 600, letterSpacing: 1, color: C.gold }}>Đề xuất</span>
+          <span style={{ display: 'inline-flex', alignItems: 'center', gap: 6, border: `1px solid ${C.lineGold}`, borderRadius: 9, padding: '6px 12px', fontSize: 12, color: C.ink }}>
+            <IconMail size={15} color={C.gold} />Lời mời
+          </span>
+        </div>
+        <Filigree />
+        <div style={{ display: 'flex', gap: 7, marginBottom: 12 }}>
+          <span style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'space-between', border: `1px solid ${C.line}`, borderRadius: 9, padding: '7px 11px', fontSize: 11, color: C.muted }}>Mở: Tùy ý <IconChevronDown size={14} /></span>
+          <span style={{ display: 'flex', alignItems: 'center', gap: 5, border: `1px solid ${C.line}`, borderRadius: 9, padding: '7px 11px', fontSize: 11, color: C.muted }}><IconHash size={14} color={C.gold} />Tag</span>
+          <span style={{ display: 'flex', alignItems: 'center', gap: 5, border: `1px solid ${C.line}`, borderRadius: 9, padding: '7px 11px', fontSize: 11, color: C.muted }}><IconSearch size={14} color={C.gold} />Tìm</span>
+          <span style={{ display: 'flex', alignItems: 'center', border: `1px solid ${C.line}`, borderRadius: 9, padding: '7px 10px', color: C.muted }}><IconRefresh size={14} color={C.gold} /></span>
+        </div>
+        <motion.div variants={{ hidden: {}, show: { transition: { staggerChildren: 0.07 } } }} initial="hidden" animate="show">
+          {guilds.map((g, i) => (
+            <GuildRow key={g.id} g={g} featured={i === 1} onInfo={onEnter} />
+          ))}
+        </motion.div>
+      </div>
+    </div>
+  )
+}
+
+// ── Hall: node chức năng ─────────────────────────────────────────
+function FeatureNode({ icon, title, sub, featured }: { icon: React.ReactNode; title: string; sub: string; featured?: boolean }) {
+  return (
+    <motion.div whileHover={{ y: -4 }} style={{ textAlign: 'center', cursor: 'pointer' }}>
+      <div style={{
+        width: featured ? 96 : 82, height: featured ? 96 : 82, margin: '0 auto 8px', borderRadius: '50%',
+        border: `${featured ? 2 : 1}px solid ${featured ? C.gold : C.lineGold}`, background: C.panel2,
+        display: 'flex', alignItems: 'center', justifyContent: 'center',
+      }}>{icon}</div>
+      <div style={{ fontFamily: SERIF, fontSize: featured ? 16 : 14, fontWeight: 600, color: featured ? C.goldLight : C.ink }}>{title}</div>
+      <div style={{ fontSize: 10.5, color: C.muted }}>{sub}</div>
     </motion.div>
   )
 }
 
-// ─────────────────────────────────────────────────────────────────
-//  Main GuildPage
-// ─────────────────────────────────────────────────────────────────
-export function GuildPage() {
-  const { t } = useLanguage()
-  const [selected,      setSelected]      = useState<Guild>(GUILDS[0])
-  const [filter,        setFilter]        = useState<'discover' | 'joined'>('discover')
-  const [createOpen,    setCreateOpen]    = useState(false)
+function RailItem({ icon, label }: { icon: React.ReactNode; label: string }) {
+  return (
+    <div style={{ textAlign: 'center', color: C.muted, cursor: 'pointer' }}>
+      {icon}<div style={{ fontSize: 10, marginTop: 3 }}>{label}</div>
+    </div>
+  )
+}
 
-  const displayed = filter === 'joined' ? GUILDS.filter(g => g.joined) : GUILDS
-  const totalMembers = GUILDS.reduce((s, g) => s + g.members, 0)
+function HallView({ guild, onLeave }: { guild: GuildView; onLeave: () => void }) {
+  return (
+    <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.35, ease: EASE }}
+      style={{ border: `1px solid ${C.line}`, borderRadius: 14, overflow: 'hidden', maxWidth: 1180, margin: '18px auto', background: C.bg }}>
+      {/* Top bar */}
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '11px 16px', borderBottom: `1px solid ${C.line}`, background: C.panel2 }}>
+        <button type="button" onClick={onLeave} style={{ display: 'flex', alignItems: 'center', gap: 6, fontFamily: SERIF, fontSize: 17, fontWeight: 600, color: C.ink, background: 'none', border: 'none', cursor: 'pointer' }}>
+          <IconChevronLeft size={18} color={C.gold} />Guild
+        </button>
+        <div style={{ display: 'flex', gap: 16, fontSize: 12, color: C.ink }}>
+          <span style={{ display: 'flex', alignItems: 'center', gap: 5 }}><IconCoin size={15} color={C.gold} />152,884,354</span>
+          <span style={{ display: 'flex', alignItems: 'center', gap: 5 }}><IconDiamond size={15} color="#9ec5e3" />1,047</span>
+          <span style={{ display: 'flex', alignItems: 'center', gap: 5 }}><IconShieldChevron size={15} color="#8fce9f" />6,070</span>
+        </div>
+        <div style={{ display: 'flex', gap: 11, color: C.gold }}><IconBell size={18} /><IconMail size={18} /><IconMessageCircle size={18} /></div>
+      </div>
+
+      {/* Body */}
+      <div style={{ display: 'flex', minHeight: 320 }}>
+        {/* Rail */}
+        <div style={{ width: 124, borderRight: `1px solid ${C.line}`, padding: '16px 8px', display: 'flex', flexDirection: 'column', gap: 18, background: C.panel2 }}>
+          <div style={{ textAlign: 'center' }}>
+            <div style={{ width: 48, height: 48, margin: '0 auto 4px', borderRadius: '50%', border: `1px solid ${C.lineGold}`, background: C.panel, display: 'flex', alignItems: 'center', justifyContent: 'center' }}><IconDiamond size={23} color={C.gold} /></div>
+            <div style={{ fontFamily: SERIF, fontSize: 14, fontWeight: 600, color: C.gold }}>Lv.{guild.level} {guild.name}</div>
+            <div style={{ fontSize: 10, color: C.muted }}>Điểm danh {guild.member_count}/{guild.maxMembers}</div>
+          </div>
+          <RailItem icon={<IconChecklist size={23} color={C.gold} />} label="Hoạt động Guild" />
+          <RailItem icon={<IconWand size={23} color={C.gold} />} label="Trang trí Gallery" />
+          <RailItem icon={<IconGift size={23} color={C.gold} />} label="Cổ tức tuần" />
+        </div>
+
+        {/* Hall floor */}
+        <div style={{ flex: 1, position: 'relative', padding: '20px 16px', display: 'flex', alignItems: 'center', justifyContent: 'space-around' }}>
+          <div style={{ position: 'absolute', top: 14, right: 14, background: C.panel, border: `1px solid ${C.lineGold}`, borderRadius: 10, padding: '7px 11px', maxWidth: 200 }}>
+            <div style={{ fontFamily: SERIF, fontSize: 12, fontWeight: 600, color: C.gold }}>Mina</div>
+            <div style={{ fontSize: 11, color: C.ink }}>gom đủ vốn rồi, vào lệnh thôi</div>
+          </div>
+          <FeatureNode icon={<IconBuildingBank size={38} color={C.gold} />} title="Kho chung" sub="Đồng sở hữu tác phẩm" />
+          <FeatureNode icon={<IconTrophy size={46} color={C.goldLight} />} title="Giải đấu Guild" sub="Đua khối lượng theo mùa" featured />
+          <FeatureNode icon={<IconPhoto size={38} color={C.gold} />} title="Phòng tuyển chọn" sub="BST chung của hội" />
+        </div>
+      </div>
+
+      {/* Bottom actions */}
+      <div style={{ display: 'flex', justifyContent: 'center', gap: 11, padding: 11, borderTop: `1px solid ${C.line}`, background: C.panel2 }}>
+        {[[<IconGavel key="g" size={15} color={C.gold} />, 'Đấu giá Guild'], [<IconUsers key="u" size={15} color={C.gold} />, 'Thành viên'], [<IconMessage2 key="m" size={15} color={C.gold} />, 'Chat hội']].map(([ic, label], i) => (
+          <span key={i} style={{ display: 'flex', alignItems: 'center', gap: 6, border: `1px solid ${C.lineGold}`, borderRadius: 10, padding: '7px 16px', fontSize: 12, color: C.ink, cursor: 'pointer' }}>{ic}{label as string}</span>
+        ))}
+      </div>
+    </motion.div>
+  )
+}
+
+// ── Main ─────────────────────────────────────────────────────────
+export function GuildPage() {
+  const [guilds, setGuilds]   = useState<GuildView[]>(MOCK)
+  const [view, setView]       = useState<'finder' | 'hall'>('finder')
+  const [active, setActive]   = useState<GuildView>(MOCK[1])
+
+  useEffect(() => {
+    guildService.list()
+      .then((rows) => { if (Array.isArray(rows) && rows.length) setGuilds(rows.map(toView)) })
+      .catch(() => { /* giữ MOCK khi backend chưa bật */ })
+  }, [])
+
+  const enter = (g: GuildView) => { setActive(g); setView('hall') }
 
   return (
-    <>
-      <AnimatePresence>
-        {createOpen && <CreateGuildModal key="create" onClose={() => setCreateOpen(false)}/>}
-      </AnimatePresence>
-
-      <motion.div className="flex flex-col overflow-hidden"
-        style={{ height:'calc(100vh - 68px)', marginTop:68, background:'#070707' }}
-        initial={{ opacity:0 }} animate={{ opacity:1 }}
-        transition={{ duration:0.35, ease:EASE }}>
-
-        {/* Filter bar */}
-        <div className="flex items-center gap-1 px-4 shrink-0"
-          style={{ height:44, borderBottom:'1px solid rgba(255,255,255,0.05)', background:'rgba(0,0,0,0.3)' }}>
-          <span className="font-sans text-[11px] font-semibold mr-2" style={{ color:'rgba(255,255,255,0.3)' }}>
-            {t.guild.guilds}
-          </span>
-          {(['discover', 'joined'] as const).map(f => (
-            <motion.button key={f} type="button" onClick={() => setFilter(f)}
-              className="px-3 py-1 font-sans text-[9px] capitalize"
-              style={{
-                color:        filter===f ? 'rgba(255,255,255,0.82)' : 'rgba(255,255,255,0.3)',
-                borderBottom: filter===f ? '1px solid rgba(255,255,255,0.5)' : '1px solid transparent',
-              }}
-              whileHover={{ color:'rgba(255,255,255,0.6)' }}>
-              {f === 'discover' ? t.guild.discover : t.guild.myGuilds}
-            </motion.button>
-          ))}
-          <div className="ml-auto flex items-center gap-3">
-            <span className="font-mono text-[7.5px]" style={{ color:'rgba(255,255,255,0.2)' }}>
-              {t.guild.statsFormat.replace('{count}', String(GUILDS.length)).replace('{members}', String(totalMembers))}
-            </span>
-            <motion.button type="button" onClick={() => setCreateOpen(true)}
-              className="px-3 py-1.5 font-mono text-[8px] font-semibold tracking-wider"
-              style={{ background:'rgba(212,175,55,0.1)', border:'1px solid rgba(212,175,55,0.28)', color:'#D4AF37' }}
-              whileHover={{ background:'rgba(212,175,55,0.18)' }} whileTap={{ scale:0.97 }}>
-              {t.guild.createGuild}
-            </motion.button>
-          </div>
-        </div>
-
-        {/* Body */}
-        <div className="flex flex-1 min-h-0">
-          {/* Guild grid */}
-          <div className="shrink-0 overflow-y-auto p-3"
-            style={{ width:404, borderRight:'1px solid rgba(255,255,255,0.05)', scrollbarWidth:'none' }}>
-            <motion.div className="grid grid-cols-2 gap-2.5"
-              variants={LIST_V} initial="hidden" animate="show">
-              {displayed.map(guild => (
-                <GuildCard key={guild.id} guild={guild}
-                  selected={selected.id === guild.id}
-                  onClick={() => setSelected(guild)}/>
-              ))}
-            </motion.div>
-          </div>
-
-          {/* Guild detail */}
-          <div className="flex-1 min-w-0 overflow-hidden">
-            <GuildDetail guild={selected}/>
-          </div>
-        </div>
-      </motion.div>
-    </>
+    <div style={{ background: C.bg, minHeight: 'calc(100vh - 68px)', marginTop: 68, color: C.ink }}>
+      {view === 'finder'
+        ? <FinderView guilds={guilds} onEnter={() => enter(guilds[1] ?? guilds[0])} />
+        : <HallView guild={active} onLeave={() => setView('finder')} />}
+    </div>
   )
 }
