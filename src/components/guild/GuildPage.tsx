@@ -134,13 +134,18 @@ function FoundationCrest({ size = 172 }: { size?: number }) {
   )
 }
 
-// Ảnh thật từ /public; lỗi (chưa có file) → fallback vector/icon
+// Mặc định LUÔN hiển thị fallback (SVG/icon). Chỉ "nâng cấp" sang ảnh thật khi
+// ảnh /public tải THÀNH CÔNG (onLoad). Tránh bug SSR: ảnh 404 fire onError trước
+// khi React gắn handler → trước đây hiện ảnh vỡ. Giờ không bao giờ vỡ.
 function ImgFallback({ src, alt, w, h, fallback }: { src: string; alt: string; w: number; h: number; fallback: React.ReactNode }) {
-  const [err, setErr] = useState(false)
-  if (err) return <>{fallback}</>
+  const [ok, setOk] = useState(false)
   return (
-    // eslint-disable-next-line @next/next/no-img-element
-    <img src={src} alt={alt} width={w} height={h} style={{ objectFit: 'contain', display: 'block' }} onError={() => setErr(true)} />
+    <span style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
+      {!ok && fallback}
+      {/* eslint-disable-next-line @next/next/no-img-element */}
+      <img src={src} alt={alt} width={w} height={h} onLoad={() => setOk(true)}
+        style={{ objectFit: 'contain', display: ok ? 'block' : 'none' }} />
+    </span>
   )
 }
 
