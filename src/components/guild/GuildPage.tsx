@@ -157,11 +157,13 @@ const REWARD_FALLBACK = [
   <IconShieldChevron key="4" size={22} color={C.goldLight} />,
 ]
 
-// Emblem riêng cho mỗi guild (giống tower / fleur-de-lis của game)
+// Logo riêng cho mỗi guild: sinh từ DiceBear theo tên (mỗi clan 1 emblem độc nhất).
+// DiceBear đã được allowlist sẵn (CSP img-src https + next.config remotePatterns).
 const ROW_EMBLEMS = [IconChessRook, IconCrown, IconBuildingCastle, IconShieldChevron]
-function RowEmblem({ idx, featured }: { idx: number; featured?: boolean }) {
+function RowEmblem({ seed, idx, featured }: { seed: string; idx: number; featured?: boolean }) {
   const Icon = ROW_EMBLEMS[idx % ROW_EMBLEMS.length]
-  return <Icon size={26} color={featured ? C.goldLight : C.gold} />
+  const url = `https://api.dicebear.com/7.x/shapes/svg?seed=${encodeURIComponent(seed)}&radius=50`
+  return <ImgFallback src={url} alt="" w={44} h={44} fallback={<Icon size={26} color={featured ? C.goldLight : C.gold} />} />
 }
 
 // ── Finder row ───────────────────────────────────────────────────
@@ -177,7 +179,7 @@ function GuildRow({ g, idx, featured, onInfo }: { g: GuildView; idx: number; fea
       }}>
       <div style={{ width: 52, height: 52, borderRadius: '50%', flexShrink: 0, display: 'flex', alignItems: 'center', justifyContent: 'center',
         border: `1px solid ${featured ? C.gold : C.lineGold}`, background: `radial-gradient(circle, rgba(201,169,110,0.12), ${C.panel2} 72%)` }}>
-        <RowEmblem idx={idx} featured={featured} />
+        <RowEmblem seed={g.name} idx={idx} featured={featured} />
       </div>
       <div style={{ flex: 1, minWidth: 0 }}>
         <div style={{ fontSize: 13, color: C.ink }}>
