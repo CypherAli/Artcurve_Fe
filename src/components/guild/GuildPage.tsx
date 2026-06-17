@@ -10,10 +10,11 @@ import { useState, useEffect } from 'react'
 import { motion } from 'framer-motion'
 import {
   IconDiamond, IconCoin, IconDroplet, IconTrendingUp, IconShieldChevron,
-  IconMail, IconHash, IconSearch, IconRefresh, IconBuildingBank, IconPalette,
+  IconMail, IconHash, IconSearch, IconRefresh,
   IconChevronLeft, IconChevronDown, IconBell, IconMessageCircle,
   IconChecklist, IconWand, IconGift, IconTrophy, IconPhoto, IconGavel,
-  IconUsers, IconMessage2,
+  IconUsers, IconMessage2, IconBuildingCastle, IconCrown, IconChessRook,
+  IconBuildingBank,
 } from '@tabler/icons-react'
 import { guildService, GUILD_FOUNDATION_FEE_ETH, type ApiGuild } from '@/services/guild.service'
 
@@ -69,8 +70,42 @@ function Corners() {
   )
 }
 
+// ── Crest huy hiệu trên banner (tấm rủ) — centerpiece kiểu game ──
+function FoundationCrest({ size = 150 }: { size?: number }) {
+  return (
+    <svg width={size} height={size * 1.25} viewBox="0 0 120 150" fill="none" aria-hidden="true">
+      {/* pennant / banner */}
+      <path d="M22 12 H98 V108 Q98 117 90 123 L60 143 L30 123 Q22 117 22 108 Z"
+        fill="#15120c" stroke={C.gold} strokeWidth="1.6" />
+      <path d="M28 18 H92 V106 Q92 113 86 117 L60 135 L34 117 Q28 113 28 106 Z"
+        fill="none" stroke={C.lineGold} strokeWidth="0.8" />
+      {/* ornament bar trên */}
+      <rect x="30" y="6" width="60" height="6" rx="2" fill={C.panel2} stroke={C.gold} strokeWidth="1" />
+      {/* laurel/wings hai bên */}
+      <path d="M50 92 C30 86 24 70 27 50 C37 60 46 66 51 78" fill="none" stroke={C.gold} strokeWidth="1.4" strokeLinecap="round" />
+      <path d="M70 92 C90 86 96 70 93 50 C83 60 74 66 69 78" fill="none" stroke={C.gold} strokeWidth="1.4" strokeLinecap="round" />
+      <path d="M34 58 C40 60 44 64 46 70" fill="none" stroke={C.lineGold} strokeWidth="1" strokeLinecap="round" />
+      <path d="M86 58 C80 60 76 64 74 70" fill="none" stroke={C.lineGold} strokeWidth="1" strokeLinecap="round" />
+      {/* sword */}
+      <polygon points="60,30 63,78 60,84 57,78" fill={C.goldLight} stroke={C.gold} strokeWidth="0.8" />
+      <line x1="44" y1="74" x2="76" y2="74" stroke={C.gold} strokeWidth="2.4" strokeLinecap="round" />
+      <rect x="58" y="84" width="4" height="14" rx="1.5" fill={C.gold} />
+      <circle cx="60" cy="101" r="3.4" fill="none" stroke={C.gold} strokeWidth="1.6" />
+      {/* gem ở chuôi */}
+      <rect x="56.5" y="70.5" width="7" height="7" rx="1" transform="rotate(45 60 74)" fill="#9ec5e3" stroke={C.goldLight} strokeWidth="0.8" />
+    </svg>
+  )
+}
+
+// Emblem riêng cho mỗi guild (giống tower / fleur-de-lis của game)
+const ROW_EMBLEMS = [IconChessRook, IconCrown, IconBuildingCastle, IconShieldChevron]
+function RowEmblem({ idx, featured }: { idx: number; featured?: boolean }) {
+  const Icon = ROW_EMBLEMS[idx % ROW_EMBLEMS.length]
+  return <Icon size={26} color={featured ? C.goldLight : C.gold} />
+}
+
 // ── Finder row ───────────────────────────────────────────────────
-function GuildRow({ g, featured, onInfo }: { g: GuildView; featured?: boolean; onInfo: () => void }) {
+function GuildRow({ g, idx, featured, onInfo }: { g: GuildView; idx: number; featured?: boolean; onInfo: () => void }) {
   return (
     <motion.div variants={{ hidden: { opacity: 0, y: 14 }, show: { opacity: 1, y: 0 } }}
       whileHover={{ borderColor: C.gold, y: -2 }}
@@ -80,9 +115,9 @@ function GuildRow({ g, featured, onInfo }: { g: GuildView; featured?: boolean; o
         border: `${featured ? 2 : 1}px solid ${featured ? C.gold : C.line}`,
         boxShadow: featured ? '0 0 22px rgba(201,169,110,0.14)' : 'none',
       }}>
-      <div style={{ width: 50, height: 50, borderRadius: '50%', flexShrink: 0, display: 'flex', alignItems: 'center', justifyContent: 'center',
-        border: `1px solid ${featured ? C.gold : C.lineGold}`, background: `radial-gradient(circle, rgba(201,169,110,0.10), ${C.panel2} 72%)` }}>
-        {featured ? <IconPalette size={25} color={C.goldLight} /> : <IconBuildingBank size={25} color={C.gold} />}
+      <div style={{ width: 52, height: 52, borderRadius: '50%', flexShrink: 0, display: 'flex', alignItems: 'center', justifyContent: 'center',
+        border: `1px solid ${featured ? C.gold : C.lineGold}`, background: `radial-gradient(circle, rgba(201,169,110,0.12), ${C.panel2} 72%)` }}>
+        <RowEmblem idx={idx} featured={featured} />
       </div>
       <div style={{ flex: 1, minWidth: 0 }}>
         <div style={{ fontSize: 13, color: C.ink }}>
@@ -111,14 +146,11 @@ function FinderView({ guilds, onEnter }: { guilds: GuildView[]; onEnter: () => v
         background: `radial-gradient(80% 50% at 50% 0%, rgba(201,169,110,0.10), transparent 60%), ${C.panel}` }}>
         <div style={{ fontFamily: SERIF, fontSize: 23, fontWeight: 600, letterSpacing: 2, color: C.goldLight }}>Guild Foundation</div>
         <Filigree w="62%" />
-        <div style={{ position: 'relative', width: 132, height: 132, margin: '14px auto' }}>
-          <div style={{ position: 'absolute', inset: 0, borderRadius: '50%', background: 'radial-gradient(circle, rgba(201,169,110,0.22), transparent 68%)' }} />
-          <div style={{ position: 'absolute', inset: 8, borderRadius: '50%', border: `1px solid ${C.lineGold}` }} />
-          <div style={{ position: 'absolute', inset: 18, borderRadius: '50%', border: `1px solid ${C.gold}`, background: C.panel2, display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: 'inset 0 0 24px rgba(201,169,110,0.18)' }}>
-            <IconDiamond size={50} color={C.goldLight} />
-          </div>
+        <div style={{ position: 'relative', display: 'flex', justifyContent: 'center', margin: '10px auto 6px' }}>
+          <div style={{ position: 'absolute', top: '46%', left: '50%', transform: 'translate(-50%,-50%)', width: 170, height: 170, borderRadius: '50%', background: 'radial-gradient(circle, rgba(201,169,110,0.20), transparent 66%)' }} />
+          <div style={{ position: 'relative' }}><FoundationCrest size={150} /></div>
         </div>
-        <p style={{ fontSize: 12.5, color: C.muted, lineHeight: 1.75, margin: '14px 0 16px' }}>
+        <p style={{ fontSize: 12.5, color: C.muted, lineHeight: 1.75, margin: '8px 0 16px' }}>
           Lập hội của riêng bạn hoặc gia nhập một guild sưu tầm. Cùng giao dịch để nhận thưởng tập thể mỗi tuần.
         </p>
         <div style={{ display: 'flex', gap: 9, justifyContent: 'center', marginBottom: 16 }}>
@@ -149,7 +181,7 @@ function FinderView({ guilds, onEnter }: { guilds: GuildView[]; onEnter: () => v
           <span style={{ display: 'flex', alignItems: 'center', border: `1px solid ${C.line}`, borderRadius: 9, padding: '8px 11px', color: C.muted }}><IconRefresh size={14} color={C.gold} /></span>
         </div>
         <motion.div variants={{ hidden: {}, show: { transition: { staggerChildren: 0.07 } } }} initial="hidden" animate="show">
-          {guilds.map((g, i) => <GuildRow key={g.id} g={g} featured={i === 1} onInfo={onEnter} />)}
+          {guilds.map((g, i) => <GuildRow key={g.id} g={g} idx={i} featured={i === 1} onInfo={onEnter} />)}
         </motion.div>
       </div>
     </div>
