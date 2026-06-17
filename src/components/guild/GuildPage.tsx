@@ -70,29 +70,66 @@ function Corners() {
   )
 }
 
-// ── Crest huy hiệu trên banner (tấm rủ) — centerpiece kiểu game ──
-function FoundationCrest({ size = 150 }: { size?: number }) {
+// ── Crest huy hiệu trên banner — centerpiece, dựng bám ảnh tham chiếu ──
+// Banner xanh rủ + thanh treo + kiếm + cánh cuộn + vương miện + gem + tua rua.
+function FoundationCrest({ size = 172 }: { size?: number }) {
+  const g = C.gold, gl = C.goldLight, gd = '#8B6914'
   return (
-    <svg width={size} height={size * 1.25} viewBox="0 0 120 150" fill="none" aria-hidden="true">
-      {/* pennant / banner */}
-      <path d="M22 12 H98 V108 Q98 117 90 123 L60 143 L30 123 Q22 117 22 108 Z"
-        fill="#15120c" stroke={C.gold} strokeWidth="1.6" />
-      <path d="M28 18 H92 V106 Q92 113 86 117 L60 135 L34 117 Q28 113 28 106 Z"
-        fill="none" stroke={C.lineGold} strokeWidth="0.8" />
-      {/* ornament bar trên */}
-      <rect x="30" y="6" width="60" height="6" rx="2" fill={C.panel2} stroke={C.gold} strokeWidth="1" />
-      {/* laurel/wings hai bên */}
-      <path d="M50 92 C30 86 24 70 27 50 C37 60 46 66 51 78" fill="none" stroke={C.gold} strokeWidth="1.4" strokeLinecap="round" />
-      <path d="M70 92 C90 86 96 70 93 50 C83 60 74 66 69 78" fill="none" stroke={C.gold} strokeWidth="1.4" strokeLinecap="round" />
-      <path d="M34 58 C40 60 44 64 46 70" fill="none" stroke={C.lineGold} strokeWidth="1" strokeLinecap="round" />
-      <path d="M86 58 C80 60 76 64 74 70" fill="none" stroke={C.lineGold} strokeWidth="1" strokeLinecap="round" />
-      {/* sword */}
-      <polygon points="60,30 63,78 60,84 57,78" fill={C.goldLight} stroke={C.gold} strokeWidth="0.8" />
-      <line x1="44" y1="74" x2="76" y2="74" stroke={C.gold} strokeWidth="2.4" strokeLinecap="round" />
-      <rect x="58" y="84" width="4" height="14" rx="1.5" fill={C.gold} />
-      <circle cx="60" cy="101" r="3.4" fill="none" stroke={C.gold} strokeWidth="1.6" />
-      {/* gem ở chuôi */}
-      <rect x="56.5" y="70.5" width="7" height="7" rx="1" transform="rotate(45 60 74)" fill="#9ec5e3" stroke={C.goldLight} strokeWidth="0.8" />
+    <svg width={size} height={size * 1.24} viewBox="0 0 200 248" fill="none" aria-hidden="true">
+      <defs>
+        <linearGradient id="gc-blue" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0" stopColor="#2c4f7c" /><stop offset="1" stopColor="#152941" />
+        </linearGradient>
+        <linearGradient id="gc-gold" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0" stopColor={gl} /><stop offset="0.5" stopColor={g} /><stop offset="1" stopColor={gd} />
+        </linearGradient>
+        <linearGradient id="gc-cream" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0" stopColor="#F4E9D6" /><stop offset="1" stopColor="#CDB07F" />
+        </linearGradient>
+      </defs>
+
+      {/* Banner */}
+      <path d="M50 28 H150 V198 L100 226 L50 198 Z" fill="url(#gc-blue)" stroke={g} strokeWidth="1.4" />
+      <rect x="70" y="28" width="12" height="178" fill="#34568a" opacity="0.5" />
+      <rect x="118" y="28" width="12" height="178" fill="#34568a" opacity="0.5" />
+      <path d="M56 34 H144 V194 L100 218 L56 194 Z" fill="none" stroke={C.lineGold} strokeWidth="0.7" />
+
+      {/* Thanh treo + chuôi */}
+      <rect x="34" y="14" width="132" height="9" rx="4.5" fill="url(#gc-gold)" />
+      <circle cx="30" cy="18.5" r="7" fill="url(#gc-gold)" /><circle cx="170" cy="18.5" r="7" fill="url(#gc-gold)" />
+      <path d="M72 23 V30 M128 23 V30" stroke={g} strokeWidth="1.4" />
+
+      {/* Cánh cuộn dưới (lớn, đối xứng) */}
+      <path d="M96 158 C58 160 34 138 38 100 C60 124 80 132 94 146 Z" fill="url(#gc-cream)" stroke={g} strokeWidth="1.2" />
+      <path d="M104 158 C142 160 166 138 162 100 C140 124 120 132 106 146 Z" fill="url(#gc-cream)" stroke={g} strokeWidth="1.2" />
+      {/* Cánh cuộn trên (nhỏ) */}
+      <path d="M97 104 C76 100 64 84 67 64 C84 78 92 86 98 98 Z" fill="url(#gc-cream)" stroke={g} strokeWidth="1.1" />
+      <path d="M103 104 C124 100 136 84 133 64 C116 78 108 86 102 98 Z" fill="url(#gc-cream)" stroke={g} strokeWidth="1.1" />
+
+      {/* Cung vòng trên kiếm + mũi tên */}
+      <path d="M74 58 Q100 40 126 58" fill="none" stroke={g} strokeWidth="2.4" strokeLinecap="round" />
+      <polygon points="72,58 78,55 78,61" fill={g} /><polygon points="128,58 122,55 122,61" fill={g} />
+
+      {/* Kiếm */}
+      <polygon points="100,48 104,128 100,136 96,128" fill="url(#gc-cream)" stroke={g} strokeWidth="0.9" />
+      <line x1="80" y1="120" x2="120" y2="120" stroke={g} strokeWidth="3" strokeLinecap="round" />
+      <rect x="96.5" y="136" width="7" height="20" rx="2" fill="url(#gc-gold)" />
+      <circle cx="100" cy="160" r="5" fill="none" stroke={g} strokeWidth="2" />
+
+      {/* Vương miện sư tử (huy hiệu trung tâm) */}
+      <path d="M88 150 L92 138 L96 146 L100 134 L104 146 L108 138 L112 150 Z" fill="url(#gc-gold)" stroke={gd} strokeWidth="0.6" />
+      <rect x="88" y="150" width="24" height="5" rx="1.5" fill="url(#gc-gold)" />
+
+      {/* Gem cyan ở đỉnh dưới */}
+      <rect x="93" y="171" width="14" height="14" rx="2" transform="rotate(45 100 178)" fill="#6fd0e8" stroke={gl} strokeWidth="1" />
+
+      {/* Tua rua vàng */}
+      {[80, 90, 100, 110, 120].map((x, i) => (
+        <g key={i}>
+          <rect x={x - 3} y="196" width="6" height="7" rx="2" fill="url(#gc-gold)" />
+          <path d={`M${x - 2} 203 V214 M${x} 203 V216 M${x + 2} 203 V214`} stroke={g} strokeWidth="1.2" strokeLinecap="round" />
+        </g>
+      ))}
     </svg>
   )
 }
