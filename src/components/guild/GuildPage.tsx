@@ -300,11 +300,9 @@ function FinderView({ guilds, s, onEnter, onRefresh, onCreate }: { guilds: Guild
         background: `radial-gradient(80% 50% at 50% 0%, rgba(201,169,110,0.10), transparent 60%), ${C.panel}` }}>
         <div style={{ fontFamily: SERIF, fontSize: 23, fontWeight: 600, letterSpacing: 2, color: C.goldLight }}>Guild Foundation</div>
         <Filigree w="62%" />
-        <div style={{ position: 'relative', display: 'flex', justifyContent: 'center', margin: '8px auto 4px' }}>
-          <div style={{ position: 'absolute', top: '46%', left: '50%', transform: 'translate(-50%,-50%)', width: 200, height: 200, borderRadius: '50%', background: 'radial-gradient(circle, rgba(201,169,110,0.18), transparent 66%)' }} />
-          <div style={{ position: 'relative' }}>
-            <ImgFallback src="/guild/crest.png" alt="Guild crest" w={172} h={210} fallback={<FoundationCrest size={168} />} />
-          </div>
+        <div style={{ position: 'relative', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '4px auto 0', height: 210 }}>
+          <img src="/guild/banner.png" alt="" style={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%,-50%)', height: 220, objectFit: 'contain', opacity: 0.45, pointerEvents: 'none' }} />
+          <img src="/guild/crest.png" alt="Guild crest" style={{ position: 'relative', zIndex: 1, height: 160, objectFit: 'contain', filter: 'drop-shadow(0 4px 14px rgba(201,169,110,0.4))' }} />
         </div>
         <p style={{ fontSize: 12.5, color: C.muted, lineHeight: 1.75, margin: '8px 0 16px' }}>{s.foundDesc}</p>
 
