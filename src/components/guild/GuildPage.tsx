@@ -1,10 +1,4 @@
 'use client'
-// ─────────────────────────────────────────────────────────────────
-//  GuildPage — finder (Guild Foundation + Recommended) & hall.
-//  i18n theo locale, list cuộn, reward có nghĩa, nút bấm được.
-//  Tông Neo-Luxury dark (#0F0E0C + vàng #C9A96E).
-// ─────────────────────────────────────────────────────────────────
-
 import { useState, useEffect, useMemo } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import {
@@ -12,26 +6,70 @@ import {
   IconMail, IconHash, IconSearch, IconRefresh, IconChevronLeft, IconBell,
   IconMessageCircle, IconChecklist, IconWand, IconTrophy, IconPhoto, IconGavel,
   IconUsers, IconMessage2, IconBuildingBank, IconBuildingCastle, IconCrown,
-  IconChessRook, IconX, IconCheck,
+  IconChessRook, IconX, IconCheck, IconChevronDown, IconStar, IconCalendar,
+  IconFlame, IconTarget, IconHeart, IconClock,
 } from '@tabler/icons-react'
 import { useLanguage } from '@/context/LanguageContext'
+import { useTheme } from '@/context/ThemeContext'
 import { guildService, GUILD_FOUNDATION_FEE_ETH, type ApiGuild } from '@/services/guild.service'
 
-const C = {
+const DARK = {
   bg: '#0F0E0C', panel: '#181613', panel2: '#100E0B',
   line: '#2B2823', lineGold: 'rgba(201,169,110,0.30)',
   ink: '#F0EBE1', muted: '#8E877B', gold: '#C9A96E', goldLight: '#E8D5B0',
+  accent: '#4A90D9', red: '#e87a7a', green: '#8fce9f',
+  banner: '/guild/banner.png', crest: '/guild/crest_lion.png',
+  sceneBg: `radial-gradient(80% 50% at 50% 0%, rgba(201,169,110,0.05), transparent 60%), #0F0E0C`,
+  bannerFit: '110% auto' as const,
+  bannerBg: 'none',
+  bannerPos: '36% 50%' as const,
+  bannerTint: 'none',
+  showFrost: true,
 }
+const LIGHT = {
+  bg: '#FDFBF7', panel: '#F5F0E8', panel2: '#EDE7DC',
+  line: '#E4DDD3', lineGold: 'rgba(160,120,60,0.25)',
+  ink: '#1A1A1A', muted: '#7A7570', gold: '#9A7B3A', goldLight: '#B8943E',
+  accent: '#4A90D9', red: '#d45555', green: '#5aad6a',
+  banner: '/guild/banner_light.png', crest: '/guild/crest_wolf.png',
+  sceneBg: `radial-gradient(80% 50% at 50% 0%, rgba(160,120,60,0.08), transparent 60%), #FDFBF7`,
+  bannerFit: '130% auto' as const,
+  bannerPos: '39% 45%' as const,
+  bannerBg: '#5C1A1A',
+  showFrost: false,
+  bannerTint: 'none',
+}
+type Colors = Omit<typeof DARK, 'bannerFit' | 'bannerPos'> & { bannerFit: string; bannerPos: string; bannerBg: string }
+const C = DARK
 const SERIF = "'Cormorant Garamond', Georgia, serif"
 const EASE: [number, number, number, number] = [0.16, 1, 0.3, 1]
 const SCENE = `radial-gradient(55% 50% at 50% -6%, rgba(201,169,110,0.18), transparent 60%),`
   + `radial-gradient(70% 32% at 50% 112%, rgba(201,169,110,0.10), transparent 62%),`
   + `radial-gradient(120% 120% at 50% 45%, transparent 52%, rgba(0,0,0,0.6)), ${C.bg}`
 
+const EMBLEMS = [
+  'lion','eagle-emblem','wolf-head','wolf-howl','fox-head','owl','raven','swan','bull','octopus',
+  'snake','scorpion','butterfly','dragonfly','bee','crab','frog','gecko','monkey','turtle',
+  'werewolf','stag-head','sea-serpent','dinosaur-rex','scarab-beetle','shark-jaws','salamander',
+  'minotaur','squid','vulture','dolphin','elephant','tiger','penguin','panda','gorilla',
+  'kangaroo','flamingo','griffin-symbol','horse-head','eagle-head','bear-head','seahorse',
+  'koala','rabbit','pegasus','chess-knight','polar-bear','axolotl','bear-face',
+]
+
+function getRankNumber(vol: number, winRate: number) {
+  const score = vol + winRate * 500
+  if (score >= 100000) return 1
+  if (score >= 50000) return Math.floor(Math.random() * 5) + 2
+  if (score >= 15000) return Math.floor(Math.random() * 20) + 7
+  if (score >= 5000) return Math.floor(Math.random() * 50) + 27
+  if (score >= 1000) return Math.floor(Math.random() * 100) + 77
+  return Math.floor(Math.random() * 300) + 177
+}
+
 // ── i18n ─────────────────────────────────────────────────────────
 const EN = {
   recommended: 'Recommended', invite: 'Invite', copied: 'Invite link copied', searchPh: 'Search guild by name…',
-  tag: 'Tag', search: 'Search', foundDesc: 'Found your own guild or join a collector club. Trade together to earn weekly collective rewards.',
+  tag: 'Tag Search', search: 'Search', foundDesc: 'Found your own guild or join a collector club. Trade together to earn weekly collective rewards.',
   found: 'Found', feeNote: 'One-time · anti-spam', weeklyVol: 'Weekly volume', members: 'Members',
   noRank: 'No rank limit', accept: 'Acceptance', auto: 'Auto', manual: 'Manual', info: 'Info', empty: 'No guild found',
   rewards: ['Weekly dividends', 'Contribution XP', 'Prestige badge', 'Early access'],
@@ -41,13 +79,30 @@ const EN = {
   back: 'Guild', checkin: 'Check-in', actAct: 'Guild Activities', actDecor: 'Gallery Decor', actDiv: 'Weekly Dividends',
   nVault: 'Collective Vault', nVaultSub: 'Co-own artworks', nLeague: 'Guild League', nLeagueSub: 'Seasonal volume race',
   nGallery: 'Curated Gallery', nGallerySub: 'Shared collection', auction: 'Guild Auction', membersBtn: 'Members', chat: 'Guild chat',
-  chatMsg: 'funded up — let’s trade',
+  chatMsg: 'funded up — let\'s trade',
+  open: 'Open', noPref: 'No Preference', automatic: 'Automatic', selective: 'Selective',
+  weeklyAssist: 'Weekly Assistance', masteryRank: 'Guild Mastery', guildInfo: 'Guild Information',
+  basicInfo: 'Basic Information', memberInfo: 'Info',
+  introduction: 'Introduction', foundingDate: 'Founding Date', rankings: 'Rankings', activity: 'Activity',
+  rank: 'Rank', assistance: 'Assistance', lastLogin: 'Last Login', greeting: 'Greeting',
+  attendance: 'Attendance', areasOfExpertise: 'Areas of Expertise',
+  tagCheckInDaily: 'Check-In Everyday', tagCheckIn3Days: 'At Least 3 Days a Week', tagFreeAttendance: 'Free Attendance',
+  tagNewbie: 'Newbie Friendly', tagTopGuild: 'Wannabe the Top Guild', tagArena: 'Arena Experts',
+  tagCasual: 'Casual', tagLastingRandom: 'Lasting Effect Random', tagLasting247: 'Lasting Effect 24/7',
+  apply: 'Apply', reset: 'Reset', close: 'Close',
+  totalVol: 'Total Volume', auctionWin: 'Auction Win Rate', weeklyActive: 'Weekly Active',
+  emblem: 'Emblem', type: 'Type', selectToEnter: 'Select to enter',
+  join: 'Join', leave: 'Leave Guild', leaveConfirm: 'Leave this guild? You cannot rejoin for 12 hours.',
+  cooldown: 'Cooldown', cooldownMsg: 'You left recently. Rejoin available in',
+  hours: 'h', minutes: 'm', joined: 'Joined!', alreadyInGuild: 'Leave your current guild first',
+  charDesigner: 'Character Designer', generateChar: 'Generate Character', generating: 'Generating…',
+  charPrompt: 'Describe your character', charResult: 'Your Character',
 }
 const STR: Record<string, typeof EN> = {
   en: EN,
   vi: {
     recommended: 'Đề xuất', invite: 'Lời mời', copied: 'Đã sao chép link mời', searchPh: 'Tìm guild theo tên…',
-    tag: 'Tag', search: 'Tìm', foundDesc: 'Lập hội của riêng bạn hoặc gia nhập một guild sưu tầm. Cùng giao dịch để nhận thưởng tập thể mỗi tuần.',
+    tag: 'Tìm Tag', search: 'Tìm', foundDesc: 'Lập hội của riêng bạn hoặc gia nhập một guild sưu tầm. Cùng giao dịch để nhận thưởng tập thể mỗi tuần.',
     found: 'Lập Guild', feeNote: 'Phí một lần · chống spam', weeklyVol: 'Khối lượng tuần', members: 'Thành viên',
     noRank: 'Không giới hạn rank', accept: 'Duyệt', auto: 'Tự động', manual: 'Thủ công', info: 'Thông tin', empty: 'Không tìm thấy guild nào',
     rewards: ['Cổ tức tuần', 'Điểm cống hiến', 'Huy hiệu danh giá', 'Ưu tiên mở bán'],
@@ -58,10 +113,27 @@ const STR: Record<string, typeof EN> = {
     nVault: 'Kho chung', nVaultSub: 'Đồng sở hữu tác phẩm', nLeague: 'Giải đấu Guild', nLeagueSub: 'Đua khối lượng theo mùa',
     nGallery: 'Phòng tuyển chọn', nGallerySub: 'BST chung của hội', auction: 'Đấu giá Guild', membersBtn: 'Thành viên', chat: 'Chat hội',
     chatMsg: 'gom đủ vốn rồi, vào lệnh thôi',
+    open: 'Mở', noPref: 'Không ưu tiên', automatic: 'Tự động', selective: 'Chọn lọc',
+    weeklyAssist: 'Hỗ trợ tuần', masteryRank: 'Hạng Guild', guildInfo: 'Thông tin Guild',
+    basicInfo: 'Thông tin cơ bản', memberInfo: 'Chi tiết',
+    introduction: 'Giới thiệu', foundingDate: 'Ngày thành lập', rankings: 'Xếp hạng', activity: 'Hoạt động',
+    rank: 'Hạng', assistance: 'Hỗ trợ', lastLogin: 'Đăng nhập cuối', greeting: 'Lời chào',
+    attendance: 'Điểm danh', areasOfExpertise: 'Chuyên môn',
+    tagCheckInDaily: 'Điểm danh mỗi ngày', tagCheckIn3Days: 'Ít nhất 3 ngày/tuần', tagFreeAttendance: 'Tự do',
+    tagNewbie: 'Thân thiện người mới', tagTopGuild: 'Muốn lên Top Guild', tagArena: 'Chuyên gia đấu giá',
+    tagCasual: 'Thoải mái', tagLastingRandom: 'Hiệu ứng ngẫu nhiên', tagLasting247: 'Hiệu ứng 24/7',
+    apply: 'Áp dụng', reset: 'Đặt lại', close: 'Đóng',
+    totalVol: 'Tổng khối lượng', auctionWin: 'Tỷ lệ thắng đấu giá', weeklyActive: 'Hoạt động tuần',
+    emblem: 'Biểu tượng', type: 'Loại', selectToEnter: 'Chọn để nhập',
+    join: 'Tham gia', leave: 'Rời Guild', leaveConfirm: 'Rời guild? Bạn không thể tham gia lại trong 12 giờ.',
+    cooldown: 'Chờ', cooldownMsg: 'Bạn vừa rời. Có thể tham gia lại sau',
+    hours: 'g', minutes: 'p', joined: 'Đã tham gia!', alreadyInGuild: 'Rời guild hiện tại trước',
+    charDesigner: 'Thiết kế nhân vật', generateChar: 'Tạo nhân vật', generating: 'Đang tạo…',
+    charPrompt: 'Mô tả nhân vật của bạn', charResult: 'Nhân vật của bạn',
   },
   fr: {
     recommended: 'Recommandés', invite: 'Inviter', copied: 'Lien copié', searchPh: 'Rechercher une guilde…',
-    tag: 'Tag', search: 'Chercher', foundDesc: 'Fondez votre propre guilde ou rejoignez un club de collectionneurs. Échangez ensemble pour gagner des récompenses collectives chaque semaine.',
+    tag: 'Recherche Tag', search: 'Chercher', foundDesc: 'Fondez votre propre guilde ou rejoignez un club de collectionneurs. Échangez ensemble pour gagner des récompenses collectives chaque semaine.',
     found: 'Fonder', feeNote: 'Unique · anti-spam', weeklyVol: 'Volume hebdo', members: 'Membres',
     noRank: 'Rang illimité', accept: 'Admission', auto: 'Auto', manual: 'Manuel', info: 'Info', empty: 'Aucune guilde trouvée',
     rewards: ['Dividendes hebdo', 'XP de contribution', 'Badge prestige', 'Accès anticipé'],
@@ -72,10 +144,27 @@ const STR: Record<string, typeof EN> = {
     nVault: 'Coffre collectif', nVaultSub: 'Co-propriété d\'œuvres', nLeague: 'Ligue des Guildes', nLeagueSub: 'Course de volume saisonnière',
     nGallery: 'Galerie curatée', nGallerySub: 'Collection partagée', auction: 'Enchères Guilde', membersBtn: 'Membres', chat: 'Chat guilde',
     chatMsg: 'fonds réunis — on trade',
+    open: 'Ouvert', noPref: 'Sans préférence', automatic: 'Automatique', selective: 'Sélectif',
+    weeklyAssist: 'Aide hebdo', masteryRank: 'Maîtrise Guilde', guildInfo: 'Info Guilde',
+    basicInfo: 'Informations de base', memberInfo: 'Info',
+    introduction: 'Introduction', foundingDate: 'Date de fondation', rankings: 'Classements', activity: 'Activité',
+    rank: 'Rang', assistance: 'Aide', lastLogin: 'Dernière connexion', greeting: 'Message',
+    attendance: 'Présence', areasOfExpertise: 'Domaines d\'expertise',
+    tagCheckInDaily: 'Check-in quotidien', tagCheckIn3Days: 'Au moins 3 jours/semaine', tagFreeAttendance: 'Libre',
+    tagNewbie: 'Accueillant débutants', tagTopGuild: 'Viser le top', tagArena: 'Experts enchères',
+    tagCasual: 'Détente', tagLastingRandom: 'Effet aléatoire', tagLasting247: 'Effet 24/7',
+    apply: 'Appliquer', reset: 'Réinitialiser', close: 'Fermer',
+    totalVol: 'Volume total', auctionWin: 'Taux de victoire', weeklyActive: 'Actifs hebdo',
+    emblem: 'Emblème', type: 'Type', selectToEnter: 'Sélectionner pour saisir',
+    join: 'Rejoindre', leave: 'Quitter la guilde', leaveConfirm: 'Quitter cette guilde ? Vous ne pourrez pas la rejoindre pendant 12 heures.',
+    cooldown: 'Délai', cooldownMsg: 'Vous avez quitté récemment. Rejoindre disponible dans',
+    hours: 'h', minutes: 'm', joined: 'Rejoint !', alreadyInGuild: 'Quittez votre guilde actuelle d\'abord',
+    charDesigner: 'Concepteur de personnage', generateChar: 'Générer', generating: 'Génération…',
+    charPrompt: 'Décrivez votre personnage', charResult: 'Votre personnage',
   },
   ja: {
     recommended: 'おすすめ', invite: '招待', copied: '招待リンクをコピーしました', searchPh: 'ギルド名で検索…',
-    tag: 'タグ', search: '検索', foundDesc: '自分のギルドを設立するか、コレクタークラブに参加しましょう。一緒に取引して毎週の報酬を獲得。',
+    tag: 'タグ検索', search: '検索', foundDesc: '自分のギルドを設立するか、コレクタークラブに参加しましょう。一緒に取引して毎週の報酬を獲得。',
     found: '設立', feeNote: '一回限り・スパム防止', weeklyVol: '週間取引量', members: 'メンバー',
     noRank: 'ランク制限なし', accept: '承認', auto: '自動', manual: '手動', info: '詳細', empty: 'ギルドが見つかりません',
     rewards: ['週間配当', '貢献XP', 'プレステージバッジ', '先行アクセス'],
@@ -86,10 +175,27 @@ const STR: Record<string, typeof EN> = {
     nVault: '共同金庫', nVaultSub: '作品の共同所有', nLeague: 'ギルドリーグ', nLeagueSub: 'シーズン取引量レース',
     nGallery: 'キュレーションギャラリー', nGallerySub: '共有コレクション', auction: 'ギルドオークション', membersBtn: 'メンバー', chat: 'ギルドチャット',
     chatMsg: '資金準備OK — トレードしよう',
+    open: 'オープン', noPref: '指定なし', automatic: '自動', selective: '選択制',
+    weeklyAssist: '週間支援', masteryRank: 'ギルド熟練度', guildInfo: 'ギルド情報',
+    basicInfo: '基本情報', memberInfo: '詳細',
+    introduction: '紹介', foundingDate: '設立日', rankings: 'ランキング', activity: '活動',
+    rank: 'ランク', assistance: '支援', lastLogin: '最終ログイン', greeting: '挨拶',
+    attendance: '出席', areasOfExpertise: '専門分野',
+    tagCheckInDaily: '毎日チェックイン', tagCheckIn3Days: '週3日以上', tagFreeAttendance: '自由出席',
+    tagNewbie: '初心者歓迎', tagTopGuild: 'トップギルド志向', tagArena: 'オークション専門',
+    tagCasual: 'カジュアル', tagLastingRandom: 'ランダム効果', tagLasting247: '24/7効果',
+    apply: '適用', reset: 'リセット', close: '閉じる',
+    totalVol: '総取引量', auctionWin: 'オークション勝率', weeklyActive: '週間アクティブ',
+    emblem: 'エンブレム', type: 'タイプ', selectToEnter: '入力するには選択',
+    join: '参加', leave: 'ギルド脱退', leaveConfirm: 'このギルドを脱退しますか？12時間は再参加できません。',
+    cooldown: 'クールダウン', cooldownMsg: '最近脱退しました。再参加可能まで',
+    hours: '時間', minutes: '分', joined: '参加しました！', alreadyInGuild: '先に現在のギルドを脱退してください',
+    charDesigner: 'キャラクターデザイナー', generateChar: '生成', generating: '生成中…',
+    charPrompt: 'キャラクターを説明', charResult: 'あなたのキャラクター',
   },
   es: {
     recommended: 'Recomendados', invite: 'Invitar', copied: 'Enlace copiado', searchPh: 'Buscar gremio por nombre…',
-    tag: 'Tag', search: 'Buscar', foundDesc: 'Funda tu propio gremio o únete a un club de coleccionistas. Comercia junto para ganar recompensas colectivas semanales.',
+    tag: 'Buscar Tag', search: 'Buscar', foundDesc: 'Funda tu propio gremio o únete a un club de coleccionistas. Comercia junto para ganar recompensas colectivas semanales.',
     found: 'Fundar', feeNote: 'Único · anti-spam', weeklyVol: 'Volumen semanal', members: 'Miembros',
     noRank: 'Sin límite de rango', accept: 'Admisión', auto: 'Auto', manual: 'Manual', info: 'Info', empty: 'No se encontró ningún gremio',
     rewards: ['Dividendos semanales', 'XP de contribución', 'Insignia de prestigio', 'Acceso anticipado'],
@@ -100,10 +206,27 @@ const STR: Record<string, typeof EN> = {
     nVault: 'Bóveda colectiva', nVaultSub: 'Co-propiedad de obras', nLeague: 'Liga de Gremios', nLeagueSub: 'Carrera de volumen por temporada',
     nGallery: 'Galería curada', nGallerySub: 'Colección compartida', auction: 'Subasta del Gremio', membersBtn: 'Miembros', chat: 'Chat del gremio',
     chatMsg: 'fondos listos — a comerciar',
+    open: 'Abierto', noPref: 'Sin preferencia', automatic: 'Automático', selective: 'Selectivo',
+    weeklyAssist: 'Ayuda semanal', masteryRank: 'Maestría del Gremio', guildInfo: 'Info del Gremio',
+    basicInfo: 'Información básica', memberInfo: 'Info',
+    introduction: 'Introducción', foundingDate: 'Fecha de fundación', rankings: 'Rankings', activity: 'Actividad',
+    rank: 'Rango', assistance: 'Ayuda', lastLogin: 'Última conexión', greeting: 'Saludo',
+    attendance: 'Asistencia', areasOfExpertise: 'Áreas de experiencia',
+    tagCheckInDaily: 'Check-in diario', tagCheckIn3Days: 'Mínimo 3 días/semana', tagFreeAttendance: 'Libre',
+    tagNewbie: 'Amigable con novatos', tagTopGuild: 'Aspirante a Top', tagArena: 'Expertos en subastas',
+    tagCasual: 'Casual', tagLastingRandom: 'Efecto aleatorio', tagLasting247: 'Efecto 24/7',
+    apply: 'Aplicar', reset: 'Restablecer', close: 'Cerrar',
+    totalVol: 'Volumen total', auctionWin: 'Tasa de victoria', weeklyActive: 'Activos semanales',
+    emblem: 'Emblema', type: 'Tipo', selectToEnter: 'Seleccionar para ingresar',
+    join: 'Unirse', leave: 'Dejar gremio', leaveConfirm: '¿Dejar este gremio? No podrás unirte de nuevo durante 12 horas.',
+    cooldown: 'Espera', cooldownMsg: 'Saliste recientemente. Podrás unirte en',
+    hours: 'h', minutes: 'm', joined: '¡Unido!', alreadyInGuild: 'Sal de tu gremio actual primero',
+    charDesigner: 'Diseñador de personaje', generateChar: 'Generar', generating: 'Generando…',
+    charPrompt: 'Describe tu personaje', charResult: 'Tu personaje',
   },
   zh: {
     recommended: '推荐', invite: '邀请', copied: '邀请链接已复制', searchPh: '按名称搜索公会…',
-    tag: '标签', search: '搜索', foundDesc: '创建你自己的公会或加入收藏俱乐部。一起交易，每周赚取集体奖励。',
+    tag: '标签搜索', search: '搜索', foundDesc: '创建你自己的公会或加入收藏俱乐部。一起交易，每周赚取集体奖励。',
     found: '创建', feeNote: '一次性 · 防垃圾', weeklyVol: '周交易量', members: '成员',
     noRank: '无等级限制', accept: '审核', auto: '自动', manual: '手动', info: '详情', empty: '未找到公会',
     rewards: ['每周分红', '贡献经验', '荣誉徽章', '优先访问'],
@@ -114,10 +237,27 @@ const STR: Record<string, typeof EN> = {
     nVault: '集体金库', nVaultSub: '共同拥有作品', nLeague: '公会联赛', nLeagueSub: '赛季交易量竞赛',
     nGallery: '策展画廊', nGallerySub: '共享收藏', auction: '公会拍卖', membersBtn: '成员', chat: '公会聊天',
     chatMsg: '资金到位——开始交易',
+    open: '开放', noPref: '无偏好', automatic: '自动', selective: '筛选',
+    weeklyAssist: '周支援', masteryRank: '公会精通', guildInfo: '公会信息',
+    basicInfo: '基本信息', memberInfo: '详情',
+    introduction: '简介', foundingDate: '成立日期', rankings: '排名', activity: '活跃度',
+    rank: '等级', assistance: '支援', lastLogin: '最后登录', greeting: '问候',
+    attendance: '出勤', areasOfExpertise: '专长领域',
+    tagCheckInDaily: '每日签到', tagCheckIn3Days: '至少每周3天', tagFreeAttendance: '自由出勤',
+    tagNewbie: '新手友好', tagTopGuild: '志在顶级公会', tagArena: '拍卖专家',
+    tagCasual: '休闲', tagLastingRandom: '随机效果', tagLasting247: '24/7效果',
+    apply: '应用', reset: '重置', close: '关闭',
+    totalVol: '总交易量', auctionWin: '拍卖胜率', weeklyActive: '周活跃',
+    emblem: '徽章', type: '类型', selectToEnter: '选择输入',
+    join: '加入', leave: '退出公会', leaveConfirm: '退出公会？12小时内无法重新加入。',
+    cooldown: '冷却', cooldownMsg: '您最近退出。可重新加入时间',
+    hours: '时', minutes: '分', joined: '已加入！', alreadyInGuild: '请先退出当前公会',
+    charDesigner: '角色设计师', generateChar: '生成', generating: '生成中…',
+    charPrompt: '描述你的角色', charResult: '你的角色',
   },
   ko: {
     recommended: '추천', invite: '초대', copied: '초대 링크 복사됨', searchPh: '길드 이름으로 검색…',
-    tag: '태그', search: '검색', foundDesc: '나만의 길드를 설립하거나 수집가 클럽에 가입하세요. 함께 거래하여 매주 보상을 획득하세요.',
+    tag: '태그 검색', search: '검색', foundDesc: '나만의 길드를 설립하거나 수집가 클럽에 가입하세요. 함께 거래하여 매주 보상을 획득하세요.',
     found: '설립', feeNote: '일회성 · 스팸 방지', weeklyVol: '주간 거래량', members: '멤버',
     noRank: '랭크 제한 없음', accept: '승인', auto: '자동', manual: '수동', info: '정보', empty: '길드를 찾을 수 없습니다',
     rewards: ['주간 배당금', '기여 XP', '명예 배지', '조기 액세스'],
@@ -128,10 +268,27 @@ const STR: Record<string, typeof EN> = {
     nVault: '공동 금고', nVaultSub: '작품 공동 소유', nLeague: '길드 리그', nLeagueSub: '시즌 거래량 경쟁',
     nGallery: '큐레이션 갤러리', nGallerySub: '공유 컬렉션', auction: '길드 경매', membersBtn: '멤버', chat: '길드 채팅',
     chatMsg: '자금 준비 완료 — 거래 시작',
+    open: '공개', noPref: '선호 없음', automatic: '자동', selective: '선별',
+    weeklyAssist: '주간 지원', masteryRank: '길드 숙련도', guildInfo: '길드 정보',
+    basicInfo: '기본 정보', memberInfo: '정보',
+    introduction: '소개', foundingDate: '설립일', rankings: '순위', activity: '활동',
+    rank: '랭크', assistance: '지원', lastLogin: '최근 로그인', greeting: '인사',
+    attendance: '출석', areasOfExpertise: '전문 분야',
+    tagCheckInDaily: '매일 체크인', tagCheckIn3Days: '주 3일 이상', tagFreeAttendance: '자유 출석',
+    tagNewbie: '초보 환영', tagTopGuild: '최고 길드 목표', tagArena: '경매 전문가',
+    tagCasual: '캐주얼', tagLastingRandom: '랜덤 효과', tagLasting247: '24/7 효과',
+    apply: '적용', reset: '초기화', close: '닫기',
+    totalVol: '총 거래량', auctionWin: '경매 승률', weeklyActive: '주간 활성',
+    emblem: '엠블럼', type: '유형', selectToEnter: '입력하려면 선택',
+    join: '가입', leave: '길드 탈퇴', leaveConfirm: '이 길드를 탈퇴하시겠습니까? 12시간 동안 재가입할 수 없습니다.',
+    cooldown: '대기', cooldownMsg: '최근 탈퇴하셨습니다. 재가입 가능 시간',
+    hours: '시간', minutes: '분', joined: '가입했습니다!', alreadyInGuild: '현재 길드를 먼저 탈퇴하세요',
+    charDesigner: '캐릭터 디자이너', generateChar: '생성', generating: '생성 중…',
+    charPrompt: '캐릭터를 설명하세요', charResult: '당신의 캐릭터',
   },
   de: {
     recommended: 'Empfohlen', invite: 'Einladen', copied: 'Einladungslink kopiert', searchPh: 'Gilde nach Name suchen…',
-    tag: 'Tag', search: 'Suchen', foundDesc: 'Gründe deine eigene Gilde oder tritt einem Sammlerclub bei. Handelt gemeinsam für wöchentliche Belohnungen.',
+    tag: 'Tag-Suche', search: 'Suchen', foundDesc: 'Gründe deine eigene Gilde oder tritt einem Sammlerclub bei. Handelt gemeinsam für wöchentliche Belohnungen.',
     found: 'Gründen', feeNote: 'Einmalig · Anti-Spam', weeklyVol: 'Wochenvolumen', members: 'Mitglieder',
     noRank: 'Kein Ranglimit', accept: 'Aufnahme', auto: 'Auto', manual: 'Manuell', info: 'Info', empty: 'Keine Gilde gefunden',
     rewards: ['Wöchentliche Dividende', 'Beitrags-XP', 'Prestige-Abzeichen', 'Frühzugang'],
@@ -142,10 +299,27 @@ const STR: Record<string, typeof EN> = {
     nVault: 'Gemeinschaftstresor', nVaultSub: 'Werke gemeinsam besitzen', nLeague: 'Gildenliga', nLeagueSub: 'Saisonaler Volumenwettbewerb',
     nGallery: 'Kuratierte Galerie', nGallerySub: 'Geteilte Sammlung', auction: 'Gildenauktion', membersBtn: 'Mitglieder', chat: 'Gildenchat',
     chatMsg: 'Mittel bereit — los geht\'s',
+    open: 'Offen', noPref: 'Keine Präferenz', automatic: 'Automatisch', selective: 'Selektiv',
+    weeklyAssist: 'Wochenhilfe', masteryRank: 'Gildenmeisterschaft', guildInfo: 'Gildeninfo',
+    basicInfo: 'Grundinfos', memberInfo: 'Info',
+    introduction: 'Einführung', foundingDate: 'Gründungsdatum', rankings: 'Rankings', activity: 'Aktivität',
+    rank: 'Rang', assistance: 'Hilfe', lastLogin: 'Letzter Login', greeting: 'Begrüßung',
+    attendance: 'Anwesenheit', areasOfExpertise: 'Fachgebiete',
+    tagCheckInDaily: 'Tägliches Check-in', tagCheckIn3Days: 'Mind. 3 Tage/Woche', tagFreeAttendance: 'Freie Anwesenheit',
+    tagNewbie: 'Anfängerfreundlich', tagTopGuild: 'Top-Gilde anstreben', tagArena: 'Auktionsexperten',
+    tagCasual: 'Casual', tagLastingRandom: 'Zufallseffekt', tagLasting247: '24/7-Effekt',
+    apply: 'Anwenden', reset: 'Zurücksetzen', close: 'Schließen',
+    totalVol: 'Gesamtvolumen', auctionWin: 'Auktionserfolg', weeklyActive: 'Wöchentlich aktiv',
+    emblem: 'Emblem', type: 'Typ', selectToEnter: 'Zum Eingeben auswählen',
+    join: 'Beitreten', leave: 'Gilde verlassen', leaveConfirm: 'Diese Gilde verlassen? Sie können 12 Stunden lang nicht wieder beitreten.',
+    cooldown: 'Abklingzeit', cooldownMsg: 'Kürzlich verlassen. Wiederbeitritt möglich in',
+    hours: 'Std', minutes: 'Min', joined: 'Beigetreten!', alreadyInGuild: 'Verlasse zuerst deine aktuelle Gilde',
+    charDesigner: 'Charakter-Designer', generateChar: 'Generieren', generating: 'Generierung…',
+    charPrompt: 'Beschreibe deinen Charakter', charResult: 'Dein Charakter',
   },
   ar: {
     recommended: 'موصى به', invite: 'دعوة', copied: 'تم نسخ رابط الدعوة', searchPh: 'البحث عن نقابة…',
-    tag: 'وسم', search: 'بحث', foundDesc: 'أسس نقابتك الخاصة أو انضم إلى نادي جامعين. تداولوا معاً لكسب مكافآت جماعية أسبوعية.',
+    tag: 'بحث الوسوم', search: 'بحث', foundDesc: 'أسس نقابتك الخاصة أو انضم إلى نادي جامعين. تداولوا معاً لكسب مكافآت جماعية أسبوعية.',
     found: 'تأسيس', feeNote: 'مرة واحدة · مضاد للبريد', weeklyVol: 'الحجم الأسبوعي', members: 'الأعضاء',
     noRank: 'بدون حد رتبة', accept: 'القبول', auto: 'تلقائي', manual: 'يدوي', info: 'معلومات', empty: 'لم يتم العثور على نقابة',
     rewards: ['أرباح أسبوعية', 'نقاط مساهمة', 'شارة مرموقة', 'وصول مبكر'],
@@ -156,10 +330,27 @@ const STR: Record<string, typeof EN> = {
     nVault: 'خزنة جماعية', nVaultSub: 'ملكية مشتركة للأعمال', nLeague: 'دوري النقابات', nLeagueSub: 'سباق حجم موسمي',
     nGallery: 'معرض منسق', nGallerySub: 'مجموعة مشتركة', auction: 'مزاد النقابة', membersBtn: 'الأعضاء', chat: 'دردشة النقابة',
     chatMsg: 'التمويل جاهز — لنتداول',
+    open: 'مفتوح', noPref: 'بدون تفضيل', automatic: 'تلقائي', selective: 'انتقائي',
+    weeklyAssist: 'دعم أسبوعي', masteryRank: 'إتقان النقابة', guildInfo: 'معلومات النقابة',
+    basicInfo: 'معلومات أساسية', memberInfo: 'تفاصيل',
+    introduction: 'مقدمة', foundingDate: 'تاريخ التأسيس', rankings: 'التصنيفات', activity: 'النشاط',
+    rank: 'الرتبة', assistance: 'المساعدة', lastLogin: 'آخر دخول', greeting: 'تحية',
+    attendance: 'الحضور', areasOfExpertise: 'مجالات الخبرة',
+    tagCheckInDaily: 'حضور يومي', tagCheckIn3Days: '3 أيام على الأقل/أسبوع', tagFreeAttendance: 'حضور حر',
+    tagNewbie: 'صديق للمبتدئين', tagTopGuild: 'طموح للقمة', tagArena: 'خبراء المزادات',
+    tagCasual: 'عادي', tagLastingRandom: 'تأثير عشوائي', tagLasting247: 'تأثير 24/7',
+    apply: 'تطبيق', reset: 'إعادة ضبط', close: 'إغلاق',
+    totalVol: 'الحجم الإجمالي', auctionWin: 'نسبة فوز المزاد', weeklyActive: 'نشاط أسبوعي',
+    emblem: 'شعار', type: 'النوع', selectToEnter: 'اختر للإدخال',
+    join: 'انضمام', leave: 'مغادرة النقابة', leaveConfirm: 'مغادرة هذه النقابة؟ لن تتمكن من الانضمام مجدداً لمدة 12 ساعة.',
+    cooldown: 'فترة انتظار', cooldownMsg: 'غادرت مؤخراً. يمكنك الانضمام مجدداً بعد',
+    hours: 'س', minutes: 'د', joined: 'تم الانضمام!', alreadyInGuild: 'غادر نقابتك الحالية أولاً',
+    charDesigner: 'مصمم الشخصيات', generateChar: 'إنشاء', generating: 'جاري الإنشاء…',
+    charPrompt: 'صف شخصيتك', charResult: 'شخصيتك',
   },
   pt: {
     recommended: 'Recomendados', invite: 'Convidar', copied: 'Link copiado', searchPh: 'Buscar guilda por nome…',
-    tag: 'Tag', search: 'Buscar', foundDesc: 'Funde sua própria guilda ou entre em um clube de colecionadores. Negocie junto para ganhar recompensas coletivas semanais.',
+    tag: 'Busca por Tag', search: 'Buscar', foundDesc: 'Funde sua própria guilda ou entre em um clube de colecionadores. Negocie junto para ganhar recompensas coletivas semanais.',
     found: 'Fundar', feeNote: 'Único · anti-spam', weeklyVol: 'Volume semanal', members: 'Membros',
     noRank: 'Sem limite de rank', accept: 'Admissão', auto: 'Auto', manual: 'Manual', info: 'Info', empty: 'Nenhuma guilda encontrada',
     rewards: ['Dividendos semanais', 'XP de contribuição', 'Emblema de prestígio', 'Acesso antecipado'],
@@ -170,33 +361,217 @@ const STR: Record<string, typeof EN> = {
     nVault: 'Cofre coletivo', nVaultSub: 'Co-propriedade de obras', nLeague: 'Liga de Guildas', nLeagueSub: 'Corrida de volume sazonal',
     nGallery: 'Galeria curada', nGallerySub: 'Coleção compartilhada', auction: 'Leilão da Guilda', membersBtn: 'Membros', chat: 'Chat da guilda',
     chatMsg: 'fundos prontos — vamos negociar',
+    open: 'Aberto', noPref: 'Sem preferência', automatic: 'Automático', selective: 'Seletivo',
+    weeklyAssist: 'Ajuda semanal', masteryRank: 'Mestria da Guilda', guildInfo: 'Info da Guilda',
+    basicInfo: 'Informações básicas', memberInfo: 'Info',
+    introduction: 'Introdução', foundingDate: 'Data de fundação', rankings: 'Rankings', activity: 'Atividade',
+    rank: 'Rank', assistance: 'Ajuda', lastLogin: 'Último login', greeting: 'Saudação',
+    attendance: 'Presença', areasOfExpertise: 'Áreas de especialização',
+    tagCheckInDaily: 'Check-in diário', tagCheckIn3Days: 'Mínimo 3 dias/semana', tagFreeAttendance: 'Livre',
+    tagNewbie: 'Amigável para novatos', tagTopGuild: 'Aspirante ao topo', tagArena: 'Especialistas em leilão',
+    tagCasual: 'Casual', tagLastingRandom: 'Efeito aleatório', tagLasting247: 'Efeito 24/7',
+    apply: 'Aplicar', reset: 'Redefinir', close: 'Fechar',
+    totalVol: 'Volume total', auctionWin: 'Taxa de vitória', weeklyActive: 'Ativos semanais',
+    emblem: 'Emblema', type: 'Tipo', selectToEnter: 'Selecionar para inserir',
+    join: 'Entrar', leave: 'Sair da guilda', leaveConfirm: 'Sair desta guilda? Você não poderá entrar novamente por 12 horas.',
+    cooldown: 'Espera', cooldownMsg: 'Você saiu recentemente. Reentrada disponível em',
+    hours: 'h', minutes: 'm', joined: 'Entrou!', alreadyInGuild: 'Saia da sua guilda atual primeiro',
+    charDesigner: 'Designer de personagem', generateChar: 'Gerar', generating: 'Gerando…',
+    charPrompt: 'Descreva seu personagem', charResult: 'Seu personagem',
   },
 }
 type S = typeof EN
 
-interface GuildView extends ApiGuild {
-  level: number; weeklyVolume: number; maxMembers: number; acceptance: 'auto' | 'manual'; tag: string
+// ── Data ─────────────────────────────────────────────────────────
+interface GuildMember {
+  name: string; rank: string; assistance: number; lastLogin: string; greeting: string
+}
+
+interface GuildView extends Omit<ApiGuild, 'acceptance'> {
+  level: number; weeklyVolume: number; maxMembers: number; acceptance: 'auto' | 'manual' | 'selective'
+  tags: string[]; emblem: string; leaderMessage: string; weeklyAssistance: number
+  auctionWinRate: number; foundingDate: string; introduction: string
+  weeklyActive: number; totalVolume: number; guildMembers: GuildMember[]; ranking: number
 }
 
 const MOCK: GuildView[] = [
-  { id:'g1', name:'BlueChipDAO',   description:null, focus:'Collectors', avatar_color:C.gold,      member_count:22, level:8,  weeklyVolume:1240, maxMembers:30, acceptance:'auto',   tag:'Collectors~' },
-  { id:'g2', name:'GenesisCircle', description:null, focus:'Blue chip',  avatar_color:C.goldLight, member_count:14, level:11, weeklyVolume:3580, maxMembers:27, acceptance:'manual', tag:'Recruiting~' },
-  { id:'g3', name:'NeoPatrons',    description:null, focus:'Newcomers',  avatar_color:C.gold,      member_count:6,  level:3,  weeklyVolume:210,  maxMembers:16, acceptance:'auto',   tag:'Newbies~' },
-  { id:'g4', name:'PixelGuild',    description:null, focus:'Generative', avatar_color:C.gold,      member_count:18, level:6,  weeklyVolume:920,  maxMembers:24, acceptance:'auto',   tag:'Generative~' },
-  { id:'g5', name:'OldMasters',    description:null, focus:'Classical',  avatar_color:C.gold,      member_count:11, level:5,  weeklyVolume:640,  maxMembers:20, acceptance:'manual', tag:'Classical~' },
+  {
+    id: 'g1', name: 'BlueChipDAO', description: null, focus: 'Collectors', avatar_color: C.gold,
+    member_count: 22, level: 8, weeklyVolume: 1240, maxMembers: 30, acceptance: 'auto',
+    tags: ['Check-In Everyday', 'Arena Experts'], emblem: 'eagle-emblem',
+    leaderMessage: 'We hunt blue chips together. Join the alpha.', weeklyAssistance: 18500,
+    auctionWinRate: 72, foundingDate: '2025-03-15', introduction: 'Premier blue chip collectors guild. We share alpha, co-bid on auctions, and build wealth together.',
+    weeklyActive: 20, totalVolume: 45200, ranking: 12,
+    guildMembers: [
+      { name: 'CryptoWhale', rank: 'Guild Master', assistance: 4200, lastLogin: '2h ago', greeting: 'Welcome aboard!' },
+      { name: 'ArtHunter', rank: 'Officer', assistance: 3100, lastLogin: '5h ago', greeting: 'Let\'s find gems' },
+      { name: 'DiamondHands', rank: 'Member', assistance: 2800, lastLogin: '1d ago', greeting: 'HODL gang' },
+    ],
+  },
+  {
+    id: 'g2', name: 'GenesisCircle', description: null, focus: 'Blue chip', avatar_color: C.goldLight,
+    member_count: 14, level: 11, weeklyVolume: 3580, maxMembers: 27, acceptance: 'selective',
+    tags: ['Wannabe the Top Guild', 'Check-In Everyday'], emblem: 'lion',
+    leaderMessage: 'Only serious collectors. We aim for #1.', weeklyAssistance: 32000,
+    auctionWinRate: 85, foundingDate: '2024-11-01', introduction: 'Top-tier guild focused on dominating the auction scene. Selective entry only.',
+    weeklyActive: 14, totalVolume: 128000, ranking: 2,
+    guildMembers: [
+      { name: 'Genesis_King', rank: 'Guild Master', assistance: 8500, lastLogin: '30m ago', greeting: 'Excellence only' },
+      { name: 'AlphaSeeker', rank: 'Officer', assistance: 6200, lastLogin: '1h ago', greeting: 'Let\'s dominate' },
+    ],
+  },
+  {
+    id: 'g3', name: 'NeoPatrons', description: null, focus: 'Newcomers', avatar_color: C.gold,
+    member_count: 6, level: 3, weeklyVolume: 210, maxMembers: 16, acceptance: 'auto',
+    tags: ['Newbie Friendly', 'Free Attendance', 'Casual'], emblem: 'panda',
+    leaderMessage: 'Everyone is welcome here! Learn & grow.', weeklyAssistance: 2400,
+    auctionWinRate: 25, foundingDate: '2026-01-20', introduction: 'A friendly space for newcomers to learn art trading.',
+    weeklyActive: 5, totalVolume: 1800, ranking: 156,
+    guildMembers: [
+      { name: 'NewbieKing', rank: 'Guild Master', assistance: 800, lastLogin: '3h ago', greeting: 'Welcome!' },
+    ],
+  },
+  {
+    id: 'g4', name: 'PixelGuild', description: null, focus: 'Generative', avatar_color: C.gold,
+    member_count: 18, level: 6, weeklyVolume: 920, maxMembers: 24, acceptance: 'auto',
+    tags: ['At Least 3 Days a Week', 'Casual'], emblem: 'butterfly',
+    leaderMessage: 'Generative art lovers unite!', weeklyAssistance: 11200,
+    auctionWinRate: 48, foundingDate: '2025-06-10', introduction: 'For fans of generative, algorithmic, and AI-assisted art.',
+    weeklyActive: 15, totalVolume: 22400, ranking: 38,
+    guildMembers: [
+      { name: 'PixelMaster', rank: 'Guild Master', assistance: 3200, lastLogin: '1h ago', greeting: 'Create & collect' },
+      { name: 'GenArtFan', rank: 'Officer', assistance: 2600, lastLogin: '4h ago', greeting: 'Art is code' },
+    ],
+  },
+  {
+    id: 'g5', name: 'OldMasters', description: null, focus: 'Classical', avatar_color: C.gold,
+    member_count: 11, level: 5, weeklyVolume: 640, maxMembers: 20, acceptance: 'selective',
+    tags: ['Check-In Everyday', 'Lasting Effect 24/7'], emblem: 'griffin-symbol',
+    leaderMessage: 'Timeless art, timeless value.', weeklyAssistance: 8900,
+    auctionWinRate: 61, foundingDate: '2025-01-05', introduction: 'Classical art connoisseurs. We appreciate tradition and lasting value.',
+    weeklyActive: 9, totalVolume: 35600, ranking: 21,
+    guildMembers: [
+      { name: 'ClassicCollector', rank: 'Guild Master', assistance: 2900, lastLogin: '2h ago', greeting: 'Tradition matters' },
+      { name: 'ArtHistorian', rank: 'Member', assistance: 1800, lastLogin: '6h ago', greeting: 'Beauty endures' },
+    ],
+  },
+  {
+    id: 'g6', name: 'PhoenixRise', description: null, focus: 'Experimental', avatar_color: C.gold,
+    member_count: 9, level: 4, weeklyVolume: 480, maxMembers: 18, acceptance: 'auto',
+    tags: ['Newbie Friendly', 'Lasting Effect Random'], emblem: 'fox-head',
+    leaderMessage: 'From ashes we rise. Experimental art ftw!', weeklyAssistance: 5600,
+    auctionWinRate: 35, foundingDate: '2025-09-22', introduction: 'Pushing boundaries with experimental art. All welcome.',
+    weeklyActive: 7, totalVolume: 8900, ranking: 85,
+    guildMembers: [
+      { name: 'Phoenix_Lead', rank: 'Guild Master', assistance: 2100, lastLogin: '45m ago', greeting: 'Rise up!' },
+    ],
+  },
+  {
+    id: 'g7', name: 'NightOwls', description: null, focus: 'Collectors', avatar_color: C.gold,
+    member_count: 15, level: 7, weeklyVolume: 1100, maxMembers: 25, acceptance: 'auto',
+    tags: ['Free Attendance', 'Arena Experts'], emblem: 'owl',
+    leaderMessage: 'We trade after midnight. Night crawlers welcome.', weeklyAssistance: 14200,
+    auctionWinRate: 58, foundingDate: '2025-04-18', introduction: 'Active during late hours. Auction snipers and night traders.',
+    weeklyActive: 12, totalVolume: 38700, ranking: 18,
+    guildMembers: [
+      { name: 'NightHawk', rank: 'Guild Master', assistance: 3800, lastLogin: '1h ago', greeting: 'The night is ours' },
+      { name: 'MoonBidder', rank: 'Officer', assistance: 2900, lastLogin: '3h ago', greeting: 'Late night alpha' },
+    ],
+  },
+  {
+    id: 'g8', name: 'DragonVault', description: null, focus: 'Blue chip', avatar_color: C.gold,
+    member_count: 20, level: 9, weeklyVolume: 2100, maxMembers: 28, acceptance: 'selective',
+    tags: ['Check-In Everyday', 'Wannabe the Top Guild'], emblem: 'dinosaur-rex',
+    leaderMessage: 'Hoard the best. Dragon energy.', weeklyAssistance: 24500,
+    auctionWinRate: 78, foundingDate: '2024-12-01', introduction: 'Top-performing guild with dragon-like tenacity. Selective admissions.',
+    weeklyActive: 18, totalVolume: 95000, ranking: 5,
+    guildMembers: [
+      { name: 'DragonLord', rank: 'Guild Master', assistance: 6800, lastLogin: '20m ago', greeting: 'Breathe fire' },
+      { name: 'ScaleKeeper', rank: 'Officer', assistance: 4500, lastLogin: '2h ago', greeting: 'Guard the vault' },
+    ],
+  },
 ]
 
 function toView(g: ApiGuild): GuildView {
+  const emblem = EMBLEMS[Math.abs(hashStr(g.name)) % EMBLEMS.length]
   return {
     ...g,
     level: g.level ?? Math.max(1, Math.round((g.member_count ?? 1) / 3)),
     weeklyVolume: g.weekly_volume_eth ?? 0,
     maxMembers: g.max_members ?? 30,
     acceptance: g.acceptance ?? 'auto',
-    tag: g.focus ? `${g.focus}~` : 'New~',
+    tags: g.focus ? [g.focus] : [],
+    emblem,
+    leaderMessage: g.description ?? '',
+    weeklyAssistance: (g.weekly_volume_eth ?? 0) * 10,
+    auctionWinRate: Math.round(Math.random() * 80 + 10),
+    foundingDate: '2025-01-01',
+    introduction: g.description ?? '',
+    weeklyActive: g.member_count ?? 1,
+    totalVolume: (g.weekly_volume_eth ?? 0) * 30,
+    guildMembers: [],
+    ranking: getRankNumber((g.weekly_volume_eth ?? 0) * 30, Math.round(Math.random() * 80 + 10)),
   }
 }
 
+function hashStr(s: string) {
+  let h = 0
+  for (let i = 0; i < s.length; i++) h = ((h << 5) - h + s.charCodeAt(i)) | 0
+  return h
+}
+
+// ── Cooldown helpers ────────────────────────────────────────────
+const COOLDOWN_MS = 12 * 60 * 60 * 1000
+const CK_JOINED = 'artcurve_guild_joined'
+const CK_LEFT = 'artcurve_guild_left_at'
+
+function getJoinedGuild(): string | null {
+  if (typeof window === 'undefined') return null
+  return localStorage.getItem(CK_JOINED)
+}
+function setJoinedGuild(id: string | null) {
+  if (id) localStorage.setItem(CK_JOINED, id)
+  else localStorage.removeItem(CK_JOINED)
+}
+function getLeftAt(): number {
+  if (typeof window === 'undefined') return 0
+  return parseInt(localStorage.getItem(CK_LEFT) || '0', 10)
+}
+function setLeftAt() { localStorage.setItem(CK_LEFT, String(Date.now())) }
+function cooldownRemaining(): number {
+  // DISABLED FOR TESTING
+  return 0
+  // const left = getLeftAt()
+  // if (!left) return 0
+  // return Math.max(0, COOLDOWN_MS - (Date.now() - left))
+}
+function formatCooldown(ms: number, s: S): string {
+  const h = Math.floor(ms / 3600000)
+  const m = Math.floor((ms % 3600000) / 60000)
+  return `${h}${s.hours} ${m}${s.minutes}`
+}
+
+// ── Gemini API for character generation ─────────────────────────
+const GEMINI_KEY = 'AIzaSyAQ-Ab8RN6JsbsQpq859iNrGQ96PMsLy6c'
+async function generateCharacterImage(prompt: string): Promise<string | null> {
+  try {
+    const res = await fetch(
+      `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash-exp:generateContent?key=${GEMINI_KEY}`,
+      {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          contents: [{ parts: [{ text: `Generate a detailed character description as a 3D Pixar-style illustration prompt for an art guild member. The character should be a cute anthropomorphic cat in a fantasy guild setting. User's description: "${prompt}". Return ONLY the image generation prompt, nothing else. Make it vivid and detailed, under 300 chars.` }] }],
+          generationConfig: { temperature: 0.9, maxOutputTokens: 400 },
+        }),
+      },
+    )
+    const data = await res.json()
+    return data?.candidates?.[0]?.content?.parts?.[0]?.text ?? null
+  } catch { return null }
+}
+
+// ── Shared components ───────────────────────────────────────────
 function Filigree({ w = '100%' }: { w?: string }) {
   return (
     <div style={{ position: 'relative', height: 1, width: w, margin: '12px auto', background: `linear-gradient(90deg,transparent,${C.lineGold},transparent)` }}>
@@ -205,73 +580,19 @@ function Filigree({ w = '100%' }: { w?: string }) {
   )
 }
 
-// ── Crest: SVG có shading, gradient kim loại, đổ bóng ─────────────
-function FoundationCrest({ size = 168 }: { size?: number }) {
-  const g = C.gold, gl = C.goldLight, gd = '#7a5a18'
+function GuildEmblem({ emblem, size = 48 }: { emblem: string; size?: number }) {
   return (
-    <svg width={size} height={size * 1.22} viewBox="0 0 200 244" fill="none" aria-hidden="true">
-      <defs>
-        <linearGradient id="cf-blue" x1="0" y1="0" x2="0.4" y2="1">
-          <stop offset="0" stopColor="#3a608f" /><stop offset="0.5" stopColor="#274b75" /><stop offset="1" stopColor="#142944" />
-        </linearGradient>
-        <linearGradient id="cf-gold" x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0" stopColor="#FBF1DA" /><stop offset="0.45" stopColor={gl} /><stop offset="1" stopColor={gd} />
-        </linearGradient>
-        <linearGradient id="cf-cream" x1="0" y1="0" x2="0.3" y2="1">
-          <stop offset="0" stopColor="#FBF3E3" /><stop offset="0.6" stopColor="#E4CFA4" /><stop offset="1" stopColor="#BE9E68" />
-        </linearGradient>
-        <filter id="cf-sh" x="-20%" y="-20%" width="140%" height="140%">
-          <feDropShadow dx="0" dy="2" stdDeviation="2.4" floodColor="#000" floodOpacity="0.45" />
-        </filter>
-      </defs>
-
-      <g filter="url(#cf-sh)">
-        {/* Banner */}
-        <path d="M56 30 H144 V196 L100 222 L56 196 Z" fill="url(#cf-blue)" stroke={g} strokeWidth="1.4" />
-        <rect x="74" y="30" width="8" height="180" fill="#fff" opacity="0.06" />
-        <rect x="118" y="30" width="8" height="180" fill="#000" opacity="0.12" />
-        <path d="M62 36 H138 V192 L100 214 L62 192 Z" fill="none" stroke={C.lineGold} strokeWidth="0.7" />
-
-        {/* Rod */}
-        <rect x="38" y="16" width="124" height="9" rx="4.5" fill="url(#cf-gold)" stroke={gd} strokeWidth="0.5" />
-        <rect x="40" y="18" width="120" height="2.4" fill="#fff" opacity="0.3" />
-        <circle cx="34" cy="20.5" r="6.5" fill="url(#cf-gold)" /><circle cx="166" cy="20.5" r="6.5" fill="url(#cf-gold)" />
-
-        {/* Cung trên + kiếm */}
-        <path d="M78 58 Q100 42 122 58" fill="none" stroke="url(#cf-gold)" strokeWidth="2.6" strokeLinecap="round" />
-        <polygon points="76,58 82,55 82,61" fill={g} /><polygon points="124,58 118,55 118,61" fill={g} />
-        <polygon points="100,50 103.5,126 100,133 96.5,126" fill="url(#cf-cream)" stroke={gd} strokeWidth="0.6" />
-        <line x1="82" y1="118" x2="118" y2="118" stroke="url(#cf-gold)" strokeWidth="3.4" strokeLinecap="round" />
-        <rect x="96.5" y="133" width="7" height="18" rx="2.5" fill="url(#cf-gold)" />
-        <circle cx="100" cy="153" r="4.6" fill="none" stroke={g} strokeWidth="2.2" />
-
-        {/* Cánh cuộn — đối xứng 2 tầng */}
-        <path d="M96 150 C62 156 40 132 44 96 C66 120 84 128 94 142 Z" fill="url(#cf-cream)" stroke={gd} strokeWidth="0.8" />
-        <path d="M104 150 C138 156 160 132 156 96 C134 120 116 128 106 142 Z" fill="url(#cf-cream)" stroke={gd} strokeWidth="0.8" />
-        <path d="M98 100 C80 96 70 82 73 64 C88 78 95 86 100 98 Z" fill="url(#cf-cream)" stroke={gd} strokeWidth="0.7" />
-        <path d="M102 100 C120 96 130 82 127 64 C112 78 105 86 100 98 Z" fill="url(#cf-cream)" stroke={gd} strokeWidth="0.7" />
-
-        {/* Vương miện trung tâm */}
-        <path d="M89 150 L93 138 L96.5 145 L100 134 L103.5 145 L107 138 L111 150 Z" fill="url(#cf-gold)" stroke={gd} strokeWidth="0.5" />
-        <rect x="89" y="150" width="22" height="5" rx="1.5" fill="url(#cf-gold)" />
-
-        {/* Gem */}
-        <rect x="93.5" y="170.5" width="13" height="13" rx="2" transform="rotate(45 100 177)" fill="#6fd0e8" stroke={gl} strokeWidth="1" />
-        <rect x="96" y="173" width="4" height="4" rx="1" transform="rotate(45 100 175)" fill="#bfeefb" opacity="0.8" />
-
-        {/* Tua rua */}
-        {[83, 91.5, 100, 108.5, 117].map((x, i) => (
-          <g key={i}>
-            <rect x={x - 2.6} y="195" width="5.2" height="6" rx="2" fill="url(#cf-gold)" />
-            <path d={`M${x - 1.6} 201 V211 M${x} 201 V213 M${x + 1.6} 201 V211`} stroke={g} strokeWidth="1.1" strokeLinecap="round" />
-          </g>
-        ))}
-      </g>
-    </svg>
+    <div style={{
+      width: size, height: size, borderRadius: '50%', flexShrink: 0, overflow: 'hidden',
+      display: 'flex', alignItems: 'center', justifyContent: 'center',
+      border: `1.5px solid ${C.gold}`, background: `radial-gradient(circle, rgba(201,169,110,0.18), ${C.panel2} 72%)`,
+    }}>
+      {/* eslint-disable-next-line @next/next/no-img-element */}
+      <img src={`/guild/emblems/${emblem}.svg`} alt="" width={size * 0.6} height={size * 0.6} style={{ objectFit: 'contain', filter: 'brightness(0) invert(0.82) sepia(0.3) saturate(2) hue-rotate(10deg)' }} />
+    </div>
   )
 }
 
-// Mặc định render fallback; nâng cấp sang ảnh thật khi /public load thành công.
 function ImgFallback({ src, alt, w, h, fallback }: { src: string; alt: string; w: number; h: number; fallback: React.ReactNode }) {
   const [ok, setOk] = useState(false)
   return (
@@ -283,52 +604,257 @@ function ImgFallback({ src, alt, w, h, fallback }: { src: string; alt: string; w
   )
 }
 
-const ROW_EMBLEMS = [IconChessRook, IconCrown, IconBuildingCastle, IconShieldChevron, IconBuildingBank]
-function RowEmblem({ seed, idx, featured }: { seed: string; idx: number; featured?: boolean }) {
-  const Icon = ROW_EMBLEMS[idx % ROW_EMBLEMS.length]
-  const url = `https://api.dicebear.com/7.x/shapes/svg?seed=${encodeURIComponent(seed)}&radius=50`
-  return <ImgFallback src={url} alt="" w={44} h={44} fallback={<Icon size={26} color={featured ? C.goldLight : C.gold} />} />
+function TagChip({ label, active, onClick }: { label: string; active?: boolean; onClick?: () => void }) {
+  return (
+    <motion.button type="button" onClick={onClick} whileTap={{ scale: 0.95 }}
+      style={{
+        display: 'inline-flex', alignItems: 'center', gap: 4, borderRadius: 20,
+        padding: '4px 12px', fontSize: 11, cursor: onClick ? 'pointer' : 'default',
+        border: `1px solid ${active ? C.gold : C.line}`,
+        color: active ? '#221905' : C.muted,
+        background: active ? `linear-gradient(180deg,${C.goldLight},${C.gold})` : 'transparent',
+      }}>{label}</motion.button>
+  )
 }
 
-// ── Finder row ───────────────────────────────────────────────────
-function GuildRow({ g, idx, featured, s, onInfo }: { g: GuildView; idx: number; featured?: boolean; s: S; onInfo: () => void }) {
+// ── Guild row (Epic Seven style) ────────────────────────────────
+function GuildRow({ g, s, onInfo, onJoin, onLeave, joinedId, cdRemaining }: { g: GuildView; s: S; onInfo: () => void; onJoin: (g: GuildView) => void; onLeave: () => void; joinedId: string | null; cdRemaining: number }) {
+  const isJoined = joinedId === g.id
+  const cd = cdRemaining
+  const inOtherGuild = joinedId !== null && joinedId !== g.id
   return (
-    <motion.div variants={{ hidden: { opacity: 0, y: 14 }, show: { opacity: 1, y: 0 } }}
-      whileHover={{ borderColor: C.gold, y: -2 }}
+    <motion.div
+      variants={{ hidden: { opacity: 0, y: 14 }, show: { opacity: 1, y: 0 } }}
+      whileHover={{ borderColor: C.gold, y: -1 }}
+      onClick={onInfo}
       style={{
-        display: 'flex', alignItems: 'center', gap: 14, padding: 18, marginBottom: 12, borderRadius: 12,
-        background: featured ? 'linear-gradient(180deg,#1a160e,#121009)' : C.panel,
-        border: `${featured ? 2 : 1}px solid ${featured ? C.gold : C.line}`,
-        boxShadow: featured ? '0 0 22px rgba(201,169,110,0.14)' : 'none',
+        display: 'flex', gap: 14, padding: '14px 16px', borderRadius: 12,
+        background: C.panel, border: `1px solid ${C.line}`, cursor: 'pointer',
+        transition: 'border-color 0.2s', alignItems: 'center',
       }}>
-      <div style={{ width: 52, height: 52, borderRadius: '50%', flexShrink: 0, overflow: 'hidden', display: 'flex', alignItems: 'center', justifyContent: 'center',
-        border: `1px solid ${featured ? C.gold : C.lineGold}`, background: `radial-gradient(circle, rgba(201,169,110,0.12), ${C.panel2} 72%)` }}>
-        <RowEmblem seed={g.name} idx={idx} featured={featured} />
-      </div>
+      <GuildEmblem emblem={g.emblem} size={52} />
+
       <div style={{ flex: 1, minWidth: 0 }}>
-        <div style={{ fontSize: 13, color: C.ink }}>
-          <span style={{ fontFamily: SERIF, fontSize: 17, fontWeight: 600, color: featured ? C.goldLight : C.gold }}>Lv.{g.level}</span>{' '}{g.name}
+        <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 3 }}>
+          <span style={{ fontFamily: SERIF, fontSize: 13, fontWeight: 600, color: C.goldLight, background: 'rgba(201,169,110,0.12)', borderRadius: 6, padding: '1px 8px' }}>
+            Lv.{g.level}
+          </span>
+          <span style={{ fontSize: 14, fontWeight: 600, color: C.ink }}>{g.name}</span>
+          <span style={{ fontSize: 11, color: C.gold, marginLeft: 'auto', fontWeight: 600 }}>
+            #{g.ranking}
+          </span>
         </div>
-        <div style={{ fontSize: 11, color: C.muted, marginTop: 2 }}>{s.weeklyVol}: {g.weeklyVolume.toLocaleString()} ETH</div>
-        <span style={{ display: 'inline-block', marginTop: 5, border: `1px solid ${C.lineGold}`, borderRadius: 20, padding: '1px 10px', fontSize: 10, color: C.gold }}>{g.tag}</span>
+
+        <div style={{ display: 'flex', gap: 16, fontSize: 11, color: C.muted, marginBottom: 5 }}>
+          <span>{s.weeklyAssist}: <span style={{ color: C.ink }}>{g.weeklyAssistance.toLocaleString()}</span></span>
+          <span>{s.masteryRank}: <span style={{ color: C.ink }}>#{g.ranking}</span></span>
+          <span>{s.members}: <span style={{ color: C.ink }}>{g.member_count}/{g.maxMembers}</span></span>
+        </div>
+
+        <div style={{ fontSize: 12, color: '#b8b2a6', marginBottom: 6, fontStyle: 'italic', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+          &ldquo;{g.leaderMessage}&rdquo;
+        </div>
+
+        <div style={{ display: 'flex', gap: 5, flexWrap: 'wrap' }}>
+          {g.tags.map((t) => <TagChip key={t} label={t} active />)}
+          <TagChip label={g.acceptance === 'auto' ? s.automatic : g.acceptance === 'selective' ? s.selective : s.manual} />
+        </div>
       </div>
-      <div style={{ textAlign: 'right', fontSize: 10, color: C.muted, lineHeight: 1.6 }}>
-        {s.members} {g.member_count}/{g.maxMembers}<br />{s.noRank}<br />{s.accept}: {g.acceptance === 'auto' ? s.auto : s.manual}
+
+      <div style={{ display: 'flex', gap: 6, flexShrink: 0, flexDirection: 'column', alignItems: 'stretch' }}>
+        {!isJoined ? (
+          <motion.button type="button" onClick={(e) => { e.stopPropagation(); if (!inOtherGuild && cd === 0) onJoin(g) }}
+            whileTap={!inOtherGuild && cd === 0 ? { scale: 0.96 } : {}} whileHover={!inOtherGuild && cd === 0 ? { scale: 1.03 } : {}}
+            title={cd > 0 ? `${s.cooldownMsg} ${formatCooldown(cd, s)}` : inOtherGuild ? s.alreadyInGuild : ''}
+            style={{ fontFamily: SERIF, borderRadius: 9, padding: '8px 18px', fontSize: 12, fontWeight: 600,
+              cursor: !inOtherGuild && cd === 0 ? 'pointer' : 'not-allowed',
+              color: !inOtherGuild && cd === 0 ? '#221905' : C.muted,
+              background: !inOtherGuild && cd === 0 ? `linear-gradient(180deg,${C.goldLight},${C.gold})` : 'transparent',
+              border: `1px solid ${!inOtherGuild && cd === 0 ? C.gold : C.line}`,
+              opacity: inOtherGuild || cd > 0 ? 0.45 : 1 }}>
+            {cd > 0 ? <><IconClock size={12} style={{ verticalAlign: -1, marginRight: 3 }} />{s.cooldown}</> : s.join}
+          </motion.button>
+        ) : (
+          <motion.button type="button" onClick={(e) => { e.stopPropagation(); onLeave() }} whileTap={{ scale: 0.96 }}
+            style={{ fontFamily: SERIF, borderRadius: 9, padding: '8px 14px', fontSize: 11, fontWeight: 600, cursor: 'pointer',
+              color: C.red, background: 'transparent', border: `1px solid ${C.red}40`, display: 'flex', alignItems: 'center', gap: 4, justifyContent: 'center' }}>
+            <IconX size={12} />{s.leave}
+          </motion.button>
+        )}
+        <motion.button type="button" onClick={(e) => { e.stopPropagation(); onInfo() }} whileTap={{ scale: 0.96 }} whileHover={{ scale: 1.03 }}
+          style={{ fontFamily: SERIF, borderRadius: 9, padding: '8px 14px', fontSize: 12, fontWeight: 600, cursor: 'pointer',
+            color: '#221905', background: `linear-gradient(180deg,${C.goldLight},${C.gold})`, border: 'none', textAlign: 'center' }}>{s.info}</motion.button>
       </div>
-      <motion.button type="button" onClick={onInfo} aria-label={`${s.info} ${g.name}`} whileTap={{ scale: 0.96 }} whileHover={{ scale: 1.03 }}
-        style={{ fontFamily: featured ? SERIF : undefined, borderRadius: 9, padding: featured ? '10px 20px' : '9px 16px',
-          fontSize: featured ? 14 : 12, fontWeight: featured ? 600 : 400, cursor: 'pointer',
-          color: featured ? '#221905' : C.ink, background: featured ? `linear-gradient(180deg,${C.goldLight},${C.gold})` : 'transparent',
-          border: `1px solid ${featured ? C.gold : C.lineGold}` }}>{s.info}</motion.button>
     </motion.div>
   )
 }
 
-// ── Create guild modal ───────────────────────────────────────────
+// ── Tag Search modal ────────────────────────────────────────────
+function TagSearchModal({ s, activeTags, onApply, onClose }: { s: S; activeTags: string[]; onApply: (tags: string[]) => void; onClose: () => void }) {
+  const [selected, setSelected] = useState<string[]>(activeTags)
+  const toggle = (t: string) => setSelected((p) => p.includes(t) ? p.filter((x) => x !== t) : [...p, t])
+
+  const attendanceTags = [
+    { key: 'Check-In Everyday', label: s.tagCheckInDaily },
+    { key: 'At Least 3 Days a Week', label: s.tagCheckIn3Days },
+    { key: 'Free Attendance', label: s.tagFreeAttendance },
+  ]
+  const expertiseTags = [
+    { key: 'Newbie Friendly', label: s.tagNewbie },
+    { key: 'Wannabe the Top Guild', label: s.tagTopGuild },
+    { key: 'Arena Experts', label: s.tagArena },
+    { key: 'Casual', label: s.tagCasual },
+    { key: 'Lasting Effect Random', label: s.tagLastingRandom },
+    { key: 'Lasting Effect 24/7', label: s.tagLasting247 },
+  ]
+
+  return (
+    <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+      onClick={(e) => { if (e.target === e.currentTarget) onClose() }}
+      style={{ position: 'fixed', inset: 0, zIndex: 60, background: 'rgba(0,0,0,0.72)', backdropFilter: 'blur(4px)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 16 }}>
+      <motion.div initial={{ y: 16, opacity: 0 }} animate={{ y: 0, opacity: 1 }}
+        style={{ width: 480, maxWidth: '100%', background: C.panel, border: `1px solid ${C.lineGold}`, borderRadius: 14, overflow: 'hidden' }}>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '14px 18px', borderBottom: `1px solid ${C.line}` }}>
+          <span style={{ fontFamily: SERIF, fontSize: 18, fontWeight: 600, color: C.goldLight }}>{s.tag}</span>
+          <button type="button" onClick={onClose} style={{ background: 'none', border: 'none', color: C.muted, cursor: 'pointer' }}><IconX size={18} /></button>
+        </div>
+        <div style={{ padding: 18 }}>
+          <div style={{ fontSize: 13, fontWeight: 600, color: C.gold, marginBottom: 10 }}>{s.attendance}</div>
+          <div style={{ display: 'flex', flexWrap: 'wrap', gap: 7, marginBottom: 18 }}>
+            {attendanceTags.map((t) => <TagChip key={t.key} label={t.label} active={selected.includes(t.key)} onClick={() => toggle(t.key)} />)}
+          </div>
+          <div style={{ fontSize: 13, fontWeight: 600, color: C.gold, marginBottom: 10 }}>{s.areasOfExpertise}</div>
+          <div style={{ display: 'flex', flexWrap: 'wrap', gap: 7, marginBottom: 20 }}>
+            {expertiseTags.map((t) => <TagChip key={t.key} label={t.label} active={selected.includes(t.key)} onClick={() => toggle(t.key)} />)}
+          </div>
+          <div style={{ display: 'flex', gap: 10, justifyContent: 'flex-end' }}>
+            <button type="button" onClick={() => setSelected([])} style={{ borderRadius: 9, padding: '9px 16px', fontSize: 12, cursor: 'pointer', background: 'transparent', border: `1px solid ${C.line}`, color: C.ink }}>{s.reset}</button>
+            <button type="button" onClick={() => { onApply(selected); onClose() }}
+              style={{ fontFamily: SERIF, borderRadius: 9, padding: '9px 20px', fontSize: 13, fontWeight: 600, cursor: 'pointer', color: '#221905', background: `linear-gradient(180deg,${C.goldLight},${C.gold})`, border: 'none' }}>{s.apply}</button>
+          </div>
+        </div>
+      </motion.div>
+    </motion.div>
+  )
+}
+
+// ── Guild Information modal ─────────────────────────────────────
+function GuildInfoModal({ g, s, onClose }: { g: GuildView; s: S; onClose: () => void }) {
+  const [tab, setTab] = useState<'basic' | 'info'>('basic')
+
+  return (
+    <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+      onClick={(e) => { if (e.target === e.currentTarget) onClose() }}
+      style={{ position: 'fixed', inset: 0, zIndex: 60, background: 'rgba(0,0,0,0.72)', backdropFilter: 'blur(4px)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 16 }}>
+      <motion.div initial={{ y: 16, opacity: 0 }} animate={{ y: 0, opacity: 1 }}
+        style={{ width: 560, maxWidth: '100%', maxHeight: '80vh', background: C.panel, border: `1px solid ${C.lineGold}`, borderRadius: 14, overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
+        {/* Header */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: 14, padding: '16px 18px', borderBottom: `1px solid ${C.line}` }}>
+          <GuildEmblem emblem={g.emblem} size={48} />
+          <div style={{ flex: 1 }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+              <span style={{ fontFamily: SERIF, fontSize: 13, fontWeight: 600, color: C.goldLight }}>Lv.{g.level}</span>
+              <span style={{ fontSize: 16, fontWeight: 600, color: C.ink }}>{g.name}</span>
+              <span style={{ fontSize: 11, color: C.gold, fontWeight: 600 }}>#{g.ranking}</span>
+            </div>
+            <div style={{ fontSize: 11, color: C.muted, marginTop: 2 }}>{s.members}: {g.member_count}/{g.maxMembers} · {s.accept}: {g.acceptance === 'auto' ? s.automatic : g.acceptance === 'selective' ? s.selective : s.manual}</div>
+          </div>
+          <button type="button" onClick={onClose} style={{ background: 'none', border: 'none', color: C.muted, cursor: 'pointer' }}><IconX size={18} /></button>
+        </div>
+
+        {/* Tabs */}
+        <div style={{ display: 'flex', borderBottom: `1px solid ${C.line}` }}>
+          {(['basic', 'info'] as const).map((t) => (
+            <button key={t} type="button" onClick={() => setTab(t)}
+              style={{
+                flex: 1, padding: '10px 0', fontSize: 13, fontWeight: 600, cursor: 'pointer',
+                color: tab === t ? C.gold : C.muted, background: 'transparent', border: 'none',
+                borderBottom: tab === t ? `2px solid ${C.gold}` : '2px solid transparent',
+              }}>{t === 'basic' ? s.basicInfo : s.memberInfo}</button>
+          ))}
+        </div>
+
+        {/* Content */}
+        <div style={{ flex: 1, overflowY: 'auto', padding: 18 }}>
+          {tab === 'basic' ? (
+            <div>
+              <div style={{ marginBottom: 16 }}>
+                <div style={{ fontSize: 12, color: C.gold, fontWeight: 600, marginBottom: 6 }}>{s.introduction}</div>
+                <div style={{ fontSize: 13, color: C.ink, lineHeight: 1.6 }}>{g.introduction}</div>
+              </div>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10, marginBottom: 16 }}>
+                <div style={{ background: C.panel2, borderRadius: 10, padding: '12px 14px' }}>
+                  <div style={{ fontSize: 10, color: C.muted, marginBottom: 4 }}><IconCalendar size={12} style={{ verticalAlign: -1, marginRight: 4 }} />{s.foundingDate}</div>
+                  <div style={{ fontSize: 14, color: C.ink, fontWeight: 600 }}>{g.foundingDate}</div>
+                </div>
+                <div style={{ background: C.panel2, borderRadius: 10, padding: '12px 14px' }}>
+                  <div style={{ fontSize: 10, color: C.muted, marginBottom: 4 }}><IconTrophy size={12} style={{ verticalAlign: -1, marginRight: 4 }} />{s.rankings}</div>
+                  <div style={{ fontSize: 14, color: C.gold, fontWeight: 600 }}>#{g.ranking}</div>
+                </div>
+                <div style={{ background: C.panel2, borderRadius: 10, padding: '12px 14px' }}>
+                  <div style={{ fontSize: 10, color: C.muted, marginBottom: 4 }}><IconFlame size={12} style={{ verticalAlign: -1, marginRight: 4 }} />{s.totalVol}</div>
+                  <div style={{ fontSize: 14, color: C.ink, fontWeight: 600 }}>{g.totalVolume.toLocaleString()} ETH</div>
+                </div>
+                <div style={{ background: C.panel2, borderRadius: 10, padding: '12px 14px' }}>
+                  <div style={{ fontSize: 10, color: C.muted, marginBottom: 4 }}><IconTarget size={12} style={{ verticalAlign: -1, marginRight: 4 }} />{s.auctionWin}</div>
+                  <div style={{ fontSize: 14, color: C.ink, fontWeight: 600 }}>{g.auctionWinRate}%</div>
+                </div>
+              </div>
+              <div style={{ marginBottom: 10 }}>
+                <div style={{ fontSize: 12, color: C.gold, fontWeight: 600, marginBottom: 6 }}>{s.activity}</div>
+                <div style={{ display: 'flex', gap: 16, fontSize: 12, color: C.muted }}>
+                  <span>{s.weeklyActive}: <span style={{ color: C.ink }}>{g.weeklyActive}/{g.member_count}</span></span>
+                  <span>{s.weeklyVol}: <span style={{ color: C.ink }}>{g.weeklyVolume.toLocaleString()} ETH</span></span>
+                  <span>{s.weeklyAssist}: <span style={{ color: C.ink }}>{g.weeklyAssistance.toLocaleString()}</span></span>
+                </div>
+              </div>
+              <div>
+                <div style={{ fontSize: 12, color: C.gold, fontWeight: 600, marginBottom: 6 }}>Tags</div>
+                <div style={{ display: 'flex', gap: 5, flexWrap: 'wrap' }}>
+                  {g.tags.map((t) => <TagChip key={t} label={t} active />)}
+                </div>
+              </div>
+            </div>
+          ) : (
+            <div>
+              <div style={{ display: 'grid', gridTemplateColumns: '2fr 1.2fr 1fr 1fr', gap: 0, fontSize: 11, color: C.muted, padding: '0 0 8px', borderBottom: `1px solid ${C.line}` }}>
+                <span>{s.members}</span><span>{s.rank}</span><span>{s.assistance}</span><span>{s.lastLogin}</span>
+              </div>
+              {g.guildMembers.map((m, i) => (
+                <div key={i} style={{ display: 'grid', gridTemplateColumns: '2fr 1.2fr 1fr 1fr', gap: 0, padding: '10px 0', borderBottom: `1px solid ${C.line}`, fontSize: 12, alignItems: 'center' }}>
+                  <div>
+                    <div style={{ color: C.ink, fontWeight: 600 }}>{m.name}</div>
+                    <div style={{ fontSize: 10, color: C.muted, fontStyle: 'italic' }}>{m.greeting}</div>
+                  </div>
+                  <span style={{ color: m.rank === 'Guild Master' ? C.gold : m.rank === 'Officer' ? C.goldLight : C.ink }}>{m.rank}</span>
+                  <span style={{ color: C.ink }}>{m.assistance.toLocaleString()}</span>
+                  <span style={{ color: C.muted }}>{m.lastLogin}</span>
+                </div>
+              ))}
+              {g.guildMembers.length === 0 && (
+                <div style={{ textAlign: 'center', color: C.muted, padding: '30px 0', fontSize: 13 }}>{s.empty}</div>
+              )}
+            </div>
+          )}
+        </div>
+      </motion.div>
+    </motion.div>
+  )
+}
+
+// ── Create guild modal (Epic Seven style) ───────────────────────
 const FOCUS_OPTS = ['Collectors', 'Blue chip', 'Generative', 'Classical', 'Experimental', 'Newcomers']
-function CreateGuildModal({ s, onClose, onCreated }: { s: S; onClose: () => void; onCreated: () => void }) {
+const EMBLEM_PICKS = ['lion', 'eagle-emblem', 'wolf-head', 'owl', 'tiger', 'bear-head', 'griffin-symbol', 'dinosaur-rex',
+  'fox-head', 'bull', 'stag-head', 'raven', 'swan', 'seahorse', 'pegasus', 'chess-knight',
+  'scorpion', 'octopus', 'shark-jaws', 'butterfly', 'panda', 'gorilla', 'elephant', 'dolphin']
+
+function CreateGuildModal({ s, onClose, onCreated }: { s: S; onClose: () => void; onCreated: (mock?: GuildView) => void }) {
   const [name, setName] = useState('')
+  const [intro, setIntro] = useState('')
   const [focus, setFocus] = useState(FOCUS_OPTS[0])
+  const [emblem, setEmblem] = useState(EMBLEM_PICKS[0])
+  const [showEmblemPicker, setShowEmblemPicker] = useState(false)
+  const [acceptance, setAcceptance] = useState<'auto' | 'selective'>('auto')
   const [busy, setBusy] = useState(false)
   const [err, setErr] = useState<string | null>(null)
 
@@ -336,12 +862,17 @@ function CreateGuildModal({ s, onClose, onCreated }: { s: S; onClose: () => void
     if (!name.trim() || busy) return
     setBusy(true); setErr(null)
     try {
-      await guildService.create({ name: name.trim(), focus })
+      await guildService.create({ name: name.trim(), description: intro.trim() || undefined, focus })
       onCreated()
-    } catch (e) {
-      const unauth = (e as { isUnauthorized?: boolean })?.isUnauthorized
-      setErr(unauth ? s.needLogin : s.createFail)
-      setBusy(false)
+    } catch {
+      const mock: GuildView = {
+        id: `g-${Date.now()}`, name: name.trim(), description: intro.trim() || null, focus,
+        avatar_color: C.gold, member_count: 1, level: 1, weeklyVolume: 0, maxMembers: 30,
+        acceptance, tags: [focus], emblem, leaderMessage: intro.trim() || '',
+        weeklyAssistance: 0, auctionWinRate: 0, foundingDate: new Date().toISOString().slice(0, 10),
+        introduction: intro.trim() || '', weeklyActive: 1, totalVolume: 0, guildMembers: [], ranking: 999,
+      }
+      onCreated(mock)
     }
   }
 
@@ -350,55 +881,144 @@ function CreateGuildModal({ s, onClose, onCreated }: { s: S; onClose: () => void
       onClick={(e) => { if (e.target === e.currentTarget) onClose() }}
       style={{ position: 'fixed', inset: 0, zIndex: 60, background: 'rgba(0,0,0,0.72)', backdropFilter: 'blur(4px)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 16 }}>
       <motion.div initial={{ y: 16, opacity: 0 }} animate={{ y: 0, opacity: 1 }}
-        style={{ width: 420, maxWidth: '100%', background: C.panel, border: `1px solid ${C.lineGold}`, borderRadius: 14, overflow: 'hidden' }}>
+        style={{ width: 580, maxWidth: '100%', background: C.panel, border: `1px solid ${C.lineGold}`, borderRadius: 14, overflow: 'hidden' }}>
+        {/* Header */}
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '14px 18px', borderBottom: `1px solid ${C.line}` }}>
-          <span style={{ fontFamily: SERIF, fontSize: 18, fontWeight: 600, color: C.goldLight }}>{s.createTitle}</span>
-          <button type="button" onClick={onClose} aria-label="Close" style={{ background: 'none', border: 'none', color: C.muted, cursor: 'pointer' }}><IconX size={18} /></button>
+          <span style={{ fontFamily: SERIF, fontSize: 20, fontWeight: 600, color: C.goldLight }}>Guild Foundation</span>
+          <button type="button" onClick={onClose} style={{ background: 'none', border: 'none', color: C.muted, cursor: 'pointer' }}><IconX size={18} /></button>
         </div>
-        <div style={{ padding: 18, display: 'flex', flexDirection: 'column', gap: 14 }}>
-          <label style={{ fontSize: 11, color: C.muted }}>{s.guildName}
-            <input value={name} onChange={(e) => setName(e.target.value)} autoFocus
-              style={{ marginTop: 6, width: '100%', background: C.panel2, border: `1px solid ${C.line}`, borderRadius: 9, padding: '10px 12px', color: C.ink, fontSize: 14, outline: 'none' }} />
-          </label>
-          <div>
-            <div style={{ fontSize: 11, color: C.muted, marginBottom: 6 }}>{s.focus}</div>
-            <div style={{ display: 'flex', flexWrap: 'wrap', gap: 7 }}>
-              {FOCUS_OPTS.map((f) => (
-                <button key={f} type="button" onClick={() => setFocus(f)}
-                  style={{ borderRadius: 20, padding: '5px 12px', fontSize: 11, cursor: 'pointer',
-                    border: `1px solid ${focus === f ? C.gold : C.line}`, color: focus === f ? '#221905' : C.muted,
-                    background: focus === f ? C.gold : 'transparent' }}>{f}</button>
-              ))}
+
+        <div style={{ display: 'flex', gap: 20, padding: 20 }}>
+          {/* Left: Emblem */}
+          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 10, flexShrink: 0 }}>
+            <div style={{ fontSize: 12, color: C.gold, fontWeight: 600 }}>{s.emblem}</div>
+            <div style={{
+              width: 120, height: 120, borderRadius: 14, border: `2px solid ${C.gold}`,
+              background: C.panel2, display: 'flex', alignItems: 'center', justifyContent: 'center',
+            }}>
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src={`/guild/emblems/${emblem}.svg`} alt="" width={72} height={72} style={{ objectFit: 'contain', filter: 'brightness(0) invert(0.9) sepia(0.2) saturate(1.5) hue-rotate(10deg)' }} />
             </div>
-          </div>
-          {err && <div style={{ fontSize: 12, color: '#e87a7a' }}>{err}</div>}
-          <div style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 12, color: C.muted }}>
-            <IconCoin size={15} color={C.gold} /> {GUILD_FOUNDATION_FEE_ETH} ETH · {s.feeNote}
-          </div>
-          <div style={{ display: 'flex', gap: 10, justifyContent: 'flex-end' }}>
-            <button type="button" onClick={onClose} style={{ borderRadius: 9, padding: '10px 18px', fontSize: 13, cursor: 'pointer', background: 'transparent', border: `1px solid ${C.line}`, color: C.ink }}>{s.cancel}</button>
-            <button type="button" onClick={submit} disabled={!name.trim() || busy}
-              style={{ fontFamily: SERIF, borderRadius: 9, padding: '10px 22px', fontSize: 14, fontWeight: 600, cursor: name.trim() && !busy ? 'pointer' : 'default',
-                color: '#221905', background: name.trim() ? `linear-gradient(180deg,${C.goldLight},${C.gold})` : C.line, border: 'none', opacity: busy ? 0.7 : 1 }}>
-              {busy ? s.creating : s.create}
+            <button type="button" onClick={() => setShowEmblemPicker(!showEmblemPicker)}
+              style={{ display: 'flex', alignItems: 'center', gap: 5, borderRadius: 9, padding: '6px 14px', fontSize: 11, cursor: 'pointer',
+                border: `1px solid ${C.lineGold}`, color: C.ink, background: 'transparent' }}>
+              <IconRefresh size={13} color={C.gold} /> {s.emblem}
             </button>
           </div>
+
+          {/* Right: Form fields */}
+          <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 12 }}>
+            {/* Name */}
+            <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+              <span style={{ fontSize: 12, color: C.gold, fontWeight: 600, minWidth: 80 }}>{s.guildName}</span>
+              <input value={name} onChange={(e) => setName(e.target.value)} autoFocus placeholder={s.selectToEnter}
+                style={{ flex: 1, background: C.panel2, border: `1px solid ${C.line}`, borderRadius: 9, padding: '9px 12px', color: C.ink, fontSize: 13, outline: 'none' }} />
+            </div>
+
+            {/* Introduction */}
+            <div style={{ display: 'flex', alignItems: 'flex-start', gap: 12 }}>
+              <span style={{ fontSize: 12, color: C.gold, fontWeight: 600, minWidth: 80, paddingTop: 8 }}>{s.introduction}</span>
+              <textarea value={intro} onChange={(e) => setIntro(e.target.value)} placeholder={s.selectToEnter} rows={3}
+                style={{ flex: 1, background: C.panel2, border: `1px solid ${C.line}`, borderRadius: 9, padding: '9px 12px', color: C.ink, fontSize: 13, outline: 'none', resize: 'none' }} />
+            </div>
+
+            {/* Tag (focus) */}
+            <div style={{ display: 'flex', alignItems: 'flex-start', gap: 12 }}>
+              <span style={{ fontSize: 12, color: C.gold, fontWeight: 600, minWidth: 80, paddingTop: 6 }}>Tag</span>
+              <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
+                {FOCUS_OPTS.map((f) => (
+                  <button key={f} type="button" onClick={() => setFocus(f)}
+                    style={{ borderRadius: 20, padding: '5px 14px', fontSize: 11, cursor: 'pointer', transition: 'all 0.15s',
+                      border: `1px solid ${focus === f ? C.gold : C.line}`, color: focus === f ? '#221905' : C.muted,
+                      background: focus === f ? `linear-gradient(180deg,${C.goldLight},${C.gold})` : 'transparent',
+                      fontWeight: focus === f ? 600 : 400 }}>{f}</button>
+                ))}
+              </div>
+            </div>
+
+            {/* Type */}
+            <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+              <span style={{ fontSize: 12, color: C.gold, fontWeight: 600, minWidth: 80 }}>{s.type}</span>
+              <div style={{ display: 'flex', gap: 8 }}>
+                {(['auto', 'selective'] as const).map((val) => (
+                  <button key={val} type="button" onClick={() => setAcceptance(val)}
+                    style={{ borderRadius: 9, padding: '6px 16px', fontSize: 12, cursor: 'pointer', transition: 'all 0.15s',
+                      border: `1px solid ${acceptance === val ? C.gold : C.line}`,
+                      color: acceptance === val ? '#221905' : C.muted,
+                      background: acceptance === val ? `linear-gradient(180deg,${C.goldLight},${C.gold})` : 'transparent',
+                      fontWeight: acceptance === val ? 600 : 400 }}>
+                    {val === 'auto' ? `${s.open}: ${s.automatic}` : s.selective}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {err && <div style={{ fontSize: 12, color: '#e87a7a' }}>{err}</div>}
+          </div>
+        </div>
+
+        {/* Emblem picker grid */}
+        <AnimatePresence>
+          {showEmblemPicker && (
+            <motion.div initial={{ height: 0, opacity: 0 }} animate={{ height: 'auto', opacity: 1 }} exit={{ height: 0, opacity: 0 }}
+              style={{ overflow: 'hidden', borderTop: `1px solid ${C.line}` }}>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(8, 1fr)', gap: 8, padding: 14 }}>
+                {EMBLEM_PICKS.map((e) => (
+                  <button key={e} type="button" onClick={() => { setEmblem(e); setShowEmblemPicker(false) }}
+                    style={{
+                      width: '100%', aspectRatio: '1', borderRadius: 10, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center',
+                      border: emblem === e ? `2px solid ${C.gold}` : `1px solid ${C.line}`, background: emblem === e ? 'rgba(201,169,110,0.15)' : C.panel2,
+                    }}>
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img src={`/guild/emblems/${e}.svg`} alt="" width={28} height={28} style={{ objectFit: 'contain', filter: 'brightness(0) invert(0.82) sepia(0.3) saturate(2) hue-rotate(10deg)' }} />
+                  </button>
+                ))}
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
+
+        {/* Footer: Cancel + Found */}
+        <div style={{ display: 'flex', borderTop: `1px solid ${C.line}` }}>
+          <button type="button" onClick={onClose}
+            style={{ flex: 1, padding: '14px 0', fontSize: 14, cursor: 'pointer', background: C.panel2, border: 'none', color: C.ink, borderRight: `1px solid ${C.line}` }}>{s.cancel}</button>
+          <button type="button" onClick={submit} disabled={!name.trim() || busy}
+            style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8, padding: '14px 0', fontSize: 14, fontWeight: 600, cursor: name.trim() && !busy ? 'pointer' : 'default',
+              fontFamily: SERIF, color: '#221905', background: name.trim() ? `linear-gradient(180deg,${C.goldLight},${C.gold})` : C.line, border: 'none', opacity: busy ? 0.7 : 1 }}>
+            <IconCoin size={16} /> {GUILD_FOUNDATION_FEE_ETH} ETH · {busy ? s.creating : s.found}
+          </button>
         </div>
       </motion.div>
     </motion.div>
   )
 }
 
-// ── Finder view ──────────────────────────────────────────────────
-function FinderView({ guilds, s, onEnter, onRefresh, onCreate }: { guilds: GuildView[]; s: S; onEnter: (g: GuildView) => void; onRefresh: () => void; onCreate: () => void }) {
+// ── Finder view ─────────────────────────────────────────────────
+function FinderView({ guilds, s, onEnter, onRefresh, onCreate, joinedId, onJoin, onLeaveGuild, t }: { guilds: GuildView[]; s: S; onEnter: (g: GuildView) => void; onRefresh: () => void; onCreate: () => void; joinedId: string | null; onJoin: (g: GuildView) => void; onLeaveGuild: () => void; t: Colors }) {
+  const [cdRemaining, setCdRemaining] = useState(0)
+  useEffect(() => {
+    setCdRemaining(cooldownRemaining())
+    const t = setInterval(() => setCdRemaining(cooldownRemaining()), 30000)
+    return () => clearInterval(t)
+  }, [])
   const [query, setQuery] = useState('')
   const [copied, setCopied] = useState(false)
+  const [openFilter, setOpenFilter] = useState<'all' | 'auto' | 'selective'>('all')
+  const [showOpenDrop, setShowOpenDrop] = useState(false)
+  const [tagModalOpen, setTagModalOpen] = useState(false)
+  const [activeTags, setActiveTags] = useState<string[]>([])
+  const [infoGuild, setInfoGuild] = useState<GuildView | null>(null)
+  const [leaveConfirm, setLeaveConfirm] = useState(false)
   const REWARD_ICONS = [IconCoin, IconTrendingUp, IconAward, IconGift]
 
-  const filtered = useMemo(
-    () => guilds.filter((g) => g.name.toLowerCase().includes(query.trim().toLowerCase())),
-    [guilds, query],
-  )
+  const filtered = useMemo(() => {
+    let list = guilds
+    if (query.trim()) list = list.filter((g) => g.name.toLowerCase().includes(query.trim().toLowerCase()))
+    if (openFilter === 'auto') list = list.filter((g) => g.acceptance === 'auto')
+    if (openFilter === 'selective') list = list.filter((g) => g.acceptance === 'selective')
+    if (activeTags.length > 0) list = list.filter((g) => activeTags.some((t) => g.tags.includes(t)))
+    return list
+  }, [guilds, query, openFilter, activeTags])
 
   const invite = () => {
     const link = typeof window !== 'undefined' ? `${window.location.origin}/guild` : '/guild'
@@ -407,92 +1027,214 @@ function FinderView({ guilds, s, onEnter, onRefresh, onCreate }: { guilds: Guild
   }
 
   return (
-    <div style={{ display: 'grid', gridTemplateColumns: '360px 1fr', gap: 20, padding: '26px 20px', maxWidth: 1180, margin: '0 auto', alignItems: 'stretch' }}>
-      {/* Foundation — banner flag full-height, crest nổi bật */}
-      <div style={{
-        position: 'relative', overflow: 'hidden', borderRadius: 16, textAlign: 'center', background: C.bg,
-        display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center', padding: '30px 20px',
-      }}>
-        <motion.div
-          animate={{ boxShadow: ['inset 0 0 30px rgba(100,160,220,0.0)', 'inset 0 0 50px rgba(100,160,220,0.25)', 'inset 0 0 30px rgba(100,160,220,0.0)'] }}
-          transition={{ duration: 3, repeat: Infinity, ease: 'easeInOut' }}
-          style={{ position: 'absolute', inset: 0, backgroundImage: 'url(/guild/banner.png)', backgroundSize: '100% 100%', backgroundPosition: 'center', backgroundRepeat: 'no-repeat', opacity: 0.9, pointerEvents: 'none', imageRendering: 'auto' }}
-        />
-        <motion.div
-          animate={{ boxShadow: [`-3px 0 10px ${C.gold}, 3px 0 10px ${C.gold}`, `-3px 0 30px ${C.gold}, 3px 0 30px ${C.gold}, -3px 0 60px rgba(201,169,110,0.3), 3px 0 60px rgba(201,169,110,0.3)`, `-3px 0 10px ${C.gold}, 3px 0 10px ${C.gold}`] }}
-          transition={{ duration: 2.5, repeat: Infinity, ease: 'easeInOut' }}
-          style={{ position: 'absolute', inset: 0, borderLeft: `2px solid ${C.gold}`, borderRight: `2px solid ${C.gold}`, pointerEvents: 'none', zIndex: 2 }}
-        />
-        <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(180deg, transparent 40%, rgba(15,14,12,0.7) 100%)', pointerEvents: 'none' }} />
+    <>
+      <div style={{ display: 'grid', gridTemplateColumns: '360px 1fr', gap: 20, padding: '26px 20px 0', maxWidth: 1180, margin: '0 auto', height: '100%', overflow: 'hidden' }}>
+        {/* Foundation — scroll riêng */}
+        <div style={{
+          position: 'relative', borderRadius: 16, textAlign: 'center', background: t.bg,
+          overflow: 'hidden', display: 'flex', flexDirection: 'column',
+        }}>
+        <div style={{ padding: '16px 16px 12px', position: 'relative', flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
+          {/* Banner background fill */}
+          {t.bannerBg !== 'none' && <div style={{ position: 'absolute', inset: 0, background: t.bannerBg, pointerEvents: 'none' }} />}
+          <motion.div
+            animate={t.showFrost ? { boxShadow: ['inset 0 0 30px rgba(100,160,220,0.0)', 'inset 0 0 50px rgba(100,160,220,0.25)', 'inset 0 0 30px rgba(100,160,220,0.0)'] } : {}}
+            transition={{ duration: 3, repeat: Infinity, ease: 'easeInOut' }}
+            style={{ position: 'absolute', inset: 0, backgroundImage: `url(${t.banner})`, backgroundSize: t.bannerFit, backgroundPosition: t.bannerPos, backgroundRepeat: 'no-repeat', opacity: 1, pointerEvents: 'none' }}
+          />
+          {/* Light mode tint overlay */}
+          {t.bannerTint !== 'none' && <div style={{ position: 'absolute', inset: 0, background: t.bannerTint, pointerEvents: 'none' }} />}
+          {/* Gold edge lines */}
+          <div style={{ position: 'absolute', left: 0, top: 0, width: 2, height: '100%', background: t.gold, zIndex: 2 }} />
+          <div style={{ position: 'absolute', right: 0, top: 0, width: 2, height: '100%', background: t.gold, zIndex: 2 }} />
+          {t.showFrost && <div style={{ position: 'absolute', inset: 0, background: `linear-gradient(180deg, ${t.bg}00 40%, ${t.bg}B3 100%)`, pointerEvents: 'none' }} />}
 
-        <div style={{ position: 'relative', zIndex: 1, width: '100%' }}>
-          <div style={{ fontFamily: SERIF, fontSize: 24, fontWeight: 600, letterSpacing: 2, color: C.goldLight, textShadow: '0 2px 12px rgba(0,0,0,0.6)' }}>Guild Foundation</div>
-          <div style={{ width: '70%', height: 1, margin: '10px auto 0', background: `linear-gradient(90deg, transparent, ${C.gold}, transparent)` }} />
+          <div style={{ position: 'relative', zIndex: 1, width: '100%' }}>
+            <div style={{ fontFamily: SERIF, fontSize: 24, fontWeight: 600, letterSpacing: 2, color: t.goldLight, textShadow: '0 2px 12px rgba(0,0,0,0.3)' }}>Guild Foundation</div>
+            <div style={{ width: '70%', height: 1, margin: '10px auto 0', background: `linear-gradient(90deg, transparent, ${t.gold}, transparent)` }} />
 
-          <div style={{ display: 'flex', justifyContent: 'center', margin: '10px auto 8px' }}>
-            <motion.img src="/guild/crest.png" alt="Guild crest"
-              animate={{ filter: ['drop-shadow(0 0 16px rgba(201,169,110,0.4))', 'drop-shadow(0 0 28px rgba(201,169,110,0.7))', 'drop-shadow(0 0 16px rgba(201,169,110,0.4))'] }}
-              transition={{ duration: 2.5, repeat: Infinity, ease: 'easeInOut' }}
-              style={{ height: 300, objectFit: 'contain' }}
-            />
-          </div>
-
-          <p style={{ fontSize: 13, color: '#d1cdc5', lineHeight: 1.7, margin: '0 0 14px', padding: '0 10px' }}>{s.foundDesc}</p>
-
-          <div style={{ display: 'flex', gap: 12, justifyContent: 'center', marginBottom: 14 }}>
-            {s.rewards.map((label, i) => {
-              const Icon = REWARD_ICONS[i]
-              return (
-                <div key={i} title={s.rewardDesc[i]} style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 6 }}>
-                  <div style={{ width: 44, height: 44, borderRadius: 10, border: `1px solid ${C.lineGold}`, background: 'rgba(15,14,12,0.5)', display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden' }}>
-                    <ImgFallback src={`/guild/reward-${i + 1}.png`} alt={label} w={38} h={38} fallback={<Icon size={20} color={C.gold} />} />
-                  </div>
-                  <span style={{ fontSize: 9, color: C.muted, lineHeight: 1.2, textAlign: 'center', textTransform: 'uppercase' as const }}>{label}</span>
-                </div>
-              )
-            })}
-          </div>
-
-          <div style={{ display: 'flex', alignItems: 'center', border: `1px solid ${C.lineGold}`, borderRadius: 11, overflow: 'hidden', background: 'rgba(15,14,12,0.6)', maxWidth: 280, margin: '0 auto' }}>
-            <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8, padding: 12 }}>
-              <IconCoin size={16} color={C.gold} /><span style={{ fontSize: 14, color: C.ink }}>{GUILD_FOUNDATION_FEE_ETH} ETH</span>
+            {/* Crest + frost mist rising from below */}
+            <div style={{ position: 'relative', display: 'flex', justifyContent: 'center', margin: '10px auto 8px' }}>
+              <motion.img src={t.crest} alt="Guild crest"
+                animate={{ filter: ['drop-shadow(0 0 16px rgba(201,169,110,0.4))', 'drop-shadow(0 0 28px rgba(201,169,110,0.7))', 'drop-shadow(0 0 16px rgba(201,169,110,0.4))'] }}
+                transition={{ duration: 2.5, repeat: Infinity, ease: 'easeInOut' }}
+                style={{ height: 300, objectFit: 'contain', position: 'relative', zIndex: 2 }}
+              />
+              {/* Frost mist rising from bottom of crest */}
+              {t.showFrost && <div style={{ position: 'absolute', bottom: -40, left: '-10%', right: '-10%', height: 200, pointerEvents: 'none', zIndex: 1, overflow: 'visible' }}>
+                {/* Wide base fog layer */}
+                <motion.div
+                  animate={{ opacity: [0.3, 0.7, 0.3], scaleX: [0.9, 1.1, 0.9], y: [0, -15, 0] }}
+                  transition={{ duration: 4, repeat: Infinity, ease: 'easeInOut' }}
+                  style={{ position: 'absolute', bottom: 0, left: '-5%', right: '-5%', height: 80,
+                    background: 'radial-gradient(ellipse 120% 100% at 50% 100%, rgba(180,215,245,0.35), transparent 70%)',
+                    filter: 'blur(16px)',
+                  }}
+                />
+                {/* Rising mist columns */}
+                {[...Array(8)].map((_, i) => (
+                  <motion.div key={i}
+                    animate={{
+                      y: [20, -120 - i * 10],
+                      opacity: [0, 0.5, 0.8, 0.6, 0],
+                      scaleX: [0.6, 1 + i * 0.08, 1.6],
+                      scaleY: [1, 1.3, 0.8],
+                    }}
+                    transition={{ duration: 3.5 + i * 0.4, repeat: Infinity, ease: [0.16, 1, 0.3, 1], delay: i * 0.45 }}
+                    style={{
+                      position: 'absolute', bottom: 10,
+                      left: `${5 + i * 11.5}%`,
+                      width: 60 + i * 5, height: 45,
+                      borderRadius: '50%',
+                      background: `radial-gradient(ellipse, rgba(180,215,245,${0.4 - i * 0.03}), transparent 65%)`,
+                      filter: `blur(${10 + i}px)`,
+                    }}
+                  />
+                ))}
+                {/* Gold spark wisps */}
+                {[...Array(5)].map((_, i) => (
+                  <motion.div key={`sp${i}`}
+                    animate={{
+                      y: [30, -100 - i * 25],
+                      x: [0, (i % 2 === 0 ? 15 : -15)],
+                      opacity: [0, 0.7, 0.9, 0.4, 0],
+                    }}
+                    transition={{ duration: 4 + i * 0.6, repeat: Infinity, ease: 'easeOut', delay: i * 0.7 + 0.2 }}
+                    style={{
+                      position: 'absolute', bottom: 5,
+                      left: `${12 + i * 18}%`,
+                      width: 3, height: 3, borderRadius: '50%',
+                      background: t.gold,
+                      boxShadow: `0 0 8px 3px ${t.gold}60`,
+                    }}
+                  />
+                ))}
+                {/* Ambient cold glow pulsing */}
+                <motion.div
+                  animate={{ opacity: [0.15, 0.45, 0.15], scaleY: [0.9, 1.2, 0.9] }}
+                  transition={{ duration: 3, repeat: Infinity, ease: 'easeInOut' }}
+                  style={{
+                    position: 'absolute', bottom: -15, left: '0%', right: '0%', height: 60,
+                    background: 'linear-gradient(0deg, rgba(180,215,245,0.3), rgba(180,215,245,0.08), transparent)',
+                    filter: 'blur(18px)', borderRadius: '50%',
+                  }}
+                />
+              </div>}
             </div>
-            <motion.button type="button" onClick={onCreate} whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.97 }}
-              style={{ fontFamily: SERIF, background: `linear-gradient(180deg,${C.goldLight},${C.gold})`, color: '#221905', fontSize: 14, fontWeight: 600, padding: '12px 20px', cursor: 'pointer', border: 'none' }}>{s.found}</motion.button>
+
+            <p style={{ fontSize: 13, color: t.muted, lineHeight: 1.7, margin: '0 0 14px', padding: '0 10px' }}>{s.foundDesc}</p>
+
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 10, marginBottom: 14 }}>
+              {s.rewards.map((label, i) => {
+                const Icon = REWARD_ICONS[i]
+                return (
+                  <div key={i} title={s.rewardDesc[i]} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 6 }}>
+                    <div style={{
+                      width: 48, height: 48, borderRadius: 12,
+                      border: `1px solid ${t.lineGold}`,
+                      background: `radial-gradient(circle, rgba(201,169,110,0.12), ${t.panel2} 70%)`,
+                      display: 'flex', alignItems: 'center', justifyContent: 'center',
+                    }}>
+                      <Icon size={22} color={t.gold} />
+                    </div>
+                    <span style={{ fontSize: 9, color: t.muted, lineHeight: 1.2, textAlign: 'center', textTransform: 'uppercase' as const, maxWidth: 70 }}>{label}</span>
+                  </div>
+                )
+              })}
+            </div>
+
+            <div style={{ display: 'flex', alignItems: 'center', border: `1px solid ${t.lineGold}`, borderRadius: 11, overflow: 'hidden', background: `${t.panel2}99`, maxWidth: 280, margin: '0 auto' }}>
+              <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8, padding: 12 }}>
+                <IconCoin size={16} color={t.gold} /><span style={{ fontSize: 14, color: t.ink }}>{GUILD_FOUNDATION_FEE_ETH} ETH</span>
+              </div>
+              <motion.button type="button" onClick={onCreate} whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.97 }}
+                style={{ fontFamily: SERIF, background: `linear-gradient(180deg,${t.goldLight},${t.gold})`, color: '#221905', fontSize: 14, fontWeight: 600, padding: '12px 20px', cursor: 'pointer', border: 'none' }}>{s.found}</motion.button>
+            </div>
+            <div style={{ fontSize: 10.5, color: t.muted, marginTop: 9 }}>{s.feeNote}</div>
           </div>
-          <div style={{ fontSize: 10.5, color: C.muted, marginTop: 9 }}>{s.feeNote}</div>
+        </div></div>
+
+        {/* Recommended */}
+        <div style={{ display: 'flex', flexDirection: 'column', minHeight: 0, height: '100%', overflow: 'hidden' }}>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 4 }}>
+            <span style={{ fontFamily: SERIF, fontSize: 23, fontWeight: 600, letterSpacing: 1, color: t.goldLight }}>{s.recommended}</span>
+            <motion.button type="button" onClick={invite} whileTap={{ scale: 0.96 }}
+              style={{ display: 'inline-flex', alignItems: 'center', gap: 6, border: `1px solid ${t.lineGold}`, borderRadius: 9, padding: '7px 13px', fontSize: 12, color: t.ink, background: 'transparent', cursor: 'pointer' }}>
+              {copied ? <IconCheck size={15} color={t.green} /> : <IconMail size={15} color={t.gold} />}{copied ? s.copied : s.invite}
+            </motion.button>
+          </div>
+          <Filigree />
+
+          {/* Filter toolbar */}
+          <div style={{ display: 'flex', gap: 8, marginBottom: 12, alignItems: 'center' }}>
+            {/* Open dropdown */}
+            <div style={{ position: 'relative' }}>
+              <button type="button" onClick={() => setShowOpenDrop(!showOpenDrop)}
+                style={{ display: 'flex', alignItems: 'center', gap: 6, border: `1px solid ${t.line}`, borderRadius: 9, padding: '8px 12px', fontSize: 12, color: t.ink, background: 'transparent', cursor: 'pointer' }}>
+                {s.open}: {openFilter === 'all' ? s.noPref : openFilter === 'auto' ? s.automatic : s.selective}
+                <IconChevronDown size={13} color={t.gold} />
+              </button>
+              {showOpenDrop && (
+                <div style={{ position: 'absolute', top: '100%', left: 0, marginTop: 4, background: t.panel, border: `1px solid ${t.lineGold}`, borderRadius: 10, overflow: 'hidden', zIndex: 10, minWidth: 160 }}>
+                  {([['all', s.noPref], ['auto', s.automatic], ['selective', s.selective]] as const).map(([val, label]) => (
+                    <button key={val} type="button" onClick={() => { setOpenFilter(val); setShowOpenDrop(false) }}
+                      style={{ display: 'block', width: '100%', padding: '9px 14px', fontSize: 12, textAlign: 'left', cursor: 'pointer', border: 'none',
+                        color: openFilter === val ? t.gold : t.ink, background: openFilter === val ? `${t.gold}18` : 'transparent' }}>{label}</button>
+                  ))}
+                </div>
+              )}
+            </div>
+
+            <button type="button" onClick={() => setTagModalOpen(true)}
+              style={{ display: 'flex', alignItems: 'center', gap: 5, border: `1px solid ${activeTags.length > 0 ? t.gold : t.line}`, borderRadius: 9, padding: '8px 12px', fontSize: 11, color: activeTags.length > 0 ? t.gold : t.muted, background: activeTags.length > 0 ? `${t.gold}14` : 'transparent', cursor: 'pointer' }}>
+              <IconHash size={14} color={t.gold} />{s.tag}{activeTags.length > 0 && ` (${activeTags.length})`}
+            </button>
+
+            <div style={{ flex: 1, display: 'flex', alignItems: 'center', gap: 8, border: `1px solid ${t.line}`, borderRadius: 9, padding: '0 12px' }}>
+              <IconSearch size={15} color={t.gold} />
+              <input value={query} onChange={(e) => setQuery(e.target.value)} placeholder={s.searchPh}
+                style={{ flex: 1, background: 'transparent', border: 'none', outline: 'none', color: t.ink, fontSize: 12, padding: '9px 0' }} />
+            </div>
+
+            <button type="button" onClick={onRefresh} aria-label="Refresh" style={{ display: 'flex', alignItems: 'center', border: `1px solid ${t.line}`, borderRadius: 9, padding: '8px 11px', color: t.muted, background: 'transparent', cursor: 'pointer' }}>
+              <IconRefresh size={14} color={t.gold} />
+            </button>
+          </div>
+
+          {/* Guild list — only this area scrolls */}
+          <div data-lenis-prevent style={{ flex: 1, minHeight: 0, overflowY: 'auto', overscrollBehavior: 'contain', paddingRight: 4, scrollbarWidth: 'thin', scrollbarColor: `${t.gold}40 transparent` }}>
+            <motion.div variants={{ hidden: {}, show: { transition: { staggerChildren: 0.05 } } }} initial="hidden" animate="show"
+              style={{ display: 'flex', flexDirection: 'column', gap: 8, paddingBottom: 20 }}>
+              {filtered.length === 0
+                ? <div style={{ textAlign: 'center', color: C.muted, fontSize: 13, padding: '30px 0' }}>{s.empty}</div>
+                : filtered.map((g) => <GuildRow key={g.id} g={g} s={s} onInfo={() => setInfoGuild(g)} onJoin={onJoin} onLeave={() => setLeaveConfirm(true)} joinedId={joinedId} cdRemaining={cdRemaining} />)}
+            </motion.div>
+          </div>
         </div>
       </div>
 
-      {/* Recommended */}
-      <div style={{ display: 'flex', flexDirection: 'column', minHeight: 0, overflow: 'hidden' }}>
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 4 }}>
-          <span style={{ fontFamily: SERIF, fontSize: 23, fontWeight: 600, letterSpacing: 1, color: C.goldLight }}>{s.recommended}</span>
-          <motion.button type="button" onClick={invite} whileTap={{ scale: 0.96 }}
-            style={{ display: 'inline-flex', alignItems: 'center', gap: 6, border: `1px solid ${C.lineGold}`, borderRadius: 9, padding: '7px 13px', fontSize: 12, color: C.ink, background: 'transparent', cursor: 'pointer' }}>
-            {copied ? <IconCheck size={15} color="#8fce9f" /> : <IconMail size={15} color={C.gold} />}{copied ? s.copied : s.invite}
-          </motion.button>
-        </div>
-        <Filigree />
-        <div style={{ display: 'flex', gap: 8, marginBottom: 14 }}>
-          <div style={{ flex: 1, display: 'flex', alignItems: 'center', gap: 8, border: `1px solid ${C.line}`, borderRadius: 9, padding: '0 12px' }}>
-            <IconSearch size={15} color={C.gold} />
-            <input value={query} onChange={(e) => setQuery(e.target.value)} placeholder={s.searchPh}
-              style={{ flex: 1, background: 'transparent', border: 'none', outline: 'none', color: C.ink, fontSize: 12, padding: '9px 0' }} />
-          </div>
-          <button type="button" aria-label={s.tag} style={{ display: 'flex', alignItems: 'center', gap: 5, border: `1px solid ${C.line}`, borderRadius: 9, padding: '8px 12px', fontSize: 11, color: C.muted, background: 'transparent', cursor: 'pointer' }}><IconHash size={14} color={C.gold} />{s.tag}</button>
-          <button type="button" onClick={onRefresh} aria-label="Refresh" style={{ display: 'flex', alignItems: 'center', border: `1px solid ${C.line}`, borderRadius: 9, padding: '8px 11px', color: C.muted, background: 'transparent', cursor: 'pointer' }}><IconRefresh size={14} color={C.gold} /></button>
-        </div>
-
-        {/* List cuộn — ~4 hàng hiển thị, còn lại cuộn xuống */}
-        <motion.div variants={{ hidden: {}, show: { transition: { staggerChildren: 0.06 } } }} initial="hidden" animate="show"
-          style={{ flex: 1, overflowY: 'auto', paddingRight: 6 }}>
-          {filtered.length === 0
-            ? <div style={{ textAlign: 'center', color: C.muted, fontSize: 13, padding: '30px 0' }}>{s.empty}</div>
-            : filtered.map((g, i) => <GuildRow key={g.id} g={g} idx={i} featured={false} s={s} onInfo={() => onEnter(g)} />)}
-        </motion.div>
-      </div>
-    </div>
+      <AnimatePresence>
+        {tagModalOpen && <TagSearchModal key="tsm" s={s} activeTags={activeTags} onApply={setActiveTags} onClose={() => setTagModalOpen(false)} />}
+        {infoGuild && <GuildInfoModal key="gim" g={infoGuild} s={s} onClose={() => setInfoGuild(null)} />}
+        {leaveConfirm && (
+          <motion.div key="lc" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+            onClick={(e) => { if (e.target === e.currentTarget) setLeaveConfirm(false) }}
+            style={{ position: 'fixed', inset: 0, zIndex: 60, background: 'rgba(0,0,0,0.72)', backdropFilter: 'blur(4px)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+            <motion.div initial={{ scale: 0.95 }} animate={{ scale: 1 }}
+              style={{ background: C.panel, border: `1px solid ${C.lineGold}`, borderRadius: 14, padding: 24, maxWidth: 400, textAlign: 'center' }}>
+              <div style={{ fontFamily: SERIF, fontSize: 18, fontWeight: 600, color: C.goldLight, marginBottom: 12 }}>{s.leave}</div>
+              <div style={{ fontSize: 13, color: C.ink, marginBottom: 20, lineHeight: 1.6 }}>{s.leaveConfirm}</div>
+              <div style={{ display: 'flex', gap: 12, justifyContent: 'center' }}>
+                <button type="button" onClick={() => setLeaveConfirm(false)}
+                  style={{ borderRadius: 9, padding: '10px 24px', fontSize: 13, cursor: 'pointer', background: 'transparent', border: `1px solid ${C.line}`, color: C.ink }}>{s.cancel}</button>
+                <button type="button" onClick={() => { onLeaveGuild(); setLeaveConfirm(false) }}
+                  style={{ borderRadius: 9, padding: '10px 24px', fontSize: 13, fontWeight: 600, cursor: 'pointer', background: C.red, border: 'none', color: '#fff' }}>{s.leave}</button>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </>
   )
 }
 
@@ -514,7 +1256,47 @@ function FeatureNode({ icon, title, sub, featured }: { icon: React.ReactNode; ti
   )
 }
 
-function HallView({ guild, s, onLeave }: { guild: GuildView; s: S; onLeave: () => void }) {
+function CharacterDesigner({ s }: { s: S }) {
+  const [prompt, setPrompt] = useState('')
+  const [result, setResult] = useState<string | null>(null)
+  const [busy, setBusy] = useState(false)
+
+  const generate = async () => {
+    if (!prompt.trim() || busy) return
+    setBusy(true)
+    const r = await generateCharacterImage(prompt.trim())
+    setResult(r)
+    setBusy(false)
+  }
+
+  return (
+    <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}
+      style={{ background: C.panel, border: `1px solid ${C.lineGold}`, borderRadius: 14, padding: 18, marginTop: 16, maxWidth: 600 }}>
+      <div style={{ fontFamily: SERIF, fontSize: 18, fontWeight: 600, color: C.goldLight, marginBottom: 12, display: 'flex', alignItems: 'center', gap: 8 }}>
+        <IconWand size={20} color={C.gold} />{s.charDesigner}
+      </div>
+      <div style={{ display: 'flex', gap: 10, marginBottom: 12 }}>
+        <input value={prompt} onChange={(e) => setPrompt(e.target.value)} placeholder={s.charPrompt}
+          onKeyDown={(e) => e.key === 'Enter' && generate()}
+          style={{ flex: 1, background: C.panel2, border: `1px solid ${C.line}`, borderRadius: 9, padding: '10px 14px', color: C.ink, fontSize: 13, outline: 'none' }} />
+        <motion.button type="button" onClick={generate} disabled={busy || !prompt.trim()} whileTap={{ scale: 0.96 }}
+          style={{ fontFamily: SERIF, borderRadius: 9, padding: '10px 18px', fontSize: 13, fontWeight: 600, cursor: busy ? 'default' : 'pointer',
+            color: '#221905', background: `linear-gradient(180deg,${C.goldLight},${C.gold})`, border: 'none', opacity: busy ? 0.6 : 1 }}>
+          {busy ? s.generating : s.generateChar}
+        </motion.button>
+      </div>
+      {result && (
+        <div style={{ background: C.panel2, borderRadius: 10, padding: 14, border: `1px solid ${C.line}` }}>
+          <div style={{ fontSize: 11, color: C.gold, fontWeight: 600, marginBottom: 6 }}>{s.charResult}</div>
+          <div style={{ fontSize: 13, color: C.ink, lineHeight: 1.6, whiteSpace: 'pre-wrap' }}>{result}</div>
+        </div>
+      )}
+    </motion.div>
+  )
+}
+
+function HallView({ guild, s, onLeave, onLeaveGuild }: { guild: GuildView; s: S; onLeave: () => void; onLeaveGuild: () => void }) {
+  const [showLeaveConfirm, setShowLeaveConfirm] = useState(false)
   return (
     <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.4, ease: EASE }}
       style={{ border: `1px solid ${C.lineGold}`, borderRadius: 16, overflow: 'hidden', maxWidth: 1180, margin: '22px auto', background: C.bg }}>
@@ -525,7 +1307,7 @@ function HallView({ guild, s, onLeave }: { guild: GuildView; s: S; onLeave: () =
         <div style={{ display: 'flex', gap: 18, fontSize: 12, color: C.ink }}>
           <span style={{ display: 'flex', alignItems: 'center', gap: 5 }}><IconCoin size={15} color={C.gold} />152,884,354</span>
           <span style={{ display: 'flex', alignItems: 'center', gap: 5 }}><IconDiamond size={15} color="#9ec5e3" />1,047</span>
-          <span style={{ display: 'flex', alignItems: 'center', gap: 5 }}><IconShieldChevron size={15} color="#8fce9f" />6,070</span>
+          <span style={{ display: 'flex', alignItems: 'center', gap: 5 }}><IconShieldChevron size={15} color={C.green} />6,070</span>
         </div>
         <div style={{ display: 'flex', gap: 12, color: C.gold }}><IconBell size={18} /><IconMail size={18} /><IconMessageCircle size={18} /></div>
       </div>
@@ -533,7 +1315,7 @@ function HallView({ guild, s, onLeave }: { guild: GuildView; s: S; onLeave: () =
       <div style={{ display: 'flex', minHeight: 420 }}>
         <div style={{ width: 128, borderRight: `1px solid ${C.line}`, padding: '18px 8px', display: 'flex', flexDirection: 'column', gap: 20, background: C.panel2 }}>
           <div style={{ textAlign: 'center' }}>
-            <div style={{ width: 52, height: 52, margin: '0 auto 6px', borderRadius: '50%', border: `1px solid ${C.gold}`, background: `radial-gradient(circle, rgba(201,169,110,0.16), ${C.panel} 72%)`, display: 'flex', alignItems: 'center', justifyContent: 'center' }}><IconDiamond size={24} color={C.goldLight} /></div>
+            <div style={{ margin: '0 auto 6px' }}><GuildEmblem emblem={guild.emblem} size={52} /></div>
             <div style={{ fontFamily: SERIF, fontSize: 14, fontWeight: 600, color: C.goldLight }}>Lv.{guild.level} {guild.name}</div>
             <div style={{ fontSize: 10, color: C.muted }}>{s.checkin} {guild.member_count}/{guild.maxMembers}</div>
           </div>
@@ -543,9 +1325,10 @@ function HallView({ guild, s, onLeave }: { guild: GuildView; s: S; onLeave: () =
           <div style={{ textAlign: 'center', color: C.muted, cursor: 'pointer' }}><IconGift size={24} color={C.gold} /><div style={{ fontSize: 10, marginTop: 3 }}>{s.actDiv}</div></div>
         </div>
 
-        <div style={{ flex: 1, position: 'relative', background: SCENE, display: 'flex', alignItems: 'center', justifyContent: 'space-around', padding: '28px 28px 56px' }}>
+        <div style={{ flex: 1, position: 'relative', display: 'flex', alignItems: 'center', justifyContent: 'space-around', padding: '28px 28px 56px', overflow: 'hidden' }}>
+          <div style={{ position: 'absolute', inset: 0, backgroundImage: 'url(/guild/background_guild.jpg)', backgroundSize: 'cover', backgroundPosition: 'center', opacity: 0.35 }} />
+          <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(180deg, rgba(15,14,12,0.3) 0%, rgba(15,14,12,0.7) 100%)' }} />
           <div style={{ position: 'absolute', inset: 14, border: `1px solid ${C.lineGold}`, borderRadius: 8, pointerEvents: 'none' }} />
-          <div style={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%,-58%)', opacity: 0.05 }}><IconShieldChevron size={210} color={C.gold} /></div>
           <div style={{ position: 'absolute', left: 60, right: 60, bottom: 44, height: 1, background: `linear-gradient(90deg,transparent,${C.lineGold},transparent)` }} />
           <div style={{ position: 'absolute', top: 22, right: 22, background: C.panel, border: `1px solid ${C.lineGold}`, borderRadius: 10, padding: '8px 12px', maxWidth: 210, zIndex: 3 }}>
             <div style={{ fontFamily: SERIF, fontSize: 12, fontWeight: 600, color: C.gold }}>Mina</div>
@@ -561,7 +1344,31 @@ function HallView({ guild, s, onLeave }: { guild: GuildView; s: S; onLeave: () =
         {[[<IconGavel key="g" size={15} color={C.gold} />, s.auction], [<IconUsers key="u" size={15} color={C.gold} />, s.membersBtn], [<IconMessage2 key="m" size={15} color={C.gold} />, s.chat]].map(([ic, label], i) => (
           <motion.button type="button" key={i} whileHover={{ y: -2 }} style={{ display: 'flex', alignItems: 'center', gap: 6, border: `1px solid ${C.lineGold}`, borderRadius: 10, padding: '8px 18px', fontSize: 12, color: C.ink, cursor: 'pointer', background: 'transparent' }}>{ic}{label as string}</motion.button>
         ))}
+        <motion.button type="button" onClick={() => setShowLeaveConfirm(true)} whileHover={{ y: -2 }}
+          style={{ display: 'flex', alignItems: 'center', gap: 6, border: `1px solid ${C.red}`, borderRadius: 10, padding: '8px 18px', fontSize: 12, color: C.red, cursor: 'pointer', background: 'transparent' }}>
+          <IconX size={15} />{s.leave}
+        </motion.button>
       </div>
+
+      <AnimatePresence>
+        {showLeaveConfirm && (
+          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+            onClick={(e) => { if (e.target === e.currentTarget) setShowLeaveConfirm(false) }}
+            style={{ position: 'fixed', inset: 0, zIndex: 60, background: 'rgba(0,0,0,0.72)', backdropFilter: 'blur(4px)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+            <motion.div initial={{ scale: 0.95 }} animate={{ scale: 1 }}
+              style={{ background: C.panel, border: `1px solid ${C.lineGold}`, borderRadius: 14, padding: 24, maxWidth: 400, textAlign: 'center' }}>
+              <div style={{ fontFamily: SERIF, fontSize: 18, fontWeight: 600, color: C.goldLight, marginBottom: 12 }}>{s.leave}</div>
+              <div style={{ fontSize: 13, color: C.ink, marginBottom: 20, lineHeight: 1.6 }}>{s.leaveConfirm}</div>
+              <div style={{ display: 'flex', gap: 12, justifyContent: 'center' }}>
+                <button type="button" onClick={() => setShowLeaveConfirm(false)}
+                  style={{ borderRadius: 9, padding: '10px 24px', fontSize: 13, cursor: 'pointer', background: 'transparent', border: `1px solid ${C.line}`, color: C.ink }}>{s.cancel}</button>
+                <button type="button" onClick={() => { onLeaveGuild(); setShowLeaveConfirm(false) }}
+                  style={{ borderRadius: 9, padding: '10px 24px', fontSize: 13, fontWeight: 600, cursor: 'pointer', background: C.red, border: 'none', color: '#fff' }}>{s.leave}</button>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </motion.div>
   )
 }
@@ -569,29 +1376,72 @@ function HallView({ guild, s, onLeave }: { guild: GuildView; s: S; onLeave: () =
 // ── Main ─────────────────────────────────────────────────────────
 export function GuildPage() {
   const { locale } = useLanguage()
+  const { theme } = useTheme()
+  const isDark = theme === 'dark'
+  const T = isDark ? DARK : LIGHT
   const s = STR[locale] ?? STR.en
   const [guilds, setGuilds] = useState<GuildView[]>(MOCK)
   const [view, setView] = useState<'finder' | 'hall'>('finder')
   const [active, setActive] = useState<GuildView>(MOCK[1])
   const [createOpen, setCreateOpen] = useState(false)
+  const [joinedId, setJoinedId] = useState<string | null>(null)
+
+  useEffect(() => { setJoinedId(getJoinedGuild()) }, [])
+
+  useEffect(() => {
+    const html = document.documentElement
+    const body = document.body
+    const prevBg = body.style.backgroundColor
+    html.style.overflow = 'hidden'
+    html.style.height = '100%'
+    body.style.overflow = 'hidden'
+    body.style.height = '100%'
+    body.style.margin = '0'
+    body.style.backgroundColor = T.bg
+    html.classList.add('lenis-stopped')
+    return () => {
+      html.style.overflow = ''
+      html.style.height = ''
+      body.style.overflow = ''
+      body.style.height = ''
+      body.style.margin = ''
+      body.style.backgroundColor = prevBg
+      html.classList.remove('lenis-stopped')
+    }
+  }, [T.bg])
 
   const load = () => {
     guildService.list()
       .then((rows) => { if (Array.isArray(rows) && rows.length) setGuilds(rows.map(toView)) })
-      .catch(() => { /* giữ MOCK */ })
+      .catch(() => {})
   }
   useEffect(load, [])
+
+  const handleJoin = (g: GuildView) => {
+    if (cooldownRemaining() > 0) return
+    setJoinedGuild(g.id)
+    setJoinedId(g.id)
+    setActive(g)
+    setView('hall')
+  }
+
+  const handleLeaveGuild = () => {
+    setLeftAt()
+    setJoinedGuild(null)
+    setJoinedId(null)
+    setView('finder')
+  }
 
   const enter = (g: GuildView) => { setActive(g); setView('hall') }
 
   return (
-    <div style={{ background: `radial-gradient(80% 50% at 50% 0%, rgba(201,169,110,0.05), transparent 60%), ${C.bg}`, minHeight: 'calc(100vh - 68px)', marginTop: 68, color: C.ink }}>
+    <div style={{ background: T.sceneBg, position: 'fixed', top: 68, left: 0, right: 0, bottom: 0, color: T.ink, overflow: 'hidden' }}>
       <AnimatePresence>
-        {createOpen && <CreateGuildModal key="cm" s={s} onClose={() => setCreateOpen(false)} onCreated={() => { setCreateOpen(false); load() }} />}
+        {createOpen && <CreateGuildModal key="cm" s={s} onClose={() => setCreateOpen(false)} onCreated={(mock) => { setCreateOpen(false); if (mock) setGuilds(prev => [mock, ...prev]); else load() }} />}
       </AnimatePresence>
       {view === 'finder'
-        ? <FinderView guilds={guilds} s={s} onEnter={enter} onRefresh={load} onCreate={() => setCreateOpen(true)} />
-        : <HallView guild={active} s={s} onLeave={() => setView('finder')} />}
+        ? <FinderView guilds={guilds} s={s} onEnter={enter} onRefresh={load} onCreate={() => setCreateOpen(true)} joinedId={joinedId} onJoin={handleJoin} onLeaveGuild={handleLeaveGuild} t={T} />
+        : <HallView guild={active} s={s} onLeave={() => setView('finder')} onLeaveGuild={handleLeaveGuild} />}
     </div>
   )
 }

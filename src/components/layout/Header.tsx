@@ -2,10 +2,12 @@
 
 import { useEffect, useRef, useState } from 'react'
 import Link                            from 'next/link'
+import Image                           from 'next/image'
 import { ConnectButton }               from '@rainbow-me/rainbowkit'
 import { useAccount }                  from 'wagmi'
 import { gsap }                        from '@/lib/gsap'
 import { LoginModal }                  from './LoginModal'
+import { useTheme }                    from '@/context/ThemeContext'
 import { useAuthStore }                from '@/store/authStore'
 import { authStore }                   from '@/lib/auth-store'
 import { userService }                 from '@/services/user.service'
@@ -726,8 +728,10 @@ const THEMES = {
 
 interface HeaderProps { dark?: boolean }
 
-export function Header({ dark = false }: HeaderProps) {
-  const T = dark ? THEMES.dark : THEMES.light
+export function Header({ dark }: HeaderProps) {
+  const { theme } = useTheme()
+  const isDark = dark ?? (theme === 'dark')
+  const T = isDark ? THEMES.dark : THEMES.light
   const { t } = useLanguage()
 
   const [scrolled,    setScrolled]   = useState(false)
@@ -823,12 +827,16 @@ export function Header({ dark = false }: HeaderProps) {
       }}
     >
       {/* ── Logo ──────────────────────────────────────────────── */}
-      <Link href="/" className="flex items-center gap-2 group" aria-label="ArtCurve home">
-        <span className="size-2 rounded-full group-hover:scale-150 transition-transform duration-500"
-          style={{ background: T.gold }} aria-hidden/>
-        <span className="text-2xl tracking-wider transition-colors duration-300"
-          style={{ fontFamily:"'Cormorant Garamond',serif", fontWeight:600, color: T.logo }}>
-          ArtCurve
+      <Link href="/" className="flex items-center group" aria-label="ArtCurve home" style={{ gap: 0 }}>
+        <Image
+          src={isDark ? '/images/logo_darkmode_nobg.png' : '/images/logo_light_nobg.png'}
+          alt="" width={48} height={48}
+          className="group-hover:scale-105 transition-transform duration-500"
+          style={{ objectFit: 'contain', marginRight: -12 }}
+        />
+        <span className="transition-colors duration-300"
+          style={{ fontFamily:"'Cormorant Garamond',serif", fontWeight:600, color: T.logo, fontSize: 24, letterSpacing: '0.06em', lineHeight: 1 }}>
+          rtCurve
         </span>
       </Link>
 
