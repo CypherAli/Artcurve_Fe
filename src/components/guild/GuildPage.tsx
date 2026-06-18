@@ -5,9 +5,9 @@ import {
   IconDiamond, IconCoin, IconTrendingUp, IconAward, IconGift, IconShieldChevron,
   IconMail, IconHash, IconSearch, IconRefresh, IconChevronLeft, IconBell,
   IconMessageCircle, IconChecklist, IconWand, IconTrophy, IconPhoto, IconGavel,
-  IconUsers, IconMessage2, IconBuildingBank, IconBuildingCastle, IconCrown,
-  IconChessRook, IconX, IconCheck, IconChevronDown, IconStar, IconCalendar,
-  IconFlame, IconTarget, IconHeart, IconClock,
+  IconUsers, IconMessage2, IconBuildingBank,
+  IconX, IconCheck, IconChevronDown, IconCalendar,
+  IconFlame, IconTarget, IconClock,
 } from '@tabler/icons-react'
 import { useLanguage } from '@/context/LanguageContext'
 import { useTheme } from '@/context/ThemeContext'
@@ -43,7 +43,7 @@ type Colors = Omit<typeof DARK, 'bannerFit' | 'bannerPos'> & { bannerFit: string
 const C = DARK
 const SERIF = "'Cormorant Garamond', Georgia, serif"
 const EASE: [number, number, number, number] = [0.16, 1, 0.3, 1]
-const SCENE = `radial-gradient(55% 50% at 50% -6%, rgba(201,169,110,0.18), transparent 60%),`
+const _SCENE = `radial-gradient(55% 50% at 50% -6%, rgba(201,169,110,0.18), transparent 60%),`
   + `radial-gradient(70% 32% at 50% 112%, rgba(201,169,110,0.10), transparent 62%),`
   + `radial-gradient(120% 120% at 50% 45%, transparent 52%, rgba(0,0,0,0.6)), ${C.bg}`
 
@@ -521,7 +521,7 @@ function hashStr(s: string) {
 }
 
 // ── Cooldown helpers ────────────────────────────────────────────
-const COOLDOWN_MS = 12 * 60 * 60 * 1000
+const _COOLDOWN_MS = 12 * 60 * 60 * 1000
 const CK_JOINED = 'artcurve_guild_joined'
 const CK_LEFT = 'artcurve_guild_left_at'
 
@@ -533,7 +533,7 @@ function setJoinedGuild(id: string | null) {
   if (id) localStorage.setItem(CK_JOINED, id)
   else localStorage.removeItem(CK_JOINED)
 }
-function getLeftAt(): number {
+function _getLeftAt(): number {
   if (typeof window === 'undefined') return 0
   return parseInt(localStorage.getItem(CK_LEFT) || '0', 10)
 }
@@ -593,7 +593,7 @@ function GuildEmblem({ emblem, size = 48 }: { emblem: string; size?: number }) {
   )
 }
 
-function ImgFallback({ src, alt, w, h, fallback }: { src: string; alt: string; w: number; h: number; fallback: React.ReactNode }) {
+function _ImgFallback({ src, alt, w, h, fallback }: { src: string; alt: string; w: number; h: number; fallback: React.ReactNode }) {
   const [ok, setOk] = useState(false)
   return (
     <span style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
@@ -994,10 +994,9 @@ function CreateGuildModal({ s, onClose, onCreated }: { s: S; onClose: () => void
 }
 
 // ── Finder view ─────────────────────────────────────────────────
-function FinderView({ guilds, s, onEnter, onRefresh, onCreate, joinedId, onJoin, onLeaveGuild, t }: { guilds: GuildView[]; s: S; onEnter: (g: GuildView) => void; onRefresh: () => void; onCreate: () => void; joinedId: string | null; onJoin: (g: GuildView) => void; onLeaveGuild: () => void; t: Colors }) {
-  const [cdRemaining, setCdRemaining] = useState(0)
+function FinderView({ guilds, s, onEnter: _onEnter, onRefresh, onCreate, joinedId, onJoin, onLeaveGuild, t }: { guilds: GuildView[]; s: S; onEnter: (g: GuildView) => void; onRefresh: () => void; onCreate: () => void; joinedId: string | null; onJoin: (g: GuildView) => void; onLeaveGuild: () => void; t: Colors }) {
+  const [cdRemaining, setCdRemaining] = useState(() => cooldownRemaining())
   useEffect(() => {
-    setCdRemaining(cooldownRemaining())
     const t = setInterval(() => setCdRemaining(cooldownRemaining()), 30000)
     return () => clearInterval(t)
   }, [])
@@ -1256,7 +1255,7 @@ function FeatureNode({ icon, title, sub, featured }: { icon: React.ReactNode; ti
   )
 }
 
-function CharacterDesigner({ s }: { s: S }) {
+function _CharacterDesigner({ s }: { s: S }) {
   const [prompt, setPrompt] = useState('')
   const [result, setResult] = useState<string | null>(null)
   const [busy, setBusy] = useState(false)
@@ -1384,9 +1383,7 @@ export function GuildPage() {
   const [view, setView] = useState<'finder' | 'hall'>('finder')
   const [active, setActive] = useState<GuildView>(MOCK[1])
   const [createOpen, setCreateOpen] = useState(false)
-  const [joinedId, setJoinedId] = useState<string | null>(null)
-
-  useEffect(() => { setJoinedId(getJoinedGuild()) }, [])
+  const [joinedId, setJoinedId] = useState<string | null>(() => typeof window !== 'undefined' ? getJoinedGuild() : null)
 
   useEffect(() => {
     const html = document.documentElement
