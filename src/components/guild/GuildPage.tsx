@@ -295,40 +295,47 @@ function FinderView({ guilds, s, onEnter, onRefresh, onCreate }: { guilds: Guild
 
   return (
     <div style={{ display: 'grid', gridTemplateColumns: '360px 1fr', gap: 20, padding: '26px 20px', maxWidth: 1180, margin: '0 auto' }}>
-      {/* Foundation */}
-      <div style={{ border: `1px solid ${C.lineGold}`, borderRadius: 16, padding: '22px 18px', textAlign: 'center',
-        background: `radial-gradient(80% 50% at 50% 0%, rgba(201,169,110,0.10), transparent 60%), ${C.panel}` }}>
-        <div style={{ fontFamily: SERIF, fontSize: 23, fontWeight: 600, letterSpacing: 2, color: C.goldLight }}>Guild Foundation</div>
-        <Filigree w="62%" />
-        <div style={{ position: 'relative', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '4px auto 0', height: 210 }}>
-          <img src="/guild/banner.png" alt="" style={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%,-50%)', height: 220, objectFit: 'contain', opacity: 0.45, pointerEvents: 'none' }} />
-          <img src="/guild/crest.png" alt="Guild crest" style={{ position: 'relative', zIndex: 1, height: 160, objectFit: 'contain', filter: 'drop-shadow(0 4px 14px rgba(201,169,110,0.4))' }} />
-        </div>
-        <p style={{ fontSize: 12.5, color: C.muted, lineHeight: 1.75, margin: '8px 0 16px' }}>{s.foundDesc}</p>
+      {/* Foundation — banner flag full-height, crest nổi bật */}
+      <div style={{ position: 'relative', overflow: 'hidden', borderRadius: 16, textAlign: 'center', background: C.panel }}>
+        {/* Cờ xanh chạy dài từ trên xuống dưới */}
+        <img src="/guild/banner.png" alt="" style={{ position: 'absolute', top: 0, left: '50%', transform: 'translateX(-50%)', height: '100%', objectFit: 'cover', opacity: 0.35, pointerEvents: 'none' }} />
+        {/* Gradient overlay để text dưới đọc được */}
+        <div style={{ position: 'absolute', inset: 0, background: `linear-gradient(180deg, transparent 30%, rgba(15,14,12,0.7) 65%, rgba(15,14,12,0.95) 100%)`, pointerEvents: 'none' }} />
 
-        {/* Rewards — có nghĩa + nhãn + tooltip */}
-        <div style={{ display: 'flex', gap: 8, justifyContent: 'center', marginBottom: 16 }}>
-          {s.rewards.map((label, i) => {
-            const Icon = REWARD_ICONS[i]
-            return (
-              <div key={i} title={s.rewardDesc[i]} style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 5 }}>
-                <div style={{ width: 46, height: 46, borderRadius: 11, border: `1px solid ${C.lineGold}`, background: `radial-gradient(circle, rgba(201,169,110,0.10), ${C.panel2} 75%)`, display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden' }}>
-                  <ImgFallback src={`/guild/reward-${i + 1}.png`} alt={label} w={42} h={42} fallback={<Icon size={22} color={C.gold} />} />
-                </div>
-                <span style={{ fontSize: 9, color: C.muted, lineHeight: 1.2, textAlign: 'center' }}>{label}</span>
-              </div>
-            )
-          })}
-        </div>
+        <div style={{ position: 'relative', zIndex: 1, padding: '28px 18px 22px' }}>
+          <div style={{ fontFamily: SERIF, fontSize: 24, fontWeight: 600, letterSpacing: 2, color: C.goldLight, textShadow: '0 2px 12px rgba(0,0,0,0.6)' }}>Guild Foundation</div>
+          <Filigree w="62%" />
 
-        <div style={{ display: 'flex', alignItems: 'center', border: `1px solid ${C.lineGold}`, borderRadius: 11, overflow: 'hidden' }}>
-          <div style={{ flex: 1, display: 'flex', alignItems: 'center', gap: 6, padding: '11px 12px' }}>
-            <IconCoin size={16} color={C.gold} /><span style={{ fontSize: 14, color: C.ink, letterSpacing: 0.3 }}>{GUILD_FOUNDATION_FEE_ETH} ETH</span>
+          {/* Huy hiệu to, căn giữa trên cờ */}
+          <div style={{ display: 'flex', justifyContent: 'center', margin: '12px auto 16px' }}>
+            <img src="/guild/crest.png" alt="Guild crest" style={{ height: 220, objectFit: 'contain', filter: 'drop-shadow(0 6px 20px rgba(201,169,110,0.5)) drop-shadow(0 2px 6px rgba(0,0,0,0.4))' }} />
           </div>
-          <motion.button type="button" onClick={onCreate} whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.97 }}
-            style={{ fontFamily: SERIF, background: `linear-gradient(180deg,${C.goldLight},${C.gold})`, color: '#221905', fontSize: 15, fontWeight: 600, letterSpacing: 1, padding: '12px 24px', cursor: 'pointer', border: 'none' }}>{s.found}</motion.button>
+
+          <p style={{ fontSize: 12.5, color: C.muted, lineHeight: 1.75, margin: '0 0 16px' }}>{s.foundDesc}</p>
+
+          <div style={{ display: 'flex', gap: 8, justifyContent: 'center', marginBottom: 16 }}>
+            {s.rewards.map((label, i) => {
+              const Icon = REWARD_ICONS[i]
+              return (
+                <div key={i} title={s.rewardDesc[i]} style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 5 }}>
+                  <div style={{ width: 46, height: 46, borderRadius: 11, border: `1px solid ${C.lineGold}`, background: `radial-gradient(circle, rgba(201,169,110,0.10), ${C.panel2} 75%)`, display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden' }}>
+                    <ImgFallback src={`/guild/reward-${i + 1}.png`} alt={label} w={42} h={42} fallback={<Icon size={22} color={C.gold} />} />
+                  </div>
+                  <span style={{ fontSize: 9, color: C.muted, lineHeight: 1.2, textAlign: 'center' }}>{label}</span>
+                </div>
+              )
+            })}
+          </div>
+
+          <div style={{ display: 'flex', alignItems: 'center', border: `1px solid ${C.lineGold}`, borderRadius: 11, overflow: 'hidden', background: 'rgba(15,14,12,0.6)' }}>
+            <div style={{ flex: 1, display: 'flex', alignItems: 'center', gap: 6, padding: '11px 12px' }}>
+              <IconCoin size={16} color={C.gold} /><span style={{ fontSize: 14, color: C.ink, letterSpacing: 0.3 }}>{GUILD_FOUNDATION_FEE_ETH} ETH</span>
+            </div>
+            <motion.button type="button" onClick={onCreate} whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.97 }}
+              style={{ fontFamily: SERIF, background: `linear-gradient(180deg,${C.goldLight},${C.gold})`, color: '#221905', fontSize: 15, fontWeight: 600, letterSpacing: 1, padding: '12px 24px', cursor: 'pointer', border: 'none' }}>{s.found}</motion.button>
+          </div>
+          <div style={{ fontSize: 10.5, color: C.muted, marginTop: 9 }}>{s.feeNote}</div>
         </div>
-        <div style={{ fontSize: 10.5, color: C.muted, marginTop: 9 }}>{s.feeNote}</div>
       </div>
 
       {/* Recommended */}
