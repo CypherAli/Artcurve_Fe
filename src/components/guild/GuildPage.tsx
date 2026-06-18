@@ -183,7 +183,7 @@ function GuildRow({ g, idx, featured, s, onInfo }: { g: GuildView; idx: number; 
     <motion.div variants={{ hidden: { opacity: 0, y: 14 }, show: { opacity: 1, y: 0 } }}
       whileHover={{ borderColor: C.gold, y: -2 }}
       style={{
-        display: 'flex', alignItems: 'center', gap: 14, padding: 13, marginBottom: 10, borderRadius: 12,
+        display: 'flex', alignItems: 'center', gap: 14, padding: 18, marginBottom: 12, borderRadius: 12,
         background: featured ? 'linear-gradient(180deg,#1a160e,#121009)' : C.panel,
         border: `${featured ? 2 : 1}px solid ${featured ? C.gold : C.line}`,
         boxShadow: featured ? '0 0 22px rgba(201,169,110,0.14)' : 'none',
@@ -294,45 +294,58 @@ function FinderView({ guilds, s, onEnter, onRefresh, onCreate }: { guilds: Guild
   }
 
   return (
-    <div style={{ display: 'grid', gridTemplateColumns: '360px 1fr', gap: 20, padding: '26px 20px', maxWidth: 1180, margin: '0 auto' }}>
+    <div style={{ display: 'grid', gridTemplateColumns: '360px 1fr', gap: 20, padding: '26px 20px', maxWidth: 1180, margin: '0 auto', alignItems: 'stretch' }}>
       {/* Foundation — banner flag full-height, crest nổi bật */}
-      <div style={{ position: 'relative', overflow: 'hidden', borderRadius: 16, textAlign: 'center', background: C.panel }}>
-        {/* Cờ xanh chạy dài từ trên xuống dưới */}
-        <img src="/guild/banner.png" alt="" style={{ position: 'absolute', top: 0, left: '50%', transform: 'translateX(-50%)', height: '100%', objectFit: 'cover', opacity: 0.35, pointerEvents: 'none' }} />
-        {/* Gradient overlay để text dưới đọc được */}
-        <div style={{ position: 'absolute', inset: 0, background: `linear-gradient(180deg, transparent 30%, rgba(15,14,12,0.7) 65%, rgba(15,14,12,0.95) 100%)`, pointerEvents: 'none' }} />
+      <div style={{
+        position: 'relative', overflow: 'hidden', borderRadius: 16, textAlign: 'center', background: C.bg,
+        display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center', padding: '30px 20px',
+      }}>
+        <motion.div
+          animate={{ boxShadow: ['inset 0 0 30px rgba(100,160,220,0.0)', 'inset 0 0 50px rgba(100,160,220,0.25)', 'inset 0 0 30px rgba(100,160,220,0.0)'] }}
+          transition={{ duration: 3, repeat: Infinity, ease: 'easeInOut' }}
+          style={{ position: 'absolute', inset: 0, backgroundImage: 'url(/guild/banner.png)', backgroundSize: '100% 100%', backgroundPosition: 'center', backgroundRepeat: 'no-repeat', opacity: 0.9, pointerEvents: 'none', imageRendering: 'auto' }}
+        />
+        <motion.div
+          animate={{ boxShadow: [`-3px 0 10px ${C.gold}, 3px 0 10px ${C.gold}`, `-3px 0 30px ${C.gold}, 3px 0 30px ${C.gold}, -3px 0 60px rgba(201,169,110,0.3), 3px 0 60px rgba(201,169,110,0.3)`, `-3px 0 10px ${C.gold}, 3px 0 10px ${C.gold}`] }}
+          transition={{ duration: 2.5, repeat: Infinity, ease: 'easeInOut' }}
+          style={{ position: 'absolute', inset: 0, borderLeft: `2px solid ${C.gold}`, borderRight: `2px solid ${C.gold}`, pointerEvents: 'none', zIndex: 2 }}
+        />
+        <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(180deg, transparent 40%, rgba(15,14,12,0.7) 100%)', pointerEvents: 'none' }} />
 
-        <div style={{ position: 'relative', zIndex: 1, padding: '28px 18px 22px' }}>
+        <div style={{ position: 'relative', zIndex: 1, width: '100%' }}>
           <div style={{ fontFamily: SERIF, fontSize: 24, fontWeight: 600, letterSpacing: 2, color: C.goldLight, textShadow: '0 2px 12px rgba(0,0,0,0.6)' }}>Guild Foundation</div>
-          <Filigree w="62%" />
+          <div style={{ width: '70%', height: 1, margin: '10px auto 0', background: `linear-gradient(90deg, transparent, ${C.gold}, transparent)` }} />
 
-          {/* Huy hiệu to, căn giữa trên cờ */}
-          <div style={{ display: 'flex', justifyContent: 'center', margin: '12px auto 16px' }}>
-            <img src="/guild/crest.png" alt="Guild crest" style={{ height: 220, objectFit: 'contain', filter: 'drop-shadow(0 6px 20px rgba(201,169,110,0.5)) drop-shadow(0 2px 6px rgba(0,0,0,0.4))' }} />
+          <div style={{ display: 'flex', justifyContent: 'center', margin: '10px auto 8px' }}>
+            <motion.img src="/guild/crest.png" alt="Guild crest"
+              animate={{ filter: ['drop-shadow(0 0 16px rgba(201,169,110,0.4))', 'drop-shadow(0 0 28px rgba(201,169,110,0.7))', 'drop-shadow(0 0 16px rgba(201,169,110,0.4))'] }}
+              transition={{ duration: 2.5, repeat: Infinity, ease: 'easeInOut' }}
+              style={{ height: 300, objectFit: 'contain' }}
+            />
           </div>
 
-          <p style={{ fontSize: 12.5, color: C.muted, lineHeight: 1.75, margin: '0 0 16px' }}>{s.foundDesc}</p>
+          <p style={{ fontSize: 13, color: '#d1cdc5', lineHeight: 1.7, margin: '0 0 14px', padding: '0 10px' }}>{s.foundDesc}</p>
 
-          <div style={{ display: 'flex', gap: 8, justifyContent: 'center', marginBottom: 16 }}>
+          <div style={{ display: 'flex', gap: 12, justifyContent: 'center', marginBottom: 14 }}>
             {s.rewards.map((label, i) => {
               const Icon = REWARD_ICONS[i]
               return (
-                <div key={i} title={s.rewardDesc[i]} style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 5 }}>
-                  <div style={{ width: 46, height: 46, borderRadius: 11, border: `1px solid ${C.lineGold}`, background: `radial-gradient(circle, rgba(201,169,110,0.10), ${C.panel2} 75%)`, display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden' }}>
-                    <ImgFallback src={`/guild/reward-${i + 1}.png`} alt={label} w={42} h={42} fallback={<Icon size={22} color={C.gold} />} />
+                <div key={i} title={s.rewardDesc[i]} style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 6 }}>
+                  <div style={{ width: 44, height: 44, borderRadius: 10, border: `1px solid ${C.lineGold}`, background: 'rgba(15,14,12,0.5)', display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden' }}>
+                    <ImgFallback src={`/guild/reward-${i + 1}.png`} alt={label} w={38} h={38} fallback={<Icon size={20} color={C.gold} />} />
                   </div>
-                  <span style={{ fontSize: 9, color: C.muted, lineHeight: 1.2, textAlign: 'center' }}>{label}</span>
+                  <span style={{ fontSize: 9, color: C.muted, lineHeight: 1.2, textAlign: 'center', textTransform: 'uppercase' as const }}>{label}</span>
                 </div>
               )
             })}
           </div>
 
-          <div style={{ display: 'flex', alignItems: 'center', border: `1px solid ${C.lineGold}`, borderRadius: 11, overflow: 'hidden', background: 'rgba(15,14,12,0.6)' }}>
-            <div style={{ flex: 1, display: 'flex', alignItems: 'center', gap: 6, padding: '11px 12px' }}>
-              <IconCoin size={16} color={C.gold} /><span style={{ fontSize: 14, color: C.ink, letterSpacing: 0.3 }}>{GUILD_FOUNDATION_FEE_ETH} ETH</span>
+          <div style={{ display: 'flex', alignItems: 'center', border: `1px solid ${C.lineGold}`, borderRadius: 11, overflow: 'hidden', background: 'rgba(15,14,12,0.6)', maxWidth: 280, margin: '0 auto' }}>
+            <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8, padding: 12 }}>
+              <IconCoin size={16} color={C.gold} /><span style={{ fontSize: 14, color: C.ink }}>{GUILD_FOUNDATION_FEE_ETH} ETH</span>
             </div>
             <motion.button type="button" onClick={onCreate} whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.97 }}
-              style={{ fontFamily: SERIF, background: `linear-gradient(180deg,${C.goldLight},${C.gold})`, color: '#221905', fontSize: 15, fontWeight: 600, letterSpacing: 1, padding: '12px 24px', cursor: 'pointer', border: 'none' }}>{s.found}</motion.button>
+              style={{ fontFamily: SERIF, background: `linear-gradient(180deg,${C.goldLight},${C.gold})`, color: '#221905', fontSize: 14, fontWeight: 600, padding: '12px 20px', cursor: 'pointer', border: 'none' }}>{s.found}</motion.button>
           </div>
           <div style={{ fontSize: 10.5, color: C.muted, marginTop: 9 }}>{s.feeNote}</div>
         </div>
@@ -360,10 +373,10 @@ function FinderView({ guilds, s, onEnter, onRefresh, onCreate }: { guilds: Guild
 
         {/* List cuộn — ~4 hàng hiển thị, còn lại cuộn xuống */}
         <motion.div variants={{ hidden: {}, show: { transition: { staggerChildren: 0.06 } } }} initial="hidden" animate="show"
-          style={{ maxHeight: 392, overflowY: 'auto', paddingRight: 6 }}>
+          style={{ maxHeight: 540, overflowY: 'auto', paddingRight: 6 }}>
           {filtered.length === 0
             ? <div style={{ textAlign: 'center', color: C.muted, fontSize: 13, padding: '30px 0' }}>{s.empty}</div>
-            : filtered.map((g, i) => <GuildRow key={g.id} g={g} idx={i} featured={i === 1} s={s} onInfo={() => onEnter(g)} />)}
+            : filtered.map((g, i) => <GuildRow key={g.id} g={g} idx={i} featured={false} s={s} onInfo={() => onEnter(g)} />)}
         </motion.div>
       </div>
     </div>
