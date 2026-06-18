@@ -593,7 +593,7 @@ function GuildEmblem({ emblem, size = 48 }: { emblem: string; size?: number }) {
   )
 }
 
-function _ImgFallback({ src, alt, w, h, fallback }: { src: string; alt: string; w: number; h: number; fallback: React.ReactNode }) {
+function ImgFallback({ src, alt, w, h, fallback }: { src: string; alt: string; w: number; h: number; fallback: React.ReactNode }) {
   const [ok, setOk] = useState(false)
   return (
     <span style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}>
@@ -1255,7 +1255,7 @@ function FeatureNode({ icon, title, sub, featured }: { icon: React.ReactNode; ti
   )
 }
 
-function _CharacterDesigner({ s }: { s: S }) {
+function CharacterDesigner({ s }: { s: S }) {
   const [prompt, setPrompt] = useState('')
   const [result, setResult] = useState<string | null>(null)
   const [busy, setBusy] = useState(false)
