@@ -29,37 +29,80 @@ const SCENE = `radial-gradient(55% 50% at 50% -6%, rgba(201,169,110,0.18), trans
   + `radial-gradient(120% 120% at 50% 45%, transparent 52%, rgba(0,0,0,0.6)), ${C.bg}`
 
 // ── i18n ─────────────────────────────────────────────────────────
-const STR = {
+const EN = {
+  recommended: ‘Recommended’, invite: ‘Invite’, copied: ‘Invite link copied’, searchPh: ‘Search guild by name…’,
+  tag: ‘Tag’, search: ‘Search’, foundDesc: ‘Found your own guild or join a collector club. Trade together to earn weekly collective rewards.’,
+  found: ‘Found’, feeNote: ‘One-time · anti-spam’, weeklyVol: ‘Weekly volume’, members: ‘Members’,
+  noRank: ‘No rank limit’, accept: ‘Acceptance’, auto: ‘Auto’, manual: ‘Manual’, info: ‘Info’, empty: ‘No guild found’,
+  rewards: [‘Weekly dividends’, ‘Contribution XP’, ‘Prestige badge’, ‘Early access’],
+  rewardDesc: [‘Share of guild fees & royalties weekly’, ‘Earn points to level up the guild’, ‘Titles & roles within the guild’, ‘Buy hot drops before others’],
+  createTitle: ‘Found a new guild’, guildName: ‘Guild name’, focus: ‘Focus’, create: ‘Create’, cancel: ‘Cancel’, creating: ‘Creating…’,
+  needLogin: ‘Please sign in to found a guild’, createFail: ‘Could not create guild, try again later’,
+  back: ‘Guild’, checkin: ‘Check-in’, actAct: ‘Guild Activities’, actDecor: ‘Gallery Decor’, actDiv: ‘Weekly Dividends’,
+  nVault: ‘Collective Vault’, nVaultSub: ‘Co-own artworks’, nLeague: ‘Guild League’, nLeagueSub: ‘Seasonal volume race’,
+  nGallery: ‘Curated Gallery’, nGallerySub: ‘Shared collection’, auction: ‘Guild Auction’, membersBtn: ‘Members’, chat: ‘Guild chat’,
+  chatMsg: ‘funded up — let’s trade’,
+}
+const STR: Record<string, typeof EN> = {
+  en: EN,
   vi: {
-    recommended: 'Đề xuất', invite: 'Lời mời', copied: 'Đã sao chép link mời', searchPh: 'Tìm guild theo tên…',
-    tag: 'Tag', search: 'Tìm', foundDesc: 'Lập hội của riêng bạn hoặc gia nhập một guild sưu tầm. Cùng giao dịch để nhận thưởng tập thể mỗi tuần.',
-    found: 'Lập Guild', feeNote: 'Phí một lần · chống spam', weeklyVol: 'Khối lượng tuần', members: 'Thành viên',
-    noRank: 'Không giới hạn rank', accept: 'Duyệt', auto: 'Tự động', manual: 'Thủ công', info: 'Thông tin', empty: 'Không tìm thấy guild nào',
-    rewards: ['Cổ tức tuần', 'Điểm cống hiến', 'Huy hiệu danh giá', 'Ưu tiên mở bán'],
-    rewardDesc: ['Chia sẻ phí & royalty của hội mỗi tuần', 'Tích điểm để lên cấp guild', 'Danh hiệu & vai trò trong hội', 'Mua sớm các tác phẩm hot'],
-    createTitle: 'Lập Guild mới', guildName: 'Tên guild', focus: 'Lĩnh vực', create: 'Tạo guild', cancel: 'Hủy', creating: 'Đang tạo…',
-    needLogin: 'Bạn cần đăng nhập để lập guild', createFail: 'Tạo guild thất bại, thử lại sau',
-    back: 'Guild', checkin: 'Điểm danh', actAct: 'Hoạt động Guild', actDecor: 'Trang trí Gallery', actDiv: 'Cổ tức tuần',
-    nVault: 'Kho chung', nVaultSub: 'Đồng sở hữu tác phẩm', nLeague: 'Giải đấu Guild', nLeagueSub: 'Đua khối lượng theo mùa',
-    nGallery: 'Phòng tuyển chọn', nGallerySub: 'BST chung của hội', auction: 'Đấu giá Guild', membersBtn: 'Thành viên', chat: 'Chat hội',
-    chatMsg: 'gom đủ vốn rồi, vào lệnh thôi',
+    recommended: ‘Đề xuất’, invite: ‘Lời mời’, copied: ‘Đã sao chép link mời’, searchPh: ‘Tìm guild theo tên…’,
+    tag: ‘Tag’, search: ‘Tìm’, foundDesc: ‘Lập hội của riêng bạn hoặc gia nhập một guild sưu tầm. Cùng giao dịch để nhận thưởng tập thể mỗi tuần.’,
+    found: ‘Lập Guild’, feeNote: ‘Phí một lần · chống spam’, weeklyVol: ‘Khối lượng tuần’, members: ‘Thành viên’,
+    noRank: ‘Không giới hạn rank’, accept: ‘Duyệt’, auto: ‘Tự động’, manual: ‘Thủ công’, info: ‘Thông tin’, empty: ‘Không tìm thấy guild nào’,
+    rewards: [‘Cổ tức tuần’, ‘Điểm cống hiến’, ‘Huy hiệu danh giá’, ‘Ưu tiên mở bán’],
+    rewardDesc: [‘Chia sẻ phí & royalty của hội mỗi tuần’, ‘Tích điểm để lên cấp guild’, ‘Danh hiệu & vai trò trong hội’, ‘Mua sớm các tác phẩm hot’],
+    createTitle: ‘Lập Guild mới’, guildName: ‘Tên guild’, focus: ‘Lĩnh vực’, create: ‘Tạo guild’, cancel: ‘Hủy’, creating: ‘Đang tạo…’,
+    needLogin: ‘Bạn cần đăng nhập để lập guild’, createFail: ‘Tạo guild thất bại, thử lại sau’,
+    back: ‘Guild’, checkin: ‘Điểm danh’, actAct: ‘Hoạt động Guild’, actDecor: ‘Trang trí Gallery’, actDiv: ‘Cổ tức tuần’,
+    nVault: ‘Kho chung’, nVaultSub: ‘Đồng sở hữu tác phẩm’, nLeague: ‘Giải đấu Guild’, nLeagueSub: ‘Đua khối lượng theo mùa’,
+    nGallery: ‘Phòng tuyển chọn’, nGallerySub: ‘BST chung của hội’, auction: ‘Đấu giá Guild’, membersBtn: ‘Thành viên’, chat: ‘Chat hội’,
+    chatMsg: ‘gom đủ vốn rồi, vào lệnh thôi’,
   },
-  en: {
-    recommended: 'Recommended', invite: 'Invite', copied: 'Invite link copied', searchPh: 'Search guild by name…',
-    tag: 'Tag', search: 'Search', foundDesc: 'Found your own guild or join a collector club. Trade together to earn weekly collective rewards.',
-    found: 'Found', feeNote: 'One-time · anti-spam', weeklyVol: 'Weekly volume', members: 'Members',
-    noRank: 'No rank limit', accept: 'Acceptance', auto: 'Auto', manual: 'Manual', info: 'Info', empty: 'No guild found',
-    rewards: ['Weekly dividends', 'Contribution XP', 'Prestige badge', 'Early access'],
-    rewardDesc: ['Share of guild fees & royalties weekly', 'Earn points to level up the guild', 'Titles & roles within the guild', 'Buy hot drops before others'],
-    createTitle: 'Found a new guild', guildName: 'Guild name', focus: 'Focus', create: 'Create', cancel: 'Cancel', creating: 'Creating…',
-    needLogin: 'Please sign in to found a guild', createFail: 'Could not create guild, try again later',
-    back: 'Guild', checkin: 'Check-in', actAct: 'Guild Activities', actDecor: 'Gallery Decor', actDiv: 'Weekly Dividends',
-    nVault: 'Collective Vault', nVaultSub: 'Co-own artworks', nLeague: 'Guild League', nLeagueSub: 'Seasonal volume race',
-    nGallery: 'Curated Gallery', nGallerySub: 'Shared collection', auction: 'Guild Auction', membersBtn: 'Members', chat: 'Guild chat',
-    chatMsg: 'funded up — let’s trade',
+  fr: {
+    recommended: ‘Recommandés’, invite: ‘Inviter’, copied: ‘Lien copié’, searchPh: ‘Rechercher une guilde…’,
+    tag: ‘Tag’, search: ‘Chercher’, foundDesc: ‘Fondez votre propre guilde ou rejoignez un club de collectionneurs. Échangez ensemble pour gagner des récompenses collectives chaque semaine.’,
+    found: ‘Fonder’, feeNote: ‘Unique · anti-spam’, weeklyVol: ‘Volume hebdo’, members: ‘Membres’,
+    noRank: ‘Rang illimité’, accept: ‘Admission’, auto: ‘Auto’, manual: ‘Manuel’, info: ‘Info’, empty: ‘Aucune guilde trouvée’,
+    rewards: [‘Dividendes hebdo’, ‘XP de contribution’, ‘Badge prestige’, ‘Accès anticipé’],
+    rewardDesc: [‘Part des frais & royalties chaque semaine’, ‘Gagnez des points pour monter la guilde’, ‘Titres & rôles dans la guilde’, ‘Achetez les drops avant les autres’],
+    createTitle: ‘Fonder une guilde’, guildName: ‘Nom de la guilde’, focus: ‘Domaine’, create: ‘Créer’, cancel: ‘Annuler’, creating: ‘Création…’,
+    needLogin: ‘Connectez-vous pour fonder une guilde’, createFail: ‘Échec de création, réessayez’,
+    back: ‘Guilde’, checkin: ‘Check-in’, actAct: ‘Activités’, actDecor: ‘Déco Galerie’, actDiv: ‘Dividendes hebdo’,
+    nVault: ‘Coffre collectif’, nVaultSub: ‘Co-propriété d\’œuvres’, nLeague: ‘Ligue des Guildes’, nLeagueSub: ‘Course de volume saisonnière’,
+    nGallery: ‘Galerie curatée’, nGallerySub: ‘Collection partagée’, auction: ‘Enchères Guilde’, membersBtn: ‘Membres’, chat: ‘Chat guilde’,
+    chatMsg: ‘fonds réunis — on trade’,
+  },
+  ja: {
+    recommended: ‘おすすめ’, invite: ‘招待’, copied: ‘招待リンクをコピーしました’, searchPh: ‘ギルド名で検索…’,
+    tag: ‘タグ’, search: ‘検索’, foundDesc: ‘自分のギルドを設立するか、コレクタークラブに参加しましょう。一緒に取引して毎週の報酬を獲得。’,
+    found: ‘設立’, feeNote: ‘一回限り・スパム防止’, weeklyVol: ‘週間取引量’, members: ‘メンバー’,
+    noRank: ‘ランク制限なし’, accept: ‘承認’, auto: ‘自動’, manual: ‘手動’, info: ‘詳細’, empty: ‘ギルドが見つかりません’,
+    rewards: [‘週間配当’, ‘貢献XP’, ‘プレステージバッジ’, ‘先行アクセス’],
+    rewardDesc: [‘ギルド手数料＆ロイヤリティの週間シェア’, ‘ギルドレベルアップのポイント’, ‘ギルド内の称号＆役割’, ‘人気ドロップを先行購入’],
+    createTitle: ‘新しいギルドを設立’, guildName: ‘ギルド名’, focus: ‘分野’, create: ‘作成’, cancel: ‘キャンセル’, creating: ‘作成中…’,
+    needLogin: ‘ギルドを設立するにはログインしてください’, createFail: ‘ギルド作成に失敗しました’,
+    back: ‘ギルド’, checkin: ‘チェックイン’, actAct: ‘ギルド活動’, actDecor: ‘ギャラリー装飾’, actDiv: ‘週間配当’,
+    nVault: ‘共同金庫’, nVaultSub: ‘作品の共同所有’, nLeague: ‘ギルドリーグ’, nLeagueSub: ‘シーズン取引量レース’,
+    nGallery: ‘キュレーションギャラリー’, nGallerySub: ‘共有コレクション’, auction: ‘ギルドオークション’, membersBtn: ‘メンバー’, chat: ‘ギルドチャット’,
+    chatMsg: ‘資金準備OK — トレードしよう’,
+  },
+  es: {
+    recommended: ‘Recomendados’, invite: ‘Invitar’, copied: ‘Enlace copiado’, searchPh: ‘Buscar gremio por nombre…’,
+    tag: ‘Tag’, search: ‘Buscar’, foundDesc: ‘Funda tu propio gremio o únete a un club de coleccionistas. Comercia junto para ganar recompensas colectivas semanales.’,
+    found: ‘Fundar’, feeNote: ‘Único · anti-spam’, weeklyVol: ‘Volumen semanal’, members: ‘Miembros’,
+    noRank: ‘Sin límite de rango’, accept: ‘Admisión’, auto: ‘Auto’, manual: ‘Manual’, info: ‘Info’, empty: ‘No se encontró ningún gremio’,
+    rewards: [‘Dividendos semanales’, ‘XP de contribución’, ‘Insignia de prestigio’, ‘Acceso anticipado’],
+    rewardDesc: [‘Parte de las tarifas y regalías semanales’, ‘Gana puntos para subir de nivel’, ‘Títulos y roles dentro del gremio’, ‘Compra drops populares antes que otros’],
+    createTitle: ‘Fundar un gremio’, guildName: ‘Nombre del gremio’, focus: ‘Enfoque’, create: ‘Crear’, cancel: ‘Cancelar’, creating: ‘Creando…’,
+    needLogin: ‘Inicia sesión para fundar un gremio’, createFail: ‘No se pudo crear el gremio, inténtalo de nuevo’,
+    back: ‘Gremio’, checkin: ‘Check-in’, actAct: ‘Actividades’, actDecor: ‘Decoración’, actDiv: ‘Dividendos semanales’,
+    nVault: ‘Bóveda colectiva’, nVaultSub: ‘Co-propiedad de obras’, nLeague: ‘Liga de Gremios’, nLeagueSub: ‘Carrera de volumen por temporada’,
+    nGallery: ‘Galería curada’, nGallerySub: ‘Colección compartida’, auction: ‘Subasta del Gremio’, membersBtn: ‘Miembros’, chat: ‘Chat del gremio’,
+    chatMsg: ‘fondos listos — a comerciar’,
   },
 }
-type S = typeof STR.en
+type S = typeof EN
 
 interface GuildView extends ApiGuild {
   level: number; weeklyVolume: number; maxMembers: number; acceptance: 'auto' | 'manual'; tag: string
@@ -352,7 +395,7 @@ function FinderView({ guilds, s, onEnter, onRefresh, onCreate }: { guilds: Guild
       </div>
 
       {/* Recommended */}
-      <div>
+      <div style={{ display: 'flex', flexDirection: 'column' }}>
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 4 }}>
           <span style={{ fontFamily: SERIF, fontSize: 23, fontWeight: 600, letterSpacing: 1, color: C.goldLight }}>{s.recommended}</span>
           <motion.button type="button" onClick={invite} whileTap={{ scale: 0.96 }}
@@ -373,7 +416,7 @@ function FinderView({ guilds, s, onEnter, onRefresh, onCreate }: { guilds: Guild
 
         {/* List cuộn — ~4 hàng hiển thị, còn lại cuộn xuống */}
         <motion.div variants={{ hidden: {}, show: { transition: { staggerChildren: 0.06 } } }} initial="hidden" animate="show"
-          style={{ maxHeight: 540, overflowY: 'auto', paddingRight: 6 }}>
+          style={{ flex: 1, overflowY: 'auto', paddingRight: 6 }}>
           {filtered.length === 0
             ? <div style={{ textAlign: 'center', color: C.muted, fontSize: 13, padding: '30px 0' }}>{s.empty}</div>
             : filtered.map((g, i) => <GuildRow key={g.id} g={g} idx={i} featured={false} s={s} onInfo={() => onEnter(g)} />)}
@@ -456,7 +499,7 @@ function HallView({ guild, s, onLeave }: { guild: GuildView; s: S; onLeave: () =
 // ── Main ─────────────────────────────────────────────────────────
 export function GuildPage() {
   const { locale } = useLanguage()
-  const s = STR[locale === 'vi' ? 'vi' : 'en']
+  const s = STR[locale] ?? STR.en
   const [guilds, setGuilds] = useState<GuildView[]>(MOCK)
   const [view, setView] = useState<'finder' | 'hall'>('finder')
   const [active, setActive] = useState<GuildView>(MOCK[1])
