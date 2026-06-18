@@ -101,6 +101,76 @@ const STR: Record<string, typeof EN> = {
     nGallery: 'Galería curada', nGallerySub: 'Colección compartida', auction: 'Subasta del Gremio', membersBtn: 'Miembros', chat: 'Chat del gremio',
     chatMsg: 'fondos listos — a comerciar',
   },
+  zh: {
+    recommended: '推荐', invite: '邀请', copied: '邀请链接已复制', searchPh: '按名称搜索公会…',
+    tag: '标签', search: '搜索', foundDesc: '创建你自己的公会或加入收藏俱乐部。一起交易，每周赚取集体奖励。',
+    found: '创建', feeNote: '一次性 · 防垃圾', weeklyVol: '周交易量', members: '成员',
+    noRank: '无等级限制', accept: '审核', auto: '自动', manual: '手动', info: '详情', empty: '未找到公会',
+    rewards: ['每周分红', '贡献经验', '荣誉徽章', '优先访问'],
+    rewardDesc: ['每周分享公会费用和版税', '赚取积分升级公会', '公会内的头衔和角色', '优先购买热门作品'],
+    createTitle: '创建新公会', guildName: '公会名称', focus: '领域', create: '创建', cancel: '取消', creating: '创建中…',
+    needLogin: '请登录以创建公会', createFail: '创建公会失败，请重试',
+    back: '公会', checkin: '签到', actAct: '公会活动', actDecor: '画廊装饰', actDiv: '每周分红',
+    nVault: '集体金库', nVaultSub: '共同拥有作品', nLeague: '公会联赛', nLeagueSub: '赛季交易量竞赛',
+    nGallery: '策展画廊', nGallerySub: '共享收藏', auction: '公会拍卖', membersBtn: '成员', chat: '公会聊天',
+    chatMsg: '资金到位——开始交易',
+  },
+  ko: {
+    recommended: '추천', invite: '초대', copied: '초대 링크 복사됨', searchPh: '길드 이름으로 검색…',
+    tag: '태그', search: '검색', foundDesc: '나만의 길드를 설립하거나 수집가 클럽에 가입하세요. 함께 거래하여 매주 보상을 획득하세요.',
+    found: '설립', feeNote: '일회성 · 스팸 방지', weeklyVol: '주간 거래량', members: '멤버',
+    noRank: '랭크 제한 없음', accept: '승인', auto: '자동', manual: '수동', info: '정보', empty: '길드를 찾을 수 없습니다',
+    rewards: ['주간 배당금', '기여 XP', '명예 배지', '조기 액세스'],
+    rewardDesc: ['매주 길드 수수료 및 로열티 공유', '길드 레벨업 포인트 획득', '길드 내 칭호 및 역할', '인기 드롭 우선 구매'],
+    createTitle: '새 길드 설립', guildName: '길드 이름', focus: '분야', create: '생성', cancel: '취소', creating: '생성 중…',
+    needLogin: '길드를 설립하려면 로그인하세요', createFail: '길드 생성 실패, 다시 시도하세요',
+    back: '길드', checkin: '체크인', actAct: '길드 활동', actDecor: '갤러리 장식', actDiv: '주간 배당금',
+    nVault: '공동 금고', nVaultSub: '작품 공동 소유', nLeague: '길드 리그', nLeagueSub: '시즌 거래량 경쟁',
+    nGallery: '큐레이션 갤러리', nGallerySub: '공유 컬렉션', auction: '길드 경매', membersBtn: '멤버', chat: '길드 채팅',
+    chatMsg: '자금 준비 완료 — 거래 시작',
+  },
+  de: {
+    recommended: 'Empfohlen', invite: 'Einladen', copied: 'Einladungslink kopiert', searchPh: 'Gilde nach Name suchen…',
+    tag: 'Tag', search: 'Suchen', foundDesc: 'Gründe deine eigene Gilde oder tritt einem Sammlerclub bei. Handelt gemeinsam für wöchentliche Belohnungen.',
+    found: 'Gründen', feeNote: 'Einmalig · Anti-Spam', weeklyVol: 'Wochenvolumen', members: 'Mitglieder',
+    noRank: 'Kein Ranglimit', accept: 'Aufnahme', auto: 'Auto', manual: 'Manuell', info: 'Info', empty: 'Keine Gilde gefunden',
+    rewards: ['Wöchentliche Dividende', 'Beitrags-XP', 'Prestige-Abzeichen', 'Frühzugang'],
+    rewardDesc: ['Wöchentlicher Anteil an Gildengebühren', 'Punkte zum Gilden-Levelaufstieg', 'Titel & Rollen in der Gilde', 'Hot Drops vor anderen kaufen'],
+    createTitle: 'Neue Gilde gründen', guildName: 'Gildenname', focus: 'Fokus', create: 'Erstellen', cancel: 'Abbrechen', creating: 'Wird erstellt…',
+    needLogin: 'Zum Gründen bitte anmelden', createFail: 'Gilde konnte nicht erstellt werden',
+    back: 'Gilde', checkin: 'Check-in', actAct: 'Gildenaktivitäten', actDecor: 'Galeriedeko', actDiv: 'Wöchentliche Dividende',
+    nVault: 'Gemeinschaftstresor', nVaultSub: 'Werke gemeinsam besitzen', nLeague: 'Gildenliga', nLeagueSub: 'Saisonaler Volumenwettbewerb',
+    nGallery: 'Kuratierte Galerie', nGallerySub: 'Geteilte Sammlung', auction: 'Gildenauktion', membersBtn: 'Mitglieder', chat: 'Gildenchat',
+    chatMsg: 'Mittel bereit — los geht\'s',
+  },
+  ar: {
+    recommended: 'موصى به', invite: 'دعوة', copied: 'تم نسخ رابط الدعوة', searchPh: 'البحث عن نقابة…',
+    tag: 'وسم', search: 'بحث', foundDesc: 'أسس نقابتك الخاصة أو انضم إلى نادي جامعين. تداولوا معاً لكسب مكافآت جماعية أسبوعية.',
+    found: 'تأسيس', feeNote: 'مرة واحدة · مضاد للبريد', weeklyVol: 'الحجم الأسبوعي', members: 'الأعضاء',
+    noRank: 'بدون حد رتبة', accept: 'القبول', auto: 'تلقائي', manual: 'يدوي', info: 'معلومات', empty: 'لم يتم العثور على نقابة',
+    rewards: ['أرباح أسبوعية', 'نقاط مساهمة', 'شارة مرموقة', 'وصول مبكر'],
+    rewardDesc: ['حصة من رسوم النقابة أسبوعياً', 'اكسب نقاط لترقية النقابة', 'ألقاب وأدوار داخل النقابة', 'اشتر الإصدارات الساخنة أولاً'],
+    createTitle: 'تأسيس نقابة جديدة', guildName: 'اسم النقابة', focus: 'التركيز', create: 'إنشاء', cancel: 'إلغاء', creating: 'جاري الإنشاء…',
+    needLogin: 'سجل دخولك لتأسيس نقابة', createFail: 'فشل إنشاء النقابة، حاول مجدداً',
+    back: 'النقابة', checkin: 'تسجيل حضور', actAct: 'أنشطة النقابة', actDecor: 'ديكور المعرض', actDiv: 'أرباح أسبوعية',
+    nVault: 'خزنة جماعية', nVaultSub: 'ملكية مشتركة للأعمال', nLeague: 'دوري النقابات', nLeagueSub: 'سباق حجم موسمي',
+    nGallery: 'معرض منسق', nGallerySub: 'مجموعة مشتركة', auction: 'مزاد النقابة', membersBtn: 'الأعضاء', chat: 'دردشة النقابة',
+    chatMsg: 'التمويل جاهز — لنتداول',
+  },
+  pt: {
+    recommended: 'Recomendados', invite: 'Convidar', copied: 'Link copiado', searchPh: 'Buscar guilda por nome…',
+    tag: 'Tag', search: 'Buscar', foundDesc: 'Funde sua própria guilda ou entre em um clube de colecionadores. Negocie junto para ganhar recompensas coletivas semanais.',
+    found: 'Fundar', feeNote: 'Único · anti-spam', weeklyVol: 'Volume semanal', members: 'Membros',
+    noRank: 'Sem limite de rank', accept: 'Admissão', auto: 'Auto', manual: 'Manual', info: 'Info', empty: 'Nenhuma guilda encontrada',
+    rewards: ['Dividendos semanais', 'XP de contribuição', 'Emblema de prestígio', 'Acesso antecipado'],
+    rewardDesc: ['Parte das taxas e royalties semanais', 'Ganhe pontos para subir a guilda', 'Títulos e papéis na guilda', 'Compre drops populares primeiro'],
+    createTitle: 'Fundar nova guilda', guildName: 'Nome da guilda', focus: 'Foco', create: 'Criar', cancel: 'Cancelar', creating: 'Criando…',
+    needLogin: 'Faça login para fundar uma guilda', createFail: 'Falha ao criar guilda, tente novamente',
+    back: 'Guilda', checkin: 'Check-in', actAct: 'Atividades', actDecor: 'Decoração da Galeria', actDiv: 'Dividendos semanais',
+    nVault: 'Cofre coletivo', nVaultSub: 'Co-propriedade de obras', nLeague: 'Liga de Guildas', nLeagueSub: 'Corrida de volume sazonal',
+    nGallery: 'Galeria curada', nGallerySub: 'Coleção compartilhada', auction: 'Leilão da Guilda', membersBtn: 'Membros', chat: 'Chat da guilda',
+    chatMsg: 'fundos prontos — vamos negociar',
+  },
 }
 type S = typeof EN
 
@@ -395,7 +465,7 @@ function FinderView({ guilds, s, onEnter, onRefresh, onCreate }: { guilds: Guild
       </div>
 
       {/* Recommended */}
-      <div style={{ display: 'flex', flexDirection: 'column' }}>
+      <div style={{ display: 'flex', flexDirection: 'column', minHeight: 0, overflow: 'hidden' }}>
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 4 }}>
           <span style={{ fontFamily: SERIF, fontSize: 23, fontWeight: 600, letterSpacing: 1, color: C.goldLight }}>{s.recommended}</span>
           <motion.button type="button" onClick={invite} whileTap={{ scale: 0.96 }}
