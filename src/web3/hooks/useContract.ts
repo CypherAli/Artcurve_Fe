@@ -7,13 +7,13 @@ import { BondingCurveAMMAbi } from '@/web3/abis'
 export function useBuyTokens(artworkContract: `0x${string}` | undefined) {
   const { writeContract, data: hash, isPending, error } = useWriteContract()
 
-  function buy(ethAmount: bigint, minTokens = 0n) {
+  function buy(ethAmount: bigint, shareAmount: bigint, maxSlippage = ethAmount) {
     if (!artworkContract) return
     writeContract({
       address:      artworkContract,
       abi:          BondingCurveAMMAbi,
-      functionName: 'buy',
-      args:         [minTokens],
+      functionName: 'buyShares',
+      args:         [shareAmount, maxSlippage],
       value:        ethAmount,
     })
   }
@@ -27,13 +27,13 @@ export function useBuyTokens(artworkContract: `0x${string}` | undefined) {
 export function useSellTokens(artworkContract: `0x${string}` | undefined) {
   const { writeContract, data: hash, isPending, error } = useWriteContract()
 
-  function sell(tokenAmount: bigint, minEth = 0n) {
+  function sell(tokenAmount: bigint, minEthOut = 0n) {
     if (!artworkContract) return
     writeContract({
       address:      artworkContract,
       abi:          BondingCurveAMMAbi,
-      functionName: 'sell',
-      args:         [tokenAmount, minEth],
+      functionName: 'sellShares',
+      args:         [tokenAmount, minEthOut],
     })
   }
 

@@ -763,7 +763,7 @@ export function ArtworkDetailPage({ artworkId }: { artworkId: string }) {
           <div className="flex gap-3 mb-8">
             <motion.button
               type="button"
-              onClick={() => router.push('/trade')}
+              onClick={() => router.push(`/trade?id=${artworkId}`)}
               whileHover={{ scale: 1.01, filter: 'brightness(1.08)' }}
               whileTap={{ scale: 0.985 }}
               transition={{ type: 'spring', stiffness: 400, damping: 20 }}

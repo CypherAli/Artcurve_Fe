@@ -102,7 +102,7 @@ function NotificationsDropdown({
 
   return (
     <div ref={panelRef}
-      className="absolute right-0 top-[calc(100%+12px)] w-[380px] rounded-2xl overflow-hidden"
+      className="absolute right-0 top-[calc(100%+12px)] w-[calc(100vw-2rem)] md:w-[380px] max-w-[380px] rounded-2xl overflow-hidden"
       style={{
         background:      '#0E0E0E',
         border:          '1px solid rgba(201,169,110,0.14)',
@@ -714,7 +714,7 @@ const THEMES = {
     bell:        'rgba(255,255,255,0.38)',
     bellHoverBg: 'rgba(255,255,255,0.06)',
     bellActiveBg:'rgba(255,255,255,0.08)',
-    ringColor:   '#070707',
+    ringColor:   'var(--ac-paper, #070707)',
     chainBorder: 'rgba(255,255,255,0.1)',
     chainText:   'rgba(255,255,255,0.45)',
     btnBg:       'transparent',
@@ -817,7 +817,7 @@ export function Header({ dark }: HeaderProps) {
   return (
     <>
     <header ref={headerRef}
-      className="fixed top-0 left-0 right-0 z-50 flex items-center justify-between px-6 md:px-12 py-5 transition-all duration-500"
+      className="fixed top-0 left-0 right-0 z-50 flex items-center justify-between px-4 md:px-6 lg:px-12 py-4 md:py-5 transition-all duration-500"
       style={{
         background:   scrolled ? T.bgScrolled : T.bg,
         borderBottom: `1px solid ${T.border}`,
@@ -876,8 +876,8 @@ export function Header({ dark }: HeaderProps) {
         </svg>
       </button>
 
-      {/* ── Right ─────────────────────────────────────────────── */}
-      <div className="flex items-center gap-3">
+      {/* ── Right (desktop) ────────────────────────────────────── */}
+      <div className="hidden md:flex items-center gap-3">
 
         {/* Theme toggle — xé màn light ↔ dark */}
         <ThemeToggle />
@@ -1106,6 +1106,46 @@ export function Header({ dark }: HeaderProps) {
               </a>
             ))}
           </nav>
+
+          {/* Divider */}
+          <div className="h-px mx-5" style={{ background: `linear-gradient(90deg, ${T.gold}, transparent)` }} />
+
+          {/* Mobile controls */}
+          <div className="flex items-center gap-3 px-5 py-4">
+            <ThemeToggle />
+            <LangSwitcher theme={T} />
+            {/* Bell */}
+            <div className="relative" data-notif-root>
+              <button type="button" aria-label="Notifications"
+                onClick={() => { setShowNotifs(v => !v); setMobileMenu(false) }}
+                className="relative w-9 h-9 flex items-center justify-center rounded-full transition-all duration-200"
+                style={{ color: T.bell }}
+              >
+                <svg viewBox="0 0 24 24" className="w-[22px] h-[22px]" fill="none" stroke="currentColor" strokeWidth="1.6">
+                  <path d="M15 17h5l-1.405-1.405A2.032 2.032 0 0 1 18 14.158V11a6 6 0 0 0-5-5.917V4a1 1 0 1 0-2 0v1.083A6 6 0 0 0 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 0 1-6 0v-1m6 0H9"
+                    strokeLinecap="round" strokeLinejoin="round"/>
+                </svg>
+                {unreadCount > 0 && (
+                  <span className="absolute -top-0.5 -right-0.5 min-w-[17px] h-[17px] px-1 rounded-full flex items-center justify-center pointer-events-none text-[9px] font-bold leading-none"
+                    style={{ background: T.gold, color: 'var(--ac-ink)', boxShadow: `0 0 0 2px ${T.ringColor}` }}>
+                    {unreadCount > 9 ? '9+' : unreadCount}
+                  </span>
+                )}
+              </button>
+            </div>
+          </div>
+
+          {/* Mobile auth actions */}
+          <div className="px-5 mt-auto pb-6">
+            {!isAuthenticated && (
+              <button type="button"
+                onClick={() => { setShowLogin(true); setMobileMenu(false) }}
+                className="w-full h-11 text-sm tracking-widest uppercase font-medium rounded-lg transition-all duration-300"
+                style={{ background: T.btnBg, border: `1px solid ${T.btnBorder}`, color: T.btnText }}>
+                Login
+              </button>
+            )}
+          </div>
         </div>
       </>
     )}

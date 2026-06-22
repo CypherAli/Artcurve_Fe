@@ -12,7 +12,10 @@ import { usePortfolio } from '@/hooks/usePortfolio'
 import { useEthBalance } from '@/web3/hooks/useContract'
 import type { PortfolioHolding, MyTradeRecord } from '@/types/api'
 import { tradeService } from '@/services/trade.service'
+import { vaultService } from '@/services/vault.service'
+import type { VaultOverview, VaultPerformancePoint } from '@/services/vault.service'
 import { authStore } from '@/lib/auth-store'
+import { toast } from '@/components/common/Toast'
 
 // ── Types ─────────────────────────────────────────────────────────
 interface Holding {
@@ -95,13 +98,11 @@ function adaptTx(t: MyTradeRecord): TxRecord {
   }
 }
 
-const REALIZED_PNL = 0.312   // ETH — from closed positions
-const ETH_USD      = 3_420
-const ETH_BALANCE  = 4.20
+const ETH_USD_FALLBACK = 3_420
 
 function fmtETH(v: number) { return v >= 1 ? v.toFixed(3) : v.toFixed(4) }
-function fmtUSD(eth: number) {
-  return '$' + (eth * ETH_USD).toLocaleString('en', { maximumFractionDigits: 0 })
+function fmtUSD(eth: number, ethUsd: number = ETH_USD_FALLBACK) {
+  return '$' + (eth * ethUsd).toLocaleString('en', { maximumFractionDigits: 0 })
 }
 
 // ── Portfolio chart data (deterministic sine-wave) ────────────────
@@ -119,14 +120,24 @@ function genHistory(days: number, end: number): number[] {
 }
 
 // ── Portfolio chart component ─────────────────────────────────────
-function PortfolioChart({ totalValue, pnlPct }: { totalValue: number; pnlPct: number }) {
+function PortfolioChart({ totalValue, pnlPct, perfData, onTimeframeChange }: {
+  totalValue: number; pnlPct: number
+  perfData: VaultPerformancePoint[]
+  onTimeframeChange: (tf: '7d' | '30d' | '90d') => void
+}) {
   const { t } = useLanguage()
   const [tf, setTf] = useState<Timeframe>('30D')
 
+  function handleTf(v: Timeframe) {
+    setTf(v)
+    onTimeframeChange(v === '7D' ? '7d' : v === '30D' ? '30d' : '90d')
+  }
+
   const pts = useMemo(() => {
+    if (perfData.length > 1) return perfData.map(p => parseFloat(p.value_eth))
     const days = tf === '7D' ? 7 : tf === '30D' ? 30 : 90
     return genHistory(days, totalValue)
-  }, [tf, totalValue])
+  }, [tf, totalValue, perfData])
 
   const W = 700, H = 88
   const minV = Math.min(...pts) * 0.98
@@ -180,7 +191,7 @@ function PortfolioChart({ totalValue, pnlPct }: { totalValue: number; pnlPct: nu
         </div>
         <div className="flex items-center gap-1">
           {(['7D', '30D', '90D'] as const).map(tfVal => (
-            <button key={tfVal} type="button" onClick={() => setTf(tfVal)}
+            <button key={tfVal} type="button" onClick={() => handleTf(tfVal)}
               className="px-2 py-0.5 font-mono text-[7px]"
               style={{
                 background: tf === tfVal ? 'rgba(255,255,255,0.08)' : 'transparent',
@@ -276,7 +287,7 @@ function AllocationDonut({ holdings }: { holdings: Holding[] }) {
               initial={{ opacity: 0 }} animate={{ opacity: 0.78 }}
               transition={{ delay: i * 0.08, duration: 0.35 }}/>
           ))}
-          <circle cx="56" cy="56" r="30" fill="#070707"/>
+          <circle cx="56" cy="56" r="30" fill="var(--ac-paper, #070707)"/>
           <text x="56" y="52" textAnchor="middle" fontFamily="monospace"
             fontSize="8" fill="rgba(255,255,255,0.45)">{t.vault.total}</text>
           <text x="56" y="65" textAnchor="middle" fontFamily="monospace"
@@ -349,6 +360,7 @@ export function VaultPage() {
   const { t } = useLanguage()
   // ── Backend portfolio data ────────────────────────────────────────
   const portfolio  = usePortfolio()
+  const { isLoading: portfolioLoading, error: portfolioError } = portfolio
   const { formatted: walletEthBalance } = useEthBalance()
   const _apiHoldings = useMemo(
     () => portfolio.holdings.map(adaptHolding),
@@ -357,32 +369,52 @@ export function VaultPage() {
   // Shadow: real data when available, mock otherwise
   const HOLDINGS = _apiHoldings.length > 0 ? _apiHoldings : HOLDINGS_MOCK
 
+  useEffect(() => {
+    if (portfolioError) {
+      toast.emit({ type: 'error', title: 'Portfolio Error', message: 'Failed to load portfolio data' })
+      console.error('Portfolio fetch error:', portfolioError)
+    }
+  }, [portfolioError])
+
   const [activeTab, setActiveTab]   = useState<'holdings' | 'history'>('holdings')
   const [sortKey,   setSortKey]     = useState<SortKey>('value')
   const [sortDir,   setSortDir]     = useState<SortDir>('desc')
   const [apiTxs,    setApiTxs]      = useState<TxRecord[]>([])
+  const [vaultOverview, setVaultOverview] = useState<VaultOverview | null>(null)
+  const [perfData,  setPerfData]    = useState<VaultPerformancePoint[]>([])
 
   useEffect(() => {
     if (!authStore.getJwt()) return
+    vaultService.overview()
+      .then(setVaultOverview)
+      .catch(() => {})
+    vaultService.performance('30d')
+      .then(setPerfData)
+      .catch(() => {})
     tradeService.myHistory(1, 50)
       .then(res => setApiTxs(res.data.map(adaptTx)))
-      .catch(() => { /* keep mock */ })
+      .catch((err) => {
+        toast.emit({ type: 'error', title: 'History Error', message: 'Failed to load transaction history' })
+        console.error('Trade history fetch error:', err)
+      })
   }, [])
 
   const TXS = apiTxs.length > 0 ? apiTxs : TXS_MOCK
 
-  // Use API P&L numbers when available; fall back to local computation
+  const realizedPnL = vaultOverview ? parseFloat(vaultOverview.realized_pnl_eth) : 0
+  const ethUsd      = ETH_USD_FALLBACK
+
   const totalValue = portfolio.totalValue ?? HOLDINGS.reduce((s, h) => s + h.qty * h.curPrice, 0)
   const totalCost  = portfolio.totalCost  ?? HOLDINGS.reduce((s, h) => s + h.qty * h.avgBuy,   0)
   const unrealPnL  = portfolio.pnlEth     ?? (totalValue - totalCost)
   const unrealPct  = portfolio.pnlPct     ?? ((totalValue - totalCost) / (totalCost || 1) * 100)
-  const totalPnL   = unrealPnL + REALIZED_PNL
+  const totalPnL   = unrealPnL + realizedPnL
 
   const STATS = [
-    { label: t.vault.portfolioValueStat, value: fmtETH(totalValue) + ' ETH', sub: fmtUSD(totalValue),         up: true          },
+    { label: t.vault.portfolioValueStat, value: fmtETH(totalValue) + ' ETH', sub: fmtUSD(totalValue, ethUsd),         up: true          },
     { label: t.vault.unrealizedPnl,      value: (unrealPnL >= 0 ? '+' : '') + fmtETH(unrealPnL) + ' ETH',    sub: (unrealPct >= 0 ? '+' : '') + unrealPct.toFixed(1) + '%', up: unrealPnL >= 0 },
-    { label: t.vault.realizedPnl,        value: '+' + fmtETH(REALIZED_PNL)  + ' ETH',                         sub: '+' + fmtUSD(REALIZED_PNL), up: true              },
-    { label: t.vault.ethBalance,         value: walletEthBalance.toFixed(4) + ' ETH',                          sub: fmtUSD(walletEthBalance),   up: true              },
+    { label: t.vault.realizedPnl,        value: (realizedPnL >= 0 ? '+' : '') + fmtETH(realizedPnL)  + ' ETH', sub: (realizedPnL >= 0 ? '+' : '') + fmtUSD(realizedPnL, ethUsd), up: realizedPnL >= 0 },
+    { label: t.vault.ethBalance,         value: walletEthBalance.toFixed(4) + ' ETH',                          sub: fmtUSD(walletEthBalance, ethUsd),   up: true              },
   ]
 
   function handleSort(k: SortKey) {
@@ -408,7 +440,7 @@ export function VaultPage() {
   return (
     <motion.div
       className="flex flex-col overflow-hidden"
-      style={{ height: 'calc(100vh - 68px)', marginTop: 68, background: '#070707', paddingTop: 8 }}
+      style={{ height: 'calc(100vh - 68px)', marginTop: 68, background: 'var(--ac-paper, #070707)', paddingTop: 8 }}
       initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.3 }}>
 
       {/* Stats row */}
@@ -433,7 +465,9 @@ export function VaultPage() {
       </motion.div>
 
       {/* Portfolio chart */}
-      <PortfolioChart totalValue={totalValue} pnlPct={(totalPnL / totalCost) * 100}/>
+      <PortfolioChart totalValue={totalValue} pnlPct={(totalPnL / (totalCost || 1)) * 100}
+        perfData={perfData}
+        onTimeframeChange={(p) => vaultService.performance(p).then(setPerfData).catch(() => {})} />
 
       {/* Table + Donut */}
       <div className="flex flex-1 min-h-0 mx-4 gap-3 mb-3">
@@ -480,6 +514,29 @@ export function VaultPage() {
                 <motion.div className="flex-1 overflow-y-auto"
                   style={{ scrollbarWidth: 'thin', scrollbarColor: 'rgba(255,255,255,0.06) transparent' }}
                   variants={TABLE_V} initial="hidden" animate="show">
+                  {portfolioLoading && (
+                    <div className="flex flex-col items-center justify-center py-16 gap-2">
+                      <div className="w-5 h-5 border-2 border-t-transparent rounded-full animate-spin"
+                        style={{ borderColor: 'rgba(255,255,255,0.12)', borderTopColor: 'transparent' }} />
+                      <p className="font-mono text-[10px] tracking-wider" style={{ color: 'rgba(255,255,255,0.22)' }}>
+                        Loading portfolio...
+                      </p>
+                    </div>
+                  )}
+                  {!portfolioLoading && sortedHoldings.length === 0 && (
+                    <div className="flex flex-col items-center justify-center py-16 gap-3">
+                      <svg viewBox="0 0 24 24" className="w-10 h-10" fill="none" stroke="rgba(255,255,255,0.12)" strokeWidth="1.5">
+                        <path d="M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0z" strokeLinecap="round"/>
+                        <path d="M9 10h.01M15 10h.01M8 14s1.5 2 4 2 4-2 4-2" strokeLinecap="round" strokeLinejoin="round"/>
+                      </svg>
+                      <p className="font-mono text-[10px] tracking-wider" style={{ color: 'rgba(255,255,255,0.22)' }}>
+                        No holdings yet
+                      </p>
+                      <p className="font-sans text-[10px]" style={{ color: 'rgba(255,255,255,0.12)' }}>
+                        Start trading on the marketplace to build your portfolio
+                      </p>
+                    </div>
+                  )}
                   {sortedHoldings.map(h => {
                     const value   = h.qty * h.curPrice
                     const pnl     = h.qty * (h.curPrice - h.avgBuy)
@@ -543,6 +600,21 @@ export function VaultPage() {
                 </div>
                 <div className="flex-1 overflow-y-auto"
                   style={{ scrollbarWidth: 'thin', scrollbarColor: 'rgba(255,255,255,0.06) transparent' }}>
+                  {TXS.length === 0 && (
+                    <div className="flex flex-col items-center justify-center py-16 gap-3">
+                      <svg viewBox="0 0 24 24" className="w-10 h-10" fill="none" stroke="rgba(255,255,255,0.12)" strokeWidth="1.5">
+                        <path d="M9 5H7a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-2" strokeLinecap="round"/>
+                        <rect x="9" y="3" width="6" height="4" rx="1" strokeLinecap="round"/>
+                        <path d="M9 12h6M9 16h4" strokeLinecap="round"/>
+                      </svg>
+                      <p className="font-mono text-[10px] tracking-wider" style={{ color: 'rgba(255,255,255,0.22)' }}>
+                        No transactions yet
+                      </p>
+                      <p className="font-sans text-[10px]" style={{ color: 'rgba(255,255,255,0.12)' }}>
+                        Your buy and sell history will appear here
+                      </p>
+                    </div>
+                  )}
                   {TXS.map(tx => (
                     <div key={tx.id} className="flex items-center px-4 py-2.5 cursor-default"
                       style={{ borderBottom: '1px solid rgba(255,255,255,0.025)' }}>
@@ -572,7 +644,7 @@ export function VaultPage() {
                     {t.vault.realizedPnlClosed}
                   </span>
                   <span className="font-mono text-[10px] font-bold" style={{ color: '#4ade80' }}>
-                    +{fmtETH(REALIZED_PNL)} ETH ({fmtUSD(REALIZED_PNL)})
+                    {realizedPnL >= 0 ? '+' : ''}{fmtETH(realizedPnL)} ETH ({fmtUSD(realizedPnL)})
                   </span>
                 </div>
               </motion.div>

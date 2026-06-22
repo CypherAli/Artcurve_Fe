@@ -1,70 +1,67 @@
-// ABI for BondingCurveAMM contract
-// Matches: artcurve-contract/contracts/BondingCurveAMM.sol
-export const BondingCurveAMMAbi = [
+export const BondingCurveAMAbi = [
   // ── Read ──────────────────────────────────────────────────────────
   {
     name: 'getCurrentPrice',
-    type: 'function',
-    stateMutability: 'view',
-    inputs: [],
-    outputs: [{ name: '', type: 'uint256' }],
-  },
-  {
-    name: 'totalSupply',
-    type: 'function',
-    stateMutability: 'view',
+    type: 'function' as const,
+    stateMutability: 'view' as const,
     inputs: [],
     outputs: [{ name: '', type: 'uint256' }],
   },
   {
     name: 'getBuyPrice',
-    type: 'function',
-    stateMutability: 'view',
-    inputs: [{ name: 'amount', type: 'uint256' }],
+    type: 'function' as const,
+    stateMutability: 'view' as const,
+    inputs: [{ name: 'amountOut', type: 'uint256' }],
     outputs: [{ name: 'cost', type: 'uint256' }],
   },
   {
     name: 'getSellPrice',
-    type: 'function',
-    stateMutability: 'view',
-    inputs: [{ name: 'amount', type: 'uint256' }],
+    type: 'function' as const,
+    stateMutability: 'view' as const,
+    inputs: [{ name: 'amountIn', type: 'uint256' }],
     outputs: [{ name: 'proceeds', type: 'uint256' }],
   },
   {
     name: 'balanceOf',
-    type: 'function',
-    stateMutability: 'view',
+    type: 'function' as const,
+    stateMutability: 'view' as const,
     inputs: [{ name: 'account', type: 'address' }],
     outputs: [{ name: '', type: 'uint256' }],
   },
   // ── Write ─────────────────────────────────────────────────────────
   {
-    name: 'buy',
-    type: 'function',
-    stateMutability: 'payable',
-    inputs: [{ name: 'minTokens', type: 'uint256' }],
+    name: 'buyShares',
+    type: 'function' as const,
+    stateMutability: 'payable' as const,
+    inputs: [
+      { name: 'amountOut', type: 'uint256' },
+      { name: 'maxEthIn', type: 'uint256' },
+    ],
     outputs: [],
   },
   {
-    name: 'sell',
-    type: 'function',
-    stateMutability: 'nonpayable',
+    name: 'sellShares',
+    type: 'function' as const,
+    stateMutability: 'nonpayable' as const,
     inputs: [
-      { name: 'tokenAmount', type: 'uint256' },
-      { name: 'minEth',      type: 'uint256' },
+      { name: 'amountIn', type: 'uint256' },
+      { name: 'minEthOut', type: 'uint256' },
     ],
     outputs: [],
   },
   // ── Events ─────────────────────────────────────────────────────────
   {
     name: 'Trade',
-    type: 'event',
+    type: 'event' as const,
     inputs: [
-      { name: 'trader',      type: 'address', indexed: true },
+      { name: 'user',        type: 'address', indexed: true },
+      { name: 'artworkId_',  type: 'uint256', indexed: true },
       { name: 'isBuy',       type: 'bool',    indexed: false },
-      { name: 'tokenAmount', type: 'uint256', indexed: false },
+      { name: 'shareAmount', type: 'uint256', indexed: false },
       { name: 'ethAmount',   type: 'uint256', indexed: false },
       { name: 'price',       type: 'uint256', indexed: false },
     ],
   },
 ] as const
+
+export const BondingCurveAMMAbi = BondingCurveAMAbi

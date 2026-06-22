@@ -35,6 +35,7 @@ import { parseEther }                   from 'viem'
 import type { Artwork, OhlcvCandle, OhlcvTimeframe } from '@/types/api'
 import { useLanguage } from '@/context/LanguageContext'
 import { ConfirmDialog } from '@/components/common/ConfirmDialog'
+import { toast } from '@/components/common/Toast'
 
 const API_URL = (process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:3001/api/v1').replace(/\/$/, '')
 
@@ -813,6 +814,12 @@ function TradePanel({ art, livePrice }: { art:TradeArtwork; livePrice:number }) 
   useEffect(() => {
     if (buySuccess || sellSuccess) {
       setTxState('success')
+      toast.success(
+        side === 'buy' ? 'Trade Executed' : 'Sell Executed',
+        side === 'buy'
+          ? `Bought ${tokensOut.toFixed(4)} ${art.ticker} for ${ethInput} ETH`
+          : `Sold ${tokenInput} ${art.ticker} for ${ethOut.toFixed(4)} ETH`
+      )
       // FIX 6: Invalidate relevant caches after trade success
       queryClient.invalidateQueries({ queryKey: ['artworks'] })
       queryClient.invalidateQueries({ queryKey: ['portfolio'] })
@@ -821,7 +828,18 @@ function TradePanel({ art, livePrice }: { art:TradeArtwork; livePrice:number }) 
       }
       setTimeout(() => { setTxState('idle'); setEthInput(''); setTokenInput('') }, 2200)
     }
-  }, [buySuccess, sellSuccess, queryClient, art.artworkId])
+  }, [buySuccess, sellSuccess, queryClient, art.artworkId, side, tokensOut, ethInput, tokenInput, ethOut, art.ticker])
+
+  // Toast on trade error (wagmi hook went from pending → idle without success)
+  const prevPending = useRef(false)
+  useEffect(() => {
+    const nowPending = isBuying || isSelling || buyConfirming || sellConfirming
+    if (prevPending.current && !nowPending && txState === 'pending' && !buySuccess && !sellSuccess) {
+      toast.error('Transaction Failed', 'The transaction was rejected or failed on-chain')
+      setTxState('idle')
+    }
+    prevPending.current = nowPending
+  }, [isBuying, isSelling, buyConfirming, sellConfirming, txState, buySuccess, sellSuccess])
 
   const handleExecute = useCallback(() => {
     if (!canTrade) return
@@ -974,6 +992,11 @@ function TradePanel({ art, livePrice }: { art:TradeArtwork; livePrice:number }) 
                   <span className="absolute right-3 top-1/2 -translate-y-1/2 font-mono text-[9px] font-bold"
                     style={{ color:'rgba(74,222,128,0.55)' }}>ETH</span>
                 </div>
+                {ethAmt > WALLET_ETH && ethAmt > 0 && (
+                  <p className="font-mono text-[8px] mt-0.5 px-1" style={{ color: '#f87171' }}>
+                    Insufficient ETH balance
+                  </p>
+                )}
                 <div className="grid grid-cols-4 gap-1 mt-1">
                   {[0.1, 0.25, 0.5, 1.0].map(amt => (
                     <motion.button key={amt} type="button" onClick={() => setEthInput(String(amt))}
@@ -1070,6 +1093,11 @@ function TradePanel({ art, livePrice }: { art:TradeArtwork; livePrice:number }) 
                   <span className="absolute right-3 top-1/2 -translate-y-1/2 font-mono text-[7.5px] font-bold"
                     style={{ color:'rgba(248,113,113,0.55)' }}>{art.ticker}</span>
                 </div>
+                {tokenAmt > WALLET_TOKEN && tokenAmt > 0 && (
+                  <p className="font-mono text-[8px] mt-0.5 px-1" style={{ color: '#f87171' }}>
+                    Insufficient token balance
+                  </p>
+                )}
                 <div className="grid grid-cols-4 gap-1 mt-1">
                   {[25,50,75,100].map(pct => (
                     <motion.button key={pct} type="button"
@@ -1178,6 +1206,7 @@ function TradePanel({ art, livePrice }: { art:TradeArtwork; livePrice:number }) 
                 :canTrade?`1px solid ${accentBdr}`:'1px solid rgba(255,255,255,0.06)',
               color: txState==='success'?'#4ade80':txState==='pending'?'#D4AF37':canTrade?accent:'rgba(255,255,255,0.14)',
               cursor: canTrade?'pointer':'not-allowed',
+              opacity: canTrade ? 1 : 0.4,
             }}>
             <AnimatePresence mode="wait">
               {txState==='idle'&&<motion.span key="idle" initial={{ opacity:0,y:5 }} animate={{ opacity:1,y:0 }} exit={{ opacity:0,y:-5 }}>
@@ -1411,24 +1440,7 @@ export function TradePage() {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedId, selectedArt.artworkId])
 
-  // Stream live trades (stale-closure safe)
-  useEffect(() => {
-    const id = setInterval(() => {
-      const p = livePricesRef.current[selectedId] ?? selectedArt.basePrice
-      const t: RecentTrade = {
-        id:     `live-${Date.now()}-${Math.random().toString(36).slice(2,6)}`,
-        side:   Math.random()>0.38 ? 'buy' : 'sell',
-        price:  p*(1+(Math.random()-0.5)*0.009),
-        eth:    Math.random()*0.65+0.01,
-        tokens: 0,
-        wallet: `0x${Math.floor(Math.random()*0xffffff).toString(16).padStart(6,'0')}…${Math.floor(Math.random()*0xffff).toString(16).padStart(4,'0')}`,
-        ago:    0,
-      }
-      t.tokens = t.eth / t.price
-      setTrades(prev => [t, ...prev.slice(0, 28)])
-    }, 3000+Math.random()*1800)
-    return () => clearInterval(id)
-  }, [selectedId, selectedArt.basePrice])
+  // Real-time price via WebSocket — hook manages its own connection lifecycle
 
   // Order book refresh every 6 s
   useEffect(() => {
@@ -1442,7 +1454,7 @@ export function TradePage() {
     /* Page entrance: columns stagger in */
     <motion.div
       className="flex flex-col overflow-hidden"
-      style={{ height:'calc(100vh - 68px)', background:'#070707', marginTop:68, paddingTop:12 }}
+      style={{ height:'calc(100vh - 68px)', background:'var(--ac-paper, #070707)', marginTop:68, paddingTop:12 }}
       variants={PAGE_V}
       initial="hidden"
       animate="show"

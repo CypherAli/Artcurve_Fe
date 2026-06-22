@@ -18,14 +18,13 @@ function resolveChatWsUrl(): string {
 
 export function useChatSocket() {
   const socketRef = useRef<Socket | null>(null)
-  const jwt = useAuthStore.getState().jwt
+  const jwt = useAuthStore(s => s.jwt)
 
   useEffect(() => {
-    const token = useAuthStore.getState().jwt
-    if (!token) return
+    if (!jwt) return
 
     const socket = io(`${resolveChatWsUrl()}/chat`, {
-      auth: { token },
+      auth: { token: jwt },
       transports: ['websocket', 'polling'],
       reconnection: true,
       reconnectionAttempts: 5,

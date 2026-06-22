@@ -605,7 +605,7 @@ export function WalletPage() {
             },
             {
               label: t.wallet.accountRole,
-              value: user?.role === 'artist' ? t.wallet.artist : user?.role === 'admin' ? t.wallet.admin : t.wallet.collector,
+              value: user?.role === 'moderator' ? t.wallet.artist : user?.role === 'admin' ? t.wallet.admin : t.wallet.collector,
               ok: true,
             },
             {

@@ -12,11 +12,12 @@
 
 import { useQuery } from '@tanstack/react-query'
 import { portfolioService } from '@/services/portfolio.service'
-import { authStore } from '@/lib/auth-store'
+import { useAuthStore } from '@/store/authStore'
 import type { PortfolioPnL, PortfolioHolding } from '@/types/api'
 
 export function usePortfolio() {
-  const isAuth = !!authStore.getJwt()
+  const jwt = useAuthStore(s => s.jwt)
+  const isAuth = !!jwt
 
   const { data, isLoading, isFetching, error, refetch } = useQuery({
     queryKey: ['portfolio', 'pnl'],
@@ -49,7 +50,7 @@ export function useHolding(artworkId: string | null) {
   return useQuery({
     queryKey: ['portfolio', 'holding', artworkId],
     queryFn:  () => portfolioService.myHolding(artworkId!),
-    enabled:  !!artworkId && !!authStore.getJwt(),
+    enabled:  !!artworkId && !!useAuthStore.getState().jwt,
     staleTime: 30_000,
   })
 }

@@ -14,7 +14,8 @@ import {
 import { Track } from 'livekit-client'
 import '@livekit/components-styles'
 
-const API = process.env.NEXT_PUBLIC_API_URL ?? 'https://artcurve-be.onrender.com/api/v1'
+import { liveService } from '@/services/live.service'
+
 const LK_URL = process.env.NEXT_PUBLIC_LIVEKIT_URL ?? ''
 
 // ── Inner component (used inside LiveKitRoom context) ─────────────────────────
@@ -44,18 +45,21 @@ export function LiveViewer({ roomName }: { roomName: string }) {
 
   useEffect(() => {
     const identity = `viewer-${Math.random().toString(36).slice(2, 8)}`
-    const url = `${API}/live/${roomName}/viewer-token?identity=${identity}`
 
-    fetch(url)
-      .then(r => {
-        if (!r.ok) throw new Error('Stream not found or ended')
-        return r.json()
+    Promise.all([
+      liveService.viewerToken(roomName, identity),
+      liveService.get(roomName),
+    ])
+      .then(([tokenRes, stream]) => {
+        setToken(tokenRes.token)
+        setStreamInfo({
+          title: stream.title,
+          host_name: stream.host_name,
+          category: stream.category,
+          viewer_count: stream.viewer_count,
+        })
       })
-      .then(data => {
-        setToken(data.token)
-        setStreamInfo(data.stream)
-      })
-      .catch(e => setError(e.message))
+      .catch(e => setError(e?.message ?? 'Stream not found or ended'))
   }, [roomName])
 
   if (error) {

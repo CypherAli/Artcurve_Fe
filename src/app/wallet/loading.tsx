@@ -1,6 +1,6 @@
 export default function WalletLoading() {
   return (
-    <div className="flex flex-col h-screen overflow-hidden" style={{ background: '#070707', marginTop: 68 }}>
+    <div className="flex flex-col h-screen overflow-hidden" style={{ background: 'var(--ac-paper, #070707)', marginTop: 68 }}>
       <div className="h-10 animate-pulse" style={{ background: 'rgba(255,255,255,0.03)', borderBottom: '1px solid rgba(255,255,255,0.05)' }} />
       <div className="flex-1 p-6 space-y-4">
         <div className="h-8 w-40 rounded animate-pulse" style={{ background: 'rgba(255,255,255,0.03)' }} />

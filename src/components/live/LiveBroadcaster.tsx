@@ -15,9 +15,8 @@ import {
 } from '@livekit/components-react'
 import { Track } from 'livekit-client'
 import '@livekit/components-styles'
-import { authStore } from '@/lib/auth-store'
+import { liveService } from '@/services/live.service'
 
-const API    = process.env.NEXT_PUBLIC_API_URL    ?? 'https://artcurve-be.onrender.com/api/v1'
 const LK_URL = process.env.NEXT_PUBLIC_LIVEKIT_URL ?? ''
 
 // ── Inner broadcast stage ─────────────────────────────────────────────────────
@@ -58,11 +57,7 @@ export function LiveBroadcaster({ roomName }: { roomName: string }) {
   const handleEndStream = useCallback(async () => {
     setEnding(true)
     try {
-      const jwt  = authStore.getJwt()
-      await fetch(`${API}/live/${roomName}`, {
-        method:  'DELETE',
-        headers: { Authorization: `Bearer ${jwt}` },
-      })
+      await liveService.end(roomName)
     } catch { /* ignore */ }
     sessionStorage.removeItem(`livekit_host_token_${roomName}`)
     router.push('/live')

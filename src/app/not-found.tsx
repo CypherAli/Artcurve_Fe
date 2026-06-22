@@ -8,7 +8,7 @@ export default function NotFound() {
   return (
     <div
       className="min-h-screen flex flex-col items-center justify-center"
-      style={{ background: '#070707', color: 'rgba(255,255,255,0.7)' }}
+      style={{ background: 'var(--ac-paper, #070707)', color: 'rgba(255,255,255,0.7)' }}
     >
       <div className="text-center space-y-6">
         <div className="font-mono text-[80px] font-bold leading-none"

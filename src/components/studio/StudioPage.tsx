@@ -762,7 +762,7 @@ export function StudioPage() {
   return (
     <motion.div
       className="flex flex-col overflow-hidden"
-      style={{ height:'calc(100vh - 68px)', marginTop:68, background:'#070707', paddingTop:10 }}
+      style={{ height:'calc(100vh - 68px)', marginTop:68, background:'var(--ac-paper, #070707)', paddingTop:10 }}
       variants={CONTAINER_V} initial="hidden" animate="show">
 
       {/* Top breadcrumb bar */}

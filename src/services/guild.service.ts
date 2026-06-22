@@ -1,4 +1,4 @@
-import { get, post } from '@/lib/http'
+import { get, post, request } from '@/lib/http'
 
 // ─────────────────────────────────────────────────────────────────
 //  guild.service — gọi API Guild backend (/guilds).
@@ -38,6 +38,15 @@ export interface ApiGuildHolding {
   holder_count: string
 }
 
+export interface ApiGuildMessage {
+  id: string
+  guild_id: string
+  user_id: string
+  user_name: string
+  content: string
+  created_at: string
+}
+
 export const guildService = {
   list:    ()                              => get<ApiGuild[]>('/guilds'),
   mine:    ()                              => get<ApiGuild[]>('/guilds/mine', true),
@@ -45,6 +54,9 @@ export const guildService = {
   members: (id: string)                    => get<ApiGuildMember[]>(`/guilds/${id}/members`),
   holdings:(id: string)                    => get<ApiGuildHolding[]>(`/guilds/${id}/holdings`),
   join:    (id: string)                    => post<{ joined: boolean }>(`/guilds/${id}/join`, {}, true),
+  leave:   (id: string)                    => request<void>(`/guilds/${id}/leave`, { method: 'DELETE', auth: true }),
   create:  (body: { name: string; description?: string; focus: string }) =>
                                               post<ApiGuild>('/guilds', body, true),
+  postMessage: (id: string, content: string) => post<{ id: string }>(`/guilds/${id}/messages`, { content }, true),
+  messages:    (id: string, limit = 50)      => get<ApiGuildMessage[]>(`/guilds/${id}/messages?limit=${limit}`),
 }

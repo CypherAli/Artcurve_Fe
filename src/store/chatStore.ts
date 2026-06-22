@@ -31,7 +31,10 @@ export const useChatStore = create<ChatState>()(
       closeChat:    ()    => set({ isOpen: false }),
       setSessionId: (id)  => set({ sessionId: id }),
       setMessages:  (msgs) => set({ messages: msgs }),
-      addMessage:   (msg) => set((s) => ({ messages: [...s.messages, msg] })),
+      addMessage:   (msg) => set((s) => {
+        const msgs = [...s.messages, msg]
+        return { messages: msgs.length > 200 ? msgs.slice(-200) : msgs }
+      }),
       setLoading:   (v)   => set({ isLoading: v }),
       clearChat:    ()    => set({ sessionId: null, messages: [], isOpen: false }),
     }),

@@ -122,15 +122,29 @@ export const post = <T>(path: string, body: unknown, auth = false) =>
   request<T>(path, { method: 'POST', body: JSON.stringify(body), auth })
 
 export async function postForm<T>(path: string, formData: FormData): Promise<T> {
-  const bearer = authStore.bearerHeader()
-  const headers: Record<string, string> = {}
-  if (bearer) headers['Authorization'] = bearer
-  // Upload có thể lớn → cho timeout dài hơn (60s)
-  const res = await fetchWithTimeout(`${BASE}${path}`, { method: 'POST', headers, body: formData }, 60_000)
+  const doFetch = () => {
+    const headers: Record<string, string> = {}
+    const bearer = authStore.bearerHeader()
+    if (bearer) headers['Authorization'] = bearer
+    return fetchWithTimeout(`${BASE}${path}`, { method: 'POST', headers, body: formData }, 60_000)
+  }
+
+  let res = await doFetch()
+
+  if (res.status === 401) {
+    const refreshed = await tryRefresh()
+    if (refreshed) res = await doFetch()
+  }
+
   if (!res.ok) {
     let msg = res.statusText
     try { const b = await res.json(); msg = Array.isArray(b.message) ? b.message[0] : b.message ?? msg } catch { /* ignore */ }
     throw new ApiError(res.status, msg)
   }
-  return res.json() as Promise<T>
+
+  const json = await res.json()
+  if (json !== null && typeof json === 'object' && 'data' in json && !('total' in json)) {
+    return json.data as T
+  }
+  return json as T
 }

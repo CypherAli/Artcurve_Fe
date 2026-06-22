@@ -8,6 +8,7 @@ import { useUpdateProfile }            from '@/hooks/useProfile'
 import { userService, type LinkedWallet } from '@/services/user.service'
 import { gsap }                        from '@/lib/gsap'
 import { useLanguage }                 from '@/context/LanguageContext'
+import { toast }                       from '@/components/common/Toast'
 
 const GOLD  = '#C9A96E'
 const DARK  = 'rgba(255,255,255,0.03)'
@@ -64,7 +65,7 @@ function LinkedWalletsSection() {
 
   const reload = useCallback(() => {
     if (!isLoggedIn) return
-    userService.listWallets().then(setWallets).catch(() => {})
+    userService.listWallets().then(setWallets).catch(() => toast.error('Settings', 'Failed to load linked wallets'))
   }, [isLoggedIn])
 
   useEffect(() => { reload() }, [reload])
@@ -81,8 +82,10 @@ function LinkedWalletsSection() {
       const signature   = await signMessageAsync({ message })
       const list        = await userService.linkWallet({ wallet_address: address, signature, message })
       setWallets(list)
+      toast.success('Wallet Linked', `${address.slice(0, 8)}…${address.slice(-4)} linked successfully`)
     } catch (e) {
       setError(e instanceof Error ? e.message : 'Link wallet failed')
+      toast.error('Link Failed', e instanceof Error ? e.message : 'Could not link wallet')
     } finally {
       setBusy(false)
     }
@@ -93,8 +96,10 @@ function LinkedWalletsSection() {
     setBusy(true)
     try {
       setWallets(await userService.unlinkWallet(wallet_address))
+      toast.success('Wallet Unlinked', 'Wallet removed from your account')
     } catch (e) {
       setError(e instanceof Error ? e.message : 'Unlink failed')
+      toast.error('Unlink Failed', e instanceof Error ? e.message : 'Could not unlink wallet')
     } finally {
       setBusy(false)
     }
@@ -157,9 +162,23 @@ export function SettingsPage() {
   const [username, setUsername] = useState(user?.username ?? '')
   const [bio,      setBio]      = useState('')
   const [saved,    setSaved]    = useState(false)
-  const [notifTrade, setNotifTrade]   = useState(true)
-  const [notifFollow, setNotifFollow] = useState(true)
-  const [notifPrice,  setNotifPrice]  = useState(false)
+  const [notifTrade, setNotifTrade]   = useState(() => {
+    try { return JSON.parse(localStorage.getItem('ac_notif_trade') ?? 'true') } catch { return true }
+  })
+  const [notifFollow, setNotifFollow] = useState(() => {
+    try { return JSON.parse(localStorage.getItem('ac_notif_follow') ?? 'true') } catch { return true }
+  })
+  const [notifPrice,  setNotifPrice]  = useState(() => {
+    try { return JSON.parse(localStorage.getItem('ac_notif_price') ?? 'false') } catch { return false }
+  })
+
+  useEffect(() => {
+    try {
+      localStorage.setItem('ac_notif_trade', JSON.stringify(notifTrade))
+      localStorage.setItem('ac_notif_follow', JSON.stringify(notifFollow))
+      localStorage.setItem('ac_notif_price', JSON.stringify(notifPrice))
+    } catch { /* private mode */ }
+  }, [notifTrade, notifFollow, notifPrice])
 
   useEffect(() => {
     const ctx = gsap.context(() => {
@@ -172,8 +191,9 @@ export function SettingsPage() {
   }, [])
 
   function handleSave() {
-    mutate({ username: username || undefined })
+    mutate({ username: username || undefined, bio: bio || undefined })
     setSaved(true)
+    toast.success('Profile Updated', 'Your changes have been saved')
     setTimeout(() => setSaved(false), 2500)
   }
 

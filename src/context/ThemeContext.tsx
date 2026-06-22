@@ -12,7 +12,7 @@
 // ─────────────────────────────────────────────────────────────────
 
 import {
-  createContext, useContext, useCallback, useEffect, useState,
+  createContext, useContext, useCallback, useEffect, useState, useMemo,
   type ReactNode,
 } from 'react'
 import { flushSync } from 'react-dom'
@@ -71,8 +71,10 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
     setTheme(theme === 'light' ? 'dark' : 'light')
   }, [theme, setTheme])
 
+  const value = useMemo(() => ({ theme, toggleTheme, setTheme }), [theme, toggleTheme, setTheme])
+
   return (
-    <ThemeContext.Provider value={{ theme, toggleTheme, setTheme }}>
+    <ThemeContext.Provider value={value}>
       {children}
     </ThemeContext.Provider>
   )

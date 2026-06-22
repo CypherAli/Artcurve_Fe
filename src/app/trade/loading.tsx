@@ -1,6 +1,6 @@
 export default function TradeLoading() {
   return (
-    <div className="flex h-screen overflow-hidden" style={{ background: '#070707', marginTop: 68 }}>
+    <div className="flex h-screen overflow-hidden" style={{ background: 'var(--ac-paper, #070707)', marginTop: 68 }}>
       <div className="w-56 flex flex-col gap-1 p-2" style={{ borderRight: '1px solid rgba(255,255,255,0.05)' }}>
         {Array.from({ length: 16 }).map((_, i) => (
           <div key={i} className="h-10 rounded animate-pulse" style={{ background: 'rgba(255,255,255,0.03)' }} />

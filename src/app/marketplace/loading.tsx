@@ -1,6 +1,6 @@
 export default function MarketplaceLoading() {
   return (
-    <div className="flex flex-col h-screen overflow-hidden" style={{ background: '#070707', marginTop: 68 }}>
+    <div className="flex flex-col h-screen overflow-hidden" style={{ background: 'var(--ac-paper, #070707)', marginTop: 68 }}>
       {/* Header skeleton */}
       <div className="h-10 animate-pulse" style={{ background: 'rgba(255,255,255,0.03)', borderBottom: '1px solid rgba(255,255,255,0.05)' }} />
       {/* Tab bar skeleton */}

@@ -28,7 +28,7 @@ export const ARTWORK_CATEGORIES: ArtworkCategory[] = [
 ]
 
 export type TxType = 'BUY' | 'SELL' | 'MINT' | 'GRADUATE'
-export type UserRole = 'user' | 'artist' | 'admin'
+export type UserRole = 'user' | 'moderator' | 'admin'
 export type OhlcvTimeframe = '1m' | '5m' | '15m' | '1h' | '4h' | '1d'
 
 // ── User Profile ──────────────────────────────────────────────────

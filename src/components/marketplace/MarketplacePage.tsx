@@ -37,6 +37,7 @@ import { useBinanceTicker, fmtUSD, fmtChange, TICKER_COINS } from '@/hooks/useBi
 import type { Artwork, RecentTrade } from '@/types/api'
 import type { StoredArtwork }      from '@/components/artwork/ArtworkDetailPage'
 import { useLanguage }             from '@/context/LanguageContext'
+import { toast }                   from '@/components/common/Toast'
 
 // ── Extended artwork type ──────────────────────────────────────────
 interface MarketArtwork {
@@ -2614,7 +2615,8 @@ function BuyModal({ art, livePrice, onClose }: { art: MarketArtwork; livePrice: 
     setTx('confirming')
     await new Promise(r => setTimeout(r, 2200))
     setTx('success')
-  }, [])
+    toast.success('Collection Successful', `You collected ${art.ticker} for ${buyAmount}`)
+  }, [art.ticker, buyAmount])
 
   return (
     <div ref={overlayRef}

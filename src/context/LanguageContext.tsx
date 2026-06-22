@@ -1,7 +1,7 @@
 'use client'
 
 import {
-  createContext, useContext, useState, useEffect, useCallback,
+  createContext, useContext, useState, useEffect, useCallback, useMemo,
   type ReactNode,
 } from 'react'
 import { translations, DEFAULT_LOCALE, type LocaleCode } from '@/i18n'
@@ -35,7 +35,7 @@ export function LanguageProvider({ children }: { children: ReactNode }) {
   const setLocale = useCallback((code: LocaleCode) => {
     if (!translations[code]) return
     setLocaleState(code)
-    localStorage.setItem(LS_KEY, code)
+    try { localStorage.setItem(LS_KEY, code) } catch { /* private mode */ }
 
     // Sync to BE if logged in
     if (authStore.getJwt()) {
@@ -43,8 +43,10 @@ export function LanguageProvider({ children }: { children: ReactNode }) {
     }
   }, [])
 
+  const value = useMemo(() => ({ locale, t: translations[locale], setLocale }), [locale, setLocale])
+
   return (
-    <LanguageContext.Provider value={{ locale, t: translations[locale], setLocale }}>
+    <LanguageContext.Provider value={value}>
       {children}
     </LanguageContext.Provider>
   )

@@ -1,13 +1,13 @@
 'use client'
-import { useState, useEffect, useMemo } from 'react'
+import { useState, useEffect, useMemo, createContext, useContext } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import {
   IconDiamond, IconCoin, IconTrendingUp, IconAward, IconGift, IconShieldChevron,
   IconMail, IconHash, IconSearch, IconRefresh, IconChevronLeft, IconBell,
   IconMessageCircle, IconChecklist, IconWand, IconTrophy, IconPhoto, IconGavel,
   IconUsers, IconMessage2, IconBuildingBank,
-  IconX, IconCheck, IconChevronDown, IconCalendar,
-  IconFlame, IconTarget, IconClock,
+  IconX, IconCheck, IconChevronDown, IconCalendar, IconUser, IconStar,
+  IconFlame, IconTarget, IconClock, IconSettings, IconPencil,
 } from '@tabler/icons-react'
 import { useLanguage } from '@/context/LanguageContext'
 import { useTheme } from '@/context/ThemeContext'
@@ -28,24 +28,25 @@ const DARK = {
 }
 const LIGHT = {
   bg: '#FDFBF7', panel: '#F5F0E8', panel2: '#EDE7DC',
-  line: '#E4DDD3', lineGold: 'rgba(160,120,60,0.25)',
-  ink: '#1A1A1A', muted: '#7A7570', gold: '#9A7B3A', goldLight: '#B8943E',
+  line: '#E4DDD3', lineGold: 'rgba(160,120,60,0.30)',
+  ink: '#1A1A1A', muted: '#6B655C', gold: '#8A6B2A', goldLight: '#A47E30',
   accent: '#4A90D9', red: '#d45555', green: '#5aad6a',
   banner: '/guild/banner_light.png', crest: '/guild/crest_wolf.png',
   sceneBg: `radial-gradient(80% 50% at 50% 0%, rgba(160,120,60,0.08), transparent 60%), #FDFBF7`,
   bannerFit: '130% auto' as const,
   bannerPos: '39% 45%' as const,
-  bannerBg: '#5C1A1A',
+  bannerBg: '#3D1212',
   showFrost: false,
-  bannerTint: 'none',
+  bannerTint: 'linear-gradient(180deg, rgba(40,15,10,0.35) 0%, rgba(40,15,10,0.55) 100%)',
 }
 type Colors = Omit<typeof DARK, 'bannerFit' | 'bannerPos'> & { bannerFit: string; bannerPos: string; bannerBg: string }
-const C = DARK
+const ThemeCtx = createContext<Colors>(DARK as Colors)
+function useC() { return useContext(ThemeCtx) }
 const SERIF = "'Cormorant Garamond', Georgia, serif"
 const EASE: [number, number, number, number] = [0.16, 1, 0.3, 1]
 const _SCENE = `radial-gradient(55% 50% at 50% -6%, rgba(201,169,110,0.18), transparent 60%),`
   + `radial-gradient(70% 32% at 50% 112%, rgba(201,169,110,0.10), transparent 62%),`
-  + `radial-gradient(120% 120% at 50% 45%, transparent 52%, rgba(0,0,0,0.6)), ${C.bg}`
+  + `radial-gradient(120% 120% at 50% 45%, transparent 52%, rgba(0,0,0,0.6)), ${DARK.bg}`
 
 const EMBLEMS = [
   'lion','eagle-emblem','wolf-head','wolf-howl','fox-head','owl','raven','swan','bull','octopus',
@@ -97,6 +98,9 @@ const EN = {
   hours: 'h', minutes: 'm', joined: 'Joined!', alreadyInGuild: 'Leave your current guild first',
   charDesigner: 'Character Designer', generateChar: 'Generate Character', generating: 'Generating…',
   charPrompt: 'Describe your character', charResult: 'Your Character',
+  guildHall: 'Guild Hall',
+  settings: 'Settings', settingsDesc: 'Guild configuration',
+  guildDesc: 'Description', acceptance: 'Acceptance', saveSetting: 'Save', settingsSaved: 'Saved',
 }
 const STR: Record<string, typeof EN> = {
   en: EN,
@@ -130,6 +134,9 @@ const STR: Record<string, typeof EN> = {
     hours: 'g', minutes: 'p', joined: 'Đã tham gia!', alreadyInGuild: 'Rời guild hiện tại trước',
     charDesigner: 'Thiết kế nhân vật', generateChar: 'Tạo nhân vật', generating: 'Đang tạo…',
     charPrompt: 'Mô tả nhân vật của bạn', charResult: 'Nhân vật của bạn',
+    guildHall: 'Đại sảnh',
+    settings: 'Cài đặt', settingsDesc: 'Cấu hình guild',
+    guildDesc: 'Mô tả', acceptance: 'Chấp nhận', saveSetting: 'Lưu', settingsSaved: 'Đã lưu',
   },
   fr: {
     recommended: 'Recommandés', invite: 'Inviter', copied: 'Lien copié', searchPh: 'Rechercher une guilde…',
@@ -161,6 +168,9 @@ const STR: Record<string, typeof EN> = {
     hours: 'h', minutes: 'm', joined: 'Rejoint !', alreadyInGuild: 'Quittez votre guilde actuelle d\'abord',
     charDesigner: 'Concepteur de personnage', generateChar: 'Générer', generating: 'Génération…',
     charPrompt: 'Décrivez votre personnage', charResult: 'Votre personnage',
+    guildHall: 'Salle de guilde',
+    settings: 'Paramètres', settingsDesc: 'Configuration de guilde',
+    guildDesc: 'Description', acceptance: 'Acceptation', saveSetting: 'Enregistrer', settingsSaved: 'Enregistré',
   },
   ja: {
     recommended: 'おすすめ', invite: '招待', copied: '招待リンクをコピーしました', searchPh: 'ギルド名で検索…',
@@ -192,6 +202,9 @@ const STR: Record<string, typeof EN> = {
     hours: '時間', minutes: '分', joined: '参加しました！', alreadyInGuild: '先に現在のギルドを脱退してください',
     charDesigner: 'キャラクターデザイナー', generateChar: '生成', generating: '生成中…',
     charPrompt: 'キャラクターを説明', charResult: 'あなたのキャラクター',
+    guildHall: 'ギルドホール',
+    settings: '設定', settingsDesc: 'ギルド設定',
+    guildDesc: '説明', acceptance: '承認', saveSetting: '保存', settingsSaved: '保存済み',
   },
   es: {
     recommended: 'Recomendados', invite: 'Invitar', copied: 'Enlace copiado', searchPh: 'Buscar gremio por nombre…',
@@ -223,6 +236,9 @@ const STR: Record<string, typeof EN> = {
     hours: 'h', minutes: 'm', joined: '¡Unido!', alreadyInGuild: 'Sal de tu gremio actual primero',
     charDesigner: 'Diseñador de personaje', generateChar: 'Generar', generating: 'Generando…',
     charPrompt: 'Describe tu personaje', charResult: 'Tu personaje',
+    guildHall: 'Sala del gremio',
+    settings: 'Ajustes', settingsDesc: 'Configuración del gremio',
+    guildDesc: 'Descripción', acceptance: 'Aceptación', saveSetting: 'Guardar', settingsSaved: 'Guardado',
   },
   zh: {
     recommended: '推荐', invite: '邀请', copied: '邀请链接已复制', searchPh: '按名称搜索公会…',
@@ -254,6 +270,9 @@ const STR: Record<string, typeof EN> = {
     hours: '时', minutes: '分', joined: '已加入！', alreadyInGuild: '请先退出当前公会',
     charDesigner: '角色设计师', generateChar: '生成', generating: '生成中…',
     charPrompt: '描述你的角色', charResult: '你的角色',
+    guildHall: '公会大厅',
+    settings: '设置', settingsDesc: '公会配置',
+    guildDesc: '描述', acceptance: '接受', saveSetting: '保存', settingsSaved: '已保存',
   },
   ko: {
     recommended: '추천', invite: '초대', copied: '초대 링크 복사됨', searchPh: '길드 이름으로 검색…',
@@ -285,6 +304,9 @@ const STR: Record<string, typeof EN> = {
     hours: '시간', minutes: '분', joined: '가입했습니다!', alreadyInGuild: '현재 길드를 먼저 탈퇴하세요',
     charDesigner: '캐릭터 디자이너', generateChar: '생성', generating: '생성 중…',
     charPrompt: '캐릭터를 설명하세요', charResult: '당신의 캐릭터',
+    guildHall: '길드 홀',
+    settings: '설정', settingsDesc: '길드 설정',
+    guildDesc: '설명', acceptance: '수락', saveSetting: '저장', settingsSaved: '저장됨',
   },
   de: {
     recommended: 'Empfohlen', invite: 'Einladen', copied: 'Einladungslink kopiert', searchPh: 'Gilde nach Name suchen…',
@@ -316,6 +338,9 @@ const STR: Record<string, typeof EN> = {
     hours: 'Std', minutes: 'Min', joined: 'Beigetreten!', alreadyInGuild: 'Verlasse zuerst deine aktuelle Gilde',
     charDesigner: 'Charakter-Designer', generateChar: 'Generieren', generating: 'Generierung…',
     charPrompt: 'Beschreibe deinen Charakter', charResult: 'Dein Charakter',
+    guildHall: 'Gildenhalle',
+    settings: 'Einstellungen', settingsDesc: 'Gildenkonfiguration',
+    guildDesc: 'Beschreibung', acceptance: 'Annahme', saveSetting: 'Speichern', settingsSaved: 'Gespeichert',
   },
   ar: {
     recommended: 'موصى به', invite: 'دعوة', copied: 'تم نسخ رابط الدعوة', searchPh: 'البحث عن نقابة…',
@@ -347,6 +372,9 @@ const STR: Record<string, typeof EN> = {
     hours: 'س', minutes: 'د', joined: 'تم الانضمام!', alreadyInGuild: 'غادر نقابتك الحالية أولاً',
     charDesigner: 'مصمم الشخصيات', generateChar: 'إنشاء', generating: 'جاري الإنشاء…',
     charPrompt: 'صف شخصيتك', charResult: 'شخصيتك',
+    guildHall: 'قاعة النقابة',
+    settings: 'الإعدادات', settingsDesc: 'إعدادات النقابة',
+    guildDesc: 'الوصف', acceptance: 'القبول', saveSetting: 'حفظ', settingsSaved: 'تم الحفظ',
   },
   pt: {
     recommended: 'Recomendados', invite: 'Convidar', copied: 'Link copiado', searchPh: 'Buscar guilda por nome…',
@@ -378,6 +406,9 @@ const STR: Record<string, typeof EN> = {
     hours: 'h', minutes: 'm', joined: 'Entrou!', alreadyInGuild: 'Saia da sua guilda atual primeiro',
     charDesigner: 'Designer de personagem', generateChar: 'Gerar', generating: 'Gerando…',
     charPrompt: 'Descreva seu personagem', charResult: 'Seu personagem',
+    guildHall: 'Salão da guilda',
+    settings: 'Configurações', settingsDesc: 'Configuração da guilda',
+    guildDesc: 'Descrição', acceptance: 'Aceitação', saveSetting: 'Salvar', settingsSaved: 'Salvo',
   },
 }
 type S = typeof EN
@@ -396,7 +427,7 @@ interface GuildView extends Omit<ApiGuild, 'acceptance'> {
 
 const MOCK: GuildView[] = [
   {
-    id: 'g1', name: 'BlueChipDAO', description: null, focus: 'Collectors', avatar_color: C.gold,
+    id: 'g1', name: 'BlueChipDAO', description: null, focus: 'Collectors', avatar_color: DARK.gold,
     member_count: 22, level: 8, weeklyVolume: 1240, maxMembers: 30, acceptance: 'auto',
     tags: ['Check-In Everyday', 'Arena Experts'], emblem: 'eagle-emblem',
     leaderMessage: 'We hunt blue chips together. Join the alpha.', weeklyAssistance: 18500,
@@ -409,7 +440,7 @@ const MOCK: GuildView[] = [
     ],
   },
   {
-    id: 'g2', name: 'GenesisCircle', description: null, focus: 'Blue chip', avatar_color: C.goldLight,
+    id: 'g2', name: 'GenesisCircle', description: null, focus: 'Blue chip', avatar_color: DARK.goldLight,
     member_count: 14, level: 11, weeklyVolume: 3580, maxMembers: 27, acceptance: 'selective',
     tags: ['Wannabe the Top Guild', 'Check-In Everyday'], emblem: 'lion',
     leaderMessage: 'Only serious collectors. We aim for #1.', weeklyAssistance: 32000,
@@ -421,7 +452,7 @@ const MOCK: GuildView[] = [
     ],
   },
   {
-    id: 'g3', name: 'NeoPatrons', description: null, focus: 'Newcomers', avatar_color: C.gold,
+    id: 'g3', name: 'NeoPatrons', description: null, focus: 'Newcomers', avatar_color: DARK.gold,
     member_count: 6, level: 3, weeklyVolume: 210, maxMembers: 16, acceptance: 'auto',
     tags: ['Newbie Friendly', 'Free Attendance', 'Casual'], emblem: 'panda',
     leaderMessage: 'Everyone is welcome here! Learn & grow.', weeklyAssistance: 2400,
@@ -432,7 +463,7 @@ const MOCK: GuildView[] = [
     ],
   },
   {
-    id: 'g4', name: 'PixelGuild', description: null, focus: 'Generative', avatar_color: C.gold,
+    id: 'g4', name: 'PixelGuild', description: null, focus: 'Generative', avatar_color: DARK.gold,
     member_count: 18, level: 6, weeklyVolume: 920, maxMembers: 24, acceptance: 'auto',
     tags: ['At Least 3 Days a Week', 'Casual'], emblem: 'butterfly',
     leaderMessage: 'Generative art lovers unite!', weeklyAssistance: 11200,
@@ -444,7 +475,7 @@ const MOCK: GuildView[] = [
     ],
   },
   {
-    id: 'g5', name: 'OldMasters', description: null, focus: 'Classical', avatar_color: C.gold,
+    id: 'g5', name: 'OldMasters', description: null, focus: 'Classical', avatar_color: DARK.gold,
     member_count: 11, level: 5, weeklyVolume: 640, maxMembers: 20, acceptance: 'selective',
     tags: ['Check-In Everyday', 'Lasting Effect 24/7'], emblem: 'griffin-symbol',
     leaderMessage: 'Timeless art, timeless value.', weeklyAssistance: 8900,
@@ -456,7 +487,7 @@ const MOCK: GuildView[] = [
     ],
   },
   {
-    id: 'g6', name: 'PhoenixRise', description: null, focus: 'Experimental', avatar_color: C.gold,
+    id: 'g6', name: 'PhoenixRise', description: null, focus: 'Experimental', avatar_color: DARK.gold,
     member_count: 9, level: 4, weeklyVolume: 480, maxMembers: 18, acceptance: 'auto',
     tags: ['Newbie Friendly', 'Lasting Effect Random'], emblem: 'fox-head',
     leaderMessage: 'From ashes we rise. Experimental art ftw!', weeklyAssistance: 5600,
@@ -467,7 +498,7 @@ const MOCK: GuildView[] = [
     ],
   },
   {
-    id: 'g7', name: 'NightOwls', description: null, focus: 'Collectors', avatar_color: C.gold,
+    id: 'g7', name: 'NightOwls', description: null, focus: 'Collectors', avatar_color: DARK.gold,
     member_count: 15, level: 7, weeklyVolume: 1100, maxMembers: 25, acceptance: 'auto',
     tags: ['Free Attendance', 'Arena Experts'], emblem: 'owl',
     leaderMessage: 'We trade after midnight. Night crawlers welcome.', weeklyAssistance: 14200,
@@ -479,7 +510,7 @@ const MOCK: GuildView[] = [
     ],
   },
   {
-    id: 'g8', name: 'DragonVault', description: null, focus: 'Blue chip', avatar_color: C.gold,
+    id: 'g8', name: 'DragonVault', description: null, focus: 'Blue chip', avatar_color: DARK.gold,
     member_count: 20, level: 9, weeklyVolume: 2100, maxMembers: 28, acceptance: 'selective',
     tags: ['Check-In Everyday', 'Wannabe the Top Guild'], emblem: 'dinosaur-rex',
     leaderMessage: 'Hoard the best. Dragon energy.', weeklyAssistance: 24500,
@@ -573,6 +604,7 @@ async function generateCharacterImage(prompt: string): Promise<string | null> {
 
 // ── Shared components ───────────────────────────────────────────
 function Filigree({ w = '100%' }: { w?: string }) {
+  const C = useC()
   return (
     <div style={{ position: 'relative', height: 1, width: w, margin: '12px auto', background: `linear-gradient(90deg,transparent,${C.lineGold},transparent)` }}>
       <span style={{ position: 'absolute', left: '50%', top: -3, width: 6, height: 6, marginLeft: -3, transform: 'rotate(45deg)', background: C.gold }} />
@@ -581,14 +613,16 @@ function Filigree({ w = '100%' }: { w?: string }) {
 }
 
 function GuildEmblem({ emblem, size = 48 }: { emblem: string; size?: number }) {
+  const C = useC()
+  const isDark = C.bg === DARK.bg
   return (
     <div style={{
       width: size, height: size, borderRadius: '50%', flexShrink: 0, overflow: 'hidden',
       display: 'flex', alignItems: 'center', justifyContent: 'center',
-      border: `1.5px solid ${C.gold}`, background: `radial-gradient(circle, rgba(201,169,110,0.18), ${C.panel2} 72%)`,
+      border: `1.5px solid ${C.gold}`, background: `radial-gradient(circle, ${C.gold}2E, ${C.panel2} 72%)`,
     }}>
       {/* eslint-disable-next-line @next/next/no-img-element */}
-      <img src={`/guild/emblems/${emblem}.svg`} alt="" width={size * 0.6} height={size * 0.6} style={{ objectFit: 'contain', filter: 'brightness(0) invert(0.82) sepia(0.3) saturate(2) hue-rotate(10deg)' }} />
+      <img src={`/guild/emblems/${emblem}.svg`} alt="" width={size * 0.6} height={size * 0.6} style={{ objectFit: 'contain', filter: isDark ? 'brightness(0) invert(0.82) sepia(0.3) saturate(2) hue-rotate(10deg)' : 'brightness(0) sepia(0.5) saturate(3) hue-rotate(10deg)' }} />
     </div>
   )
 }
@@ -606,6 +640,7 @@ function ImgFallback({ src, alt, w, h, fallback }: { src: string; alt: string; w
 }
 
 function TagChip({ label, active, onClick }: { label: string; active?: boolean; onClick?: () => void }) {
+  const C = useC()
   return (
     <motion.button type="button" onClick={onClick} whileTap={{ scale: 0.95 }}
       style={{
@@ -619,7 +654,8 @@ function TagChip({ label, active, onClick }: { label: string; active?: boolean; 
 }
 
 // ── Guild row (Epic Seven style) ────────────────────────────────
-function GuildRow({ g, s, onInfo, onJoin, onLeave, joinedId, cdRemaining }: { g: GuildView; s: S; onInfo: () => void; onJoin: (g: GuildView) => void; onLeave: () => void; joinedId: string | null; cdRemaining: number }) {
+function GuildRow({ g, s, onInfo, onJoin, onEnter, joinedId, cdRemaining }: { g: GuildView; s: S; onInfo: () => void; onJoin: (g: GuildView) => void; onEnter: () => void; joinedId: string | null; cdRemaining: number }) {
+  const C = useC()
   const isJoined = joinedId === g.id
   const cd = cdRemaining
   const inOtherGuild = joinedId !== null && joinedId !== g.id
@@ -637,7 +673,7 @@ function GuildRow({ g, s, onInfo, onJoin, onLeave, joinedId, cdRemaining }: { g:
 
       <div style={{ flex: 1, minWidth: 0 }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 3 }}>
-          <span style={{ fontFamily: SERIF, fontSize: 13, fontWeight: 600, color: C.goldLight, background: 'rgba(201,169,110,0.12)', borderRadius: 6, padding: '1px 8px' }}>
+          <span style={{ fontFamily: SERIF, fontSize: 13, fontWeight: 600, color: C.goldLight, background: `${C.gold}1F`, borderRadius: 6, padding: '1px 8px' }}>
             Lv.{g.level}
           </span>
           <span style={{ fontSize: 14, fontWeight: 600, color: C.ink }}>{g.name}</span>
@@ -652,7 +688,7 @@ function GuildRow({ g, s, onInfo, onJoin, onLeave, joinedId, cdRemaining }: { g:
           <span>{s.members}: <span style={{ color: C.ink }}>{g.member_count}/{g.maxMembers}</span></span>
         </div>
 
-        <div style={{ fontSize: 12, color: '#b8b2a6', marginBottom: 6, fontStyle: 'italic', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+        <div style={{ fontSize: 12, color: C.muted, marginBottom: 6, fontStyle: 'italic', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
           &ldquo;{g.leaderMessage}&rdquo;
         </div>
 
@@ -676,10 +712,10 @@ function GuildRow({ g, s, onInfo, onJoin, onLeave, joinedId, cdRemaining }: { g:
             {cd > 0 ? <><IconClock size={12} style={{ verticalAlign: -1, marginRight: 3 }} />{s.cooldown}</> : s.join}
           </motion.button>
         ) : (
-          <motion.button type="button" onClick={(e) => { e.stopPropagation(); onLeave() }} whileTap={{ scale: 0.96 }}
-            style={{ fontFamily: SERIF, borderRadius: 9, padding: '8px 14px', fontSize: 11, fontWeight: 600, cursor: 'pointer',
-              color: C.red, background: 'transparent', border: `1px solid ${C.red}40`, display: 'flex', alignItems: 'center', gap: 4, justifyContent: 'center' }}>
-            <IconX size={12} />{s.leave}
+          <motion.button type="button" onClick={(e) => { e.stopPropagation(); onEnter() }} whileTap={{ scale: 0.96 }} whileHover={{ scale: 1.03 }}
+            style={{ fontFamily: SERIF, borderRadius: 9, padding: '8px 18px', fontSize: 12, fontWeight: 600, cursor: 'pointer',
+              color: '#221905', background: `linear-gradient(180deg,${C.goldLight},${C.gold})`, border: 'none', textAlign: 'center' }}>
+            {s.guildHall}
           </motion.button>
         )}
         <motion.button type="button" onClick={(e) => { e.stopPropagation(); onInfo() }} whileTap={{ scale: 0.96 }} whileHover={{ scale: 1.03 }}
@@ -692,6 +728,7 @@ function GuildRow({ g, s, onInfo, onJoin, onLeave, joinedId, cdRemaining }: { g:
 
 // ── Tag Search modal ────────────────────────────────────────────
 function TagSearchModal({ s, activeTags, onApply, onClose }: { s: S; activeTags: string[]; onApply: (tags: string[]) => void; onClose: () => void }) {
+  const C = useC()
   const [selected, setSelected] = useState<string[]>(activeTags)
   const toggle = (t: string) => setSelected((p) => p.includes(t) ? p.filter((x) => x !== t) : [...p, t])
 
@@ -741,6 +778,7 @@ function TagSearchModal({ s, activeTags, onApply, onClose }: { s: S; activeTags:
 
 // ── Guild Information modal ─────────────────────────────────────
 function GuildInfoModal({ g, s, onClose }: { g: GuildView; s: S; onClose: () => void }) {
+  const C = useC()
   const [tab, setTab] = useState<'basic' | 'info'>('basic')
 
   return (
@@ -850,6 +888,7 @@ const EMBLEM_PICKS = ['lion', 'eagle-emblem', 'wolf-head', 'owl', 'tiger', 'bear
   'scorpion', 'octopus', 'shark-jaws', 'butterfly', 'panda', 'gorilla', 'elephant', 'dolphin']
 
 function CreateGuildModal({ s, onClose, onCreated }: { s: S; onClose: () => void; onCreated: (mock?: GuildView) => void }) {
+  const C = useC()
   const [name, setName] = useState('')
   const [intro, setIntro] = useState('')
   const [focus, setFocus] = useState(FOCUS_OPTS[0])
@@ -868,7 +907,7 @@ function CreateGuildModal({ s, onClose, onCreated }: { s: S; onClose: () => void
     } catch {
       const mock: GuildView = {
         id: `g-${Date.now()}`, name: name.trim(), description: intro.trim() || null, focus,
-        avatar_color: C.gold, member_count: 1, level: 1, weeklyVolume: 0, maxMembers: 30,
+        avatar_color: DARK.gold, member_count: 1, level: 1, weeklyVolume: 0, maxMembers: 30,
         acceptance, tags: [focus], emblem, leaderMessage: intro.trim() || '',
         weeklyAssistance: 0, auctionWinRate: 0, foundingDate: new Date().toISOString().slice(0, 10),
         introduction: intro.trim() || '', weeklyActive: 1, totalVolume: 0, guildMembers: [], ranking: 999,
@@ -968,7 +1007,7 @@ function CreateGuildModal({ s, onClose, onCreated }: { s: S; onClose: () => void
                   <button key={e} type="button" onClick={() => { setEmblem(e); setShowEmblemPicker(false) }}
                     style={{
                       width: '100%', aspectRatio: '1', borderRadius: 10, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center',
-                      border: emblem === e ? `2px solid ${C.gold}` : `1px solid ${C.line}`, background: emblem === e ? 'rgba(201,169,110,0.15)' : C.panel2,
+                      border: emblem === e ? `2px solid ${C.gold}` : `1px solid ${C.line}`, background: emblem === e ? `${C.gold}26` : C.panel2,
                     }}>
                     {/* eslint-disable-next-line @next/next/no-img-element */}
                     <img src={`/guild/emblems/${e}.svg`} alt="" width={28} height={28} style={{ objectFit: 'contain', filter: 'brightness(0) invert(0.82) sepia(0.3) saturate(2) hue-rotate(10deg)' }} />
@@ -995,7 +1034,8 @@ function CreateGuildModal({ s, onClose, onCreated }: { s: S; onClose: () => void
 }
 
 // ── Finder view ─────────────────────────────────────────────────
-function FinderView({ guilds, s, onEnter: _onEnter, onRefresh, onCreate, joinedId, onJoin, onLeaveGuild, t }: { guilds: GuildView[]; s: S; onEnter: (g: GuildView) => void; onRefresh: () => void; onCreate: () => void; joinedId: string | null; onJoin: (g: GuildView) => void; onLeaveGuild: () => void; t: Colors }) {
+function FinderView({ guilds, s, onEnter, onRefresh, onCreate, joinedId, onJoin, onLeaveGuild, t }: { guilds: GuildView[]; s: S; onEnter: (g: GuildView) => void; onRefresh: () => void; onCreate: () => void; joinedId: string | null; onJoin: (g: GuildView) => void; onLeaveGuild: () => void; t: Colors }) {
+  const C = useC()
   const [cdRemaining, setCdRemaining] = useState(() => cooldownRemaining())
   useEffect(() => {
     const t = setInterval(() => setCdRemaining(cooldownRemaining()), 30000)
@@ -1050,13 +1090,15 @@ function FinderView({ guilds, s, onEnter: _onEnter, onRefresh, onCreate, joinedI
           {t.showFrost && <div style={{ position: 'absolute', inset: 0, background: `linear-gradient(180deg, ${t.bg}00 40%, ${t.bg}B3 100%)`, pointerEvents: 'none' }} />}
 
           <div style={{ position: 'relative', zIndex: 1, width: '100%' }}>
-            <div style={{ fontFamily: SERIF, fontSize: 24, fontWeight: 600, letterSpacing: 2, color: t.goldLight, textShadow: '0 2px 12px rgba(0,0,0,0.3)' }}>Guild Foundation</div>
+            <div style={{ fontFamily: SERIF, fontSize: 24, fontWeight: 600, letterSpacing: 2, color: t.showFrost ? t.goldLight : '#F0E0C0', textShadow: '0 2px 12px rgba(0,0,0,0.4)' }}>Guild Foundation</div>
             <div style={{ width: '70%', height: 1, margin: '10px auto 0', background: `linear-gradient(90deg, transparent, ${t.gold}, transparent)` }} />
 
             {/* Crest + frost mist rising from below */}
             <div style={{ position: 'relative', display: 'flex', justifyContent: 'center', margin: '10px auto 8px' }}>
               <motion.img src={t.crest} alt="Guild crest"
-                animate={{ filter: ['drop-shadow(0 0 16px rgba(201,169,110,0.4))', 'drop-shadow(0 0 28px rgba(201,169,110,0.7))', 'drop-shadow(0 0 16px rgba(201,169,110,0.4))'] }}
+                animate={t.showFrost
+                  ? { filter: ['drop-shadow(0 0 16px rgba(201,169,110,0.4))', 'drop-shadow(0 0 28px rgba(201,169,110,0.7))', 'drop-shadow(0 0 16px rgba(201,169,110,0.4))'] }
+                  : { filter: ['drop-shadow(0 0 12px rgba(255,200,100,0.3))', 'drop-shadow(0 0 22px rgba(255,200,100,0.55))', 'drop-shadow(0 0 12px rgba(255,200,100,0.3))'] }}
                 transition={{ duration: 2.5, repeat: Infinity, ease: 'easeInOut' }}
                 style={{ height: 300, objectFit: 'contain', position: 'relative', zIndex: 2 }}
               />
@@ -1120,9 +1162,20 @@ function FinderView({ guilds, s, onEnter: _onEnter, onRefresh, onCreate, joinedI
                   }}
                 />
               </div>}
+              {/* Light-mode ember sparks */}
+              {!t.showFrost && <div style={{ position: 'absolute', bottom: -20, left: '5%', right: '5%', height: 160, pointerEvents: 'none', zIndex: 1 }}>
+                {[...Array(6)].map((_, i) => (
+                  <motion.div key={`em${i}`}
+                    animate={{ y: [20, -100 - i * 15], x: [0, (i % 2 === 0 ? 10 : -10)], opacity: [0, 0.8, 0.5, 0] }}
+                    transition={{ duration: 3 + i * 0.5, repeat: Infinity, ease: 'easeOut', delay: i * 0.6 }}
+                    style={{ position: 'absolute', bottom: 0, left: `${10 + i * 15}%`, width: 3, height: 3, borderRadius: '50%',
+                      background: '#FFCC66', boxShadow: '0 0 6px 2px rgba(255,170,50,0.5)' }}
+                  />
+                ))}
+              </div>}
             </div>
 
-            <p style={{ fontSize: 13, color: t.muted, lineHeight: 1.7, margin: '0 0 14px', padding: '0 10px' }}>{s.foundDesc}</p>
+            <p style={{ fontSize: 13, color: t.showFrost ? t.muted : 'rgba(255,255,255,0.75)', lineHeight: 1.7, margin: '0 0 14px', padding: '0 10px' }}>{s.foundDesc}</p>
 
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 10, marginBottom: 14 }}>
               {s.rewards.map((label, i) => {
@@ -1132,25 +1185,26 @@ function FinderView({ guilds, s, onEnter: _onEnter, onRefresh, onCreate, joinedI
                     <div style={{
                       width: 48, height: 48, borderRadius: 12,
                       border: `1px solid ${t.lineGold}`,
-                      background: `radial-gradient(circle, rgba(201,169,110,0.12), ${t.panel2} 70%)`,
+                      background: t.showFrost ? `radial-gradient(circle, ${t.gold}1F, ${t.panel2} 70%)` : 'rgba(0,0,0,0.25)',
+                      backdropFilter: t.showFrost ? 'none' : 'blur(4px)',
                       display: 'flex', alignItems: 'center', justifyContent: 'center',
                     }}>
-                      <Icon size={22} color={t.gold} />
+                      <Icon size={22} color={t.showFrost ? t.gold : t.goldLight} />
                     </div>
-                    <span style={{ fontSize: 9, color: t.muted, lineHeight: 1.2, textAlign: 'center', textTransform: 'uppercase' as const, maxWidth: 70 }}>{label}</span>
+                    <span style={{ fontSize: 9, color: t.showFrost ? t.muted : 'rgba(255,255,255,0.7)', lineHeight: 1.2, textAlign: 'center', textTransform: 'uppercase' as const, maxWidth: 70 }}>{label}</span>
                   </div>
                 )
               })}
             </div>
 
-            <div style={{ display: 'flex', alignItems: 'center', border: `1px solid ${t.lineGold}`, borderRadius: 11, overflow: 'hidden', background: `${t.panel2}99`, maxWidth: 280, margin: '0 auto' }}>
+            <div style={{ display: 'flex', alignItems: 'center', border: `1px solid ${t.lineGold}`, borderRadius: 11, overflow: 'hidden', background: t.showFrost ? `${t.panel2}99` : 'rgba(0,0,0,0.3)', backdropFilter: t.showFrost ? 'none' : 'blur(4px)', maxWidth: 280, margin: '0 auto' }}>
               <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8, padding: 12 }}>
-                <IconCoin size={16} color={t.gold} /><span style={{ fontSize: 14, color: t.ink }}>{GUILD_FOUNDATION_FEE_ETH} ETH</span>
+                <IconCoin size={16} color={t.gold} /><span style={{ fontSize: 14, color: t.showFrost ? t.ink : '#F0EBE1' }}>{GUILD_FOUNDATION_FEE_ETH} ETH</span>
               </div>
               <motion.button type="button" onClick={onCreate} whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.97 }}
                 style={{ fontFamily: SERIF, background: `linear-gradient(180deg,${t.goldLight},${t.gold})`, color: '#221905', fontSize: 14, fontWeight: 600, padding: '12px 20px', cursor: 'pointer', border: 'none' }}>{s.found}</motion.button>
             </div>
-            <div style={{ fontSize: 10.5, color: t.muted, marginTop: 9 }}>{s.feeNote}</div>
+            <div style={{ fontSize: 10.5, color: t.showFrost ? t.muted : 'rgba(255,255,255,0.55)', marginTop: 9 }}>{s.feeNote}</div>
           </div>
         </div></div>
 
@@ -1207,7 +1261,7 @@ function FinderView({ guilds, s, onEnter: _onEnter, onRefresh, onCreate, joinedI
               style={{ display: 'flex', flexDirection: 'column', gap: 8, paddingBottom: 20 }}>
               {filtered.length === 0
                 ? <div style={{ textAlign: 'center', color: C.muted, fontSize: 13, padding: '30px 0' }}>{s.empty}</div>
-                : filtered.map((g) => <GuildRow key={g.id} g={g} s={s} onInfo={() => setInfoGuild(g)} onJoin={onJoin} onLeave={() => setLeaveConfirm(true)} joinedId={joinedId} cdRemaining={cdRemaining} />)}
+                : filtered.map((g) => <GuildRow key={g.id} g={g} s={s} onInfo={() => setInfoGuild(g)} onJoin={onJoin} onEnter={() => onEnter(g)} joinedId={joinedId} cdRemaining={cdRemaining} />)}
             </motion.div>
           </div>
         </div>
@@ -1240,6 +1294,7 @@ function FinderView({ guilds, s, onEnter: _onEnter, onRefresh, onCreate, joinedI
 
 // ── Hall ─────────────────────────────────────────────────────────
 function FeatureNode({ icon, title, sub, featured }: { icon: React.ReactNode; title: string; sub: string; featured?: boolean }) {
+  const C = useC()
   const d = featured ? 120 : 98
   return (
     <motion.div whileHover={{ y: -6 }} transition={{ type: 'spring', stiffness: 200, damping: 18 }} style={{ textAlign: 'center', cursor: 'pointer', position: 'relative', zIndex: 2 }}>
@@ -1258,6 +1313,7 @@ function FeatureNode({ icon, title, sub, featured }: { icon: React.ReactNode; ti
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 function CharacterDesigner({ s }: { s: S }) {
+  const C = useC()
   const [prompt, setPrompt] = useState('')
   const [result, setResult] = useState<string | null>(null)
   const [busy, setBusy] = useState(false)
@@ -1297,80 +1353,470 @@ function CharacterDesigner({ s }: { s: S }) {
 }
 
 function HallView({ guild, s, onLeave, onLeaveGuild }: { guild: GuildView; s: S; onLeave: () => void; onLeaveGuild: () => void }) {
+  const C = useC()
   const [showLeaveConfirm, setShowLeaveConfirm] = useState(false)
+  const [activeSection, setActiveSection] = useState('vault')
+  const [settingsName, setSettingsName] = useState(guild.name)
+  const [settingsDesc, setSettingsDesc] = useState('A collective of traders focused on digital art and NFT opportunities.')
+  const [settingsAcceptance, setSettingsAcceptance] = useState<'auto' | 'manual'>('auto')
+  const [settingsEmblem, setSettingsEmblem] = useState(guild.emblem)
+  const [settingsSaved, setSettingsSaved] = useState(false)
+  const MONO = "'JetBrains Mono', 'Fira Code', 'SF Mono', monospace"
+
+  const isGuildMaster = true
+
+  const MOCK_MEMBERS = [
+    { name: 'marcelowu', role: 'Guild Master', assistance: 4217, lastLogin: '2h ago' },
+    { name: 'lena.kvn', role: 'Officer', assistance: 3084, lastLogin: '5h ago' },
+    { name: 'ryo_tanaka', role: 'Member', assistance: 2761, lastLogin: '1d ago' },
+    { name: 'ada.eth', role: 'Member', assistance: 1903, lastLogin: '3d ago' },
+    { name: 'felix_art', role: 'Member', assistance: 1247, lastLogin: '6h ago' },
+  ]
+  const MOCK_CHAT = [
+    { user: 'marcelowu', msg: 'funded up, lets trade', time: '14:32' },
+    { user: 'lena.kvn', msg: 'found a gem, check #curated', time: '14:28' },
+    { user: 'ryo_tanaka', msg: 'solid volume today', time: '13:51' },
+    { user: 'ada.eth', msg: 'new piece listed in gallery', time: '12:07' },
+    { user: 'felix_art', msg: 'any thoughts on the new drop?', time: '11:44' },
+  ]
+
+  const totalVol = (guild.weeklyAssistance * 2.4).toFixed(0)
+  const weeklyVol = (guild.weeklyAssistance * 0.067).toFixed(0)
+  const winRate = Math.min(93, 48 + guild.level * 2.3)
+  const R = 6
+
+  const sideMenuItems = [
+    { key: 'vault', icon: <IconBuildingBank size={15} />, label: s.nVault },
+    { key: 'league', icon: <IconTrophy size={15} />, label: s.nLeague },
+    { key: 'gallery', icon: <IconPhoto size={15} />, label: s.nGallery },
+    { key: 'auction', icon: <IconGavel size={15} />, label: s.auction },
+    { key: 'members', icon: <IconUsers size={15} />, label: s.membersBtn },
+    { key: 'chat', icon: <IconMessage2 size={15} />, label: s.chat },
+    { key: 'activities', icon: <IconChecklist size={15} />, label: s.actAct },
+    { key: 'dividends', icon: <IconGift size={15} />, label: s.actDiv },
+    ...(isGuildMaster ? [{ key: 'settings', icon: <IconSettings size={15} />, label: s.settings }] : []),
+  ]
+
+  const TH: React.CSSProperties = { fontSize: 10, fontWeight: 500, color: C.muted, textTransform: 'uppercase', letterSpacing: '0.06em' }
+  const NUM: React.CSSProperties = { fontFamily: MONO, fontVariantNumeric: 'tabular-nums' }
+  const INPUT: React.CSSProperties = { width: '100%', padding: '8px 10px', border: `1px solid ${C.line}`, borderRadius: R, background: C.bg, color: C.ink, fontSize: 13, outline: 'none' }
+
+  const handleSaveSettings = () => {
+    setSettingsSaved(true)
+    setTimeout(() => setSettingsSaved(false), 2000)
+  }
+
   return (
-    <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.4, ease: EASE }}
-      style={{ border: `1px solid ${C.lineGold}`, borderRadius: 16, overflow: 'hidden', maxWidth: 1180, margin: '22px auto', background: C.bg }}>
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '12px 18px', borderBottom: `1px solid ${C.line}`, background: C.panel2 }}>
-        <button type="button" onClick={onLeave} style={{ display: 'flex', alignItems: 'center', gap: 6, fontFamily: SERIF, fontSize: 18, fontWeight: 600, color: C.ink, background: 'none', border: 'none', cursor: 'pointer' }}>
-          <IconChevronLeft size={18} color={C.gold} />{s.back}
+    <div style={{ border: `1px solid ${C.line}`, borderRadius: R + 2, overflow: 'hidden', maxWidth: 1200, margin: '16px auto', background: C.bg }}>
+
+      {/* Top bar */}
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '7px 16px', borderBottom: `1px solid ${C.line}`, background: C.panel2 }}>
+        <button type="button" onClick={onLeave}
+          style={{ display: 'flex', alignItems: 'center', gap: 5, fontSize: 13, fontWeight: 500, color: C.ink, background: 'none', border: 'none', cursor: 'pointer' }}>
+          <IconChevronLeft size={15} color={C.gold} />{s.back}
         </button>
-        <div style={{ display: 'flex', gap: 18, fontSize: 12, color: C.ink }}>
-          <span style={{ display: 'flex', alignItems: 'center', gap: 5 }}><IconCoin size={15} color={C.gold} />152,884,354</span>
-          <span style={{ display: 'flex', alignItems: 'center', gap: 5 }}><IconDiamond size={15} color="#9ec5e3" />1,047</span>
-          <span style={{ display: 'flex', alignItems: 'center', gap: 5 }}><IconShieldChevron size={15} color={C.green} />6,070</span>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+          <GuildEmblem emblem={guild.emblem} size={20} />
+          <span style={{ fontSize: 13, fontWeight: 600, color: C.ink }}>{guild.name}</span>
+          <span style={{ ...NUM, fontSize: 11, color: C.gold }}>Lv.{guild.level}</span>
+          <span style={{ ...NUM, fontSize: 11, color: C.muted }}>#{guild.ranking}</span>
         </div>
-        <div style={{ display: 'flex', gap: 12, color: C.gold }}><IconBell size={18} /><IconMail size={18} /><IconMessageCircle size={18} /></div>
+        <button type="button" onClick={() => setShowLeaveConfirm(true)}
+          style={{ padding: '4px 12px', fontSize: 11, fontWeight: 500, color: C.red, background: 'none', border: `1px solid ${C.red}30`, borderRadius: R, cursor: 'pointer' }}>
+          {s.leave}
+        </button>
       </div>
 
-      <div style={{ display: 'flex', minHeight: 420 }}>
-        <div style={{ width: 128, borderRight: `1px solid ${C.line}`, padding: '18px 8px', display: 'flex', flexDirection: 'column', gap: 20, background: C.panel2 }}>
-          <div style={{ textAlign: 'center' }}>
-            <div style={{ margin: '0 auto 6px' }}><GuildEmblem emblem={guild.emblem} size={52} /></div>
-            <div style={{ fontFamily: SERIF, fontSize: 14, fontWeight: 600, color: C.goldLight }}>Lv.{guild.level} {guild.name}</div>
-            <div style={{ fontSize: 10, color: C.muted }}>{s.checkin} {guild.member_count}/{guild.maxMembers}</div>
+      <div style={{ display: 'flex', height: 'calc(100vh - 160px)', minHeight: 480 }}>
+        {/* Sidebar */}
+        <div style={{ width: 180, borderRight: `1px solid ${C.line}`, display: 'flex', flexDirection: 'column', background: C.panel2, flexShrink: 0 }}>
+          {/* Guild identity + stats */}
+          <div style={{ padding: '14px 14px 12px', borderBottom: `1px solid ${C.line}` }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 12 }}>
+              <GuildEmblem emblem={guild.emblem} size={34} />
+              <div>
+                <div style={{ fontSize: 13, fontWeight: 700, color: C.ink, lineHeight: 1.2 }}>{guild.name}</div>
+                <div style={{ fontSize: 10, color: C.muted, marginTop: 2 }}>Lv.{guild.level} - {guild.member_count}/{guild.maxMembers} {s.membersBtn.toLowerCase()}</div>
+              </div>
+            </div>
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8, padding: '8px 0 0', borderTop: `1px solid ${C.line}` }}>
+              <div>
+                <div style={{ ...NUM, fontSize: 14, fontWeight: 700, color: C.gold }}>{(Number(totalVol) / 1000).toFixed(1)}K</div>
+                <div style={{ fontSize: 9, color: C.muted, marginTop: 1 }}>{s.totalVol}</div>
+              </div>
+              <div>
+                <div style={{ ...NUM, fontSize: 14, fontWeight: 700, color: C.ink }}>#{guild.ranking}</div>
+                <div style={{ fontSize: 9, color: C.muted, marginTop: 1 }}>{s.rank}</div>
+              </div>
+            </div>
           </div>
-          <Filigree w="70%" />
-          <div style={{ textAlign: 'center', color: C.muted, cursor: 'pointer' }}><IconChecklist size={24} color={C.gold} /><div style={{ fontSize: 10, marginTop: 3 }}>{s.actAct}</div></div>
-          <div style={{ textAlign: 'center', color: C.muted, cursor: 'pointer' }}><IconWand size={24} color={C.gold} /><div style={{ fontSize: 10, marginTop: 3 }}>{s.actDecor}</div></div>
-          <div style={{ textAlign: 'center', color: C.muted, cursor: 'pointer' }}><IconGift size={24} color={C.gold} /><div style={{ fontSize: 10, marginTop: 3 }}>{s.actDiv}</div></div>
+
+          <nav style={{ flex: 1, padding: '6px 0', overflow: 'auto' }}>
+            {sideMenuItems.map((item, idx) => {
+              const isActive = activeSection === item.key
+              const isSettingsItem = item.key === 'settings'
+              return (
+                <div key={item.key}>
+                  {isSettingsItem && <div style={{ height: 1, background: C.line, margin: '6px 12px' }} />}
+                  <button type="button" onClick={() => setActiveSection(item.key)}
+                    style={{
+                      display: 'flex', alignItems: 'center', gap: 8, width: '100%', padding: '8px 14px', fontSize: 12,
+                      fontWeight: isActive ? 600 : 400, color: isActive ? C.gold : C.muted,
+                      background: isActive ? `${C.gold}10` : 'transparent',
+                      border: 'none', borderLeft: `2px solid ${isActive ? C.gold : 'transparent'}`,
+                      cursor: 'pointer', textAlign: 'left', transition: 'color 0.15s, background 0.15s',
+                    }}>
+                    {item.icon}
+                    {item.label}
+                  </button>
+                </div>
+              )
+            })}
+          </nav>
         </div>
 
-        <div style={{ flex: 1, position: 'relative', display: 'flex', alignItems: 'center', justifyContent: 'space-around', padding: '28px 28px 56px', overflow: 'hidden' }}>
-          <div style={{ position: 'absolute', inset: 0, backgroundImage: 'url(/guild/background_guild.jpg)', backgroundSize: 'cover', backgroundPosition: 'center', opacity: 0.35 }} />
-          <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(180deg, rgba(15,14,12,0.3) 0%, rgba(15,14,12,0.7) 100%)' }} />
-          <div style={{ position: 'absolute', inset: 14, border: `1px solid ${C.lineGold}`, borderRadius: 8, pointerEvents: 'none' }} />
-          <div style={{ position: 'absolute', left: 60, right: 60, bottom: 44, height: 1, background: `linear-gradient(90deg,transparent,${C.lineGold},transparent)` }} />
-          <div style={{ position: 'absolute', top: 22, right: 22, background: C.panel, border: `1px solid ${C.lineGold}`, borderRadius: 10, padding: '8px 12px', maxWidth: 210, zIndex: 3 }}>
-            <div style={{ fontFamily: SERIF, fontSize: 12, fontWeight: 600, color: C.gold }}>Mina</div>
-            <div style={{ fontSize: 11, color: C.ink }}>{s.chatMsg}</div>
+        {/* Main content */}
+        <div style={{ flex: 1, overflow: 'auto', padding: '16px 20px' }}>
+          {/* Section title */}
+          <div style={{ marginBottom: 16, paddingBottom: 10, borderBottom: `1px solid ${C.line}` }}>
+            <div style={{ fontSize: 16, fontWeight: 600, color: C.ink, letterSpacing: '-0.01em' }}>
+              {sideMenuItems.find(i => i.key === activeSection)?.label}
+            </div>
+            {activeSection === 'vault' && <div style={{ fontSize: 12, color: C.muted, marginTop: 2 }}>{s.nVaultSub}</div>}
+            {activeSection === 'league' && <div style={{ fontSize: 12, color: C.muted, marginTop: 2 }}>{s.nLeagueSub}</div>}
+            {activeSection === 'gallery' && <div style={{ fontSize: 12, color: C.muted, marginTop: 2 }}>{s.nGallerySub}</div>}
+            {activeSection === 'settings' && <div style={{ fontSize: 12, color: C.muted, marginTop: 2 }}>{s.settingsDesc}</div>}
           </div>
-          <FeatureNode icon={<IconBuildingBank size={40} color={C.gold} />} title={s.nVault} sub={s.nVaultSub} />
-          <FeatureNode icon={<IconTrophy size={54} color={C.goldLight} />} title={s.nLeague} sub={s.nLeagueSub} featured />
-          <FeatureNode icon={<IconPhoto size={40} color={C.gold} />} title={s.nGallery} sub={s.nGallerySub} />
-        </div>
-      </div>
 
-      <div style={{ display: 'flex', justifyContent: 'center', gap: 12, padding: 12, borderTop: `1px solid ${C.line}`, background: C.panel2 }}>
-        {[[<IconGavel key="g" size={15} color={C.gold} />, s.auction], [<IconUsers key="u" size={15} color={C.gold} />, s.membersBtn], [<IconMessage2 key="m" size={15} color={C.gold} />, s.chat]].map(([ic, label], i) => (
-          <motion.button type="button" key={i} whileHover={{ y: -2 }} style={{ display: 'flex', alignItems: 'center', gap: 6, border: `1px solid ${C.lineGold}`, borderRadius: 10, padding: '8px 18px', fontSize: 12, color: C.ink, cursor: 'pointer', background: 'transparent' }}>{ic}{label as string}</motion.button>
-        ))}
-        <motion.button type="button" onClick={() => setShowLeaveConfirm(true)} whileHover={{ y: -2 }}
-          style={{ display: 'flex', alignItems: 'center', gap: 6, border: `1px solid ${C.red}`, borderRadius: 10, padding: '8px 18px', fontSize: 12, color: C.red, cursor: 'pointer', background: 'transparent' }}>
-          <IconX size={15} />{s.leave}
-        </motion.button>
+          {/* ─── Vault ─── */}
+          {activeSection === 'vault' && <>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 10, marginBottom: 20 }}>
+              {[
+                { label: s.totalVol, value: `${Number(totalVol).toLocaleString()}`, unit: 'ETH', accent: C.gold },
+                { label: s.weeklyVol, value: `${Number(weeklyVol).toLocaleString()}`, unit: 'ETH', accent: C.gold },
+                { label: s.auctionWin, value: `${winRate.toFixed(1)}`, unit: '%', accent: C.green },
+                { label: s.weeklyActive, value: `${Math.max(guild.member_count - 2, 1)}`, unit: `/${guild.member_count}`, accent: C.gold },
+              ].map((card, i) => (
+                <div key={i} style={{ background: C.panel, borderRadius: R, padding: '12px 14px', borderLeft: `3px solid ${card.accent}30` }}>
+                  <div style={{ fontSize: 10, color: C.muted, marginBottom: 6, fontWeight: 500 }}>{card.label}</div>
+                  <div style={{ display: 'flex', alignItems: 'baseline', gap: 3 }}>
+                    <span style={{ ...NUM, fontSize: 18, fontWeight: 700, color: C.ink }}>{card.value}</span>
+                    <span style={{ ...NUM, fontSize: 10, color: C.muted }}>{card.unit}</span>
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            <div style={{ fontSize: 12, fontWeight: 600, color: C.ink, marginBottom: 8 }}>{s.membersBtn} <span style={{ fontWeight: 400, color: C.muted }}>({MOCK_MEMBERS.length})</span></div>
+            <div style={{ borderRadius: R, overflow: 'hidden', border: `1px solid ${C.line}`, marginBottom: 20 }}>
+              <div style={{ display: 'grid', gridTemplateColumns: '2.5fr 1fr 1fr 1fr', padding: '7px 14px', ...TH, background: C.panel2 }}>
+                <span>{s.membersBtn}</span><span>{s.rank}</span><span>{s.assistance}</span><span>{s.lastLogin}</span>
+              </div>
+              {MOCK_MEMBERS.map((m, i) => (
+                <div key={i} style={{ display: 'grid', gridTemplateColumns: '2.5fr 1fr 1fr 1fr', padding: '9px 14px', fontSize: 12, color: C.ink, borderTop: `1px solid ${C.line}`, alignItems: 'center' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                    <div style={{ width: 24, height: 24, borderRadius: R, background: m.role === 'Guild Master' ? `${C.gold}20` : C.panel, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, fontSize: 10, fontWeight: 700, color: m.role === 'Guild Master' ? C.gold : C.muted }}>
+                      {m.name[0].toUpperCase()}
+                    </div>
+                    <div>
+                      <span style={{ fontWeight: 500 }}>{m.name}</span>
+                    </div>
+                  </div>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 4, fontSize: 11 }}>
+                    {m.role === 'Guild Master' && <IconShieldChevron size={12} color={C.gold} />}
+                    {m.role === 'Officer' && <IconStar size={12} color={C.gold} />}
+                    <span style={{ color: m.role === 'Guild Master' ? C.gold : C.muted, fontWeight: m.role === 'Guild Master' ? 600 : 400 }}>{m.role}</span>
+                  </div>
+                  <span style={{ ...NUM, fontWeight: 500 }}>{m.assistance.toLocaleString()}</span>
+                  <span style={{ ...NUM, color: C.muted, fontSize: 11 }}>{m.lastLogin}</span>
+                </div>
+              ))}
+            </div>
+
+          </>}
+
+          {/* ─── League ─── */}
+          {activeSection === 'league' && (
+            <div style={{ borderRadius: R, overflow: 'hidden', border: `1px solid ${C.line}` }}>
+              <div style={{ display: 'grid', gridTemplateColumns: '40px 2fr 1fr 1fr', padding: '7px 14px', ...TH, background: C.panel2 }}>
+                <span>#</span><span>Guild</span><span>{s.weeklyVol}</span><span>{s.rank}</span>
+              </div>
+              {[
+                { rank: 1, name: 'GenesisCircle', vol: '48,200', mastery: 1 },
+                { rank: 2, name: guild.name, vol: Number(weeklyVol).toLocaleString(), mastery: guild.ranking },
+                { rank: 3, name: 'PixelGuild', vol: '8,420', mastery: 38 },
+                { rank: 4, name: 'SovereignDAO', vol: '6,108', mastery: 47 },
+                { rank: 5, name: 'NightOwlsNFT', vol: '4,903', mastery: 61 },
+              ].map((row, i) => (
+                <div key={i} style={{
+                  display: 'grid', gridTemplateColumns: '40px 2fr 1fr 1fr', padding: '9px 14px', fontSize: 12, color: C.ink,
+                  borderTop: `1px solid ${C.line}`, alignItems: 'center',
+                  background: row.name === guild.name ? `${C.gold}08` : 'transparent',
+                }}>
+                  <span style={{ ...NUM, fontWeight: 700, color: row.rank <= 3 ? C.gold : C.muted }}>{row.rank}</span>
+                  <span style={{ fontWeight: row.name === guild.name ? 600 : 400, color: row.name === guild.name ? C.gold : C.ink }}>{row.name}</span>
+                  <span style={{ ...NUM }}>{row.vol} <span style={{ fontSize: 9, color: C.muted }}>ETH</span></span>
+                  <span style={{ ...NUM, color: C.muted, fontSize: 11 }}>#{row.mastery}</span>
+                </div>
+              ))}
+            </div>
+          )}
+
+          {/* ─── Gallery ─── */}
+          {activeSection === 'gallery' && (
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 12 }}>
+              {[
+                { title: 'Starry Night Remix', floor: '0.47', artist: 'marcelowu', img: 'https://images.unsplash.com/photo-1541961017774-22349e4a1262?w=400&h=400&fit=crop' },
+                { title: 'Digital Bloom #42', floor: '0.82', artist: 'lena.kvn', img: 'https://images.unsplash.com/photo-1549490349-8643362247b5?w=400&h=400&fit=crop' },
+                { title: 'Cyber Samurai', floor: '1.14', artist: 'ryo_tanaka', img: 'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=400&h=400&fit=crop' },
+                { title: 'Abstract Waves', floor: '0.63', artist: 'ada.eth', img: 'https://images.unsplash.com/photo-1634017839464-5c339ebe3579?w=400&h=400&fit=crop' },
+                { title: 'Neon District', floor: '0.91', artist: 'felix_art', img: 'https://images.unsplash.com/photo-1577083552431-6e5fd01988ec?w=400&h=400&fit=crop' },
+                { title: 'Golden Hour', floor: '0.38', artist: 'marcelowu', img: 'https://images.unsplash.com/photo-1547891654-e66ed7ebb968?w=400&h=400&fit=crop' },
+              ].map((item, i) => (
+                <div key={i} style={{ borderRadius: R, overflow: 'hidden', border: `1px solid ${C.line}`, cursor: 'pointer', transition: 'border-color 0.2s' }}
+                  onMouseEnter={e => (e.currentTarget.style.borderColor = C.gold + '60')}
+                  onMouseLeave={e => (e.currentTarget.style.borderColor = C.line)}>
+                  <div style={{ aspectRatio: '1/1', overflow: 'hidden', background: C.panel }}>
+                    <img src={item.img} alt={item.title}
+                      style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}
+                      loading="lazy" />
+                  </div>
+                  <div style={{ padding: '10px 12px' }}>
+                    <div style={{ fontSize: 13, fontWeight: 600, color: C.ink, marginBottom: 4 }}>{item.title}</div>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                      <span style={{ fontSize: 11, color: C.muted }}>{item.artist}</span>
+                      <span style={{ ...NUM, fontSize: 12, fontWeight: 600, color: C.gold }}>{item.floor} ETH</span>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+
+          {/* ─── Auction ─── */}
+          {activeSection === 'auction' && (
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+              {[
+                { title: 'Crystal Genesis', time: '2h 14m left', bid: '1.24', bids: 12, live: true },
+                { title: 'Neon Waves', time: 'starts in 8h', bid: '2.05', bids: 0, live: false },
+                { title: 'Emerald Fractals', time: '4h 32m left', bid: '0.87', bids: 6, live: true },
+              ].map((item, i) => (
+                <div key={i} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '12px 14px', borderRadius: R, border: `1px solid ${C.line}`, background: C.panel }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                    <div style={{ width: 36, height: 36, borderRadius: R, background: `linear-gradient(135deg, ${C.gold}18, ${C.panel2})`, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                      <IconGavel size={16} color={C.gold} style={{ opacity: 0.6 }} />
+                    </div>
+                    <div>
+                      <div style={{ fontSize: 13, fontWeight: 600, color: C.ink }}>{item.title}</div>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginTop: 2 }}>
+                        {item.live && <div style={{ width: 6, height: 6, borderRadius: 3, background: C.green }} />}
+                        <span style={{ ...NUM, fontSize: 10, color: item.live ? C.green : C.muted }}>{item.time}</span>
+                      </div>
+                    </div>
+                  </div>
+                  <div style={{ textAlign: 'right' }}>
+                    <div style={{ ...NUM, fontSize: 15, fontWeight: 700, color: C.ink }}>{item.bid} <span style={{ fontSize: 10, fontWeight: 400, color: C.muted }}>ETH</span></div>
+                    <div style={{ ...NUM, fontSize: 10, color: C.muted }}>{item.bids > 0 ? `${item.bids} bids` : 'No bids yet'}</div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+
+          {/* ─── Members ─── */}
+          {activeSection === 'members' && (
+            <div style={{ borderRadius: R, overflow: 'hidden', border: `1px solid ${C.line}` }}>
+              <div style={{ display: 'grid', gridTemplateColumns: '2.5fr 1fr 1fr 1fr', padding: '7px 14px', ...TH, background: C.panel2 }}>
+                <span>{s.membersBtn}</span><span>{s.rank}</span><span>{s.assistance}</span><span>{s.lastLogin}</span>
+              </div>
+              {MOCK_MEMBERS.map((m, i) => (
+                <div key={i} style={{ display: 'grid', gridTemplateColumns: '2.5fr 1fr 1fr 1fr', padding: '9px 14px', fontSize: 12, color: C.ink, borderTop: `1px solid ${C.line}`, alignItems: 'center' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                    <div style={{ width: 24, height: 24, borderRadius: R, background: m.role === 'Guild Master' ? `${C.gold}20` : C.panel, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, fontSize: 10, fontWeight: 700, color: m.role === 'Guild Master' ? C.gold : C.muted }}>
+                      {m.name[0].toUpperCase()}
+                    </div>
+                    <div>
+                      <span style={{ fontWeight: 500 }}>{m.name}</span>
+                    </div>
+                  </div>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 4, fontSize: 11 }}>
+                    {m.role === 'Guild Master' && <IconShieldChevron size={12} color={C.gold} />}
+                    {m.role === 'Officer' && <IconStar size={12} color={C.gold} />}
+                    <span style={{ color: m.role === 'Guild Master' ? C.gold : C.muted, fontWeight: m.role === 'Guild Master' ? 600 : 400 }}>{m.role}</span>
+                  </div>
+                  <span style={{ ...NUM, fontWeight: 500 }}>{m.assistance.toLocaleString()}</span>
+                  <span style={{ ...NUM, color: C.muted, fontSize: 11 }}>{m.lastLogin}</span>
+                </div>
+              ))}
+            </div>
+          )}
+
+          {/* ─── Chat ─── */}
+          {activeSection === 'chat' && (
+            <div style={{ borderRadius: R, overflow: 'hidden', border: `1px solid ${C.line}`, display: 'flex', flexDirection: 'column', height: 'calc(100% - 60px)' }}>
+              <div style={{ flex: 1, overflow: 'auto', padding: 0 }}>
+                {MOCK_CHAT.map((c, i) => (
+                  <div key={i} style={{ display: 'flex', gap: 10, padding: '10px 14px', borderTop: i > 0 ? `1px solid ${C.line}` : 'none', alignItems: 'flex-start' }}>
+                    <div style={{ width: 26, height: 26, borderRadius: R, background: C.panel, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, fontSize: 10, fontWeight: 700, color: C.muted }}>
+                      {c.user[0].toUpperCase()}
+                    </div>
+                    <div style={{ flex: 1, minWidth: 0 }}>
+                      <div style={{ display: 'flex', alignItems: 'baseline', gap: 6 }}>
+                        <span style={{ fontSize: 12, fontWeight: 600, color: C.ink }}>{c.user}</span>
+                        <span style={{ ...NUM, fontSize: 9, color: C.muted }}>{c.time}</span>
+                      </div>
+                      <div style={{ fontSize: 13, color: C.ink, marginTop: 3, lineHeight: 1.45, opacity: 0.85 }}>{c.msg}</div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+              <div style={{ padding: '10px 14px', borderTop: `1px solid ${C.line}`, background: C.panel2, display: 'flex', gap: 8 }}>
+                <input type="text" placeholder="Type a message..." style={{ ...INPUT, borderRadius: R, padding: '7px 10px', fontSize: 12, background: C.bg }} readOnly />
+                <button type="button" style={{ padding: '7px 16px', borderRadius: R, background: C.gold, border: 'none', color: '#1a1400', fontSize: 12, fontWeight: 600, cursor: 'pointer', whiteSpace: 'nowrap' }}>Send</button>
+              </div>
+            </div>
+          )}
+
+          {/* ─── Activities ─── */}
+          {activeSection === 'activities' && (
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+              {[
+                { title: 'Daily Check-in', desc: 'Check in to earn guild XP', status: 'Available', color: C.green, icon: <IconCheck size={14} /> },
+                { title: 'Weekly Trade Goal', desc: 'Trade 5 artworks this week', status: '3/5', color: C.gold, icon: <IconTarget size={14} /> },
+                { title: 'Invite Members', desc: 'Invite 2 new members', status: 'Not started', color: C.muted, icon: <IconUsers size={14} /> },
+              ].map((act, i) => (
+                <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '12px 14px', borderRadius: R, border: `1px solid ${C.line}`, background: C.panel }}>
+                  <div style={{ width: 32, height: 32, borderRadius: R, background: `${act.color}15`, display: 'flex', alignItems: 'center', justifyContent: 'center', color: act.color, flexShrink: 0 }}>
+                    {act.icon}
+                  </div>
+                  <div style={{ flex: 1 }}>
+                    <div style={{ fontSize: 13, fontWeight: 600, color: C.ink }}>{act.title}</div>
+                    <div style={{ fontSize: 11, color: C.muted, marginTop: 1 }}>{act.desc}</div>
+                  </div>
+                  <span style={{ ...NUM, fontSize: 11, fontWeight: 600, color: act.color, padding: '3px 10px', borderRadius: R, background: `${act.color}10` }}>{act.status}</span>
+                </div>
+              ))}
+            </div>
+          )}
+
+          {/* ─── Dividends ─── */}
+          {activeSection === 'dividends' && (
+            <div>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 10, marginBottom: 16 }}>
+                {[
+                  { label: 'This Week', value: '0.42', unit: 'ETH', accent: C.green },
+                  { label: 'Total Earned', value: '3.81', unit: 'ETH', accent: C.gold },
+                  { label: 'Next Payout', value: '5d 12h', unit: '', accent: C.muted },
+                ].map((d, i) => (
+                  <div key={i} style={{ background: C.panel, borderRadius: R, padding: '14px 14px', borderLeft: `3px solid ${d.accent}30` }}>
+                    <div style={{ fontSize: 10, color: C.muted, marginBottom: 6, fontWeight: 500 }}>{d.label}</div>
+                    <div style={{ display: 'flex', alignItems: 'baseline', gap: 3 }}>
+                      <span style={{ ...NUM, fontSize: 20, fontWeight: 700, color: C.ink }}>{d.value}</span>
+                      {d.unit && <span style={{ ...NUM, fontSize: 10, color: C.muted }}>{d.unit}</span>}
+                    </div>
+                  </div>
+                ))}
+              </div>
+              <div style={{ fontSize: 12, color: C.muted, lineHeight: 1.6, padding: '8px 0' }}>
+                Dividends are distributed weekly based on your contribution XP and guild volume.
+              </div>
+            </div>
+          )}
+
+          {/* ─── Settings (Guild Master only) ─── */}
+          {activeSection === 'settings' && (
+            <div style={{ maxWidth: 520 }}>
+              <div style={{ marginBottom: 20 }}>
+                <label style={{ display: 'block', fontSize: 12, fontWeight: 600, color: C.ink, marginBottom: 6 }}>{s.guildName}</label>
+                <input type="text" value={settingsName} onChange={e => setSettingsName(e.target.value)}
+                  style={{ ...INPUT }} />
+              </div>
+
+              <div style={{ marginBottom: 20 }}>
+                <label style={{ display: 'block', fontSize: 12, fontWeight: 600, color: C.ink, marginBottom: 6 }}>{s.guildDesc}</label>
+                <textarea value={settingsDesc} onChange={e => setSettingsDesc(e.target.value)} rows={3}
+                  style={{ ...INPUT, resize: 'vertical', lineHeight: 1.5 }} />
+              </div>
+
+              <div style={{ marginBottom: 20 }}>
+                <label style={{ display: 'block', fontSize: 12, fontWeight: 600, color: C.ink, marginBottom: 6 }}>{s.emblem}</label>
+                <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
+                  {EMBLEMS.slice(0, 20).map((e) => (
+                    <button type="button" key={e} onClick={() => setSettingsEmblem(e)}
+                      style={{
+                        width: 36, height: 36, borderRadius: R, cursor: 'pointer',
+                        border: settingsEmblem === e ? `2px solid ${C.gold}` : `1px solid ${C.line}`,
+                        background: settingsEmblem === e ? `${C.gold}15` : C.panel,
+                        display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 0,
+                      }}>
+                      <GuildEmblem emblem={e} size={20} />
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              <div style={{ marginBottom: 20 }}>
+                <label style={{ display: 'block', fontSize: 12, fontWeight: 600, color: C.ink, marginBottom: 6 }}>{s.acceptance}</label>
+                <div style={{ display: 'flex', gap: 8 }}>
+                  {(['auto', 'manual'] as const).map(mode => (
+                    <button type="button" key={mode} onClick={() => setSettingsAcceptance(mode)}
+                      style={{
+                        padding: '7px 18px', borderRadius: R, fontSize: 12, fontWeight: 500, cursor: 'pointer',
+                        border: `1px solid ${settingsAcceptance === mode ? C.gold : C.line}`,
+                        background: settingsAcceptance === mode ? `${C.gold}15` : 'transparent',
+                        color: settingsAcceptance === mode ? C.gold : C.muted,
+                      }}>
+                      {mode === 'auto' ? s.auto : s.manual}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              <div style={{ marginBottom: 20 }}>
+                <label style={{ display: 'block', fontSize: 12, fontWeight: 600, color: C.ink, marginBottom: 6 }}>{s.focus}</label>
+                <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
+                  {[s.tagCasual, s.tagNewbie, s.tagTopGuild, s.tagArena, s.tagCheckInDaily].map((tag) => (
+                    <span key={tag} style={{ padding: '4px 12px', borderRadius: R, fontSize: 11, border: `1px solid ${C.line}`, color: C.muted, background: C.panel }}>
+                      {tag}
+                    </span>
+                  ))}
+                </div>
+              </div>
+
+              <div style={{ display: 'flex', alignItems: 'center', gap: 10, paddingTop: 10, borderTop: `1px solid ${C.line}` }}>
+                <button type="button" onClick={handleSaveSettings}
+                  style={{ padding: '8px 24px', borderRadius: R, fontSize: 13, fontWeight: 600, cursor: 'pointer', background: C.gold, border: 'none', color: '#1a1400', transition: 'opacity 0.15s' }}>
+                  {settingsSaved ? s.settingsSaved : s.saveSetting}
+                </button>
+                {settingsSaved && <span style={{ fontSize: 12, color: C.green }}>
+                  <IconCheck size={14} style={{ verticalAlign: -2, marginRight: 3 }} />{s.settingsSaved}
+                </span>}
+              </div>
+            </div>
+          )}
+        </div>
       </div>
 
       <AnimatePresence>
         {showLeaveConfirm && (
           <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
             onClick={(e) => { if (e.target === e.currentTarget) setShowLeaveConfirm(false) }}
-            style={{ position: 'fixed', inset: 0, zIndex: 60, background: 'rgba(0,0,0,0.72)', backdropFilter: 'blur(4px)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-            <motion.div initial={{ scale: 0.95 }} animate={{ scale: 1 }}
-              style={{ background: C.panel, border: `1px solid ${C.lineGold}`, borderRadius: 14, padding: 24, maxWidth: 400, textAlign: 'center' }}>
-              <div style={{ fontFamily: SERIF, fontSize: 18, fontWeight: 600, color: C.goldLight, marginBottom: 12 }}>{s.leave}</div>
-              <div style={{ fontSize: 13, color: C.ink, marginBottom: 20, lineHeight: 1.6 }}>{s.leaveConfirm}</div>
-              <div style={{ display: 'flex', gap: 12, justifyContent: 'center' }}>
+            style={{ position: 'fixed', inset: 0, zIndex: 60, background: 'rgba(0,0,0,0.5)', backdropFilter: 'blur(4px)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+            <motion.div initial={{ scale: 0.96, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} exit={{ scale: 0.96, opacity: 0 }}
+              style={{ background: C.panel, border: `1px solid ${C.lineGold}`, borderRadius: R + 2, padding: '24px 28px', maxWidth: 360, textAlign: 'center' }}>
+              <div style={{ fontSize: 15, fontWeight: 600, color: C.ink, marginBottom: 8 }}>{s.leave}</div>
+              <div style={{ fontSize: 13, color: C.muted, marginBottom: 18, lineHeight: 1.6 }}>{s.leaveConfirm}</div>
+              <div style={{ display: 'flex', gap: 10, justifyContent: 'center' }}>
                 <button type="button" onClick={() => setShowLeaveConfirm(false)}
-                  style={{ borderRadius: 9, padding: '10px 24px', fontSize: 13, cursor: 'pointer', background: 'transparent', border: `1px solid ${C.line}`, color: C.ink }}>{s.cancel}</button>
+                  style={{ borderRadius: R, padding: '7px 20px', fontSize: 13, cursor: 'pointer', background: 'transparent', border: `1px solid ${C.line}`, color: C.ink }}>{s.cancel}</button>
                 <button type="button" onClick={() => { onLeaveGuild(); setShowLeaveConfirm(false) }}
-                  style={{ borderRadius: 9, padding: '10px 24px', fontSize: 13, fontWeight: 600, cursor: 'pointer', background: C.red, border: 'none', color: '#fff' }}>{s.leave}</button>
+                  style={{ borderRadius: R, padding: '7px 20px', fontSize: 13, fontWeight: 600, cursor: 'pointer', background: C.red, border: 'none', color: '#fff' }}>{s.leave}</button>
               </div>
             </motion.div>
           </motion.div>
         )}
       </AnimatePresence>
-    </motion.div>
+    </div>
   )
 }
 
@@ -1385,7 +1831,8 @@ export function GuildPage() {
   const [view, setView] = useState<'finder' | 'hall'>('finder')
   const [active, setActive] = useState<GuildView>(MOCK[1])
   const [createOpen, setCreateOpen] = useState(false)
-  const [joinedId, setJoinedId] = useState<string | null>(() => typeof window !== 'undefined' ? getJoinedGuild() : null)
+  const [joinedId, setJoinedId] = useState<string | null>(null)
+  useEffect(() => { setJoinedId(getJoinedGuild()) }, [])
 
   useEffect(() => {
     const html = document.documentElement
@@ -1434,13 +1881,15 @@ export function GuildPage() {
   const enter = (g: GuildView) => { setActive(g); setView('hall') }
 
   return (
-    <div style={{ background: T.sceneBg, position: 'fixed', top: 68, left: 0, right: 0, bottom: 0, color: T.ink, overflow: 'hidden' }}>
-      <AnimatePresence>
-        {createOpen && <CreateGuildModal key="cm" s={s} onClose={() => setCreateOpen(false)} onCreated={(mock) => { setCreateOpen(false); if (mock) setGuilds(prev => [mock, ...prev]); else load() }} />}
-      </AnimatePresence>
-      {view === 'finder'
-        ? <FinderView guilds={guilds} s={s} onEnter={enter} onRefresh={load} onCreate={() => setCreateOpen(true)} joinedId={joinedId} onJoin={handleJoin} onLeaveGuild={handleLeaveGuild} t={T} />
-        : <HallView guild={active} s={s} onLeave={() => setView('finder')} onLeaveGuild={handleLeaveGuild} />}
-    </div>
+    <ThemeCtx.Provider value={T as Colors}>
+      <div style={{ background: T.sceneBg, position: 'fixed', top: 68, left: 0, right: 0, bottom: 0, color: T.ink, overflow: 'hidden' }}>
+        <AnimatePresence>
+          {createOpen && <CreateGuildModal key="cm" s={s} onClose={() => setCreateOpen(false)} onCreated={(mock) => { setCreateOpen(false); if (mock) setGuilds(prev => [mock, ...prev]); else load() }} />}
+        </AnimatePresence>
+        {view === 'finder'
+          ? <FinderView guilds={guilds} s={s} onEnter={enter} onRefresh={load} onCreate={() => setCreateOpen(true)} joinedId={joinedId} onJoin={handleJoin} onLeaveGuild={handleLeaveGuild} t={T} />
+          : <HallView guild={active} s={s} onLeave={() => setView('finder')} onLeaveGuild={handleLeaveGuild} />}
+      </div>
+    </ThemeCtx.Provider>
   )
 }

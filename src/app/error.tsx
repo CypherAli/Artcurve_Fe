@@ -19,7 +19,7 @@ export default function Error({
   return (
     <div
       className="min-h-screen flex flex-col items-center justify-center"
-      style={{ background: '#070707' }}
+      style={{ background: 'var(--ac-paper, #070707)' }}
     >
       <div className="text-center space-y-5 max-w-sm px-4">
         <div className="font-mono text-[10px] tracking-[0.3em] uppercase"

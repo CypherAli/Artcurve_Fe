@@ -14,12 +14,15 @@ export function useNotifications() {
 
   useEffect(() => {
     if (!user) return
+    let cancelled = false
 
     store.setLoading(true)
     notificationService.list(50)
-      .then(items => store.setItems(items))
-      .catch(() => {/* silent — không crash UI */})
-      .finally(() => store.setLoading(false))
+      .then(items => { if (!cancelled) store.setItems(items) })
+      .catch(() => {})
+      .finally(() => { if (!cancelled) store.setLoading(false) })
+
+    return () => { cancelled = true }
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user?.id])
 
