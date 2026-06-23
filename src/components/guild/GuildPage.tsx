@@ -1831,8 +1831,7 @@ export function GuildPage() {
   const [view, setView] = useState<'finder' | 'hall'>('finder')
   const [active, setActive] = useState<GuildView>(MOCK[1])
   const [createOpen, setCreateOpen] = useState(false)
-  const [joinedId, setJoinedId] = useState<string | null>(null)
-  useEffect(() => { setJoinedId(getJoinedGuild()) }, [])
+  const [joinedId, setJoinedId] = useState<string | null>(() => getJoinedGuild())
 
   useEffect(() => {
     const html = document.documentElement

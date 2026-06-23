@@ -1,7 +1,6 @@
 'use client'
 
 import { useEffect, useState, useCallback, useRef } from 'react'
-import { useRouter }           from 'next/navigation'
 import Link                    from 'next/link'
 import {
   LiveKitRoom,
@@ -35,14 +34,16 @@ function Stage() {
 }
 
 export function LiveViewer({ roomName }: { roomName: string }) {
-  const router = useRouter()
   const [token,      setToken]      = useState<string | null>(null)
   const [streamInfo, setStreamInfo] = useState<{
     title: string; host_name: string; category: string; viewer_count: number
   } | null>(null)
   const [error, setError] = useState('')
   const [ended, setEnded] = useState(false)
-  const identityRef = useRef(`viewer-${Math.random().toString(36).slice(2, 8)}`)
+  const identityRef = useRef<string>(null)
+  if (!identityRef.current) {
+    identityRef.current = `viewer-${Math.random().toString(36).slice(2, 8)}`
+  }
 
   const fetchToken = useCallback(async () => {
     try {
@@ -63,13 +64,13 @@ export function LiveViewer({ roomName }: { roomName: string }) {
         category: stream.category,
         viewer_count: stream.viewer_count,
       })
-    } catch (e: any) {
-      setError(e?.message ?? 'Stream not found or ended')
+    } catch (e: unknown) {
+      setError(e instanceof Error ? e.message : 'Stream not found or ended')
     }
   }, [roomName])
 
   useEffect(() => {
-    fetchToken()
+    void fetchToken()
   }, [fetchToken])
 
   useEffect(() => {
