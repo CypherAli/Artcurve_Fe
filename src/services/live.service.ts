@@ -11,10 +11,20 @@ export interface LiveStream {
   is_live: boolean
   artwork_ticker: string | null
   started_at: string
+  ended_at: string | null
 }
 
-export interface ViewerToken {
+export interface CreateStreamResponse {
+  roomName: string
   token: string
+  liveKitUrl: string
+  streamId: string
+}
+
+export interface ViewerTokenResponse {
+  token: string
+  liveKitUrl: string
+  stream: LiveStream
 }
 
 export const liveService = {
@@ -25,11 +35,11 @@ export const liveService = {
     get<LiveStream>(`/live/${roomName}`),
 
   create: (body: { title: string; category?: string; artwork_ticker?: string }) =>
-    post<LiveStream>('/live/create', body, true),
+    post<CreateStreamResponse>('/live/create', body, true),
 
   viewerToken: (roomName: string, identity: string) =>
-    get<ViewerToken>(`/live/${roomName}/viewer-token?identity=${encodeURIComponent(identity)}`),
+    get<ViewerTokenResponse>(`/live/${roomName}/viewer-token?identity=${encodeURIComponent(identity)}`),
 
   end: (roomName: string) =>
-    request<void>(`/live/${roomName}`, { method: 'DELETE', auth: true }),
+    request<{ ended: boolean }>(`/live/${roomName}`, { method: 'DELETE', auth: true }),
 }

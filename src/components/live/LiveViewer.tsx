@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useCallback, useRef } from 'react'
 import { useRouter }           from 'next/navigation'
 import Link                    from 'next/link'
 import {
@@ -17,8 +17,8 @@ import '@livekit/components-styles'
 import { liveService } from '@/services/live.service'
 
 const LK_URL = process.env.NEXT_PUBLIC_LIVEKIT_URL ?? ''
+const STREAM_CHECK_INTERVAL = 15_000
 
-// ── Inner component (used inside LiveKitRoom context) ─────────────────────────
 function Stage() {
   const tracks = useTracks(
     [
@@ -34,7 +34,6 @@ function Stage() {
   )
 }
 
-// ── LiveViewer ─────────────────────────────────────────────────────────────────
 export function LiveViewer({ roomName }: { roomName: string }) {
   const router = useRouter()
   const [token,      setToken]      = useState<string | null>(null)
@@ -42,25 +41,73 @@ export function LiveViewer({ roomName }: { roomName: string }) {
     title: string; host_name: string; category: string; viewer_count: number
   } | null>(null)
   const [error, setError] = useState('')
+  const [ended, setEnded] = useState(false)
+  const identityRef = useRef(`viewer-${Math.random().toString(36).slice(2, 8)}`)
+
+  const fetchToken = useCallback(async () => {
+    try {
+      const [tokenRes, stream] = await Promise.all([
+        liveService.viewerToken(roomName, identityRef.current),
+        liveService.get(roomName),
+      ])
+
+      if (!stream.is_live) {
+        setEnded(true)
+        return
+      }
+
+      setToken(tokenRes.token)
+      setStreamInfo({
+        title: stream.title,
+        host_name: stream.host_name,
+        category: stream.category,
+        viewer_count: stream.viewer_count,
+      })
+    } catch (e: any) {
+      setError(e?.message ?? 'Stream not found or ended')
+    }
+  }, [roomName])
 
   useEffect(() => {
-    const identity = `viewer-${Math.random().toString(36).slice(2, 8)}`
+    fetchToken()
+  }, [fetchToken])
 
-    Promise.all([
-      liveService.viewerToken(roomName, identity),
-      liveService.get(roomName),
-    ])
-      .then(([tokenRes, stream]) => {
-        setToken(tokenRes.token)
-        setStreamInfo({
-          title: stream.title,
-          host_name: stream.host_name,
-          category: stream.category,
-          viewer_count: stream.viewer_count,
-        })
-      })
-      .catch(e => setError(e?.message ?? 'Stream not found or ended'))
-  }, [roomName])
+  useEffect(() => {
+    if (!token || ended) return
+    const interval = setInterval(async () => {
+      try {
+        const stream = await liveService.get(roomName)
+        if (!stream.is_live) {
+          setEnded(true)
+          clearInterval(interval)
+          return
+        }
+        setStreamInfo(prev => prev ? { ...prev, viewer_count: stream.viewer_count } : prev)
+      } catch {
+        // stream might have been deleted
+        setEnded(true)
+        clearInterval(interval)
+      }
+    }, STREAM_CHECK_INTERVAL)
+    return () => clearInterval(interval)
+  }, [token, ended, roomName])
+
+  if (ended) {
+    return (
+      <div className="min-h-dvh flex flex-col items-center justify-center gap-4"
+        style={{ background: '#0A0A0A', color: 'var(--ac-paper)' }}>
+        <p className="font-mono text-[12px] tracking-widest uppercase"
+          style={{ color: 'rgba(255,255,255,0.5)' }}>
+          Stream has ended
+        </p>
+        <Link href="/live"
+          className="font-mono text-[9px] tracking-widest uppercase px-4 py-2"
+          style={{ border: '1px solid rgba(212,175,55,0.35)', color: '#D4AF37' }}>
+          ← Back to Live
+        </Link>
+      </div>
+    )
+  }
 
   if (error) {
     return (
@@ -70,9 +117,14 @@ export function LiveViewer({ roomName }: { roomName: string }) {
           style={{ color: 'rgba(255,255,255,0.3)' }}>
           {error}
         </p>
+        <button onClick={() => { setError(''); fetchToken() }}
+          className="font-mono text-[9px] tracking-widest uppercase px-4 py-2"
+          style={{ border: '1px solid rgba(212,175,55,0.35)', color: '#D4AF37', background: 'none', cursor: 'pointer' }}>
+          Retry
+        </button>
         <Link href="/live"
           className="font-mono text-[9px] tracking-widest uppercase px-4 py-2"
-          style={{ border: '1px solid rgba(212,175,55,0.35)', color: '#D4AF37' }}>
+          style={{ border: '1px solid rgba(255,255,255,0.1)', color: 'rgba(255,255,255,0.3)' }}>
           ← Back to Live
         </Link>
       </div>
@@ -93,7 +145,6 @@ export function LiveViewer({ roomName }: { roomName: string }) {
 
   return (
     <div data-lenis-prevent className="min-h-dvh" style={{ background: '#0A0A0A', color: 'var(--ac-paper)' }}>
-      {/* Header */}
       <div className="flex items-center justify-between px-6 py-3"
         style={{ borderBottom: '1px solid rgba(255,255,255,0.06)', background: 'rgba(0,0,0,0.6)' }}>
         <Link href="/live"
@@ -117,20 +168,20 @@ export function LiveViewer({ roomName }: { roomName: string }) {
               {streamInfo.title}
             </span>
             <span className="font-mono text-[9px]" style={{ color: 'rgba(255,255,255,0.28)' }}>
-              {streamInfo.host_name}
+              {streamInfo.host_name} · {streamInfo.viewer_count} watching
             </span>
           </div>
         )}
         <div/>
       </div>
 
-      {/* LiveKit Room */}
       <LiveKitRoom
         token={token}
         serverUrl={LK_URL}
         connect={true}
         video={false}
         audio={false}
+        onDisconnected={() => setEnded(true)}
         data-lenis-prevent
         style={{ height: 'calc(100dvh - 53px)' }}
       >
