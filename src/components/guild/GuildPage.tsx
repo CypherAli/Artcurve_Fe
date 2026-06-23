@@ -1476,7 +1476,7 @@ function HallView({ guild, s, onLeave, onLeaveGuild }: { guild: GuildView; s: S;
         </div>
 
         {/* Main content */}
-        <div style={{ flex: 1, overflowY: 'auto', overflowX: 'hidden', padding: '16px 20px', minHeight: 0 }}>
+        <div data-lenis-prevent style={{ flex: 1, overflowY: 'auto', overflowX: 'hidden', padding: '16px 20px', minHeight: 0 }}>
           {/* Section title */}
           <div style={{ marginBottom: 16, paddingBottom: 10, borderBottom: `1px solid ${C.line}` }}>
             <div style={{ fontSize: 16, fontWeight: 600, color: C.ink, letterSpacing: '-0.01em' }}>
