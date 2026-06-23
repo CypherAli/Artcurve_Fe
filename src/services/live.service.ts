@@ -27,6 +27,26 @@ export interface ViewerTokenResponse {
   stream: LiveStream
 }
 
+export interface LiveChatMessage {
+  id: string
+  room_name: string
+  user_id: string
+  user_name: string
+  content: string
+  created_at: string
+}
+
+export interface LiveTipData {
+  id: string
+  room_name: string
+  from_user_id: string
+  from_user_name: string
+  to_host_id: string
+  amount_eth: string
+  message: string | null
+  created_at: string
+}
+
 export const liveService = {
   list: () =>
     get<LiveStream[]>('/live'),
@@ -42,4 +62,18 @@ export const liveService = {
 
   end: (roomName: string) =>
     request<{ ended: boolean }>(`/live/${roomName}`, { method: 'DELETE', auth: true }),
+
+  // Chat
+  postChat: (roomName: string, content: string) =>
+    post<LiveChatMessage>(`/live/${roomName}/chat`, { content }, true),
+  chatMessages: (roomName: string, limit = 50) =>
+    get<LiveChatMessage[]>(`/live/${roomName}/chat?limit=${limit}`),
+
+  // Tips
+  sendTip: (roomName: string, amountEth: string, message?: string) =>
+    post<LiveTipData>(`/live/${roomName}/tip`, { amount_eth: amountEth, message }, true),
+  tips: (roomName: string, limit = 20) =>
+    get<LiveTipData[]>(`/live/${roomName}/tips?limit=${limit}`),
+  totalTips: (roomName: string) =>
+    get<{ total_eth: number; tip_count: number }>(`/live/${roomName}/tips/total`),
 }
