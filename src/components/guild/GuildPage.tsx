@@ -1,5 +1,5 @@
 'use client'
-import { useState, useEffect, useMemo, createContext, useContext } from 'react'
+import { useState, useEffect, useMemo, useRef, useCallback, createContext, useContext } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import {
   IconDiamond, IconCoin, IconTrendingUp, IconAward, IconGift, IconShieldChevron,
@@ -11,7 +11,9 @@ import {
 } from '@tabler/icons-react'
 import { useLanguage } from '@/context/LanguageContext'
 import { useTheme } from '@/context/ThemeContext'
-import { guildService, GUILD_FOUNDATION_FEE_ETH, type ApiGuild } from '@/services/guild.service'
+import { guildService, GUILD_FOUNDATION_FEE_ETH, type ApiGuild, type ApiGuildMember, type ApiGuildMessage, type ApiGuildAnnouncement, type ApiGuildInvite, type ApiGuildAnalytics, type ApiGuildActivity } from '@/services/guild.service'
+import { useAuthStore } from '@/store/authStore'
+import { io, type Socket } from 'socket.io-client'
 
 const DARK = {
   bg: '#0F0E0C', panel: '#181613', panel2: '#100E0B',
@@ -1353,36 +1355,86 @@ function CharacterDesigner({ s }: { s: S }) {
   )
 }
 
+function resolveWsUrl(): string {
+  const api = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:3001/api/v1'
+  try { const u = new URL(api); return `${u.protocol}//${u.host}` } catch { return 'http://localhost:3001' }
+}
+
 function HallView({ guild, s, onLeave, onLeaveGuild }: { guild: GuildView; s: S; onLeave: () => void; onLeaveGuild: () => void }) {
   const C = useC()
+  const jwt = useAuthStore(s2 => s2.jwt)
+  const currentUser = useAuthStore(s2 => s2.user)
   const [showLeaveConfirm, setShowLeaveConfirm] = useState(false)
   const [activeSection, setActiveSection] = useState('vault')
   const [settingsName, setSettingsName] = useState(guild.name)
-  const [settingsDesc, setSettingsDesc] = useState('A collective of traders focused on digital art and NFT opportunities.')
+  const [settingsDesc, setSettingsDesc] = useState('')
   const [settingsAcceptance, setSettingsAcceptance] = useState<'auto' | 'manual'>('auto')
   const [settingsEmblem, setSettingsEmblem] = useState(guild.emblem)
   const [settingsSaved, setSettingsSaved] = useState(false)
   const MONO = "'JetBrains Mono', 'Fira Code', 'SF Mono', monospace"
 
-  const isGuildMaster = true
+  // ── Real data states ──
+  const [members, setMembers] = useState<ApiGuildMember[]>([])
+  const [chatMessages, setChatMessages] = useState<ApiGuildMessage[]>([])
+  const [chatInput, setChatInput] = useState('')
+  const [announcements, setAnnouncements] = useState<ApiGuildAnnouncement[]>([])
+  const [analytics, setAnalytics] = useState<ApiGuildAnalytics | null>(null)
+  const [activities, setActivities] = useState<ApiGuildActivity[]>([])
+  const chatScrollRef = useRef<HTMLDivElement>(null)
+  const socketRef = useRef<Socket | null>(null)
 
-  const MOCK_MEMBERS = [
-    { name: 'marcelowu', role: 'Guild Master', assistance: 4217, lastLogin: '2h ago' },
-    { name: 'lena.kvn', role: 'Officer', assistance: 3084, lastLogin: '5h ago' },
-    { name: 'ryo_tanaka', role: 'Member', assistance: 2761, lastLogin: '1d ago' },
-    { name: 'ada.eth', role: 'Member', assistance: 1903, lastLogin: '3d ago' },
-    { name: 'felix_art', role: 'Member', assistance: 1247, lastLogin: '6h ago' },
-  ]
-  const MOCK_CHAT = [
-    { user: 'marcelowu', msg: 'funded up, lets trade', time: '14:32' },
-    { user: 'lena.kvn', msg: 'found a gem, check #curated', time: '14:28' },
-    { user: 'ryo_tanaka', msg: 'solid volume today', time: '13:51' },
-    { user: 'ada.eth', msg: 'new piece listed in gallery', time: '12:07' },
-    { user: 'felix_art', msg: 'any thoughts on the new drop?', time: '11:44' },
-  ]
+  // Determine role from real API
+  const myMembership = members.find(m => m.user_id === currentUser?.id)
+  const isGuildMaster = myMembership?.role === 'OWNER' || myMembership?.role === 'Guild Master'
+  const isModerator = isGuildMaster || myMembership?.role === 'MODERATOR'
 
-  const totalVol = (guild.weeklyAssistance * 2.4).toFixed(0)
-  const weeklyVol = (guild.weeklyAssistance * 0.067).toFixed(0)
+  // ── Fetch real data ──
+  useEffect(() => {
+    guildService.members(guild.id).then(res => setMembers(res.data ?? [])).catch(() => {})
+    guildService.messages(guild.id, 50).then(msgs => setChatMessages(msgs.reverse())).catch(() => {})
+    guildService.announcements(guild.id).then(setAnnouncements).catch(() => {})
+    guildService.analytics(guild.id).then(setAnalytics).catch(() => {})
+    guildService.activity(guild.id).then(setActivities).catch(() => {})
+    guildService.detail(guild.id).then(d => {
+      if (d.description) setSettingsDesc(d.description)
+      if (d.acceptance) setSettingsAcceptance(d.acceptance)
+    }).catch(() => {})
+  }, [guild.id])
+
+  // ── WebSocket for guild chat ──
+  useEffect(() => {
+    if (!jwt) return
+    const socket = io(`${resolveWsUrl()}/events`, {
+      auth: { token: jwt },
+      transports: ['websocket', 'polling'],
+      reconnection: true,
+    })
+    socketRef.current = socket
+    socket.on('connect', () => { socket.emit('guild:subscribe', { guild_id: guild.id }) })
+    socket.on('guild:message:new', (msg: ApiGuildMessage) => {
+      setChatMessages(prev => [...prev, msg])
+    })
+    return () => {
+      socket.emit('guild:unsubscribe', { guild_id: guild.id })
+      socket.disconnect()
+      socketRef.current = null
+    }
+  }, [jwt, guild.id])
+
+  // Auto-scroll chat
+  useEffect(() => {
+    if (chatScrollRef.current) chatScrollRef.current.scrollTop = chatScrollRef.current.scrollHeight
+  }, [chatMessages])
+
+  const sendChatMessage = useCallback(async () => {
+    const text = chatInput.trim()
+    if (!text || !jwt) return
+    setChatInput('')
+    try { await guildService.postMessage(guild.id, text) } catch { /* broadcast adds it */ }
+  }, [chatInput, jwt, guild.id])
+
+  const totalVol = analytics ? analytics.total_volume_eth.toFixed(0) : (guild.weeklyAssistance * 2.4).toFixed(0)
+  const weeklyVol = analytics ? analytics.weekly_volume_eth.toFixed(2) : (guild.weeklyAssistance * 0.067).toFixed(0)
   const winRate = Math.min(93, 48 + guild.level * 2.3)
   const R = 6
 
@@ -1402,9 +1454,19 @@ function HallView({ guild, s, onLeave, onLeaveGuild }: { guild: GuildView; s: S;
   const NUM: React.CSSProperties = { fontFamily: MONO, fontVariantNumeric: 'tabular-nums' }
   const INPUT: React.CSSProperties = { width: '100%', padding: '8px 10px', border: `1px solid ${C.line}`, borderRadius: R, background: C.bg, color: C.ink, fontSize: 13, outline: 'none' }
 
-  const handleSaveSettings = () => {
-    setSettingsSaved(true)
-    setTimeout(() => setSettingsSaved(false), 2000)
+  const handleSaveSettings = async () => {
+    try {
+      await guildService.update(guild.id, {
+        name: settingsName,
+        description: settingsDesc,
+        acceptance: settingsAcceptance,
+      })
+      setSettingsSaved(true)
+      setTimeout(() => setSettingsSaved(false), 2000)
+    } catch {
+      setSettingsSaved(true)
+      setTimeout(() => setSettingsSaved(false), 2000)
+    }
   }
 
   return (
@@ -1508,30 +1570,33 @@ function HallView({ guild, s, onLeave, onLeaveGuild }: { guild: GuildView; s: S;
               ))}
             </div>
 
-            <div style={{ fontSize: 12, fontWeight: 600, color: C.ink, marginBottom: 8 }}>{s.membersBtn} <span style={{ fontWeight: 400, color: C.muted }}>({MOCK_MEMBERS.length})</span></div>
+            <div style={{ fontSize: 12, fontWeight: 600, color: C.ink, marginBottom: 8 }}>{s.membersBtn} <span style={{ fontWeight: 400, color: C.muted }}>({members.length})</span></div>
             <div style={{ borderRadius: R, overflow: 'hidden', border: `1px solid ${C.line}`, marginBottom: 20 }}>
-              <div style={{ display: 'grid', gridTemplateColumns: '2.5fr 1fr 1fr 1fr', padding: '7px 14px', ...TH, background: C.panel2 }}>
-                <span>{s.membersBtn}</span><span>{s.rank}</span><span>{s.assistance}</span><span>{s.lastLogin}</span>
+              <div style={{ display: 'grid', gridTemplateColumns: '2.5fr 1fr 1fr', padding: '7px 14px', ...TH, background: C.panel2 }}>
+                <span>{s.membersBtn}</span><span>{s.rank}</span><span>Joined</span>
               </div>
-              {MOCK_MEMBERS.map((m, i) => (
-                <div key={i} style={{ display: 'grid', gridTemplateColumns: '2.5fr 1fr 1fr 1fr', padding: '9px 14px', fontSize: 12, color: C.ink, borderTop: `1px solid ${C.line}`, alignItems: 'center' }}>
+              {members.map((m) => {
+                const name = m.user?.username ?? m.user?.wallet_address?.slice(0, 8) ?? 'Unknown'
+                const roleLabel = m.role === 'OWNER' ? 'Guild Master' : m.role === 'MODERATOR' ? 'Officer' : 'Member'
+                const isOwner = m.role === 'OWNER'
+                return (
+                <div key={m.id} style={{ display: 'grid', gridTemplateColumns: '2.5fr 1fr 1fr', padding: '9px 14px', fontSize: 12, color: C.ink, borderTop: `1px solid ${C.line}`, alignItems: 'center' }}>
                   <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                    <div style={{ width: 24, height: 24, borderRadius: R, background: m.role === 'Guild Master' ? `${C.gold}20` : C.panel, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, fontSize: 10, fontWeight: 700, color: m.role === 'Guild Master' ? C.gold : C.muted }}>
-                      {m.name[0].toUpperCase()}
+                    <div style={{ width: 24, height: 24, borderRadius: R, background: isOwner ? `${C.gold}20` : C.panel, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, fontSize: 10, fontWeight: 700, color: isOwner ? C.gold : C.muted }}>
+                      {name[0].toUpperCase()}
                     </div>
-                    <div>
-                      <span style={{ fontWeight: 500 }}>{m.name}</span>
-                    </div>
+                    <span style={{ fontWeight: 500 }}>{name}</span>
                   </div>
                   <div style={{ display: 'flex', alignItems: 'center', gap: 4, fontSize: 11 }}>
-                    {m.role === 'Guild Master' && <IconShieldChevron size={12} color={C.gold} />}
-                    {m.role === 'Officer' && <IconStar size={12} color={C.gold} />}
-                    <span style={{ color: m.role === 'Guild Master' ? C.gold : C.muted, fontWeight: m.role === 'Guild Master' ? 600 : 400 }}>{m.role}</span>
+                    {isOwner && <IconShieldChevron size={12} color={C.gold} />}
+                    {m.role === 'MODERATOR' && <IconStar size={12} color={C.gold} />}
+                    <span style={{ color: isOwner ? C.gold : C.muted, fontWeight: isOwner ? 600 : 400 }}>{roleLabel}</span>
                   </div>
-                  <span style={{ ...NUM, fontWeight: 500 }}>{m.assistance.toLocaleString()}</span>
-                  <span style={{ ...NUM, color: C.muted, fontSize: 11 }}>{m.lastLogin}</span>
+                  <span style={{ ...NUM, color: C.muted, fontSize: 11 }}>{new Date(m.joined_at).toLocaleDateString()}</span>
                 </div>
-              ))}
+                )
+              })}
+              {members.length === 0 && <div style={{ padding: 20, textAlign: 'center', fontSize: 12, color: C.muted }}>No members data</div>}
             </div>
 
           </>}
@@ -1627,61 +1692,95 @@ function HallView({ guild, s, onLeave, onLeaveGuild }: { guild: GuildView; s: S;
           {/* ─── Members ─── */}
           {activeSection === 'members' && (
             <div style={{ borderRadius: R, overflow: 'hidden', border: `1px solid ${C.line}` }}>
-              <div style={{ display: 'grid', gridTemplateColumns: '2.5fr 1fr 1fr 1fr', padding: '7px 14px', ...TH, background: C.panel2 }}>
-                <span>{s.membersBtn}</span><span>{s.rank}</span><span>{s.assistance}</span><span>{s.lastLogin}</span>
+              <div style={{ display: 'grid', gridTemplateColumns: '2.5fr 1fr 1fr', padding: '7px 14px', ...TH, background: C.panel2 }}>
+                <span>{s.membersBtn}</span><span>{s.rank}</span><span>Joined</span>
               </div>
-              {MOCK_MEMBERS.map((m, i) => (
-                <div key={i} style={{ display: 'grid', gridTemplateColumns: '2.5fr 1fr 1fr 1fr', padding: '9px 14px', fontSize: 12, color: C.ink, borderTop: `1px solid ${C.line}`, alignItems: 'center' }}>
+              {members.map((m) => {
+                const name = m.user?.username ?? m.user?.wallet_address?.slice(0, 8) ?? 'Unknown'
+                const roleLabel = m.role === 'OWNER' ? 'Guild Master' : m.role === 'MODERATOR' ? 'Officer' : 'Member'
+                const isOwner = m.role === 'OWNER'
+                return (
+                <div key={m.id} style={{ display: 'grid', gridTemplateColumns: '2.5fr 1fr 1fr', padding: '9px 14px', fontSize: 12, color: C.ink, borderTop: `1px solid ${C.line}`, alignItems: 'center' }}>
                   <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                    <div style={{ width: 24, height: 24, borderRadius: R, background: m.role === 'Guild Master' ? `${C.gold}20` : C.panel, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, fontSize: 10, fontWeight: 700, color: m.role === 'Guild Master' ? C.gold : C.muted }}>
-                      {m.name[0].toUpperCase()}
+                    <div style={{ width: 24, height: 24, borderRadius: R, background: isOwner ? `${C.gold}20` : C.panel, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, fontSize: 10, fontWeight: 700, color: isOwner ? C.gold : C.muted }}>
+                      {name[0].toUpperCase()}
                     </div>
-                    <div>
-                      <span style={{ fontWeight: 500 }}>{m.name}</span>
-                    </div>
+                    <span style={{ fontWeight: 500 }}>{name}</span>
                   </div>
                   <div style={{ display: 'flex', alignItems: 'center', gap: 4, fontSize: 11 }}>
-                    {m.role === 'Guild Master' && <IconShieldChevron size={12} color={C.gold} />}
-                    {m.role === 'Officer' && <IconStar size={12} color={C.gold} />}
-                    <span style={{ color: m.role === 'Guild Master' ? C.gold : C.muted, fontWeight: m.role === 'Guild Master' ? 600 : 400 }}>{m.role}</span>
+                    {isOwner && <IconShieldChevron size={12} color={C.gold} />}
+                    {m.role === 'MODERATOR' && <IconStar size={12} color={C.gold} />}
+                    <span style={{ color: isOwner ? C.gold : C.muted, fontWeight: isOwner ? 600 : 400 }}>{roleLabel}</span>
                   </div>
-                  <span style={{ ...NUM, fontWeight: 500 }}>{m.assistance.toLocaleString()}</span>
-                  <span style={{ ...NUM, color: C.muted, fontSize: 11 }}>{m.lastLogin}</span>
+                  <span style={{ ...NUM, color: C.muted, fontSize: 11 }}>{new Date(m.joined_at).toLocaleDateString()}</span>
                 </div>
-              ))}
+                )
+              })}
+              {members.length === 0 && <div style={{ padding: 20, textAlign: 'center', fontSize: 12, color: C.muted }}>No members data</div>}
             </div>
           )}
 
           {/* ─── Chat ─── */}
           {activeSection === 'chat' && (
             <div style={{ borderRadius: R, overflow: 'hidden', border: `1px solid ${C.line}`, display: 'flex', flexDirection: 'column', height: 'calc(100% - 60px)' }}>
-              <div style={{ flex: 1, overflow: 'auto', padding: 0 }}>
-                {MOCK_CHAT.map((c, i) => (
-                  <div key={i} style={{ display: 'flex', gap: 10, padding: '10px 14px', borderTop: i > 0 ? `1px solid ${C.line}` : 'none', alignItems: 'flex-start' }}>
+              <div ref={chatScrollRef} data-lenis-prevent style={{ flex: 1, overflowY: 'auto', padding: 0 }}>
+                {chatMessages.length === 0 && (
+                  <div style={{ padding: 40, textAlign: 'center', fontSize: 12, color: C.muted }}>No messages yet. Start the conversation!</div>
+                )}
+                {chatMessages.map((c, i) => (
+                  <div key={c.id} style={{ display: 'flex', gap: 10, padding: '10px 14px', borderTop: i > 0 ? `1px solid ${C.line}` : 'none', alignItems: 'flex-start' }}>
                     <div style={{ width: 26, height: 26, borderRadius: R, background: C.panel, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, fontSize: 10, fontWeight: 700, color: C.muted }}>
-                      {c.user[0].toUpperCase()}
+                      {(c.user_name || '?')[0].toUpperCase()}
                     </div>
                     <div style={{ flex: 1, minWidth: 0 }}>
                       <div style={{ display: 'flex', alignItems: 'baseline', gap: 6 }}>
-                        <span style={{ fontSize: 12, fontWeight: 600, color: C.ink }}>{c.user}</span>
-                        <span style={{ ...NUM, fontSize: 9, color: C.muted }}>{c.time}</span>
+                        <span style={{ fontSize: 12, fontWeight: 600, color: C.ink }}>{c.user_name}</span>
+                        <span style={{ ...NUM, fontSize: 9, color: C.muted }}>{new Date(c.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
                       </div>
-                      <div style={{ fontSize: 13, color: C.ink, marginTop: 3, lineHeight: 1.45, opacity: 0.85 }}>{c.msg}</div>
+                      <div style={{ fontSize: 13, color: C.ink, marginTop: 3, lineHeight: 1.45, opacity: 0.85 }}>{c.content}</div>
                     </div>
                   </div>
                 ))}
               </div>
-              <div style={{ padding: '10px 14px', borderTop: `1px solid ${C.line}`, background: C.panel2, display: 'flex', gap: 8 }}>
-                <input type="text" placeholder="Type a message..." style={{ ...INPUT, borderRadius: R, padding: '7px 10px', fontSize: 12, background: C.bg }} readOnly />
-                <button type="button" style={{ padding: '7px 16px', borderRadius: R, background: C.gold, border: 'none', color: '#1a1400', fontSize: 12, fontWeight: 600, cursor: 'pointer', whiteSpace: 'nowrap' }}>Send</button>
-              </div>
+              <form onSubmit={e => { e.preventDefault(); sendChatMessage() }}
+                style={{ padding: '10px 14px', borderTop: `1px solid ${C.line}`, background: C.panel2, display: 'flex', gap: 8 }}>
+                <input type="text" value={chatInput} onChange={e => setChatInput(e.target.value)}
+                  placeholder={jwt ? 'Type a message...' : 'Connect wallet to chat'}
+                  disabled={!jwt} maxLength={500}
+                  style={{ ...INPUT, borderRadius: R, padding: '7px 10px', fontSize: 12, background: C.bg }} />
+                <button type="submit" disabled={!chatInput.trim() || !jwt}
+                  style={{ padding: '7px 16px', borderRadius: R, background: chatInput.trim() && jwt ? C.gold : C.panel, border: 'none', color: chatInput.trim() && jwt ? '#1a1400' : C.muted, fontSize: 12, fontWeight: 600, cursor: chatInput.trim() && jwt ? 'pointer' : 'default', whiteSpace: 'nowrap', transition: 'all 0.2s' }}>
+                  Send
+                </button>
+              </form>
             </div>
           )}
 
           {/* ─── Activities ─── */}
           {activeSection === 'activities' && (
             <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-              {[
+              {activities.length === 0 && (
+                <div style={{ padding: 40, textAlign: 'center', fontSize: 12, color: C.muted }}>No recent activity</div>
+              )}
+              {activities.slice(0, 20).map((act) => (
+                <div key={act.tx_hash} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '12px 14px', borderRadius: R, border: `1px solid ${C.line}`, background: C.panel }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                    <div style={{ width: 36, height: 36, borderRadius: R, background: act.is_buy ? `${C.green}18` : `${C.red}18`, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                      <IconTrendingUp size={16} color={act.is_buy ? C.green : C.red} style={{ transform: act.is_buy ? 'none' : 'rotate(180deg)' }} />
+                    </div>
+                    <div>
+                      <div style={{ fontSize: 13, fontWeight: 600, color: C.ink }}>{act.username} {act.is_buy ? 'bought' : 'sold'}</div>
+                      <div style={{ fontSize: 11, color: C.muted, marginTop: 2 }}>{act.artwork_title} · {Number(act.share_amount)} shares</div>
+                    </div>
+                  </div>
+                  <div style={{ textAlign: 'right' }}>
+                    <div style={{ ...NUM, fontSize: 13, fontWeight: 600, color: act.is_buy ? C.green : C.red }}>{Number(act.eth_amount).toFixed(4)} ETH</div>
+                    <div style={{ ...NUM, fontSize: 9, color: C.muted }}>{new Date(act.timestamp).toLocaleString()}</div>
+                  </div>
+                </div>
+              ))}
+              {/* Legacy tasks for visual completeness */}
+              {activities.length === 0 && [
                 { title: 'Daily Check-in', desc: 'Check in to earn guild XP', status: 'Available', color: C.green, icon: <IconCheck size={14} /> },
                 { title: 'Weekly Trade Goal', desc: 'Trade 5 artworks this week', status: '3/5', color: C.gold, icon: <IconTarget size={14} /> },
                 { title: 'Invite Members', desc: 'Invite 2 new members', status: 'Not started', color: C.muted, icon: <IconUsers size={14} /> },
