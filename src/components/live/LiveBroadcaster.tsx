@@ -5,10 +5,8 @@ import { useRouter }                         from 'next/navigation'
 import Link                                  from 'next/link'
 import {
   LiveKitRoom,
-  VideoConference,
   RoomAudioRenderer,
   ControlBar,
-  useLocalParticipant,
   useTracks,
   GridLayout,
   ParticipantTile,

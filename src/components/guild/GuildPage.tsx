@@ -583,11 +583,12 @@ function formatCooldown(ms: number, s: S): string {
 }
 
 // ── Gemini API for character generation ─────────────────────────
-const GEMINI_KEY = 'AIzaSyAQ-Ab8RN6JsbsQpq859iNrGQ96PMsLy6c'
 async function generateCharacterImage(prompt: string): Promise<string | null> {
   try {
+    const key = process.env.NEXT_PUBLIC_GEMINI_KEY
+    if (!key) return null
     const res = await fetch(
-      `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash-exp:generateContent?key=${GEMINI_KEY}`,
+      `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash-exp:generateContent?key=${key}`,
       {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
