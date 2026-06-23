@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState, useCallback, useRef } from 'react'
+import { useEffect, useState } from 'react'
 import Link                    from 'next/link'
 import {
   LiveKitRoom,
@@ -40,38 +40,36 @@ export function LiveViewer({ roomName }: { roomName: string }) {
   } | null>(null)
   const [error, setError] = useState('')
   const [ended, setEnded] = useState(false)
-  const identityRef = useRef<string>(null)
-  if (!identityRef.current) {
-    identityRef.current = `viewer-${Math.random().toString(36).slice(2, 8)}`
-  }
-
-  const fetchToken = useCallback(async () => {
-    try {
-      const [tokenRes, stream] = await Promise.all([
-        liveService.viewerToken(roomName, identityRef.current),
-        liveService.get(roomName),
-      ])
-
-      if (!stream.is_live) {
-        setEnded(true)
-        return
-      }
-
-      setToken(tokenRes.token)
-      setStreamInfo({
-        title: stream.title,
-        host_name: stream.host_name,
-        category: stream.category,
-        viewer_count: stream.viewer_count,
-      })
-    } catch (e: unknown) {
-      setError(e instanceof Error ? e.message : 'Stream not found or ended')
-    }
-  }, [roomName])
+  const [identity] = useState(() => `viewer-${crypto.randomUUID().slice(0, 8)}`)
+  const [retryKey, setRetryKey] = useState(0)
 
   useEffect(() => {
-    void fetchToken()
-  }, [fetchToken])
+    let cancelled = false
+    async function init() {
+      try {
+        const [tokenRes, stream] = await Promise.all([
+          liveService.viewerToken(roomName, identity),
+          liveService.get(roomName),
+        ])
+        if (cancelled) return
+        if (!stream.is_live) {
+          setEnded(true)
+          return
+        }
+        setToken(tokenRes.token)
+        setStreamInfo({
+          title: stream.title,
+          host_name: stream.host_name,
+          category: stream.category,
+          viewer_count: stream.viewer_count,
+        })
+      } catch (e: unknown) {
+        if (!cancelled) setError(e instanceof Error ? e.message : 'Stream not found or ended')
+      }
+    }
+    init()
+    return () => { cancelled = true }
+  }, [roomName, identity, retryKey])
 
   useEffect(() => {
     if (!token || ended) return
@@ -118,7 +116,7 @@ export function LiveViewer({ roomName }: { roomName: string }) {
           style={{ color: 'rgba(255,255,255,0.3)' }}>
           {error}
         </p>
-        <button onClick={() => { setError(''); fetchToken() }}
+        <button onClick={() => { setError(''); setRetryKey(k => k + 1) }}
           className="font-mono text-[9px] tracking-widest uppercase px-4 py-2"
           style={{ border: '1px solid rgba(212,175,55,0.35)', color: '#D4AF37', background: 'none', cursor: 'pointer' }}>
           Retry
