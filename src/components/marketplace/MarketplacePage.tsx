@@ -637,8 +637,8 @@ function TickerTape() {
       className="overflow-hidden relative"
       style={{
         height:       28,
-        borderBottom: '1px solid rgba(255,255,255,0.05)',
-        background:   'rgba(0,0,0,0.55)',
+        borderBottom: '1px solid var(--tp-border)',
+        background:   'var(--tp-panel)',
       }}
     >
       {/* live indicator */}
@@ -668,16 +668,16 @@ function TickerTape() {
           <span
             key={i}
             className="inline-flex items-center gap-2 px-5 h-full shrink-0"
-            style={{ borderRight: '1px solid rgba(255,255,255,0.04)' }}
+            style={{ borderRight: '1px solid var(--tp-border)' }}
           >
             {/* Symbol */}
             <span className="font-mono text-[8px] font-bold tracking-wide"
-              style={{ color: 'rgba(255,255,255,0.55)' }}>
+              style={{ color: 'var(--tp-text-2)' }}>
               {item.symbol}
             </span>
             {/* Price */}
             <span className="font-mono text-[8.5px]"
-              style={{ color: 'rgba(255,255,255,0.85)' }}>
+              style={{ color: 'var(--tp-text-1)' }}>
               {item.price}
             </span>
             {/* % change */}
@@ -770,15 +770,15 @@ function ActivityFeed() {
   }, [])
 
   return (
-    <div style={{ borderTop: '1px solid rgba(255,255,255,0.07)' }}>
+    <div style={{ borderTop: '1px solid var(--tp-border)' }}>
       {/* Header */}
       <div
         className="flex items-center justify-between px-4 py-2.5"
-        style={{ borderBottom: '1px solid rgba(255,255,255,0.05)' }}
+        style={{ borderBottom: '1px solid var(--tp-border)' }}
       >
         <span
           className="font-mono text-[8px] uppercase tracking-[0.22em]"
-          style={{ color: 'rgba(255,255,255,0.22)' }}
+          style={{ color: 'var(--tp-text-4)' }}
         >
           {t.marketplace.liveActivity}
         </span>
@@ -806,7 +806,7 @@ function ActivityFeed() {
             exit={{ opacity: 0 }}
             transition={{ duration: 0.28 }}
             className="flex items-center gap-3 px-4 py-2.5"
-            style={{ borderBottom: '1px solid rgba(255,255,255,0.04)' }}
+            style={{ borderBottom: '1px solid var(--tp-border)' }}
           >
             {/* Thumbnail */}
             <div className="relative w-[22px] h-[22px] shrink-0 overflow-hidden rounded-sm">
@@ -821,11 +821,11 @@ function ActivityFeed() {
             {/* Description */}
             <p
               className="flex-1 min-w-0 text-[8.5px] truncate"
-              style={{ color: 'rgba(255,255,255,0.4)' }}
+              style={{ color: 'var(--tp-text-3)' }}
             >
               <span
                 className="font-mono"
-                style={{ color: 'rgba(255,255,255,0.18)' }}
+                style={{ color: 'var(--tp-text-4)' }}
               >
                 {trade.addr}
               </span>
@@ -838,7 +838,7 @@ function ActivityFeed() {
             {/* Amount */}
             <span
               className="font-mono text-[8.5px] shrink-0"
-              style={{ color: 'rgba(255,255,255,0.35)' }}
+              style={{ color: 'var(--tp-text-3)' }}
             >
               {trade.ethAmount} ETH
             </span>
@@ -1090,8 +1090,8 @@ function MiniSparkline({ art, height }: { art: MarketArtwork; height: number }) 
       className="relative w-full overflow-hidden rounded-sm"
       style={{
         height,
-        background: 'rgba(0,0,0,0.55)',
-        border:     '1px solid rgba(255,255,255,0.07)',
+        background: 'var(--tp-panel)',
+        border:     '1px solid var(--tp-border)',
         transition: 'height 0.38s cubic-bezier(0.25,0.46,0.45,0.94)',
       }}
     >
@@ -1126,7 +1126,7 @@ function MiniSparkline({ art, height }: { art: MarketArtwork; height: number }) 
       {/* Current price label */}
       <span
         className="absolute left-2 top-1 font-mono text-[7px] tracking-widest"
-        style={{ color: 'rgba(255,255,255,0.3)' }}
+        style={{ color: 'var(--tp-text-3)' }}
       >
         PRICE HISTORY
       </span>
@@ -1344,27 +1344,27 @@ function RankTimeline({
 
   return (
     <div className="w-full shrink-0"
-      style={{ height, borderBottom: '1px solid rgba(255,255,255,0.06)' }}>
+      style={{ height, borderBottom: '1px solid var(--tp-border)' }}>
 
       {/* ── Topbar: fully isolated from SVG, can never be overlapped ── */}
       <div className="flex items-center justify-between px-3"
-        style={{ height: TOPBAR, background: 'rgba(0,0,0,0.5)', borderBottom: '1px solid rgba(255,255,255,0.04)' }}>
+        style={{ height: TOPBAR, background: 'var(--tp-panel)', borderBottom: '1px solid var(--tp-border)' }}>
         <span className="font-mono text-[7px] tracking-[0.18em] uppercase"
-          style={{ color: 'rgba(255,255,255,0.22)' }}>
+          style={{ color: 'var(--tp-text-4)' }}>
           RANK HISTORY · {ticks} pts
         </span>
         {onExpand && (
           <button type="button" onClick={onExpand}
             className="flex items-center gap-1 font-mono text-[7px] tracking-widest uppercase px-1.5 py-0.5"
-            style={{ color: 'rgba(255,255,255,0.3)', border: '1px solid rgba(255,255,255,0.1)' }}
+            style={{ color: 'var(--tp-text-3)', border: '1px solid var(--tp-border)' }}
             onMouseEnter={e => {
               e.currentTarget.style.color = '#D4AF37'
               e.currentTarget.style.borderColor = 'rgba(212,175,55,0.45)'
               e.currentTarget.style.background = 'rgba(212,175,55,0.08)'
             }}
             onMouseLeave={e => {
-              e.currentTarget.style.color = 'rgba(255,255,255,0.3)'
-              e.currentTarget.style.borderColor = 'rgba(255,255,255,0.1)'
+              e.currentTarget.style.color = 'var(--tp-text-3)'
+              e.currentTarget.style.borderColor = 'var(--tp-border)'
               e.currentTarget.style.background = 'transparent'
             }}>
             <svg viewBox="0 0 24 24" className="w-2.5 h-2.5" fill="none"
@@ -1377,13 +1377,13 @@ function RankTimeline({
       </div>
 
       {/* ── Chart body: SVG lines + HTML avatar column ── */}
-      <div className="relative" style={{ height: svgH, background: 'rgba(0,0,0,0.18)' }}>
+      <div className="relative" style={{ height: svgH, background: 'var(--tp-panel-alt)' }}>
         {/* Y-axis rank labels */}
         <div className="absolute top-0 bottom-0 flex flex-col justify-between pointer-events-none"
           style={{ left: 5, paddingTop: 14, paddingBottom: 14, zIndex: 2 }}>
           {Array.from({ length: N }, (_, i) => (
             <span key={i} className="font-mono leading-none"
-              style={{ fontSize: Math.max(6, Math.min(8, svgH / N - 1)), color: i === 0 ? 'rgba(212,175,55,0.55)' : 'rgba(255,255,255,0.14)' }}>
+              style={{ fontSize: Math.max(6, Math.min(8, svgH / N - 1)), color: i === 0 ? 'rgba(212,175,55,0.55)' : 'var(--tp-text-5)' }}>
               {i + 1}
             </span>
           ))}
@@ -1460,7 +1460,7 @@ function RankTimelineFullscreen({
       {/* ── Header ── */}
       <div
         className="flex items-center justify-between px-6 shrink-0"
-        style={{ height: 48, borderBottom: '1px solid rgba(255,255,255,0.07)', background: 'rgba(0,0,0,0.5)' }}
+        style={{ height: 48, borderBottom: '1px solid var(--tp-border)', background: 'var(--tp-panel)' }}
       >
         <div className="flex items-center gap-3">
           <svg viewBox="0 0 24 24" className="w-3.5 h-3.5" fill="none"
@@ -1468,7 +1468,7 @@ function RankTimelineFullscreen({
             <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>
           </svg>
           <span className="font-mono text-[10px] tracking-[0.26em] uppercase"
-            style={{ color: 'rgba(255,255,255,0.5)' }}>
+            style={{ color: 'var(--tp-text-2)' }}>
             RANK HISTORY
           </span>
           <span className="flex items-center gap-1.5 ml-1">
@@ -1481,7 +1481,7 @@ function RankTimelineFullscreen({
               <span className="font-mono text-[9px] tracking-wide" style={{ color: selectedArt.phaseColor }}>
                 {selectedArt.ticker}
               </span>
-              <span className="font-mono text-[9px]" style={{ color: 'rgba(255,255,255,0.4)' }}>
+              <span className="font-mono text-[9px]" style={{ color: 'var(--tp-text-3)' }}>
                 {selectedArt.title}
               </span>
             </span>
@@ -1499,23 +1499,23 @@ function RankTimelineFullscreen({
           {selectedIds.length > 0 && (
             <button type="button" onClick={() => setSelectedIds([])}
               className="font-mono text-[8px] tracking-widest uppercase px-2 py-1 transition-colors"
-              style={{ color: 'rgba(255,255,255,0.3)', border: '1px solid rgba(255,255,255,0.08)' }}
-              onMouseEnter={e => e.currentTarget.style.color = 'rgba(255,255,255,0.6)'}
-              onMouseLeave={e => e.currentTarget.style.color = 'rgba(255,255,255,0.3)'}>
+              style={{ color: 'var(--tp-text-3)', border: '1px solid var(--tp-border)' }}
+              onMouseEnter={e => e.currentTarget.style.color = 'var(--tp-text-2)'}
+              onMouseLeave={e => e.currentTarget.style.color = 'var(--tp-text-3)'}>
               Clear {selectedIds.length > 1 ? `(${selectedIds.length})` : ''}
             </button>
           )}
           <button type="button" onClick={onClose}
             className="flex items-center gap-1.5 font-mono text-[9px] tracking-widest uppercase
                        px-3 py-1.5 transition-colors duration-150"
-            style={{ color: 'rgba(255,255,255,0.35)', border: '1px solid rgba(255,255,255,0.1)' }}
+            style={{ color: 'var(--tp-text-3)', border: '1px solid var(--tp-border)' }}
             onMouseEnter={e => {
-              e.currentTarget.style.color = 'rgba(255,255,255,0.75)'
-              e.currentTarget.style.borderColor = 'rgba(255,255,255,0.3)'
+              e.currentTarget.style.color = 'var(--tp-text-1)'
+              e.currentTarget.style.borderColor = 'var(--tp-border)'
             }}
             onMouseLeave={e => {
-              e.currentTarget.style.color = 'rgba(255,255,255,0.35)'
-              e.currentTarget.style.borderColor = 'rgba(255,255,255,0.1)'
+              e.currentTarget.style.color = 'var(--tp-text-3)'
+              e.currentTarget.style.borderColor = 'var(--tp-border)'
             }}>
             <svg viewBox="0 0 24 24" className="w-3 h-3" fill="none"
               stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
@@ -1535,13 +1535,13 @@ function RankTimelineFullscreen({
           style={{ width: selectedArt ? '55%' : '100%', transition: 'width 0.3s ease', borderRight: selectedArt ? '1px solid rgba(255,255,255,0.06)' : 'none' }}
         >
           {/* SVG chart,fills available height */}
-          <div ref={chartRef} className="flex-1 min-h-0 relative" style={{ background: 'rgba(0,0,0,0.15)' }}>
+          <div ref={chartRef} className="flex-1 min-h-0 relative" style={{ background: 'var(--tp-panel-alt)' }}>
             {/* Y-axis labels */}
             <div className="absolute top-0 bottom-0 flex flex-col justify-between py-4 pointer-events-none"
               style={{ left: 6, zIndex: 1 }}>
               {Array.from({ length: N }, (_, i) => (
                 <span key={i} className="font-mono text-[8px] leading-none"
-                  style={{ color: i === 0 ? 'rgba(212,175,55,0.6)' : 'rgba(255,255,255,0.14)' }}>
+                  style={{ color: i === 0 ? 'rgba(212,175,55,0.6)' : 'var(--tp-text-5)' }}>
                   #{i + 1}
                 </span>
               ))}
@@ -1555,8 +1555,8 @@ function RankTimelineFullscreen({
             className="shrink-0 overflow-y-auto p-3"
             style={{
               maxHeight: 220,
-              background: 'rgba(0,0,0,0.3)',
-              borderTop: '1px solid rgba(255,255,255,0.05)',
+              background: 'var(--tp-panel)',
+              borderTop: '1px solid var(--tp-border)',
               scrollbarWidth: 'thin',
               scrollbarColor: 'rgba(255,255,255,0.08) transparent',
             }}
@@ -1588,7 +1588,7 @@ function RankTimelineFullscreen({
                     }}
                   >
                     <span className="font-mono text-[9px] w-5 shrink-0 text-right"
-                      style={{ color: idx < 3 ? '#D4AF37' : 'rgba(255,255,255,0.22)' }}>
+                      style={{ color: idx < 3 ? '#D4AF37' : 'var(--tp-text-4)' }}>
                       #{idx + 1}
                     </span>
                     <span className="size-2 rounded-full shrink-0" style={{ background: art.phaseColor }}/>
@@ -1602,7 +1602,7 @@ function RankTimelineFullscreen({
                         {art.title}
                       </p>
                       <div className="flex items-center gap-1.5 mt-0.5">
-                        <span className="font-mono text-[8px]" style={{ color: 'rgba(255,255,255,0.4)' }}>
+                        <span className="font-mono text-[8px]" style={{ color: 'var(--tp-text-3)' }}>
                           {fmtETH(lp)} ETH
                         </span>
                         <span className="font-mono text-[7.5px]" style={{ color: up ? '#4ade80' : '#f87171' }}>
@@ -1620,7 +1620,7 @@ function RankTimelineFullscreen({
               })}
             </div>
             <p className="font-mono text-[7px] mt-2 tracking-[0.14em] uppercase text-center"
-              style={{ color: 'rgba(255,255,255,0.1)' }}>
+              style={{ color: 'var(--tp-text-5)' }}>
               Click an artwork to view its price chart · ESC to close
             </p>
           </div>
@@ -1639,13 +1639,13 @@ function RankTimelineFullscreen({
               style={{ width: '45%', background: '#0A0A0A', minHeight: 0 }}
             >
               <div className="px-6 pt-5 pb-4 shrink-0"
-                style={{ borderBottom: '1px solid rgba(255,255,255,0.06)' }}>
+                style={{ borderBottom: '1px solid var(--tp-border)' }}>
                 <div className="flex items-center gap-2 mb-2">
                   <span className="font-mono text-[9px] tracking-[0.18em] uppercase px-2 py-0.5"
                     style={{ background: `${selectedArt.phaseColor}15`, border: `1px solid ${selectedArt.phaseColor}35`, color: selectedArt.phaseColor }}>
                     {selectedArt.phase}
                   </span>
-                  <span className="font-mono text-[9px] tracking-wide" style={{ color: 'rgba(255,255,255,0.28)' }}>
+                  <span className="font-mono text-[9px] tracking-wide" style={{ color: 'var(--tp-text-3)' }}>
                     {selectedArt.ticker}
                   </span>
                 </div>
@@ -1653,30 +1653,30 @@ function RankTimelineFullscreen({
                   style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: '1.45rem', color: 'var(--ac-paper)' }}>
                   {selectedArt.title}
                 </h3>
-                <p className="text-[9.5px] tracking-[0.2em] uppercase" style={{ color: 'rgba(255,255,255,0.3)' }}>
+                <p className="text-[9.5px] tracking-[0.2em] uppercase" style={{ color: 'var(--tp-text-3)' }}>
                   {selectedArt.artist}
                 </p>
               </div>
               <div className="flex items-center gap-6 px-6 py-3 shrink-0"
-                style={{ borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
+                style={{ borderBottom: '1px solid var(--tp-border)' }}>
                 {(() => {
                   const lp = livePrices[selectedArt.id] ?? selectedArt.marketCap
                   const delta = ((lp - selectedArt.marketCap) / selectedArt.marketCap) * 100
                   const up = delta >= 0
                   return (<>
                     <div>
-                      <p className="font-mono text-[7.5px] uppercase tracking-widest mb-0.5" style={{ color: 'rgba(255,255,255,0.28)' }}>Live Price</p>
+                      <p className="font-mono text-[7.5px] uppercase tracking-widest mb-0.5" style={{ color: 'var(--tp-text-3)' }}>Live Price</p>
                       <p className="font-mono text-[1.4rem] leading-none" style={{ color: 'var(--ac-paper)' }}>
                         {fmtETH(lp)} <span className="text-[0.85rem] opacity-50">ETH</span>
                       </p>
                     </div>
                     <div>
-                      <p className="font-mono text-[7.5px] uppercase tracking-widest mb-0.5" style={{ color: 'rgba(255,255,255,0.28)' }}>vs Seed</p>
+                      <p className="font-mono text-[7.5px] uppercase tracking-widest mb-0.5" style={{ color: 'var(--tp-text-3)' }}>vs Seed</p>
                       <p className="font-mono text-[1.1rem] leading-none" style={{ color: up ? '#4ade80' : '#f87171' }}>{fmtPct(delta)}</p>
                     </div>
                     <div>
-                      <p className="font-mono text-[7.5px] uppercase tracking-widest mb-0.5" style={{ color: 'rgba(255,255,255,0.28)' }}>Holders</p>
-                      <p className="font-mono text-[1.1rem] leading-none" style={{ color: 'rgba(255,255,255,0.7)' }}>{selectedArt.holders}</p>
+                      <p className="font-mono text-[7.5px] uppercase tracking-widest mb-0.5" style={{ color: 'var(--tp-text-3)' }}>Holders</p>
+                      <p className="font-mono text-[1.1rem] leading-none" style={{ color: 'var(--tp-text-1)' }}>{selectedArt.holders}</p>
                     </div>
                   </>)
                 })()}
@@ -1685,17 +1685,17 @@ function RankTimelineFullscreen({
                 {(['1H', '6H', '1D', '7D'] as TimeRange[]).map(r => (
                   <button key={r} type="button" onClick={() => setChartRange(r)}
                     className="font-mono text-[8px] px-2.5 py-1 transition-colors duration-150"
-                    style={{ color: chartRange === r ? '#D4AF37' : 'rgba(255,255,255,0.3)', background: chartRange === r ? 'rgba(212,175,55,0.1)' : 'transparent', border: `1px solid ${chartRange === r ? 'rgba(212,175,55,0.3)' : 'rgba(255,255,255,0.07)'}` }}>
+                    style={{ color: chartRange === r ? '#D4AF37' : 'var(--tp-text-3)', background: chartRange === r ? 'rgba(212,175,55,0.1)' : 'transparent', border: `1px solid ${chartRange === r ? 'rgba(212,175,55,0.3)' : 'var(--tp-border)'}` }}>
                     {r}
                   </button>
                 ))}
-                <span className="font-mono text-[7.5px] ml-auto tracking-widest uppercase" style={{ color: 'rgba(255,255,255,0.2)' }}>Bonding Curve</span>
+                <span className="font-mono text-[7.5px] ml-auto tracking-widest uppercase" style={{ color: 'var(--tp-text-4)' }}>Bonding Curve</span>
               </div>
               <div className="flex-1 min-h-0 px-4 pb-4">
                 <BondingCurveChart art={selectedArt} range={chartRange} height={220}/>
               </div>
               <div className="px-6 pb-5 shrink-0">
-                <p className="text-[11.5px] leading-relaxed mb-5" style={{ color: 'rgba(255,255,255,0.38)', maxWidth: '44ch' }}>
+                <p className="text-[11.5px] leading-relaxed mb-5" style={{ color: 'var(--tp-text-3)', maxWidth: '44ch' }}>
                   {selectedArt.description}
                 </p>
                 <Link
@@ -1760,9 +1760,9 @@ function RankTimelineFullscreen({
             >
               {/* Header */}
               <div className="px-6 pt-5 pb-4 shrink-0"
-                style={{ borderBottom: '1px solid rgba(255,255,255,0.06)' }}>
+                style={{ borderBottom: '1px solid var(--tp-border)' }}>
                 <p className="font-mono text-[8px] tracking-[0.22em] uppercase mb-1.5"
-                  style={{ color: 'rgba(255,255,255,0.28)' }}>Comparing</p>
+                  style={{ color: 'var(--tp-text-3)' }}>Comparing</p>
                 <h3 className="font-light"
                   style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: '1.35rem', color: 'var(--ac-paper)' }}>
                   {selectedIds.length} Artworks
@@ -1784,7 +1784,7 @@ function RankTimelineFullscreen({
                 style={{ scrollbarWidth: 'thin', scrollbarColor: 'rgba(255,255,255,0.06) transparent' }}>
                 {/* Table header */}
                 <div className="grid px-5 py-2 font-mono text-[7.5px] tracking-[0.16em] uppercase sticky top-0"
-                  style={{ gridTemplateColumns: '1fr 70px 70px 44px', background: '#0A0A0A', borderBottom: '1px solid rgba(255,255,255,0.05)', color: 'rgba(255,255,255,0.22)' }}>
+                  style={{ gridTemplateColumns: '1fr 70px 70px 44px', background: '#0A0A0A', borderBottom: '1px solid var(--tp-border)', color: 'var(--tp-text-4)' }}>
                   <span>Artwork</span>
                   <span className="text-right">Price</span>
                   <span className="text-right">vs Seed</span>
@@ -1818,7 +1818,7 @@ function RankTimelineFullscreen({
                         className="grid items-center px-5 py-3.5 transition-colors duration-100 cursor-pointer"
                         style={{
                           gridTemplateColumns: '1fr 70px 70px 44px',
-                          borderBottom: '1px solid rgba(255,255,255,0.04)',
+                          borderBottom: '1px solid var(--tp-border)',
                           background: idx === 0 ? 'rgba(212,175,55,0.03)' : 'transparent',
                         }}
                         onClick={() => setSelectedIds([art.id])}
@@ -1859,7 +1859,7 @@ function RankTimelineFullscreen({
                             style={{ color: up ? '#4ade80' : '#f87171' }}>
                             {fmtPct(delta)}
                           </p>
-                          <p className="font-mono text-[8px] mt-0.5" style={{ color: 'rgba(255,255,255,0.22)' }}>
+                          <p className="font-mono text-[8px] mt-0.5" style={{ color: 'var(--tp-text-4)' }}>
                             {art.holders} holders
                           </p>
                         </div>
@@ -1867,7 +1867,7 @@ function RankTimelineFullscreen({
                         {/* Current rank */}
                         <div className="text-right">
                           <p className="font-mono text-[13px] leading-none"
-                            style={{ color: idx === 0 ? '#D4AF37' : 'rgba(255,255,255,0.35)' }}>
+                            style={{ color: idx === 0 ? '#D4AF37' : 'var(--tp-text-3)' }}>
                             #{ranked.findIndex(r => r.id === art.id) + 1}
                           </p>
                         </div>
@@ -1877,9 +1877,9 @@ function RankTimelineFullscreen({
               </div>
 
               {/* Footer hint */}
-              <div className="px-5 py-3 shrink-0" style={{ borderTop: '1px solid rgba(255,255,255,0.05)' }}>
+              <div className="px-5 py-3 shrink-0" style={{ borderTop: '1px solid var(--tp-border)' }}>
                 <p className="font-mono text-[7.5px] tracking-[0.14em] uppercase text-center"
-                  style={{ color: 'rgba(255,255,255,0.14)' }}>
+                  style={{ color: 'var(--tp-text-5)' }}>
                   Click a row to view single chart · Click ticker tag to remove
                 </p>
               </div>
@@ -1921,14 +1921,14 @@ function RaceBar({
           : isSelected
             ? 'rgba(255,255,255,0.035)'
             : 'transparent',
-        borderBottom: '1px solid rgba(255,255,255,0.045)',
+        borderBottom: '1px solid var(--tp-border)',
         transition:   `background ${isFlashing ? '0.6s' : '0.15s'} ease`,
       }}
     >
       {/* Rank number */}
       <span
         className="font-mono text-[11px] w-5 shrink-0 text-right"
-        style={{ color: rank <= 3 ? '#D4AF37' : 'rgba(255,255,255,0.22)' }}
+        style={{ color: rank <= 3 ? '#D4AF37' : 'var(--tp-text-4)' }}
       >
         {rank}
       </span>
@@ -1951,7 +1951,7 @@ function RaceBar({
           {art.title}
         </p>
         <p className="font-mono text-[8px] tracking-wide mt-0.5"
-          style={{ color: 'rgba(255,255,255,0.28)' }}>
+          style={{ color: 'var(--tp-text-3)' }}>
           {art.ticker}
         </p>
       </div>
@@ -1960,7 +1960,7 @@ function RaceBar({
       <div className="flex-1 flex items-center gap-2.5">
         <div
           className="h-[4px] flex-1 overflow-hidden rounded-full"
-          style={{ background: 'rgba(255,255,255,0.06)' }}
+          style={{ background: 'var(--tp-border)' }}
         >
           <motion.div
             className="h-full rounded-full"
@@ -1975,7 +1975,7 @@ function RaceBar({
         {/* Live price */}
         <span
           className="font-mono text-[10.5px] whitespace-nowrap shrink-0"
-          style={{ color: 'rgba(255,255,255,0.8)', minWidth: 80, textAlign: 'right' }}
+          style={{ color: 'var(--tp-text-1)', minWidth: 80, textAlign: 'right' }}
         >
           {fmtETH(livePrice)} ETH
         </span>
@@ -2118,7 +2118,7 @@ function ListItem({
       onMouseLeave={() => setHovered(false)}
       className="w-full flex items-center gap-3 py-3 px-4 text-left relative"
       style={{
-        borderBottom:    '1px solid rgba(255,255,255,0.05)',
+        borderBottom:    '1px solid var(--tp-border)',
         background:      isFlashing
           ? (liveUp ? 'rgba(74,222,128,0.07)' : 'rgba(248,113,113,0.07)')
           : active  ? 'rgba(255,255,255,0.04)'
@@ -2149,14 +2149,14 @@ function ListItem({
       <div className="flex-1 min-w-0">
         <p className="truncate text-[12.5px] leading-tight"
           style={{
-            color:      active ? 'var(--ac-paper)' : 'rgba(255,255,255,0.72)',
+            color:      active ? 'var(--ac-paper)' : 'var(--tp-text-1)',
             fontFamily: "'Cormorant Garamond', serif",
             fontWeight: 400,
           }}>
           {art.title}
         </p>
         <p className="text-[9px] font-mono tracking-wide mt-0.5"
-          style={{ color: 'rgba(255,255,255,0.3)' }}>
+          style={{ color: 'var(--tp-text-3)' }}>
           {art.ticker}
         </p>
       </div>
@@ -2165,7 +2165,7 @@ function ListItem({
       <div className="text-right shrink-0 w-20">
         <p
           className="font-mono text-[11.5px]"
-          style={{ color: active ? 'var(--ac-paper)' : 'rgba(255,255,255,0.65)' }}
+          style={{ color: active ? 'var(--ac-paper)' : 'var(--tp-text-2)' }}
         >
           {fmtETH(livePrice)} ETH
         </p>
@@ -2247,12 +2247,12 @@ function StarRating({ value, count }: { value: number | null; count: number }) {
           <span className="font-mono text-[13px] font-medium" style={{ color: '#D4AF37' }}>
             {value.toFixed(2)}
           </span>
-          <span className="font-mono text-[9px]" style={{ color: 'rgba(255,255,255,0.22)' }}>
+          <span className="font-mono text-[9px]" style={{ color: 'var(--tp-text-4)' }}>
             ({count} {count === 1 ? 'review' : 'reviews'})
           </span>
         </>
       ) : (
-        <span className="font-mono text-[10px]" style={{ color: 'rgba(255,255,255,0.22)' }}>
+        <span className="font-mono text-[10px]" style={{ color: 'var(--tp-text-4)' }}>
           {t.common.noReviewsYet}
         </span>
       )}
@@ -2358,7 +2358,7 @@ function InspectionDeck({
               </span>
               <span
                 className="font-mono text-[10px] tracking-wider"
-                style={{ color: 'rgba(255,255,255,0.28)' }}
+                style={{ color: 'var(--tp-text-3)' }}
               >
                 {art.ticker}
               </span>
@@ -2381,9 +2381,9 @@ function InspectionDeck({
 
             {/* Artist */}
             <p className="text-[10px] tracking-[0.24em] uppercase"
-              style={{ color: 'rgba(255,255,255,0.35)' }}>
+              style={{ color: 'var(--tp-text-3)' }}>
               {art.artist}
-              <span className="ml-2 font-mono" style={{ color: 'rgba(255,255,255,0.2)' }}>
+              <span className="ml-2 font-mono" style={{ color: 'var(--tp-text-4)' }}>
                 {art.artistAddr}
               </span>
             </p>
@@ -2391,7 +2391,7 @@ function InspectionDeck({
             {/* Description */}
             <p
               className="text-[13px] leading-relaxed"
-              style={{ color: 'rgba(255,255,255,0.52)', maxWidth: '36ch' }}
+              style={{ color: 'var(--tp-text-2)', maxWidth: '36ch' }}
             >
               {art.description}
             </p>
@@ -2408,11 +2408,11 @@ function InspectionDeck({
                   className="px-3 py-2.5 text-center"
                   style={{
                     background: 'rgba(255,255,255,0.04)',
-                    border:     '1px solid rgba(255,255,255,0.07)',
+                    border:     '1px solid var(--tp-border)',
                   }}
                 >
                   <p className="text-[7.5px] uppercase tracking-[0.2em] mb-1"
-                    style={{ color: 'rgba(255,255,255,0.28)' }}>{m.label}</p>
+                    style={{ color: 'var(--tp-text-3)' }}>{m.label}</p>
                   <p className="font-mono text-[12px] font-medium" style={{ color: m.color }}>
                     {m.value}
                   </p>
@@ -2494,9 +2494,9 @@ function InspectionDeck({
             ].map(s => (
               <div key={s.label}>
                 <p className="text-[8px] uppercase tracking-[0.2em] mb-0.5"
-                  style={{ color: 'rgba(255,255,255,0.28)' }}>{s.label}</p>
+                  style={{ color: 'var(--tp-text-3)' }}>{s.label}</p>
                 <p className="font-mono text-[12.5px]"
-                  style={{ color: 'rgba(255,255,255,0.75)' }}>{s.value}</p>
+                  style={{ color: 'var(--tp-text-1)' }}>{s.value}</p>
               </div>
             ))}
           </div>
@@ -2506,7 +2506,7 @@ function InspectionDeck({
             <div className="flex items-center justify-between mb-2.5">
               <p
                 className="font-mono text-[9px] tracking-[0.22em] uppercase"
-                style={{ color: 'rgba(255,255,255,0.28)' }}
+                style={{ color: 'var(--tp-text-3)' }}
               >
                 {t.marketplace.bondingCurveHistory}
               </p>
@@ -2518,9 +2518,9 @@ function InspectionDeck({
                     onClick={() => setChartRange(r)}
                     className="font-mono text-[8px] px-2 py-1 transition-colors duration-150"
                     style={{
-                      color:      chartRange === r ? '#D4AF37' : 'rgba(255,255,255,0.3)',
+                      color:      chartRange === r ? '#D4AF37' : 'var(--tp-text-3)',
                       background: chartRange === r ? 'rgba(212,175,55,0.1)' : 'transparent',
-                      border:     `1px solid ${chartRange === r ? 'rgba(212,175,55,0.3)' : 'rgba(255,255,255,0.07)'}`,
+                      border:     `1px solid ${chartRange === r ? 'rgba(212,175,55,0.3)' : 'var(--tp-border)'}`,
                     }}
                   >
                     {r}
@@ -2534,11 +2534,11 @@ function InspectionDeck({
           {/* Progress bar */}
           <div>
             <div className="flex justify-between font-mono text-[9px] mb-1.5">
-              <span style={{ color: 'rgba(255,255,255,0.3)' }}>{t.marketplace.curveProgress}</span>
+              <span style={{ color: 'var(--tp-text-3)' }}>{t.marketplace.curveProgress}</span>
               <span style={{ color: '#D4AF37' }}>{art.progress}% {t.marketplace.toGraduation}</span>
             </div>
             <div className="h-[5px] w-full rounded-full"
-              style={{ background: 'rgba(255,255,255,0.08)' }}>
+              style={{ background: 'var(--tp-border)' }}>
               <div className="h-full rounded-full transition-all duration-700"
                 style={{
                   width:      `${art.progress}%`,
@@ -2546,7 +2546,7 @@ function InspectionDeck({
                 }}/>
             </div>
             <div className="flex justify-between font-mono text-[7.5px] mt-1.5"
-              style={{ color: 'rgba(255,255,255,0.2)' }}>
+              style={{ color: 'var(--tp-text-4)' }}>
               <span>{t.marketplace.phaseAccumulation}</span>
               <span>{t.marketplace.phaseFomo}</span>
               <span>{t.marketplace.phaseMigration}</span>
@@ -2572,7 +2572,7 @@ function InspectionDeck({
           </button>
 
           <p className="text-center font-mono text-[8px] tracking-[0.14em] uppercase"
-            style={{ color: 'rgba(255,255,255,0.16)' }}>
+            style={{ color: 'var(--tp-text-5)' }}>
             Base Network · Bonding Curve · {art.holders} {t.marketplace.currentHolders}
           </p>
         </div>
@@ -3117,7 +3117,7 @@ export function MarketplacePage() {
         <div
           ref={headerRef}
           className="relative shrink-0 px-8 py-5 overflow-hidden"
-          style={{ borderBottom: '1px solid rgba(255,255,255,0.08)' }}
+          style={{ borderBottom: '1px solid var(--tp-border)' }}
         >
           {/* Animated background chart */}
           <HeaderChartBg />
@@ -3140,7 +3140,7 @@ export function MarketplacePage() {
               <p
                 data-fade
                 className="text-[11px] tracking-[0.18em] mt-1"
-                style={{ color: 'rgba(255,255,255,0.35)', opacity: 0 }}
+                style={{ color: 'var(--tp-text-3)', opacity: 0 }}
               >
                 {t.marketplace.subtitle}
               </p>
@@ -3155,15 +3155,15 @@ export function MarketplacePage() {
                 <div key={s.label}
                   className="px-4 py-2.5 text-center"
                   style={{
-                    border:     '1px solid rgba(255,255,255,0.1)',
+                    border:     '1px solid var(--tp-border)',
                     background: 'rgba(255,255,255,0.02)',
                     minWidth:   96,
                   }}>
                   <p className="font-mono text-[7.5px] tracking-[0.22em] uppercase mb-1"
-                    style={{ color: 'rgba(255,255,255,0.3)' }}>{s.label}</p>
+                    style={{ color: 'var(--tp-text-3)' }}>{s.label}</p>
                   <p className="font-mono text-[0.95rem] leading-none"
                     style={{
-                      color: s.gold ? '#D4AF37' : s.green ? '#4ade80' : 'rgba(255,255,255,0.82)',
+                      color: s.gold ? '#D4AF37' : s.green ? '#4ade80' : 'var(--tp-text-1)',
                     }}>
                     {s.value}
                   </p>
@@ -3178,7 +3178,7 @@ export function MarketplacePage() {
           className="sticky z-30 flex items-center justify-between gap-4 px-6"
           style={{
             top:          80,
-            borderBottom: '1px solid rgba(255,255,255,0.08)',
+            borderBottom: '1px solid var(--tp-border)',
             background:   'rgba(10,10,10,0.98)',
             height:       48,
           }}
@@ -3204,7 +3204,7 @@ export function MarketplacePage() {
                   onClick={() => setActivePhase(tab.key)}
                   className="relative flex items-center gap-1.5 h-full px-3.5 shrink-0
                              text-[9.5px] tracking-[0.2em] uppercase transition-colors duration-200"
-                  style={{ color: active ? color : 'rgba(255,255,255,0.32)' }}>
+                  style={{ color: active ? color : 'var(--tp-text-3)' }}>
                   {tab.key !== 'All' && active && (
                     <span className="size-[4px] rounded-full" style={{ background: color }}/>
                   )}
@@ -3218,7 +3218,7 @@ export function MarketplacePage() {
                   <span className="font-mono text-[7.5px] px-1 py-0.5"
                     style={{
                       background: active ? `${color}18` : 'rgba(255,255,255,0.05)',
-                      color:      active ? color : 'rgba(255,255,255,0.22)',
+                      color:      active ? color : 'var(--tp-text-4)',
                     }}>
                     {count}
                   </span>
@@ -3239,7 +3239,7 @@ export function MarketplacePage() {
             onClick={() => setViewMode(v => v === 'race' ? 'list' : 'race')}
             className="relative flex items-center gap-1.5 h-full px-3 shrink-0
                        text-[9.5px] tracking-[0.2em] uppercase transition-colors duration-200"
-            style={{ color: viewMode === 'race' ? '#D4AF37' : 'rgba(255,255,255,0.32)' }}
+            style={{ color: viewMode === 'race' ? '#D4AF37' : 'var(--tp-text-3)' }}
           >
             {/* Pulse-line icon */}
             <svg viewBox="0 0 24 24" className="w-3 h-3" fill="none"
@@ -3277,8 +3277,8 @@ export function MarketplacePage() {
                 className="h-7 pl-5 pr-2 w-36 text-[10.5px] bg-transparent outline-none
                            placeholder:text-white/20"
                 style={{
-                  borderBottom: '1px solid rgba(255,255,255,0.15)',
-                  color:        'rgba(255,255,255,0.7)',
+                  borderBottom: '1px solid var(--tp-border)',
+                  color:        'var(--tp-text-1)',
                 }}
                 onFocus={e => (e.currentTarget.style.borderBottomColor = 'rgba(212,175,55,0.65)')}
                 onBlur={e  => (e.currentTarget.style.borderBottomColor = 'rgba(255,255,255,0.15)')}
@@ -3288,9 +3288,9 @@ export function MarketplacePage() {
               <button type="button" onClick={() => setSortOpen(v => !v)}
                 className="flex items-center gap-1.5 h-7 px-2.5 text-[9.5px] tracking-wide
                            uppercase transition-colors duration-200"
-                style={{ border: '1px solid rgba(255,255,255,0.1)', color: 'rgba(255,255,255,0.45)' }}
+                style={{ border: '1px solid var(--tp-border)', color: 'var(--tp-text-3)' }}
                 onMouseEnter={e => (e.currentTarget.style.borderColor = 'rgba(212,175,55,0.4)')}
-                onMouseLeave={e => !sortOpen && (e.currentTarget.style.borderColor = 'rgba(255,255,255,0.1)')}>
+                onMouseLeave={e => !sortOpen && (e.currentTarget.style.borderColor = 'var(--tp-border)')}>
                 {currentSort.label}
                 <svg viewBox="0 0 24 24"
                   className={`w-2.5 h-2.5 transition-transform ${sortOpen ? 'rotate-180' : ''}`}
@@ -3323,7 +3323,7 @@ export function MarketplacePage() {
                         className="w-full text-left px-4 py-2.5 text-[10px] tracking-wide
                                    transition-colors duration-100 flex items-center justify-between"
                         style={{
-                          color:      s.key === sortKey ? '#D4AF37' : 'rgba(255,255,255,0.5)',
+                          color:      s.key === sortKey ? '#D4AF37' : 'var(--tp-text-2)',
                           background: s.key === sortKey ? 'rgba(212,175,55,0.08)' : 'transparent',
                         }}
                         onMouseEnter={e => {
@@ -3396,7 +3396,7 @@ export function MarketplacePage() {
               width:          '40%',
               height:         '100%',
               overflowY:      'auto',
-              borderRight:    '1px solid rgba(255,255,255,0.07)',
+              borderRight:    '1px solid var(--tp-border)',
               scrollbarWidth: 'thin',
               scrollbarColor: 'rgba(212,175,55,0.15) transparent',
             }}
@@ -3408,12 +3408,12 @@ export function MarketplacePage() {
                 top:                 0,
                 gridTemplateColumns: '40px 1fr 80px 48px',
                 background:          '#0A0A0A',
-                borderBottom:        '1px solid rgba(255,255,255,0.06)',
+                borderBottom:        '1px solid var(--tp-border)',
               }}
             >
               {['', t.marketplace.artwork, 'Cap', '%'].map(h => (
                 <p key={h} className="font-mono text-[7.5px] uppercase tracking-[0.2em]"
-                  style={{ color: 'rgba(255,255,255,0.22)' }}>
+                  style={{ color: 'var(--tp-text-4)' }}>
                   {h}
                 </p>
               ))}
@@ -3440,7 +3440,7 @@ export function MarketplacePage() {
               </div>
             ) : filtered.length === 0 ? (
               <div className="flex flex-col items-center justify-center py-16 gap-3">
-                <p className="font-mono text-[10px]" style={{ color: 'rgba(255,255,255,0.25)' }}>
+                <p className="font-mono text-[10px]" style={{ color: 'var(--tp-text-3)' }}>
                   {t.common.noResults}
                 </p>
                 <button type="button"
@@ -3476,16 +3476,16 @@ export function MarketplacePage() {
                   disabled={page === 1}
                   className="flex items-center justify-center w-7 h-7 font-mono text-[11px] transition-colors duration-150"
                   style={{
-                    border:     '1px solid rgba(255,255,255,0.1)',
-                    color:      page === 1 ? 'rgba(255,255,255,0.2)' : 'rgba(255,255,255,0.55)',
+                    border:     '1px solid var(--tp-border)',
+                    color:      page === 1 ? 'var(--tp-text-4)' : 'var(--tp-text-2)',
                     cursor:     page === 1 ? 'not-allowed' : 'pointer',
                   }}
                   onMouseEnter={e => { if (page !== 1) e.currentTarget.style.borderColor = 'rgba(212,175,55,0.4)' }}
-                  onMouseLeave={e => { e.currentTarget.style.borderColor = 'rgba(255,255,255,0.1)' }}
+                  onMouseLeave={e => { e.currentTarget.style.borderColor = 'var(--tp-border)' }}
                 >
                   ←
                 </button>
-                <span className="font-mono text-[9px]" style={{ color: 'rgba(255,255,255,0.35)' }}>
+                <span className="font-mono text-[9px]" style={{ color: 'var(--tp-text-3)' }}>
                   {page} / {pageCount}
                 </span>
                 <button
@@ -3494,12 +3494,12 @@ export function MarketplacePage() {
                   disabled={page === pageCount}
                   className="flex items-center justify-center w-7 h-7 font-mono text-[11px] transition-colors duration-150"
                   style={{
-                    border:     '1px solid rgba(255,255,255,0.1)',
-                    color:      page === pageCount ? 'rgba(255,255,255,0.2)' : 'rgba(255,255,255,0.55)',
+                    border:     '1px solid var(--tp-border)',
+                    color:      page === pageCount ? 'var(--tp-text-4)' : 'var(--tp-text-2)',
                     cursor:     page === pageCount ? 'not-allowed' : 'pointer',
                   }}
                   onMouseEnter={e => { if (page !== pageCount) e.currentTarget.style.borderColor = 'rgba(212,175,55,0.4)' }}
-                  onMouseLeave={e => { e.currentTarget.style.borderColor = 'rgba(255,255,255,0.1)' }}
+                  onMouseLeave={e => { e.currentTarget.style.borderColor = 'var(--tp-border)' }}
                 >
                   →
                 </button>
@@ -3571,7 +3571,7 @@ export function MarketplacePage() {
             >
               {/* Drag handle */}
               <div className="flex justify-center pt-3 pb-1">
-                <div className="w-10 h-1 rounded-full" style={{ background: 'rgba(255,255,255,0.15)' }}/>
+                <div className="w-10 h-1 rounded-full" style={{ background: 'var(--tp-text-5)' }}/>
               </div>
               <div style={{ maxHeight: 'calc(90dvh - 24px)', overflowY: 'auto' }}>
                 <InspectionDeck art={selected} livePrice={livePrices[selected.id] ?? selected.marketCap} onCollect={art => { setSheetOpen(false); setBuyArt(art) }} onLightbox={setLightboxArt}/>

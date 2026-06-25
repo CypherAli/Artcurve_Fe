@@ -45,13 +45,13 @@
 
   /* ── Trade page tokens (light) ── */
   --tp-panel:      #FFFFFF;
-  --tp-panel-alt:  #F7F6F3;
-  --tp-border:     #C8C0B4;
-  --tp-text-1:     #1A1A1A;
-  --tp-text-2:     #3D3D3D;
-  --tp-text-3:     #5C5C5C;
-  --tp-text-4:     #7A7A7A;
-  --tp-text-5:     #999999;
+  --tp-panel-alt:  #F5F3EF;
+  --tp-border:     #B5AD9E;
+  --tp-text-1:     #111111;
+  --tp-text-2:     #2A2A2A;
+  --tp-text-3:     #444444;
+  --tp-text-4:     #666666;
+  --tp-text-5:     #888888;
   --tp-chart-bg:   #FFFFFF;
   --tp-chart-inner: #FFFFFF;
   --tp-chart-border: #C8C0B4;

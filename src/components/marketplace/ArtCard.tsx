@@ -105,7 +105,7 @@ export function ArtCard({
       ───────────────────────────────────────────────────────────── */}
       <div
         className="p-4"
-        style={{ borderTop: '1px solid rgba(255,255,255,0.07)' }}
+        style={{ borderTop: '1px solid var(--tp-border)' }}
       >
 
         {/* ── Row 1: Title  +  Ticker symbol ── */}
@@ -122,7 +122,7 @@ export function ArtCard({
           </h3>
           <span
             className="font-mono text-[9.5px] shrink-0 tracking-wide"
-            style={{ color: 'rgba(255,255,255,0.3)' }}
+            style={{ color: 'var(--tp-text-3)' }}
           >
             {data.ticker}
           </span>
@@ -133,13 +133,13 @@ export function ArtCard({
           <div>
             <p
               className="text-[8px] uppercase tracking-[0.22em] mb-[3px]"
-              style={{ color: 'rgba(255,255,255,0.28)' }}
+              style={{ color: 'var(--tp-text-3)' }}
             >
               Market Cap
             </p>
             <p
               className="font-mono leading-none"
-              style={{ fontSize: '0.95rem', color: 'rgba(255,255,255,0.88)' }}
+              style={{ fontSize: '0.95rem', color: 'var(--tp-text-1)' }}
             >
               {data.marketCapLabel}
             </p>
@@ -147,7 +147,7 @@ export function ArtCard({
           <div className="text-right">
             <p
               className="text-[8px] uppercase tracking-[0.22em] mb-[3px]"
-              style={{ color: 'rgba(255,255,255,0.28)' }}
+              style={{ color: 'var(--tp-text-3)' }}
             >
               24h
             </p>
@@ -187,7 +187,7 @@ export function ArtCard({
           {/* Progress track */}
           <div
             className="h-[5px] w-full rounded-full overflow-hidden"
-            style={{ background: 'rgba(255,255,255,0.08)' }}
+            style={{ background: 'var(--tp-border)' }}
           >
             <div
               className="h-full rounded-full"
