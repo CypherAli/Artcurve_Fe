@@ -287,8 +287,8 @@ function Sidebar({ chip, setChip }: { chip: string; setChip: (c: string) => void
       style={{
         top: 68, left: 0, width: 80,
         height: 'calc(100vh - 68px)',
-        background: '#0f0f0f',
-        borderRight: '1px solid rgba(255,255,255,0.05)',
+        background: 'var(--ac-paper)',
+        borderRight: '1px solid var(--tp-border)',
       }}>
       {NAV_ITEMS.map(item => {
         const active = item.chip ? chip === item.chip : false
@@ -299,12 +299,12 @@ function Sidebar({ chip, setChip }: { chip: string; setChip: (c: string) => void
             className="flex flex-col items-center justify-center gap-1.5 cursor-pointer"
             style={{
               width: 68, padding: '10px 6px', borderRadius: 12,
-              color: active ? 'rgba(255,255,255,0.95)' : 'rgba(255,255,255,0.42)',
+              color: active ? 'var(--tp-text-1)' : 'var(--tp-text-3)',
               background: 'transparent', border: 'none',
             }}
-            whileHover={{ background: 'rgba(255,255,255,0.08)', color: 'rgba(255,255,255,0.88)' }}
+            whileHover={{ background: 'var(--tp-panel-alt)', color: 'var(--tp-text-1)' }}
             whileTap={{ scale: 0.93 }}
-            animate={{ background: active ? 'rgba(255,255,255,0.11)' : 'transparent' }}
+            animate={{ background: active ? 'var(--tp-panel-alt)' : 'transparent' }}
             transition={{ duration: 0.13 }}
             onClick={() => {
               if (item.chip) setChip(item.chip)
@@ -353,7 +353,7 @@ function ThumbBg({ item }: { item: Item }) {
       <div className="absolute inset-0" style={{ background: `radial-gradient(ellipse 45% 40% at 75% 70%, ${item.glow2} 0%, transparent 60%)` }}/>
       <div className="absolute inset-0 flex items-center justify-center select-none pointer-events-none">
         <span className="font-mono font-black rotate-[-12deg] whitespace-nowrap"
-          style={{ color: 'rgba(255,255,255,0.04)', fontSize: item.ticker.length > 7 ? 30 : 40 }}>
+          style={{ color: 'var(--tp-text-5)', fontSize: item.ticker.length > 7 ? 30 : 40 }}>
           {item.ticker}
         </span>
       </div>
@@ -367,8 +367,8 @@ function ThumbBg({ item }: { item: Item }) {
 function CheckMark() {
   return (
     <svg width="13" height="13" viewBox="0 0 24 24" aria-hidden="true">
-      <circle cx="12" cy="12" r="12" fill="rgba(255,255,255,0.15)"/>
-      <path d="M8 12l3 3 5-5" stroke="rgba(255,255,255,0.7)" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"/>
+      <circle cx="12" cy="12" r="12" fill="var(--tp-text-4)"/>
+      <path d="M8 12l3 3 5-5" stroke="var(--tp-text-2)" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"/>
     </svg>
   )
 }
@@ -389,9 +389,9 @@ function ContextMenu({ visible, open, onToggle }: { visible: boolean; open: bool
         className="size-8 flex items-center justify-center rounded-full"
         animate={{ opacity: visible || open ? 1 : 0 }}
         transition={{ duration: 0.15 }}
-        whileHover={{ backgroundColor: 'rgba(255,255,255,0.1)' }}
+        whileHover={{ backgroundColor: 'var(--tp-panel-alt)' }}
         whileTap={{ scale: 0.92 }}
-        style={{ color: 'rgba(255,255,255,0.6)' }}>
+        style={{ color: 'var(--tp-text-2)' }}>
         <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
           <circle cx="12" cy="5" r="2"/><circle cx="12" cy="12" r="2"/><circle cx="12" cy="19" r="2"/>
         </svg>
@@ -401,7 +401,7 @@ function ContextMenu({ visible, open, onToggle }: { visible: boolean; open: bool
         {open && (
           <motion.div
             className="absolute right-0 top-9 w-44 z-50 overflow-hidden rounded-lg py-1"
-            style={{ background: '#282828', boxShadow: '0 4px 24px rgba(0,0,0,0.6)', border: '1px solid rgba(255,255,255,0.07)' }}
+            style={{ background: 'var(--tp-panel)', boxShadow: '0 4px 24px rgba(0,0,0,0.6)', border: '1px solid var(--tp-border)' }}
             initial={{ opacity: 0, y: -6, scale: 0.96 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: -4, scale: 0.96 }}
@@ -409,8 +409,8 @@ function ContextMenu({ visible, open, onToggle }: { visible: boolean; open: bool
             {menuActions.map(action => (
               <button key={action} type="button"
                 className="w-full text-left px-4 py-2.5 text-sm transition-colors"
-                style={{ color: 'rgba(255,255,255,0.8)' }}
-                onMouseEnter={e => (e.currentTarget.style.background = 'rgba(255,255,255,0.07)')}
+                style={{ color: 'var(--tp-text-1)' }}
+                onMouseEnter={e => (e.currentTarget.style.background = 'var(--tp-panel-alt)')}
                 onMouseLeave={e => (e.currentTarget.style.background = 'transparent')}>
                 {action}
               </button>
@@ -439,7 +439,7 @@ function VideoCard({ item, onClick }: { item: Item; onClick: () => void }) {
       onClick={onClick}>
 
       {/* Thumbnail */}
-      <div className="relative overflow-hidden rounded-xl" style={{ aspectRatio: '16/9', background: '#1a1a1a' }}>
+      <div className="relative overflow-hidden rounded-xl" style={{ aspectRatio: '16/9', background: 'var(--tp-panel)' }}>
         <ThumbBg item={item}/>
 
         {/* Hover veil */}
@@ -493,18 +493,18 @@ function VideoCard({ item, onClick }: { item: Item; onClick: () => void }) {
           {/* Text block */}
           <div className="flex-1 min-w-0">
             <p className="text-sm font-semibold leading-snug line-clamp-2"
-              style={{ color: 'rgba(255,255,255,0.92)', letterSpacing: '-0.01em' }}>
+              style={{ color: 'var(--tp-text-1)', letterSpacing: '-0.01em' }}>
               {item.title}
             </p>
 
             <div className="flex items-center gap-1 mt-1">
-              <span className="text-xs" style={{ color: 'rgba(255,255,255,0.48)' }}>
+              <span className="text-xs" style={{ color: 'var(--tp-text-2)' }}>
                 {item.artist}
               </span>
               {item.verified && <CheckMark/>}
             </div>
 
-            <p className="text-xs mt-0.5" style={{ color: 'rgba(255,255,255,0.32)' }}>
+            <p className="text-xs mt-0.5" style={{ color: 'var(--tp-text-3)' }}>
               {item.type === 'live'
                 ? `${fmtViewers(item.viewers ?? 0)} viewers · ${item.ticker}`
                 : `${item.views} views · ${item.uploadedAt}`
@@ -568,7 +568,7 @@ function GoLiveModal({ onClose }: { onClose: () => void }) {
 
       <motion.div
         className="w-[460px] rounded-xl overflow-hidden"
-        style={{ background: '#212121', border: '1px solid rgba(255,255,255,0.08)' }}
+        style={{ background: 'var(--tp-panel)', border: '1px solid var(--tp-border)' }}
         initial={{ opacity: 0, scale: 0.95, y: 20 }}
         animate={{ opacity: 1, scale: 1, y: 0 }}
         exit={{ opacity: 0, scale: 0.95, y: 10 }}
@@ -576,21 +576,21 @@ function GoLiveModal({ onClose }: { onClose: () => void }) {
 
         {/* Header */}
         <div className="flex items-center justify-between px-5 py-4"
-          style={{ borderBottom: '1px solid rgba(255,255,255,0.07)' }}>
+          style={{ borderBottom: '1px solid var(--tp-border)' }}>
           <div className="flex items-center gap-2.5">
             <div className="size-7 rounded-full flex items-center justify-center bg-red-600">
               <motion.span className="size-2 rounded-full bg-[var(--ac-paper)]"
                 animate={{ opacity: [1, 0.3, 1] }} transition={{ duration: 1.1, repeat: Infinity }}/>
             </div>
-            <span className="font-sans font-semibold text-base" style={{ color: 'rgba(255,255,255,0.92)' }}>
+            <span className="font-sans font-semibold text-base" style={{ color: 'var(--tp-text-1)' }}>
               {t.live.goLive}
             </span>
           </div>
           <motion.button
             type="button" onClick={onClose}
             className="size-8 flex items-center justify-center rounded-full text-base"
-            style={{ color: 'rgba(255,255,255,0.45)' }}
-            whileHover={{ backgroundColor: 'rgba(255,255,255,0.1)', color: 'rgba(255,255,255,0.8)' }}
+            style={{ color: 'var(--tp-text-3)' }}
+            whileHover={{ backgroundColor: 'var(--tp-panel-alt)', color: 'var(--tp-text-1)' }}
             whileTap={{ scale: 0.92 }}>
             ✕
           </motion.button>
@@ -599,7 +599,7 @@ function GoLiveModal({ onClose }: { onClose: () => void }) {
         <div className="px-5 py-5 flex flex-col gap-4">
           {/* Stream title */}
           <div>
-            <label className="block text-xs font-medium mb-2" style={{ color: 'rgba(255,255,255,0.48)' }}>
+            <label className="block text-xs font-medium mb-2" style={{ color: 'var(--tp-text-2)' }}>
               {t.live.streamTitleLabel}
             </label>
             <input
@@ -609,8 +609,8 @@ function GoLiveModal({ onClose }: { onClose: () => void }) {
               placeholder={t.live.streamTitlePlaceholder}
               className="w-full bg-transparent text-sm px-3.5 py-2.5 rounded-md outline-hidden"
               style={{
-                border: `1px solid rgba(255,255,255,${title ? '0.22' : '0.1'})`,
-                color: 'rgba(255,255,255,0.88)',
+                border: `1px solid var(--tp-border)`,
+                color: 'var(--tp-text-1)',
                 caretColor: '#dc2626',
                 transition: 'border-color 0.15s',
               }}/>
@@ -618,7 +618,7 @@ function GoLiveModal({ onClose }: { onClose: () => void }) {
 
           {/* Category */}
           <div>
-            <label className="block text-xs font-medium mb-2" style={{ color: 'rgba(255,255,255,0.48)' }}>
+            <label className="block text-xs font-medium mb-2" style={{ color: 'var(--tp-text-2)' }}>
               {t.live.categoryLabel}
             </label>
             <div className="flex flex-wrap gap-2">
@@ -627,9 +627,9 @@ function GoLiveModal({ onClose }: { onClose: () => void }) {
                   key={c} type="button" onClick={() => setCat(c)}
                   className="px-3 py-1.5 text-xs font-medium rounded-full"
                   animate={{
-                    background: cat === c ? 'rgba(220,38,38,0.15)' : 'rgba(255,255,255,0.06)',
-                    borderColor: cat === c ? 'rgba(220,38,38,0.5)' : 'rgba(255,255,255,0.1)',
-                    color: cat === c ? '#f87171' : 'rgba(255,255,255,0.42)',
+                    background: cat === c ? 'rgba(220,38,38,0.15)' : 'var(--tp-panel-alt)',
+                    borderColor: cat === c ? 'rgba(220,38,38,0.5)' : 'var(--tp-border)',
+                    color: cat === c ? '#f87171' : 'var(--tp-text-3)',
                   }}
                   style={{ border: '1px solid' }}
                   whileTap={{ scale: 0.95 }}>
@@ -658,8 +658,8 @@ function GoLiveModal({ onClose }: { onClose: () => void }) {
             disabled={!title.trim() || loading}
             className="w-full py-3 text-sm font-semibold rounded-md mt-1"
             animate={{
-              background: title.trim() ? '#dc2626' : 'rgba(255,255,255,0.07)',
-              color: title.trim() ? '#ffffff' : 'rgba(255,255,255,0.22)',
+              background: title.trim() ? '#dc2626' : 'var(--tp-panel-alt)',
+              color: title.trim() ? '#ffffff' : 'var(--tp-text-4)',
             }}
             whileHover={title.trim() && !loading ? { background: '#b91c1c' } : {}}
             whileTap={title.trim() && !loading ? { scale: 0.98 } : {}}
@@ -721,11 +721,11 @@ export function LivePage() {
       {/* ── YouTube-style left sidebar ── */}
       <Sidebar chip={chip} setChip={setChip}/>
 
-      <div className="min-h-dvh" style={{ marginTop: 68, marginLeft: 80, background: '#0f0f0f' }}>
+      <div className="min-h-dvh" style={{ marginTop: 68, marginLeft: 80, background: 'var(--ac-paper)' }}>
 
         {/* ── Sticky chip bar ── */}
         <div className="sticky z-10"
-          style={{ top: 68, background: 'rgba(13,13,13,0.98)', backdropFilter: 'blur(20px)', borderBottom: '1px solid rgba(255,255,255,0.07)' }}>
+          style={{ top: 68, background: 'var(--ac-paper)', backdropFilter: 'blur(20px)', borderBottom: '1px solid var(--tp-border)' }}>
           <div className="flex items-center px-6" style={{ height: 72, paddingTop: 10, paddingBottom: 10 }}>
 
             {/* Chips */}
@@ -741,15 +741,15 @@ export function LivePage() {
                     fontSize: 14,
                     padding: '7px 16px',
                     borderRadius: 8,
-                    border: chip === c ? 'none' : '1px solid rgba(255,255,255,0.15)',
+                    border: chip === c ? 'none' : '1px solid var(--tp-border)',
                   }}
                   animate={{
-                    background: chip === c ? 'rgba(255,255,255,0.93)' : 'transparent',
-                    color:      chip === c ? '#0d0d0d'                : 'rgba(255,255,255,0.72)',
+                    background: chip === c ? 'var(--tp-text-1)' : 'transparent',
+                    color:      chip === c ? 'var(--ac-paper)'       : 'var(--tp-text-2)',
                   }}
                   whileHover={{
-                    background: chip === c ? 'rgba(255,255,255,0.93)' : 'rgba(255,255,255,0.08)',
-                    borderColor: 'rgba(255,255,255,0.3)',
+                    background: chip === c ? 'var(--tp-text-1)' : 'var(--tp-panel-alt)',
+                    borderColor: 'var(--tp-text-3)',
                   }}
                   whileTap={{ scale: 0.95 }}
                   transition={{ duration: 0.13 }}>
@@ -765,7 +765,7 @@ export function LivePage() {
             </div>
 
             {/* Divider */}
-            <div className="mx-6 shrink-0" style={{ width: 1, height: 28, background: 'rgba(255,255,255,0.1)' }}/>
+            <div className="mx-6 shrink-0" style={{ width: 1, height: 28, background: 'var(--tp-border)' }}/>
 
             {/* Go Live */}
             <motion.button
@@ -795,7 +795,7 @@ export function LivePage() {
                   style={{ background: '#dc2626' }}
                   animate={{ opacity: [1, 0.3, 1] }}
                   transition={{ duration: 1.1, repeat: Infinity }}/>
-                <h2 className="font-sans text-base font-semibold tracking-tight" style={{ color: 'rgba(255,255,255,0.88)' }}>
+                <h2 className="font-sans text-base font-semibold tracking-tight" style={{ color: 'var(--tp-text-1)' }}>
                   Live Now
                 </h2>
                 <span className="font-mono text-[10px] tracking-widest uppercase px-2 py-0.5 rounded-full"
@@ -827,7 +827,7 @@ export function LivePage() {
             <div>
               {realStreams.length > 0 && (chip === t.live.all || chip === t.live.live) && (
                 <div className="flex items-center gap-3 mb-5">
-                  <h2 className="font-sans text-base font-semibold tracking-tight" style={{ color: 'rgba(255,255,255,0.5)' }}>
+                  <h2 className="font-sans text-base font-semibold tracking-tight" style={{ color: 'var(--tp-text-2)' }}>
                     Featured
                   </h2>
                 </div>
@@ -874,7 +874,7 @@ export function LivePage() {
                         <path d="M15 10l4.553-2.276A1 1 0 0121 8.723v6.554a1 1 0 01-1.447.894L15 14M3 8a2 2 0 012-2h10a2 2 0 012 2v8a2 2 0 01-2 2H5a2 2 0 01-2-2V8z"
                           stroke="white" strokeWidth="1.5" strokeLinecap="round"/>
                       </svg>
-                      <p className="text-sm" style={{ color: 'rgba(255,255,255,0.22)' }}>{t.live.noContent}</p>
+                      <p className="text-sm" style={{ color: 'var(--tp-text-4)' }}>{t.live.noContent}</p>
                     </motion.div>
                   )
                 })()}
@@ -910,7 +910,7 @@ export function LivePage() {
                     <path d="M15 10l4.553-2.276A1 1 0 0121 8.723v6.554a1 1 0 01-1.447.894L15 14M3 8a2 2 0 012-2h10a2 2 0 012 2v8a2 2 0 01-2 2H5a2 2 0 01-2-2V8z"
                       stroke="white" strokeWidth="1.5" strokeLinecap="round"/>
                   </svg>
-                  <p className="text-sm" style={{ color: 'rgba(255,255,255,0.22)' }}>{t.live.noContent}</p>
+                  <p className="text-sm" style={{ color: 'var(--tp-text-4)' }}>{t.live.noContent}</p>
                 </motion.div>
               )}
             </AnimatePresence>
@@ -921,12 +921,12 @@ export function LivePage() {
             <div className="grid grid-cols-4 gap-x-5 gap-y-9">
               {Array.from({ length: 8 }).map((_, i) => (
                 <div key={i} className="animate-pulse">
-                  <div className="rounded-xl" style={{ aspectRatio: '16/9', background: 'rgba(255,255,255,0.05)' }}/>
+                  <div className="rounded-xl" style={{ aspectRatio: '16/9', background: 'var(--tp-panel-alt)' }}/>
                   <div className="flex gap-3 mt-3">
-                    <div className="size-9 rounded-full shrink-0" style={{ background: 'rgba(255,255,255,0.05)' }}/>
+                    <div className="size-9 rounded-full shrink-0" style={{ background: 'var(--tp-panel-alt)' }}/>
                     <div className="flex-1 space-y-2">
-                      <div className="h-3 rounded" style={{ background: 'rgba(255,255,255,0.05)', width: '80%' }}/>
-                      <div className="h-2.5 rounded" style={{ background: 'rgba(255,255,255,0.04)', width: '50%' }}/>
+                      <div className="h-3 rounded" style={{ background: 'var(--tp-panel-alt)', width: '80%' }}/>
+                      <div className="h-2.5 rounded" style={{ background: 'var(--tp-panel-alt)', width: '50%' }}/>
                     </div>
                   </div>
                 </div>
