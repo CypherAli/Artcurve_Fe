@@ -366,12 +366,6 @@ export function VaultPage() {
 
   useEffect(() => setMounted(true), [])
 
-  useEffect(() => {
-    if (mounted && !isAuth && !authStore.getJwt()) router.replace('/?auth=required')
-  }, [mounted, isAuth, router])
-
-  if (!mounted) return null
-
   // ── Backend portfolio data ────────────────────────────────────────
   const portfolio  = usePortfolio()
   const { isLoading: portfolioLoading, error: portfolioError } = portfolio
@@ -382,6 +376,10 @@ export function VaultPage() {
   )
   // Shadow: real data when available, mock otherwise
   const HOLDINGS = _apiHoldings.length > 0 ? _apiHoldings : HOLDINGS_MOCK
+
+  useEffect(() => {
+    if (mounted && !isAuth && !authStore.getJwt()) router.replace('/?auth=required')
+  }, [mounted, isAuth, router])
 
   useEffect(() => {
     if (portfolioError) {
@@ -450,6 +448,8 @@ export function VaultPage() {
       return sortDir === 'asc' ? (av as number) - (bv as number) : (bv as number) - (av as number)
     })
   }, [sortKey, sortDir])
+
+  if (!mounted) return null
 
   return (
     <motion.div

@@ -1,6 +1,6 @@
 import { NextResponse, type NextRequest } from 'next/server'
 
-const PROTECTED = ['/settings', '/studio', '/chat']
+const PROTECTED = ['/settings', '/chat']
 
 export function middleware(request: NextRequest) {
   const jwt = request.cookies.get('ac_jwt')?.value
@@ -17,5 +17,5 @@ export function middleware(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ['/settings/:path*', '/studio/:path*', '/chat/:path*'],
+  matcher: ['/settings/:path*', '/chat/:path*'],
 }
