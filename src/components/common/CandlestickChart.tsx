@@ -281,8 +281,8 @@ export function CandlestickChart({
       style={{
         height,
         transition: 'height 0.38s cubic-bezier(0.25,0.46,0.45,0.94)',
-        background: 'rgba(0,0,0,0.55)',
-        border:     '1px solid rgba(255,255,255,0.07)',
+        background: 'var(--tp-chart-inner)',
+        border:     '1px solid var(--tp-chart-border)',
       }}
     >
       <ReactApexChart

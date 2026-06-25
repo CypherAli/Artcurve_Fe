@@ -282,14 +282,14 @@ function TokenRow({
       }}
     >
       <div className="w-8 h-8 shrink-0 overflow-hidden"
-        style={{ border:`1px solid ${isSelected ? art.phaseColor+'50' : 'rgba(255,255,255,0.08)'}` }}>
+        style={{ border:`1px solid ${isSelected ? art.phaseColor+'50' : 'var(--tp-border)'}` }}>
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img src={art.image} alt="" className="w-full h-full object-cover" draggable={false}/>
       </div>
       <div className="flex-1 min-w-0">
         <div className="flex items-center justify-between gap-1">
           <span className="font-mono text-[10px] font-bold truncate"
-            style={{ color: isSelected ? art.phaseColor : 'rgba(255,255,255,0.78)' }}>
+            style={{ color: isSelected ? art.phaseColor : 'var(--tp-text-1)' }}>
             {art.ticker}
           </span>
           <span className="font-mono text-[9px] shrink-0"
@@ -298,7 +298,7 @@ function TokenRow({
           </span>
         </div>
         <div className="flex items-center justify-between gap-1 mt-0.5">
-          <span className="font-sans text-[8.5px] truncate" style={{ color:'rgba(255,255,255,0.26)' }}>
+          <span className="font-sans text-[8.5px] truncate" style={{ color:'var(--tp-text-3)' }}>
             {art.title}
           </span>
           <span className="font-mono text-[9px] shrink-0 font-semibold"
@@ -345,20 +345,20 @@ function TokenPickerPanel({
     t.trade.chipMig
 
   return (
-    <div className="flex flex-col h-full" style={{ borderRight:'1px solid rgba(255,255,255,0.05)' }}>
+    <div className="flex flex-col h-full" style={{ borderRight:'1px solid var(--tp-border)' }}>
 
       {/* Header */}
       <div className="flex items-center justify-between px-3 shrink-0"
-        style={{ height:36, background:'rgba(0,0,0,0.35)', borderBottom:'1px solid rgba(255,255,255,0.05)' }}>
-        <span className="font-mono text-[7px] tracking-[0.24em] uppercase" style={{ color:'rgba(255,255,255,0.22)' }}>{t.trade.markets}</span>
-        <span className="font-mono text-[7px]" style={{ color:'rgba(255,255,255,0.14)' }}>{filtered.length}/{artworks.length}</span>
+        style={{ height:36, background:'var(--tp-panel)', borderBottom:'1px solid var(--tp-border)' }}>
+        <span className="font-mono text-[7px] tracking-[0.24em] uppercase" style={{ color:'var(--tp-text-4)' }}>{t.trade.markets}</span>
+        <span className="font-mono text-[7px]" style={{ color:'var(--tp-text-5)' }}>{filtered.length}/{artworks.length}</span>
       </div>
 
       {/* Search */}
-      <div className="px-2.5 py-2 shrink-0" style={{ borderBottom:'1px solid rgba(255,255,255,0.04)' }}>
+      <div className="px-2.5 py-2 shrink-0" style={{ borderBottom:'1px solid var(--tp-border)' }}>
         <div className="relative">
           <svg className="absolute left-2 top-1/2 -translate-y-1/2 w-3 h-3 pointer-events-none"
-            viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.18)" strokeWidth="2.2" strokeLinecap="round">
+            viewBox="0 0 24 24" fill="none" stroke="var(--tp-text-4)" strokeWidth="2.2" strokeLinecap="round">
             <circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/>
           </svg>
           <motion.input
@@ -366,7 +366,7 @@ function TokenPickerPanel({
             onChange={e => setSearch(e.target.value)}
             placeholder={t.trade.search}
             className="w-full bg-transparent font-mono text-[10px] pl-7 pr-2 py-1.5 outline-none"
-            style={{ border:'1px solid rgba(255,255,255,0.07)', color:'rgba(255,255,255,0.65)', caretColor:'#D4AF37' }}
+            style={{ border:'1px solid var(--tp-border)', color:'var(--tp-text-2)', caretColor:'#D4AF37' }}
             whileFocus={{ outline: '1px solid rgba(212,175,55,0.4)' }}
             transition={{ duration: 0.2 }}
           />
@@ -374,7 +374,7 @@ function TokenPickerPanel({
       </div>
 
       {/* Phase chips */}
-      <div className="flex gap-1 px-2.5 py-2 shrink-0" style={{ borderBottom:'1px solid rgba(255,255,255,0.04)' }}>
+      <div className="flex gap-1 px-2.5 py-2 shrink-0" style={{ borderBottom:'1px solid var(--tp-border)' }}>
         {phases.map(p => {
           const active = phaseFilter === p
           const c = p==='All' ? '#D4AF37' : PHASE_COLOR[p as Phase]
@@ -385,8 +385,8 @@ function TokenPickerPanel({
               transition={{ type: 'spring', stiffness: 420, damping: 18 }}
               className="flex-1 py-0.5 font-mono text-[7px] tracking-wider"
               style={{
-                color:      active ? c : 'rgba(255,255,255,0.22)',
-                border:     `1px solid ${active ? c+'45' : 'rgba(255,255,255,0.07)'}`,
+                color:      active ? c : 'var(--tp-text-4)',
+                border:     `1px solid ${active ? c+'45' : 'var(--tp-border)'}`,
                 background: active ? c+'0c' : 'transparent',
               }}>
               {chipLabel(p)}
@@ -397,14 +397,14 @@ function TokenPickerPanel({
 
       {/* Column labels */}
       <div className="flex items-center justify-between px-3 py-1 shrink-0"
-        style={{ borderBottom:'1px solid rgba(255,255,255,0.03)' }}>
-        <span className="font-mono text-[6.5px] tracking-wider" style={{ color:'rgba(255,255,255,0.14)' }}>{t.trade.tickerName}</span>
-        <span className="font-mono text-[6.5px] tracking-wider" style={{ color:'rgba(255,255,255,0.14)' }}>{t.trade.price24h}</span>
+        style={{ borderBottom:'1px solid var(--tp-border)' }}>
+        <span className="font-mono text-[6.5px] tracking-wider" style={{ color:'var(--tp-text-5)' }}>{t.trade.tickerName}</span>
+        <span className="font-mono text-[6.5px] tracking-wider" style={{ color:'var(--tp-text-5)' }}>{t.trade.price24h}</span>
       </div>
 
       {/* Token list — AnimatePresence popLayout for smooth reorder */}
       <div className="flex-1 overflow-y-auto"
-        style={{ scrollbarWidth:'thin', scrollbarColor:'rgba(255,255,255,0.06) transparent' }}>
+        style={{ scrollbarWidth:'thin', scrollbarColor:'var(--tp-border) transparent' }}>
         <AnimatePresence mode="popLayout" initial={false}>
           {filtered.map(art => (
             <motion.div
@@ -427,7 +427,7 @@ function TokenPickerPanel({
         {filtered.length===0 && (
           <motion.div initial={{ opacity:0 }} animate={{ opacity:1 }}
             className="flex items-center justify-center py-8">
-            <span className="font-mono text-[9px]" style={{ color:'rgba(255,255,255,0.18)' }}>{t.common.noResults}</span>
+            <span className="font-mono text-[9px]" style={{ color:'var(--tp-text-4)' }}>{t.common.noResults}</span>
           </motion.div>
         )}
       </div>
@@ -446,7 +446,7 @@ function PriceHeader({ art, livePrice }: { art: TradeArtwork; livePrice: number 
 
   const priceColor = flash
     ? (flash==='up' ? '#22c55e' : '#ef4444')
-    : 'rgba(255,255,255,0.92)'
+    : 'var(--tp-text-1)'
 
   const stats = [
     { label:t.trade.change24h, value:fmtPct(pct),                      color: up?'#22c55e':'#f87171' },
@@ -460,8 +460,8 @@ function PriceHeader({ art, livePrice }: { art: TradeArtwork; livePrice: number 
   return (
     <div className="flex items-center gap-4 px-4 shrink-0 overflow-x-auto"
       style={{
-        height:44, background:'rgba(0,0,0,0.45)',
-        borderBottom:'1px solid rgba(255,255,255,0.06)',
+        height:44, background:'var(--tp-panel)',
+        borderBottom:'1px solid var(--tp-border)',
         scrollbarWidth:'none',
       }}>
 
@@ -477,12 +477,12 @@ function PriceHeader({ art, livePrice }: { art: TradeArtwork; livePrice: number 
           </div>
           <div>
             <div className="font-mono text-[11px] font-bold leading-tight" style={{ color:art.phaseColor }}>{art.ticker}</div>
-            <div className="font-sans text-[8.5px] leading-tight" style={{ color:'rgba(255,255,255,0.28)' }}>{art.title}</div>
+            <div className="font-sans text-[8.5px] leading-tight" style={{ color:'var(--tp-text-3)' }}>{art.title}</div>
           </div>
         </motion.div>
       </AnimatePresence>
 
-      <div className="w-px h-6 shrink-0" style={{ background:'rgba(255,255,255,0.07)' }}/>
+      <div className="w-px h-6 shrink-0" style={{ background:'var(--tp-border)' }}/>
 
       {/* Live price — flipping digit animation */}
       <div className="shrink-0 flex items-baseline gap-1 overflow-hidden" style={{ height:'1.5em' }}>
@@ -498,10 +498,10 @@ function PriceHeader({ art, livePrice }: { art: TradeArtwork; livePrice: number 
             {fmtETH(livePrice)}
           </motion.span>
         </AnimatePresence>
-        <span className="font-mono text-[9px]" style={{ color:'rgba(255,255,255,0.22)' }}>ETH</span>
+        <span className="font-mono text-[9px]" style={{ color:'var(--tp-text-4)' }}>ETH</span>
       </div>
 
-      <div className="w-px h-6 shrink-0" style={{ background:'rgba(255,255,255,0.07)' }}/>
+      <div className="w-px h-6 shrink-0" style={{ background:'var(--tp-border)' }}/>
 
       {/* Stats — stagger in when artwork changes */}
       <motion.div
@@ -513,8 +513,8 @@ function PriceHeader({ art, livePrice }: { art: TradeArtwork; livePrice: number 
       >
         {stats.map(({ label, value, color }) => (
           <motion.div key={label} variants={STAT_ITEM_V} className="shrink-0 flex flex-col gap-0.5">
-            <span className="font-mono text-[6.5px] tracking-wider uppercase" style={{ color:'rgba(255,255,255,0.18)' }}>{label}</span>
-            <span className="font-mono text-[10px] font-semibold" style={{ color: color??'rgba(255,255,255,0.58)' }}>{value}</span>
+            <span className="font-mono text-[6.5px] tracking-wider uppercase" style={{ color:'var(--tp-text-4)' }}>{label}</span>
+            <span className="font-mono text-[10px] font-semibold" style={{ color: color??'var(--tp-text-2)' }}>{value}</span>
           </motion.div>
         ))}
       </motion.div>
@@ -559,10 +559,10 @@ function OrderBookPanel({ art, livePrice, bookTick }: { art:TradeArtwork; livePr
       <span className="flex-1 text-left z-[1] relative" style={{ color: lvl.type==='ask' ? '#f87171' : '#4ade80' }}>
         {lvl.price.toFixed(4)}
       </span>
-      <span className="flex-1 text-right z-[1] relative" style={{ color:'rgba(255,255,255,0.5)' }}>
+      <span className="flex-1 text-right z-[1] relative" style={{ color:'var(--tp-text-2)' }}>
         {lvl.size.toFixed(3)}
       </span>
-      <span className="flex-1 text-right z-[1] relative" style={{ color:'rgba(255,255,255,0.25)' }}>
+      <span className="flex-1 text-right z-[1] relative" style={{ color:'var(--tp-text-3)' }}>
         {(lvl.size*lvl.price).toFixed(3)}
       </span>
     </div>
@@ -570,21 +570,21 @@ function OrderBookPanel({ art, livePrice, bookTick }: { art:TradeArtwork; livePr
 
   return (
     <div className="h-full flex flex-col overflow-hidden">
-      <div className="flex items-center px-3 py-1.5 shrink-0" style={{ borderBottom:'1px solid rgba(255,255,255,0.04)' }}>
+      <div className="flex items-center px-3 py-1.5 shrink-0" style={{ borderBottom:'1px solid var(--tp-border)' }}>
         {[t.trade.priceEth, t.trade.size, t.trade.total].map((h,i)=>(
           <span key={h} className="flex-1 font-mono text-[6.5px] tracking-wider"
-            style={{ color:'rgba(255,255,255,0.16)', textAlign: i===0?'left':'right' }}>{h}</span>
+            style={{ color:'var(--tp-text-4)', textAlign: i===0?'left':'right' }}>{h}</span>
         ))}
       </div>
       <div className="flex-1 flex flex-col justify-end overflow-hidden">
         {asks.map((l,i)=><Row key={i} lvl={l}/>)}
       </div>
       <div className="flex items-center justify-between px-3 py-1.5 shrink-0"
-        style={{ background:'rgba(0,0,0,0.5)', borderTop:'1px solid rgba(255,255,255,0.04)', borderBottom:'1px solid rgba(255,255,255,0.04)' }}>
-        <span className="font-mono text-[10px] font-bold" style={{ color:'rgba(255,255,255,0.82)' }}>
+        style={{ background:'var(--tp-panel-alt)', borderTop:'1px solid var(--tp-border)', borderBottom:'1px solid var(--tp-border)' }}>
+        <span className="font-mono text-[10px] font-bold" style={{ color:'var(--tp-text-1)' }}>
           {fmtETH(livePrice)} ETH
         </span>
-        <span className="font-mono text-[7.5px]" style={{ color:'rgba(255,255,255,0.2)' }}>
+        <span className="font-mono text-[7.5px]" style={{ color:'var(--tp-text-4)' }}>
           {t.trade.spread} {fmtETH(spread)} · {((spread/livePrice)*100).toFixed(3)}%
         </span>
       </div>
@@ -602,12 +602,12 @@ function RecentTradesPanel({ trades }: { trades: RecentTrade[] }) {
   const { t } = useLanguage()
   return (
     <div className="h-full overflow-y-auto"
-      style={{ scrollbarWidth:'thin', scrollbarColor:'rgba(255,255,255,0.06) transparent' }}>
+      style={{ scrollbarWidth:'thin', scrollbarColor:'var(--tp-border) transparent' }}>
       <div className="sticky top-0 flex items-center px-3 py-1.5 shrink-0 z-[1]"
-        style={{ background:'rgba(8,8,8,0.96)', borderBottom:'1px solid rgba(255,255,255,0.04)' }}>
+        style={{ background:'var(--tp-panel)', borderBottom:'1px solid var(--tp-border)' }}>
         {[{l:t.trade.time,w:40},{l:t.trade.side,w:36},{l:t.trade.price,w:undefined},{l:t.trade.sizeEth,w:undefined},{l:t.trade.wallet,w:undefined}].map(({l,w})=>(
           <span key={l} className="font-mono text-[6.5px] tracking-wider"
-            style={{ color:'rgba(255,255,255,0.15)', minWidth:w, flex:w?undefined:1 }}>{l}</span>
+            style={{ color:'var(--tp-text-4)', minWidth:w, flex:w?undefined:1 }}>{l}</span>
         ))}
       </div>
       <AnimatePresence mode="popLayout" initial={false}>
@@ -621,9 +621,9 @@ function RecentTradesPanel({ trades }: { trades: RecentTrade[] }) {
             layout="position"
             transition={{ type:'spring', stiffness:300, damping:28 }}
             className="flex items-center px-3 py-[3.5px] font-mono hover:bg-[var(--ac-paper)]/[0.018] cursor-default"
-            style={{ borderBottom:'1px solid rgba(255,255,255,0.02)' }}
+            style={{ borderBottom:'1px solid var(--tp-border)' }}
           >
-            <span style={{ minWidth:40, fontSize:8, color:'rgba(255,255,255,0.2)' }}>
+            <span style={{ minWidth:40, fontSize:8, color:'var(--tp-text-4)' }}>
               {trade.ago<60?`${trade.ago}s`:`${Math.floor(trade.ago/60)}m`}
             </span>
             <span style={{ minWidth:36, fontSize:8, fontWeight:600, color:trade.side==='buy'?'#4ade80':'#f87171' }}>
@@ -632,8 +632,8 @@ function RecentTradesPanel({ trades }: { trades: RecentTrade[] }) {
             <span style={{ flex:1, fontSize:9, color:trade.side==='buy'?'rgba(74,222,128,0.7)':'rgba(248,113,113,0.7)' }}>
               {trade.price.toFixed(4)}
             </span>
-            <span style={{ flex:1, fontSize:8, color:'rgba(255,255,255,0.45)' }}>{trade.eth.toFixed(3)}</span>
-            <span style={{ flex:1, fontSize:8, color:'rgba(255,255,255,0.2)' }}>{trade.wallet}</span>
+            <span style={{ flex:1, fontSize:8, color:'var(--tp-text-2)' }}>{trade.eth.toFixed(3)}</span>
+            <span style={{ flex:1, fontSize:8, color:'var(--tp-text-4)' }}>{trade.wallet}</span>
           </motion.div>
         ))}
       </AnimatePresence>
@@ -652,14 +652,14 @@ function BottomPanel({ art, livePrice, trades, bookTick }: {
   const TABS = [{ key:'trades' as const, label:t.trade.recentTrades }, { key:'book' as const, label:t.trade.orderBook }]
 
   return (
-    <div className="shrink-0 flex flex-col" style={{ height:170, borderTop:'1px solid rgba(255,255,255,0.05)' }}>
+    <div className="shrink-0 flex flex-col" style={{ height:170, borderTop:'1px solid var(--tp-border)' }}>
       <div className="flex items-center shrink-0"
-        style={{ height:34, background:'rgba(0,0,0,0.4)', borderBottom:'1px solid rgba(255,255,255,0.05)' }}>
+        style={{ height:34, background:'var(--tp-panel)', borderBottom:'1px solid var(--tp-border)' }}>
         {TABS.map(({ key, label }) => (
           <motion.button key={key} type="button" onClick={() => setTab(key)}
             whileTap={{ scale: 0.98 }}
             className="relative h-full px-4 font-mono text-[8px] tracking-widest transition-colors"
-            style={{ color: tab===key ? 'rgba(255,255,255,0.75)' : 'rgba(255,255,255,0.22)' }}>
+            style={{ color: tab===key ? 'var(--tp-text-1)' : 'var(--tp-text-4)' }}>
             {label}
             {tab===key && (
               <motion.div layoutId="btm-indicator"
@@ -799,7 +799,7 @@ function TradePanel({ art, livePrice }: { art:TradeArtwork; livePrice:number }) 
   const minEthOut  = ethOut * (1 - parseFloat(slippage) / 100)
 
   const impactPct  = side === 'buy' ? buyImpact : sellImpact
-  const impactColor = impactPct === 0 ? 'rgba(255,255,255,0.28)'
+  const impactColor = impactPct === 0 ? 'var(--tp-text-3)'
     : impactPct < 1 ? '#4ade80' : impactPct < 3 ? '#fbbf24' : '#f87171'
 
   const canBuy  = ethAmt  > 0 && ethAmt  <= WALLET_ETH   && txState === 'idle'
@@ -893,7 +893,7 @@ function TradePanel({ art, livePrice }: { art:TradeArtwork; livePrice:number }) 
     ? 'linear-gradient(135deg, rgba(34,197,94,0.22) 0%, rgba(34,197,94,0.1) 100%)'
     : txState==='pending'
       ? 'rgba(212,175,55,0.08)'
-      : canTrade ? btnBgAct : 'rgba(255,255,255,0.02)'
+      : canTrade ? btnBgAct : 'var(--tp-panel-alt)'
 
   const PARTICLES = [0,1,2,3,4,5]
 
@@ -901,7 +901,7 @@ function TradePanel({ art, livePrice }: { art:TradeArtwork; livePrice:number }) 
     <motion.div
       className="flex flex-col h-full overflow-hidden"
       style={{
-        borderLeft:'1px solid rgba(255,255,255,0.05)',
+        borderLeft:'1px solid var(--tp-border)',
         background: glowBg,
       }}
       onMouseMove={e => {
@@ -912,19 +912,19 @@ function TradePanel({ art, livePrice }: { art:TradeArtwork; livePrice:number }) 
     >
       {/* ── Header — accent line changes with side ── */}
       <div className="flex items-center justify-between px-3 shrink-0 relative overflow-hidden"
-        style={{ height:30, background:'rgba(0,0,0,0.42)', borderBottom:'1px solid rgba(255,255,255,0.05)' }}>
+        style={{ height:30, background:'var(--tp-panel)', borderBottom:'1px solid var(--tp-border)' }}>
         <motion.div className="absolute top-0 left-0 right-0 h-[2px]"
           animate={{ background: isBuy
             ? 'linear-gradient(90deg,transparent,rgba(74,222,128,0.7),transparent)'
             : 'linear-gradient(90deg,transparent,rgba(248,113,113,0.7),transparent)' }}
           transition={{ duration:0.4 }}
         />
-        <span className="font-mono text-[6.5px] tracking-[0.24em] uppercase" style={{ color:'rgba(255,255,255,0.22)' }}>{t.trade.tradeHeader}</span>
-        <span className="font-mono text-[6.5px]" style={{ color:'rgba(255,255,255,0.14)' }}>{art.ticker} / ETH</span>
+        <span className="font-mono text-[6.5px] tracking-[0.24em] uppercase" style={{ color:'var(--tp-text-4)' }}>{t.trade.tradeHeader}</span>
+        <span className="font-mono text-[6.5px]" style={{ color:'var(--tp-text-5)' }}>{art.ticker} / ETH</span>
       </div>
 
       {/* ── BUY / SELL toggle ── */}
-      <div className="flex shrink-0" style={{ borderBottom:'1px solid rgba(255,255,255,0.06)' }}>
+      <div className="flex shrink-0" style={{ borderBottom:'1px solid var(--tp-border)' }}>
         {(['buy','sell'] as const).map(s => {
           const active = side===s
           const c  = s==='buy'?'#4ade80':'#f87171'
@@ -936,7 +936,7 @@ function TradePanel({ art, livePrice }: { art:TradeArtwork; livePrice:number }) 
               whileTap={{ scale:0.97 }}
               transition={{ type:'spring', stiffness:400, damping:18 }}
               className="flex-1 py-2 font-mono text-[9px] tracking-[0.18em] uppercase font-bold relative"
-              style={{ background:bg, borderBottom:`2px solid ${bd}`, color:active?c:'rgba(255,255,255,0.22)' }}>
+              style={{ background:bg, borderBottom:`2px solid ${bd}`, color:active?c:'var(--tp-text-4)' }}>
               <span className="mr-1 text-[7.5px]">{s==='buy'?'▲':'▼'}</span>
               {s==='buy' ? t.common.buy.toUpperCase() : t.common.sell.toUpperCase()}
             </motion.button>
@@ -946,21 +946,21 @@ function TradePanel({ art, livePrice }: { art:TradeArtwork; livePrice:number }) 
 
       {/* ── Wallet strip — compact 1-row ── */}
       <div className="flex items-center justify-between px-3 shrink-0"
-        style={{ height:28, background:'rgba(0,0,0,0.22)', borderBottom:'1px solid rgba(255,255,255,0.04)' }}>
+        style={{ height:28, background:'var(--tp-panel-alt)', borderBottom:'1px solid var(--tp-border)' }}>
         <div className="flex items-center gap-1.5">
-          <span className="font-mono text-[6.5px]" style={{ color:'rgba(255,255,255,0.2)' }}>ETH</span>
-          <span className="font-mono text-[10px] font-semibold" style={{ color: isBuy?'#4ade80':'rgba(255,255,255,0.5)' }}>
+          <span className="font-mono text-[6.5px]" style={{ color:'var(--tp-text-4)' }}>ETH</span>
+          <span className="font-mono text-[10px] font-semibold" style={{ color: isBuy?'#4ade80':'var(--tp-text-2)' }}>
             {WALLET_ETH.toFixed(2)}
           </span>
         </div>
-        <span className="font-mono text-[6.5px]" style={{ color:'rgba(255,255,255,0.1)' }}>·</span>
+        <span className="font-mono text-[6.5px]" style={{ color:'var(--tp-text-5)' }}>·</span>
         <div className="flex items-center gap-1.5">
-          <span className="font-mono text-[6.5px]" style={{ color:'rgba(255,255,255,0.2)' }}>{art.ticker}</span>
-          <span className="font-mono text-[10px] font-semibold" style={{ color: !isBuy?'#f87171':'rgba(255,255,255,0.5)' }}>
+          <span className="font-mono text-[6.5px]" style={{ color:'var(--tp-text-4)' }}>{art.ticker}</span>
+          <span className="font-mono text-[10px] font-semibold" style={{ color: !isBuy?'#f87171':'var(--tp-text-2)' }}>
             {WALLET_TOKEN.toFixed(4)}
           </span>
         </div>
-        <span className="font-mono text-[6px]" style={{ color:'rgba(255,255,255,0.1)' }}>0x4f2…a91</span>
+        <span className="font-mono text-[6px]" style={{ color:'var(--tp-text-5)' }}>0x4f2…a91</span>
       </div>
 
       {/* ── Form body — BUY / SELL cross-fade ── */}
@@ -975,7 +975,7 @@ function TradePanel({ art, livePrice }: { art:TradeArtwork; livePrice:number }) 
               {/* Pay ETH */}
               <div>
                 <div className="flex items-center justify-between mb-1">
-                  <span className="font-mono text-[7px] tracking-wider uppercase" style={{ color:'rgba(255,255,255,0.28)' }}>{t.trade.youPay}</span>
+                  <span className="font-mono text-[7px] tracking-wider uppercase" style={{ color:'var(--tp-text-3)' }}>{t.trade.youPay}</span>
                   <span className="font-mono text-[7px]" style={{ color:'rgba(74,222,128,0.5)' }}>{t.trade.bal}: {WALLET_ETH.toFixed(2)} ETH</span>
                 </div>
                 <div className="relative">
@@ -985,7 +985,7 @@ function TradePanel({ art, livePrice }: { art:TradeArtwork; livePrice:number }) 
                     onChange={e => setEthInput(e.target.value)}
                     placeholder="0.0000"
                     className="w-full bg-transparent font-mono text-[15px] px-3 py-2 outline-none pr-12"
-                    style={{ border:'1px solid rgba(74,222,128,0.16)', background:'rgba(74,222,128,0.03)', color:'rgba(255,255,255,0.88)', caretColor:'#4ade80' }}
+                    style={{ border:'1px solid rgba(74,222,128,0.16)', background:'rgba(74,222,128,0.03)', color:'var(--tp-text-1)', caretColor:'#4ade80' }}
                     whileFocus={{ outline:'1px solid rgba(74,222,128,0.35)', boxShadow:'0 0 0 3px rgba(74,222,128,0.05)' }}
                     transition={{ duration:0.2 }}
                   />
@@ -1025,8 +1025,8 @@ function TradePanel({ art, livePrice }: { art:TradeArtwork; livePrice:number }) 
               {/* Receive token */}
               <div>
                 <div className="flex items-center justify-between mb-1">
-                  <span className="font-mono text-[7px] tracking-wider uppercase" style={{ color:'rgba(255,255,255,0.28)' }}>{t.trade.youReceive}</span>
-                  <span className="font-mono text-[7px]" style={{ color:'rgba(255,255,255,0.18)' }}>{t.trade.estimate}</span>
+                  <span className="font-mono text-[7px] tracking-wider uppercase" style={{ color:'var(--tp-text-3)' }}>{t.trade.youReceive}</span>
+                  <span className="font-mono text-[7px]" style={{ color:'var(--tp-text-4)' }}>{t.trade.estimate}</span>
                 </div>
                 <div style={{ border:'1px solid rgba(74,222,128,0.1)', background:'rgba(74,222,128,0.03)', padding:'8px 12px' }}>
                   <div className="flex items-center justify-between">
@@ -1035,7 +1035,7 @@ function TradePanel({ art, livePrice }: { art:TradeArtwork; livePrice:number }) 
                         initial={{ opacity:0.4 }} animate={{ opacity:1 }} exit={{ opacity:0.4 }}
                         transition={{ duration:0.16 }}
                         className="font-mono text-[15px]"
-                        style={{ color: tokensOut>0?'rgba(255,255,255,0.82)':'rgba(255,255,255,0.18)' }}>
+                        style={{ color: tokensOut>0?'var(--tp-text-1)':'var(--tp-text-4)' }}>
                         {tokensOut>0 ? tokensOut.toFixed(4) : '0.0000'}
                       </motion.span>
                     </AnimatePresence>
@@ -1053,8 +1053,8 @@ function TradePanel({ art, livePrice }: { art:TradeArtwork; livePrice:number }) 
                   { label:t.trade.minOut,        value: quoteFetching ? '…' : (tokensOut>0?`${minReceived.toFixed(3)} ${art.ticker}`:'-') },
                 ].map(({ label, value, color }) => (
                   <div key={label} className="flex items-center justify-between">
-                    <span className="font-mono text-[7px]" style={{ color:'rgba(255,255,255,0.22)' }}>{label}</span>
-                    <span className="font-mono text-[7px]" style={{ color: color??'rgba(255,255,255,0.5)' }}>{value}</span>
+                    <span className="font-mono text-[7px]" style={{ color:'var(--tp-text-4)' }}>{label}</span>
+                    <span className="font-mono text-[7px]" style={{ color: color??'var(--tp-text-2)' }}>{value}</span>
                   </div>
                 ))}
                 {quote?.wouldGraduate && (
@@ -1076,7 +1076,7 @@ function TradePanel({ art, livePrice }: { art:TradeArtwork; livePrice:number }) 
               {/* Sell token */}
               <div>
                 <div className="flex items-center justify-between mb-1">
-                  <span className="font-mono text-[7px] tracking-wider uppercase" style={{ color:'rgba(255,255,255,0.28)' }}>{t.trade.youSell}</span>
+                  <span className="font-mono text-[7px] tracking-wider uppercase" style={{ color:'var(--tp-text-3)' }}>{t.trade.youSell}</span>
                   <span className="font-mono text-[7px]" style={{ color:'rgba(248,113,113,0.5)' }}>{t.trade.bal}: {WALLET_TOKEN.toFixed(4)} {art.ticker}</span>
                 </div>
                 <div className="relative">
@@ -1086,7 +1086,7 @@ function TradePanel({ art, livePrice }: { art:TradeArtwork; livePrice:number }) 
                     onChange={e => setTokenInput(e.target.value)}
                     placeholder="0.0000"
                     className="w-full bg-transparent font-mono text-[15px] px-3 py-2 outline-none pr-16"
-                    style={{ border:'1px solid rgba(248,113,113,0.18)', background:'rgba(248,113,113,0.03)', color:'rgba(255,255,255,0.88)', caretColor:'#f87171' }}
+                    style={{ border:'1px solid rgba(248,113,113,0.18)', background:'rgba(248,113,113,0.03)', color:'var(--tp-text-1)', caretColor:'#f87171' }}
                     whileFocus={{ outline:'1px solid rgba(248,113,113,0.38)', boxShadow:'0 0 0 3px rgba(248,113,113,0.05)' }}
                     transition={{ duration:0.2 }}
                   />
@@ -1127,8 +1127,8 @@ function TradePanel({ art, livePrice }: { art:TradeArtwork; livePrice:number }) 
               {/* Receive ETH */}
               <div>
                 <div className="flex items-center justify-between mb-1">
-                  <span className="font-mono text-[7px] tracking-wider uppercase" style={{ color:'rgba(255,255,255,0.28)' }}>{t.trade.youReceive}</span>
-                  <span className="font-mono text-[7px]" style={{ color:'rgba(255,255,255,0.18)' }}>{t.trade.estimate}</span>
+                  <span className="font-mono text-[7px] tracking-wider uppercase" style={{ color:'var(--tp-text-3)' }}>{t.trade.youReceive}</span>
+                  <span className="font-mono text-[7px]" style={{ color:'var(--tp-text-4)' }}>{t.trade.estimate}</span>
                 </div>
                 <div style={{ border:'1px solid rgba(248,113,113,0.1)', background:'rgba(248,113,113,0.03)', padding:'8px 12px' }}>
                   <div className="flex items-center justify-between">
@@ -1137,7 +1137,7 @@ function TradePanel({ art, livePrice }: { art:TradeArtwork; livePrice:number }) 
                         initial={{ opacity:0.4 }} animate={{ opacity:1 }} exit={{ opacity:0.4 }}
                         transition={{ duration:0.16 }}
                         className="font-mono text-[15px]"
-                        style={{ color: ethOut>0?'rgba(255,255,255,0.82)':'rgba(255,255,255,0.18)' }}>
+                        style={{ color: ethOut>0?'var(--tp-text-1)':'var(--tp-text-4)' }}>
                         {ethOut>0 ? ethOut.toFixed(5) : '0.00000'}
                       </motion.span>
                     </AnimatePresence>
@@ -1155,8 +1155,8 @@ function TradePanel({ art, livePrice }: { art:TradeArtwork; livePrice:number }) 
                   { label:t.trade.minOut,   value: quoteFetching ? '…' : (ethOut>0?`${minEthOut.toFixed(4)} ETH`:'-') },
                 ].map(({ label, value, color }) => (
                   <div key={label} className="flex items-center justify-between">
-                    <span className="font-mono text-[7px]" style={{ color:'rgba(255,255,255,0.22)' }}>{label}</span>
-                    <span className="font-mono text-[7px]" style={{ color: color??'rgba(255,255,255,0.5)' }}>{value}</span>
+                    <span className="font-mono text-[7px]" style={{ color:'var(--tp-text-4)' }}>{label}</span>
+                    <span className="font-mono text-[7px]" style={{ color: color??'var(--tp-text-2)' }}>{value}</span>
                   </div>
                 ))}
               </div>
@@ -1167,7 +1167,7 @@ function TradePanel({ art, livePrice }: { art:TradeArtwork; livePrice:number }) 
         {/* ── Slippage ── */}
         <div className="shrink-0">
           <div className="flex items-center justify-between mb-1">
-            <span className="font-mono text-[6.5px] tracking-wider uppercase" style={{ color:'rgba(255,255,255,0.18)' }}>{t.trade.slippage}</span>
+            <span className="font-mono text-[6.5px] tracking-wider uppercase" style={{ color:'var(--tp-text-4)' }}>{t.trade.slippage}</span>
           </div>
           <div className="grid grid-cols-3 gap-1">
             {['0.5','1.0','2.0'].map(s => {
@@ -1178,9 +1178,9 @@ function TradePanel({ art, livePrice }: { art:TradeArtwork; livePrice:number }) 
                   transition={{ type:'spring', stiffness:420, damping:18 }}
                   className="py-0.5 font-mono text-[7.5px]"
                   style={{
-                    border:`1px solid ${active?'rgba(212,175,55,0.4)':'rgba(255,255,255,0.07)'}`,
+                    border:`1px solid ${active?'rgba(212,175,55,0.4)':'var(--tp-border)'}`,
                     background: active?'rgba(212,175,55,0.06)':'transparent',
-                    color:      active?'#D4AF37':'rgba(255,255,255,0.28)',
+                    color:      active?'#D4AF37':'var(--tp-text-3)',
                   }}>
                   {s}%
                 </motion.button>
@@ -1203,8 +1203,8 @@ function TradePanel({ art, livePrice }: { art:TradeArtwork; livePrice:number }) 
                 :canTrade?btnBgExec:'rgba(255,255,255,0.02)',
               border: txState==='success'?'1px solid rgba(34,197,94,0.45)'
                 :txState==='pending'?'1px solid rgba(212,175,55,0.28)'
-                :canTrade?`1px solid ${accentBdr}`:'1px solid rgba(255,255,255,0.06)',
-              color: txState==='success'?'#4ade80':txState==='pending'?'#D4AF37':canTrade?accent:'rgba(255,255,255,0.14)',
+                :canTrade?`1px solid ${accentBdr}`:`1px solid var(--tp-border)`,
+              color: txState==='success'?'#4ade80':txState==='pending'?'#D4AF37':canTrade?accent:'var(--tp-text-5)',
               cursor: canTrade?'pointer':'not-allowed',
               opacity: canTrade ? 1 : 0.4,
             }}>
@@ -1245,10 +1245,10 @@ function TradePanel({ art, livePrice }: { art:TradeArtwork; livePrice:number }) 
         {/* ── Graduation bar — ultra-compact ── */}
         <div className="shrink-0 pb-2">
           <div className="flex items-center justify-between mb-0.5">
-            <span className="font-mono text-[6px] tracking-wider uppercase" style={{ color:'rgba(255,255,255,0.14)' }}>{t.trade.graduation}</span>
+            <span className="font-mono text-[6px] tracking-wider uppercase" style={{ color:'var(--tp-text-5)' }}>{t.trade.graduation}</span>
             <span className="font-mono text-[7px] font-semibold" style={{ color:art.phaseColor }}>{art.progress}%</span>
           </div>
-          <div className="h-1 w-full overflow-hidden" style={{ background:'rgba(255,255,255,0.05)' }}>
+          <div className="h-1 w-full overflow-hidden" style={{ background:'var(--tp-border)' }}>
             <motion.div className="h-full"
               style={{ background:`linear-gradient(90deg,${art.phaseColor}60,${art.phaseColor})` }}
               initial={{ width:0 }}
@@ -1489,12 +1489,12 @@ export function TradePage() {
 
           {/* Timeframe bar */}
           <div className="flex items-center shrink-0 px-3 gap-1"
-            style={{ height:36, background:'rgba(0,0,0,0.32)', borderBottom:'1px solid rgba(255,255,255,0.05)' }}>
+            style={{ height:36, background:'var(--tp-panel)', borderBottom:'1px solid var(--tp-border)' }}>
             {RANGES.map(r => (
               <motion.button key={r} type="button" onClick={() => setChartRange(r)}
                 whileTap={{ scale:0.94 }}
                 className="relative px-3 h-full font-mono text-[8px] tracking-[0.16em] transition-colors"
-                style={{ color: chartRange===r ? '#D4AF37' : 'rgba(255,255,255,0.22)' }}>
+                style={{ color: chartRange===r ? '#D4AF37' : 'var(--tp-text-4)' }}>
                 {r}
                 {chartRange===r && (
                   <motion.div layoutId="range-indicator"
@@ -1504,7 +1504,7 @@ export function TradePage() {
               </motion.button>
             ))}
             <div className="ml-auto flex items-center gap-2 pr-1">
-              <span className="font-mono text-[7.5px]" style={{ color:'rgba(255,255,255,0.16)' }}>
+              <span className="font-mono text-[7.5px]" style={{ color:'var(--tp-text-4)' }}>
                 {selectedArt.ticker} / ETH · {t.trade.candlestick}
               </span>
             </div>
@@ -1512,7 +1512,7 @@ export function TradePage() {
 
           {/* Chart — cross-fades on artwork or range change */}
           <div ref={chartContainerRef} className="flex-1 min-h-0 overflow-hidden"
-            style={{ background:'rgba(0,0,0,0.12)' }}>
+            style={{ background:'var(--tp-chart-bg)' }}>
             <AnimatePresence mode="wait">
               <motion.div
                 key={`${selectedId}-${chartRange}`}
