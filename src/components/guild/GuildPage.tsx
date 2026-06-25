@@ -97,7 +97,7 @@ const EN = {
   emblem: 'Emblem', type: 'Type', selectToEnter: 'Select to enter',
   join: 'Join', leave: 'Leave Guild', leaveConfirm: 'Leave this guild? You cannot rejoin for 12 hours.',
   cooldown: 'Cooldown', cooldownMsg: 'You left recently. Rejoin available in',
-  hours: 'h', minutes: 'm', joined: 'Joined!', alreadyInGuild: 'Leave your current guild first',
+  hours: 'h', minutes: 'm', joined: 'Joined!', alreadyInGuild: 'Leave your current guild first', loginRequired: 'Please login to join or create a guild',
   charDesigner: 'Character Designer', generateChar: 'Generate Character', generating: 'Generating…',
   charPrompt: 'Describe your character', charResult: 'Your Character',
   guildHall: 'Guild Hall',
@@ -133,7 +133,7 @@ const STR: Record<string, typeof EN> = {
     emblem: 'Biểu tượng', type: 'Loại', selectToEnter: 'Chọn để nhập',
     join: 'Tham gia', leave: 'Rời Guild', leaveConfirm: 'Rời guild? Bạn không thể tham gia lại trong 12 giờ.',
     cooldown: 'Chờ', cooldownMsg: 'Bạn vừa rời. Có thể tham gia lại sau',
-    hours: 'g', minutes: 'p', joined: 'Đã tham gia!', alreadyInGuild: 'Rời guild hiện tại trước',
+    hours: 'g', minutes: 'p', joined: 'Đã tham gia!', alreadyInGuild: 'Rời guild hiện tại trước', loginRequired: 'Vui lòng đăng nhập để tham gia hoặc tạo guild',
     charDesigner: 'Thiết kế nhân vật', generateChar: 'Tạo nhân vật', generating: 'Đang tạo…',
     charPrompt: 'Mô tả nhân vật của bạn', charResult: 'Nhân vật của bạn',
     guildHall: 'Đại sảnh',
@@ -167,7 +167,7 @@ const STR: Record<string, typeof EN> = {
     emblem: 'Emblème', type: 'Type', selectToEnter: 'Sélectionner pour saisir',
     join: 'Rejoindre', leave: 'Quitter la guilde', leaveConfirm: 'Quitter cette guilde ? Vous ne pourrez pas la rejoindre pendant 12 heures.',
     cooldown: 'Délai', cooldownMsg: 'Vous avez quitté récemment. Rejoindre disponible dans',
-    hours: 'h', minutes: 'm', joined: 'Rejoint !', alreadyInGuild: 'Quittez votre guilde actuelle d\'abord',
+    hours: 'h', minutes: 'm', joined: 'Rejoint !', alreadyInGuild: 'Quittez votre guilde actuelle d\'abord', loginRequired: 'Veuillez vous connecter pour rejoindre ou créer une guilde',
     charDesigner: 'Concepteur de personnage', generateChar: 'Générer', generating: 'Génération…',
     charPrompt: 'Décrivez votre personnage', charResult: 'Votre personnage',
     guildHall: 'Salle de guilde',
@@ -201,7 +201,7 @@ const STR: Record<string, typeof EN> = {
     emblem: 'エンブレム', type: 'タイプ', selectToEnter: '入力するには選択',
     join: '参加', leave: 'ギルド脱退', leaveConfirm: 'このギルドを脱退しますか？12時間は再参加できません。',
     cooldown: 'クールダウン', cooldownMsg: '最近脱退しました。再参加可能まで',
-    hours: '時間', minutes: '分', joined: '参加しました！', alreadyInGuild: '先に現在のギルドを脱退してください',
+    hours: '時間', minutes: '分', joined: '参加しました！', alreadyInGuild: '先に現在のギルドを脱退してください', loginRequired: 'ギルドに参加または作成するにはログインしてください',
     charDesigner: 'キャラクターデザイナー', generateChar: '生成', generating: '生成中…',
     charPrompt: 'キャラクターを説明', charResult: 'あなたのキャラクター',
     guildHall: 'ギルドホール',
@@ -235,7 +235,7 @@ const STR: Record<string, typeof EN> = {
     emblem: 'Emblema', type: 'Tipo', selectToEnter: 'Seleccionar para ingresar',
     join: 'Unirse', leave: 'Dejar gremio', leaveConfirm: '¿Dejar este gremio? No podrás unirte de nuevo durante 12 horas.',
     cooldown: 'Espera', cooldownMsg: 'Saliste recientemente. Podrás unirte en',
-    hours: 'h', minutes: 'm', joined: '¡Unido!', alreadyInGuild: 'Sal de tu gremio actual primero',
+    hours: 'h', minutes: 'm', joined: '¡Unido!', alreadyInGuild: 'Sal de tu gremio actual primero', loginRequired: 'Inicia sesión para unirte o crear un gremio',
     charDesigner: 'Diseñador de personaje', generateChar: 'Generar', generating: 'Generando…',
     charPrompt: 'Describe tu personaje', charResult: 'Tu personaje',
     guildHall: 'Sala del gremio',
@@ -269,7 +269,7 @@ const STR: Record<string, typeof EN> = {
     emblem: '徽章', type: '类型', selectToEnter: '选择输入',
     join: '加入', leave: '退出公会', leaveConfirm: '退出公会？12小时内无法重新加入。',
     cooldown: '冷却', cooldownMsg: '您最近退出。可重新加入时间',
-    hours: '时', minutes: '分', joined: '已加入！', alreadyInGuild: '请先退出当前公会',
+    hours: '时', minutes: '分', joined: '已加入！', alreadyInGuild: '请先退出当前公会', loginRequired: '请登录以加入或创建公会',
     charDesigner: '角色设计师', generateChar: '生成', generating: '生成中…',
     charPrompt: '描述你的角色', charResult: '你的角色',
     guildHall: '公会大厅',
@@ -303,7 +303,7 @@ const STR: Record<string, typeof EN> = {
     emblem: '엠블럼', type: '유형', selectToEnter: '입력하려면 선택',
     join: '가입', leave: '길드 탈퇴', leaveConfirm: '이 길드를 탈퇴하시겠습니까? 12시간 동안 재가입할 수 없습니다.',
     cooldown: '대기', cooldownMsg: '최근 탈퇴하셨습니다. 재가입 가능 시간',
-    hours: '시간', minutes: '분', joined: '가입했습니다!', alreadyInGuild: '현재 길드를 먼저 탈퇴하세요',
+    hours: '시간', minutes: '분', joined: '가입했습니다!', alreadyInGuild: '현재 길드를 먼저 탈퇴하세요', loginRequired: '길드에 가입하거나 만들려면 로그인하세요',
     charDesigner: '캐릭터 디자이너', generateChar: '생성', generating: '생성 중…',
     charPrompt: '캐릭터를 설명하세요', charResult: '당신의 캐릭터',
     guildHall: '길드 홀',
@@ -337,7 +337,7 @@ const STR: Record<string, typeof EN> = {
     emblem: 'Emblem', type: 'Typ', selectToEnter: 'Zum Eingeben auswählen',
     join: 'Beitreten', leave: 'Gilde verlassen', leaveConfirm: 'Diese Gilde verlassen? Sie können 12 Stunden lang nicht wieder beitreten.',
     cooldown: 'Abklingzeit', cooldownMsg: 'Kürzlich verlassen. Wiederbeitritt möglich in',
-    hours: 'Std', minutes: 'Min', joined: 'Beigetreten!', alreadyInGuild: 'Verlasse zuerst deine aktuelle Gilde',
+    hours: 'Std', minutes: 'Min', joined: 'Beigetreten!', alreadyInGuild: 'Verlasse zuerst deine aktuelle Gilde', loginRequired: 'Bitte melden Sie sich an, um einer Gilde beizutreten oder eine zu erstellen',
     charDesigner: 'Charakter-Designer', generateChar: 'Generieren', generating: 'Generierung…',
     charPrompt: 'Beschreibe deinen Charakter', charResult: 'Dein Charakter',
     guildHall: 'Gildenhalle',
@@ -371,7 +371,7 @@ const STR: Record<string, typeof EN> = {
     emblem: 'شعار', type: 'النوع', selectToEnter: 'اختر للإدخال',
     join: 'انضمام', leave: 'مغادرة النقابة', leaveConfirm: 'مغادرة هذه النقابة؟ لن تتمكن من الانضمام مجدداً لمدة 12 ساعة.',
     cooldown: 'فترة انتظار', cooldownMsg: 'غادرت مؤخراً. يمكنك الانضمام مجدداً بعد',
-    hours: 'س', minutes: 'د', joined: 'تم الانضمام!', alreadyInGuild: 'غادر نقابتك الحالية أولاً',
+    hours: 'س', minutes: 'د', joined: 'تم الانضمام!', alreadyInGuild: 'غادر نقابتك الحالية أولاً', loginRequired: 'يرجى تسجيل الدخول للانضمام أو إنشاء نقابة',
     charDesigner: 'مصمم الشخصيات', generateChar: 'إنشاء', generating: 'جاري الإنشاء…',
     charPrompt: 'صف شخصيتك', charResult: 'شخصيتك',
     guildHall: 'قاعة النقابة',
@@ -405,7 +405,7 @@ const STR: Record<string, typeof EN> = {
     emblem: 'Emblema', type: 'Tipo', selectToEnter: 'Selecionar para inserir',
     join: 'Entrar', leave: 'Sair da guilda', leaveConfirm: 'Sair desta guilda? Você não poderá entrar novamente por 12 horas.',
     cooldown: 'Espera', cooldownMsg: 'Você saiu recentemente. Reentrada disponível em',
-    hours: 'h', minutes: 'm', joined: 'Entrou!', alreadyInGuild: 'Saia da sua guilda atual primeiro',
+    hours: 'h', minutes: 'm', joined: 'Entrou!', alreadyInGuild: 'Saia da sua guilda atual primeiro', loginRequired: 'Faça login para entrar ou criar uma guilda',
     charDesigner: 'Designer de personagem', generateChar: 'Gerar', generating: 'Gerando…',
     charPrompt: 'Descreva seu personagem', charResult: 'Seu personagem',
     guildHall: 'Salão da guilda',
@@ -1962,7 +1962,10 @@ export function GuildPage() {
   }
   useEffect(load, [])
 
+  const isAuth = useAuthStore(s => s.isAuthenticated)
+
   const handleJoin = (g: GuildView) => {
+    if (!isAuth) { alert(s.loginRequired ?? 'Please login first'); return }
     if (cooldownRemaining() > 0) return
     setJoinedGuild(g.id)
     setJoinedId(g.id)
@@ -1986,7 +1989,7 @@ export function GuildPage() {
           {createOpen && <CreateGuildModal key="cm" s={s} onClose={() => setCreateOpen(false)} onCreated={(mock) => { setCreateOpen(false); if (mock) setGuilds(prev => [mock, ...prev]); else load() }} />}
         </AnimatePresence>
         {view === 'finder'
-          ? <FinderView guilds={guilds} s={s} onEnter={enter} onRefresh={load} onCreate={() => setCreateOpen(true)} joinedId={joinedId} onJoin={handleJoin} onLeaveGuild={handleLeaveGuild} t={T} />
+          ? <FinderView guilds={guilds} s={s} onEnter={enter} onRefresh={load} onCreate={() => { if (!isAuth) { alert(s.loginRequired ?? 'Please login first'); return }; setCreateOpen(true) }} joinedId={joinedId} onJoin={handleJoin} onLeaveGuild={handleLeaveGuild} t={T} />
           : <HallView guild={active} s={s} onLeave={() => setView('finder')} onLeaveGuild={handleLeaveGuild} />}
       </div>
     </ThemeCtx.Provider>
