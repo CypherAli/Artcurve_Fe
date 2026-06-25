@@ -5,8 +5,10 @@
 // ─────────────────────────────────────────────────────────────────
 
 import { useState, useMemo, useEffect } from 'react'
+import { useRouter } from 'next/navigation'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useLanguage } from '@/context/LanguageContext'
+import { useAuthStore } from '@/store/authStore'
 import { PHASE_COLOR, Phase } from '../marketplace/ArtCard'
 import { usePortfolio } from '@/hooks/usePortfolio'
 import { useEthBalance } from '@/web3/hooks/useContract'
@@ -358,6 +360,15 @@ const TABLE_V = {
 // ─────────────────────────────────────────────────────────────────
 export function VaultPage() {
   const { t } = useLanguage()
+  const router = useRouter()
+  const isAuth = useAuthStore(s => s.isAuthenticated)
+
+  useEffect(() => {
+    if (!isAuth && !authStore.getJwt()) router.replace('/?auth=required')
+  }, [isAuth, router])
+
+  if (!isAuth && !authStore.getJwt()) return null
+
   // ── Backend portfolio data ────────────────────────────────────────
   const portfolio  = usePortfolio()
   const { isLoading: portfolioLoading, error: portfolioError } = portfolio
