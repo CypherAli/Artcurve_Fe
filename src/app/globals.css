@@ -46,12 +46,12 @@
   /* ── Trade page tokens (light) ── */
   --tp-panel:      #FFFFFF;
   --tp-panel-alt:  #F5F3EF;
-  --tp-border:     #B5AD9E;
-  --tp-text-1:     #111111;
-  --tp-text-2:     #2A2A2A;
-  --tp-text-3:     #444444;
-  --tp-text-4:     #666666;
-  --tp-text-5:     #888888;
+  --tp-border:     #A09585;
+  --tp-text-1:     #0A0A0A;
+  --tp-text-2:     #1E1E1E;
+  --tp-text-3:     #333333;
+  --tp-text-4:     #555555;
+  --tp-text-5:     #777777;
   --tp-chart-bg:   #FFFFFF;
   --tp-chart-inner: #FFFFFF;
   --tp-chart-border: #C8C0B4;
