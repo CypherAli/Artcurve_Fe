@@ -726,7 +726,7 @@ export function LivePage() {
         {/* ── Sticky chip bar ── */}
         <div className="sticky z-10"
           style={{ top: 68, background: 'var(--ac-paper)', backdropFilter: 'blur(20px)', borderBottom: '1px solid var(--tp-border)' }}>
-          <div className="flex items-center px-6" style={{ height: 72, paddingTop: 10, paddingBottom: 10 }}>
+          <div className="flex items-center px-6" style={{ height: 52, paddingTop: 6, paddingBottom: 6 }}>
 
             {/* Chips */}
             <div ref={chipsRef}
