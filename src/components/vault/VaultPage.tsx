@@ -362,12 +362,15 @@ export function VaultPage() {
   const { t } = useLanguage()
   const router = useRouter()
   const isAuth = useAuthStore(s => s.isAuthenticated)
+  const [mounted, setMounted] = useState(false)
+
+  useEffect(() => setMounted(true), [])
 
   useEffect(() => {
-    if (!isAuth && !authStore.getJwt()) router.replace('/?auth=required')
-  }, [isAuth, router])
+    if (mounted && !isAuth && !authStore.getJwt()) router.replace('/?auth=required')
+  }, [mounted, isAuth, router])
 
-  if (!isAuth && !authStore.getJwt()) return null
+  if (!mounted) return null
 
   // ── Backend portfolio data ────────────────────────────────────────
   const portfolio  = usePortfolio()
