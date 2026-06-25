@@ -1313,7 +1313,7 @@ function RankAvatarColumn({
               border:    `${(isHigh || isTop) ? 2 : 1}px solid ${faded ? 'var(--tp-border)' : art.phaseColor}`,
               opacity:   faded ? 0.1 : 1,
               transition: 'opacity 0.25s ease, width 0.2s ease, height 0.2s ease',
-              background: '#111',
+              background: 'var(--tp-panel)',
               boxShadow:  (isHigh || isTop) ? `0 0 8px ${art.phaseColor}60` : 'none',
               zIndex:     isHigh ? 10 : isTop ? 5 : 1,
             }}
@@ -1636,7 +1636,7 @@ function RankTimelineFullscreen({
               exit={{ opacity: 0, x: 24 }}
               transition={{ duration: 0.22, ease: [0.25, 0.46, 0.45, 0.94] }}
               className="flex flex-col"
-              style={{ width: '45%', background: '#0A0A0A', minHeight: 0 }}
+              style={{ width: '45%', background: 'var(--ac-paper)', minHeight: 0 }}
             >
               <div className="px-6 pt-5 pb-4 shrink-0"
                 style={{ borderBottom: '1px solid var(--tp-border)' }}>
@@ -1650,7 +1650,7 @@ function RankTimelineFullscreen({
                   </span>
                 </div>
                 <h3 className="font-light leading-tight mb-1"
-                  style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: '1.45rem', color: 'var(--ac-paper)' }}>
+                  style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: '1.45rem', color: 'var(--tp-text-1)' }}>
                   {selectedArt.title}
                 </h3>
                 <p className="text-[9.5px] tracking-[0.2em] uppercase" style={{ color: 'var(--tp-text-3)' }}>
@@ -1666,7 +1666,7 @@ function RankTimelineFullscreen({
                   return (<>
                     <div>
                       <p className="font-mono text-[7.5px] uppercase tracking-widest mb-0.5" style={{ color: 'var(--tp-text-3)' }}>Live Price</p>
-                      <p className="font-mono text-[1.4rem] leading-none" style={{ color: 'var(--ac-paper)' }}>
+                      <p className="font-mono text-[1.4rem] leading-none" style={{ color: 'var(--tp-text-1)' }}>
                         {fmtETH(lp)} <span className="text-[0.85rem] opacity-50">ETH</span>
                       </p>
                     </div>
@@ -1756,7 +1756,7 @@ function RankTimelineFullscreen({
               exit={{ opacity: 0, x: 24 }}
               transition={{ duration: 0.22, ease: [0.25, 0.46, 0.45, 0.94] }}
               className="flex flex-col overflow-hidden"
-              style={{ width: '45%', background: '#0A0A0A', minHeight: 0 }}
+              style={{ width: '45%', background: 'var(--ac-paper)', minHeight: 0 }}
             >
               {/* Header */}
               <div className="px-6 pt-5 pb-4 shrink-0"
@@ -1764,7 +1764,7 @@ function RankTimelineFullscreen({
                 <p className="font-mono text-[8px] tracking-[0.22em] uppercase mb-1.5"
                   style={{ color: 'var(--tp-text-3)' }}>Comparing</p>
                 <h3 className="font-light"
-                  style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: '1.35rem', color: 'var(--ac-paper)' }}>
+                  style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: '1.35rem', color: 'var(--tp-text-1)' }}>
                   {selectedIds.length} Artworks
                 </h3>
                 <div className="flex flex-wrap gap-1.5 mt-2.5">
@@ -1784,7 +1784,7 @@ function RankTimelineFullscreen({
                 style={{ scrollbarWidth: 'thin', scrollbarColor: 'var(--tp-border) transparent' }}>
                 {/* Table header */}
                 <div className="grid px-5 py-2 font-mono text-[7.5px] tracking-[0.16em] uppercase sticky top-0"
-                  style={{ gridTemplateColumns: '1fr 70px 70px 44px', background: '#0A0A0A', borderBottom: '1px solid var(--tp-border)', color: 'var(--tp-text-4)' }}>
+                  style={{ gridTemplateColumns: '1fr 70px 70px 44px', background: 'var(--ac-paper)', borderBottom: '1px solid var(--tp-border)', color: 'var(--tp-text-4)' }}>
                   <span>Artwork</span>
                   <span className="text-right">Price</span>
                   <span className="text-right">vs Seed</span>
@@ -1832,7 +1832,7 @@ function RankTimelineFullscreen({
                           </div>
                           <div className="min-w-0">
                             <p className="font-light text-[11px] truncate leading-tight"
-                              style={{ fontFamily: "'Cormorant Garamond', serif", color: 'var(--ac-paper)' }}>
+                              style={{ fontFamily: "'Cormorant Garamond', serif", color: 'var(--tp-text-1)' }}>
                               {art.title}
                             </p>
                             <div className="flex items-center gap-1.5 mt-0.5">
@@ -1844,7 +1844,7 @@ function RankTimelineFullscreen({
 
                         {/* Price + mini spark */}
                         <div className="text-right">
-                          <p className="font-mono text-[11px] leading-none" style={{ color: 'var(--ac-paper)' }}>{fmtETH(lp)}</p>
+                          <p className="font-mono text-[11px] leading-none" style={{ color: 'var(--tp-text-1)' }}>{fmtETH(lp)}</p>
                           {sparkPath && (
                             <svg viewBox="0 0 48 20" className="w-12 h-5 ml-auto mt-1" style={{ overflow: 'visible' }}>
                               <path d={sparkPath} fill="none" stroke={up ? '#4ade80' : '#f87171'}
@@ -1947,7 +1947,7 @@ function RaceBar({
       {/* Name + ticker */}
       <div className="w-36 shrink-0">
         <p className="text-[11px] font-light leading-snug truncate"
-          style={{ fontFamily: "'Cormorant Garamond', serif", color: 'var(--ac-paper)' }}>
+          style={{ fontFamily: "'Cormorant Garamond', serif", color: 'var(--tp-text-1)' }}>
           {art.title}
         </p>
         <p className="font-mono text-[8px] tracking-wide mt-0.5"
@@ -3108,7 +3108,7 @@ export function MarketplacePage() {
 
   return (
     <>
-      <div style={{ paddingTop: 80, background: '#0A0A0A', minHeight: '100dvh' }}>
+      <div style={{ paddingTop: 80, background: 'var(--ac-paper)', minHeight: '100dvh' }}>
 
         {/* ══ TICKER TAPE ═════════════════════════════════════ */}
         <TickerTape />
@@ -3131,7 +3131,7 @@ export function MarketplacePage() {
                 style={{
                   fontFamily: "'Cormorant Garamond', serif",
                   fontSize:   'clamp(1.6rem, 3vw, 2.6rem)',
-                  color:      'var(--ac-paper)',
+                  color:      'var(--tp-text-1)',
                   opacity:    0,
                 }}
               >
@@ -3179,7 +3179,7 @@ export function MarketplacePage() {
           style={{
             top:          80,
             borderBottom: '1px solid var(--tp-border)',
-            background:   'rgba(10,10,10,0.98)',
+            background:   'var(--tp-panel)',
             height:       48,
           }}
         >
@@ -3407,7 +3407,7 @@ export function MarketplacePage() {
               style={{
                 top:                 0,
                 gridTemplateColumns: '40px 1fr 80px 48px',
-                background:          '#0A0A0A',
+                background:          'var(--ac-paper)',
                 borderBottom:        '1px solid var(--tp-border)',
               }}
             >
@@ -3532,7 +3532,7 @@ export function MarketplacePage() {
             style={{
               height:         '100%',
               overflowY:      'auto',
-              background:     '#0A0A0A',
+              background:     'var(--ac-paper)',
               scrollbarWidth: 'none',
             }}
           >
