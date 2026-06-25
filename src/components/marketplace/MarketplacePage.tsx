@@ -2149,7 +2149,7 @@ function ListItem({
       <div className="flex-1 min-w-0">
         <p className="truncate text-[12.5px] leading-tight"
           style={{
-            color:      active ? 'var(--ac-paper)' : 'var(--tp-text-1)',
+            color:      'var(--tp-text-1)',
             fontFamily: "'Cormorant Garamond', serif",
             fontWeight: 400,
           }}>
@@ -2165,7 +2165,7 @@ function ListItem({
       <div className="text-right shrink-0 w-20">
         <p
           className="font-mono text-[11.5px]"
-          style={{ color: active ? 'var(--ac-paper)' : 'var(--tp-text-2)' }}
+          style={{ color: active ? 'var(--tp-text-1)' : 'var(--tp-text-2)' }}
         >
           {fmtETH(livePrice)} ETH
         </p>
@@ -2371,7 +2371,7 @@ function InspectionDeck({
                 style={{
                   fontFamily: "'Cormorant Garamond', serif",
                   fontSize:   'clamp(1.6rem, 2.4vw, 2.4rem)',
-                  color:      'var(--ac-paper)',
+                  color:      'var(--tp-text-1)',
                 }}
               >
                 {art.title}
@@ -2399,7 +2399,7 @@ function InspectionDeck({
             {/* Key metrics */}
             <div className="grid grid-cols-3 gap-2 mt-1">
               {[
-                { label: t.marketplace.marketCap, value: `${fmtETH(livePrice)} ETH`, color: 'var(--ac-paper)' },
+                { label: t.marketplace.marketCap, value: `${fmtETH(livePrice)} ETH`, color: 'var(--tp-text-1)' },
                 { label: t.marketplace.change24h, value: fmtPct(((livePrice - art.marketCap) / art.marketCap) * 100), color: livePrice >= art.marketCap ? '#4ade80' : '#f87171' },
                 { label: t.marketplace.change7d,  value: art.change7d,  color: 'var(--tp-text-2)' },
               ].map(m => (
