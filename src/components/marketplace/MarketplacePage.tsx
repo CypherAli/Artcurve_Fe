@@ -607,7 +607,7 @@ function HeaderChartBg() {
             className="h-full"
             style={{ width: '50%', flexShrink: 0 }}
           >
-            <path d={accentD} fill="none" stroke="rgba(255,255,255,0.055)"
+            <path d={accentD} fill="none" stroke="var(--tp-border)"
               strokeWidth="1" strokeLinejoin="round"/>
           </svg>
         ))}
@@ -1034,7 +1034,7 @@ function ArtworkWithChart({
               key={t}
               x1={8} x2={W - 8}
               y1={12 + (H - 40) * t} y2={12 + (H - 40) * t}
-              stroke="rgba(255,255,255,0.1)"
+              stroke="var(--tp-border)"
               strokeWidth="1"
               strokeDasharray="3 5"
             />
@@ -1231,7 +1231,7 @@ function RankTimelineSVG({
         const isGold = i === 0
         return (
           <line key={i} x1={PAD.l} x2={PAD.l + pw} y1={y} y2={y}
-            stroke={isGold ? 'rgba(212,175,55,0.06)' : 'rgba(255,255,255,0.035)'}
+            stroke={isGold ? 'rgba(212,175,55,0.06)' : 'var(--tp-border)'}
             strokeWidth={isGold ? 1.5 : 1}
             strokeDasharray={isGold ? undefined : '2 6'}
           />
@@ -1310,7 +1310,7 @@ function RankAvatarColumn({
               top:       yPx,
               right:     4,
               transform: 'translateY(-50%)',
-              border:    `${(isHigh || isTop) ? 2 : 1}px solid ${faded ? 'rgba(255,255,255,0.1)' : art.phaseColor}`,
+              border:    `${(isHigh || isTop) ? 2 : 1}px solid ${faded ? 'var(--tp-border)' : art.phaseColor}`,
               opacity:   faded ? 0.1 : 1,
               transition: 'opacity 0.25s ease, width 0.2s ease, height 0.2s ease',
               background: '#111',
@@ -1532,7 +1532,7 @@ function RankTimelineFullscreen({
         {/* Left: rank timeline + legend */}
         <div
           className="flex flex-col min-h-0"
-          style={{ width: selectedArt ? '55%' : '100%', transition: 'width 0.3s ease', borderRight: selectedArt ? '1px solid rgba(255,255,255,0.06)' : 'none' }}
+          style={{ width: selectedArt ? '55%' : '100%', transition: 'width 0.3s ease', borderRight: selectedArt ? '1px solid var(--tp-border)' : 'none' }}
         >
           {/* SVG chart,fills available height */}
           <div ref={chartRef} className="flex-1 min-h-0 relative" style={{ background: 'var(--tp-panel-alt)' }}>
@@ -1558,7 +1558,7 @@ function RankTimelineFullscreen({
               background: 'var(--tp-panel)',
               borderTop: '1px solid var(--tp-border)',
               scrollbarWidth: 'thin',
-              scrollbarColor: 'rgba(255,255,255,0.08) transparent',
+              scrollbarColor: 'var(--tp-border) transparent',
             }}
           >
             <div className="grid gap-1.5" style={{ gridTemplateColumns: 'repeat(auto-fill, minmax(190px, 1fr))' }}>
@@ -1583,8 +1583,8 @@ function RankTimelineFullscreen({
                     style={{
                       background: active
                         ? `${art.phaseColor}12`
-                        : idx === 0 ? 'rgba(212,175,55,0.04)' : 'rgba(255,255,255,0.02)',
-                      border: `1px solid ${active ? art.phaseColor + '50' : idx === 0 ? 'rgba(212,175,55,0.2)' : 'rgba(255,255,255,0.06)'}`,
+                        : idx === 0 ? 'rgba(212,175,55,0.04)' : 'var(--tp-panel-alt)',
+                      border: `1px solid ${active ? art.phaseColor + '50' : idx === 0 ? 'rgba(212,175,55,0.2)' : 'var(--tp-border)'}`,
                     }}
                   >
                     <span className="font-mono text-[9px] w-5 shrink-0 text-right"
@@ -1598,7 +1598,7 @@ function RankTimelineFullscreen({
                     </div>
                     <div className="flex-1 min-w-0">
                       <p className="text-[10.5px] font-light truncate leading-snug"
-                        style={{ fontFamily: "'Cormorant Garamond', serif", color: active ? '#fff' : 'rgba(255,255,255,0.8)' }}>
+                        style={{ fontFamily: "'Cormorant Garamond', serif", color: active ? '#fff' : 'var(--tp-text-1)' }}>
                         {art.title}
                       </p>
                       <div className="flex items-center gap-1.5 mt-0.5">
@@ -1781,7 +1781,7 @@ function RankTimelineFullscreen({
 
               {/* Comparison table */}
               <div className="flex-1 overflow-y-auto"
-                style={{ scrollbarWidth: 'thin', scrollbarColor: 'rgba(255,255,255,0.06) transparent' }}>
+                style={{ scrollbarWidth: 'thin', scrollbarColor: 'var(--tp-border) transparent' }}>
                 {/* Table header */}
                 <div className="grid px-5 py-2 font-mono text-[7.5px] tracking-[0.16em] uppercase sticky top-0"
                   style={{ gridTemplateColumns: '1fr 70px 70px 44px', background: '#0A0A0A', borderBottom: '1px solid var(--tp-border)', color: 'var(--tp-text-4)' }}>
@@ -1919,7 +1919,7 @@ function RaceBar({
         background: isFlashing
           ? (liveUp ? 'rgba(74,222,128,0.06)' : 'rgba(248,113,113,0.06)')
           : isSelected
-            ? 'rgba(255,255,255,0.035)'
+            ? 'var(--tp-border)'
             : 'transparent',
         borderBottom: '1px solid var(--tp-border)',
         transition:   `background ${isFlashing ? '0.6s' : '0.15s'} ease`,
@@ -2121,8 +2121,8 @@ function ListItem({
         borderBottom:    '1px solid var(--tp-border)',
         background:      isFlashing
           ? (liveUp ? 'rgba(74,222,128,0.07)' : 'rgba(248,113,113,0.07)')
-          : active  ? 'rgba(255,255,255,0.04)'
-          : hovered ? 'rgba(255,255,255,0.025)'
+          : active  ? 'var(--tp-panel-alt)'
+          : hovered ? 'var(--tp-panel-alt)'
           : 'transparent',
         borderLeft:      active ? '2px solid #D4AF37' : '2px solid transparent',
         transition:      `background-color ${isFlashing ? '0.55s' : '0.15s'} ease, border-color 0.15s ease`,
@@ -2401,13 +2401,13 @@ function InspectionDeck({
               {[
                 { label: t.marketplace.marketCap, value: `${fmtETH(livePrice)} ETH`, color: 'var(--ac-paper)' },
                 { label: t.marketplace.change24h, value: fmtPct(((livePrice - art.marketCap) / art.marketCap) * 100), color: livePrice >= art.marketCap ? '#4ade80' : '#f87171' },
-                { label: t.marketplace.change7d,  value: art.change7d,  color: 'rgba(255,255,255,0.7)' },
+                { label: t.marketplace.change7d,  value: art.change7d,  color: 'var(--tp-text-2)' },
               ].map(m => (
                 <div
                   key={m.label}
                   className="px-3 py-2.5 text-center"
                   style={{
-                    background: 'rgba(255,255,255,0.04)',
+                    background: 'var(--tp-panel-alt)',
                     border:     '1px solid var(--tp-border)',
                   }}
                 >
@@ -2478,7 +2478,7 @@ function InspectionDeck({
         <div
           className="h-px w-full"
           style={{
-            background: `linear-gradient(90deg, ${art.phaseColor}30, rgba(255,255,255,0.07) 40%, transparent)`,
+            background: `linear-gradient(90deg, ${art.phaseColor}30, var(--tp-border) 40%, transparent)`,
           }}
         />
 
@@ -2634,7 +2634,7 @@ function BuyModal({ art, livePrice, onClose }: { art: MarketArtwork; livePrice: 
           style={{ background: `linear-gradient(90deg, ${art.phaseColor}, ${art.phaseColor}40 60%, transparent)` }}/>
 
         <div className="flex items-start gap-4 px-6 pt-5 pb-4"
-          style={{ borderBottom: '1px solid rgba(255,255,255,0.07)' }}>
+          style={{ borderBottom: '1px solid var(--tp-border)' }}>
           <div className="relative w-12 h-12 shrink-0 overflow-hidden rounded-sm">
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img src={art.image} alt="" className="w-full h-full object-cover"/>
@@ -2651,7 +2651,7 @@ function BuyModal({ art, livePrice, onClose }: { art: MarketArtwork; livePrice: 
           </div>
           <button onClick={close}
             className="w-7 h-7 flex items-center justify-center rounded-sm transition-colors"
-            style={{ color: 'rgba(255,255,255,0.3)' }}
+            style={{ color: 'var(--tp-text-3)' }}
             onMouseEnter={e => (e.currentTarget.style.background = 'rgba(255,255,255,0.08)')}
             onMouseLeave={e => (e.currentTarget.style.background = 'transparent')}>
             <svg viewBox="0 0 24 24" className="w-3.5 h-3.5" fill="none" stroke="currentColor" strokeWidth="2.5">
@@ -2662,10 +2662,10 @@ function BuyModal({ art, livePrice, onClose }: { art: MarketArtwork; livePrice: 
 
         <div className="px-6 py-5">
           <div className="flex justify-between items-end mb-5"
-            style={{ borderBottom: '1px solid rgba(255,255,255,0.07)', paddingBottom: '1.25rem' }}>
+            style={{ borderBottom: '1px solid var(--tp-border)', paddingBottom: '1.25rem' }}>
             <div>
               <p className="text-[8px] uppercase tracking-widest mb-1"
-                style={{ color: 'rgba(255,255,255,0.3)' }}>Current Price</p>
+                style={{ color: 'var(--tp-text-3)' }}>Current Price</p>
               <p className="font-light text-white leading-none"
                 style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: '2rem' }}>
                 {fmtETH(livePrice)} ETH
@@ -2687,8 +2687,8 @@ function BuyModal({ art, livePrice, onClose }: { art: MarketArtwork; livePrice: 
                     onClick={() => setBuyAmount(amt)}
                     className="flex-1 h-8 font-mono text-[9px] tracking-widest transition-colors duration-150"
                     style={{
-                      border:     `1px solid ${buyAmount === amt ? '#D4AF37' : 'rgba(255,255,255,0.1)'}`,
-                      color:      buyAmount === amt ? '#D4AF37' : 'rgba(255,255,255,0.35)',
+                      border:     `1px solid ${buyAmount === amt ? '#D4AF37' : 'var(--tp-border)'}`,
+                      color:      buyAmount === amt ? '#D4AF37' : 'var(--tp-text-3)',
                       background: buyAmount === amt ? 'rgba(212,175,55,0.08)' : 'transparent',
                     }}
                   >
@@ -2701,12 +2701,12 @@ function BuyModal({ art, livePrice, onClose }: { art: MarketArtwork; livePrice: 
               <div
                 className="flex items-center justify-between px-3 py-2 mb-3 font-mono text-[8px]"
                 style={{
-                  background: 'rgba(255,255,255,0.025)',
-                  border:     '1px solid rgba(255,255,255,0.06)',
+                  background: 'var(--tp-panel-alt)',
+                  border:     '1px solid var(--tp-border)',
                 }}
               >
-                <span style={{ color: 'rgba(255,255,255,0.28)' }}>Network fee</span>
-                <span style={{ color: 'rgba(255,255,255,0.45)' }}>~$0.04 · Base · EIP-1559</span>
+                <span style={{ color: 'var(--tp-text-3)' }}>Network fee</span>
+                <span style={{ color: 'var(--tp-text-2)' }}>~$0.04 · Base · EIP-1559</span>
               </div>
 
               {/* Confirm button */}
@@ -2750,15 +2750,15 @@ function BuyModal({ art, livePrice, onClose }: { art: MarketArtwork; livePrice: 
               </div>
               <button onClick={close}
                 className="w-full h-8 font-mono text-[9px] tracking-widest uppercase transition-colors"
-                style={{ color: 'rgba(255,255,255,0.28)' }}
-                onMouseEnter={e => (e.currentTarget.style.color = 'rgba(255,255,255,0.55)')}
-                onMouseLeave={e => (e.currentTarget.style.color = 'rgba(255,255,255,0.28)')}>
+                style={{ color: 'var(--tp-text-3)' }}
+                onMouseEnter={e => (e.currentTarget.style.color = 'var(--tp-text-2)')}
+                onMouseLeave={e => (e.currentTarget.style.color = 'var(--tp-text-3)')}>
                 Close
               </button>
             </div>
           )}
           <p className="text-center font-mono text-[8px] tracking-widest uppercase mt-3"
-            style={{ color: 'rgba(255,255,255,0.16)' }}>
+            style={{ color: 'var(--tp-text-4)' }}>
             Base Network · Bonding Curve Contract
           </p>
         </div>
@@ -3156,7 +3156,7 @@ export function MarketplacePage() {
                   className="px-4 py-2.5 text-center"
                   style={{
                     border:     '1px solid var(--tp-border)',
-                    background: 'rgba(255,255,255,0.02)',
+                    background: 'var(--tp-panel-alt)',
                     minWidth:   96,
                   }}>
                   <p className="font-mono text-[7.5px] tracking-[0.22em] uppercase mb-1"
@@ -3217,7 +3217,7 @@ export function MarketplacePage() {
                         : t.marketplace.phaseMigration}
                   <span className="font-mono text-[7.5px] px-1 py-0.5"
                     style={{
-                      background: active ? `${color}18` : 'rgba(255,255,255,0.05)',
+                      background: active ? `${color}18` : 'var(--tp-panel-alt)',
                       color:      active ? color : 'var(--tp-text-4)',
                     }}>
                     {count}
@@ -3233,7 +3233,7 @@ export function MarketplacePage() {
 
           {/* Race view toggle,separator + RACE button */}
           <div className="h-4 w-px mx-1 shrink-0"
-            style={{ background: 'rgba(255,255,255,0.1)' }}/>
+            style={{ background: 'var(--tp-border)' }}/>
           <button
             type="button"
             onClick={() => setViewMode(v => v === 'race' ? 'list' : 'race')}
@@ -3266,7 +3266,7 @@ export function MarketplacePage() {
               ) : (
                 <svg viewBox="0 0 24 24"
                   className="absolute left-0 top-1/2 -translate-y-1/2 w-3 h-3"
-                  style={{ color: 'rgba(255,255,255,0.25)' }}
+                  style={{ color: 'var(--tp-text-3)' }}
                   fill="none" stroke="currentColor" strokeWidth="2">
                   <circle cx="11" cy="11" r="8"/>
                   <path d="m21 21-4.35-4.35" strokeLinecap="round"/>
@@ -3281,7 +3281,7 @@ export function MarketplacePage() {
                   color:        'var(--tp-text-1)',
                 }}
                 onFocus={e => (e.currentTarget.style.borderBottomColor = 'rgba(212,175,55,0.65)')}
-                onBlur={e  => (e.currentTarget.style.borderBottomColor = 'rgba(255,255,255,0.15)')}
+                onBlur={e  => (e.currentTarget.style.borderBottomColor = 'var(--tp-border)')}
               />
             </div>
             <div ref={sortRef} className="relative">
@@ -3305,8 +3305,8 @@ export function MarketplacePage() {
                     exit={{ opacity: 0, y: -4 }} transition={{ duration: 0.14 }}
                     className="absolute right-0 top-[calc(100%+4px)] z-50 overflow-hidden"
                     style={{
-                      background: '#111', border: '1px solid rgba(255,255,255,0.1)',
-                      minWidth: 170, boxShadow: '0 16px 40px rgba(0,0,0,0.6)',
+                      background: 'var(--tp-panel)', border: '1px solid var(--tp-border)',
+                      minWidth: 170, boxShadow: '0 16px 40px rgba(0,0,0,0.15)',
                     }}>
                     {SORT_OPTIONS.map(s => (
                       <button key={s.key} type="button"
@@ -3327,7 +3327,7 @@ export function MarketplacePage() {
                           background: s.key === sortKey ? 'rgba(212,175,55,0.08)' : 'transparent',
                         }}
                         onMouseEnter={e => {
-                          if (s.key !== sortKey) e.currentTarget.style.background = 'rgba(255,255,255,0.04)'
+                          if (s.key !== sortKey) e.currentTarget.style.background = 'var(--tp-panel-alt)'
                         }}
                         onMouseLeave={e => {
                           if (s.key !== sortKey) e.currentTarget.style.background = 'transparent'
@@ -3424,16 +3424,16 @@ export function MarketplacePage() {
               <div className="flex flex-col">
                 {[1,2,3,4,5,6].map(i => (
                   <div key={i} className="flex items-center gap-3 px-4 py-3 animate-pulse"
-                    style={{ borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
+                    style={{ borderBottom: '1px solid var(--tp-border)' }}>
                     <div className="w-10 h-10 shrink-0 rounded-sm"
-                      style={{ background: 'rgba(255,255,255,0.07)' }}/>
+                      style={{ background: 'var(--tp-border)' }}/>
                     <div className="flex-1 flex flex-col gap-1.5">
-                      <div className="h-3 rounded" style={{ background: 'rgba(255,255,255,0.07)', width: '65%' }}/>
-                      <div className="h-2 rounded" style={{ background: 'rgba(255,255,255,0.04)', width: '40%' }}/>
+                      <div className="h-3 rounded" style={{ background: 'var(--tp-border)', width: '65%' }}/>
+                      <div className="h-2 rounded" style={{ background: 'var(--tp-panel-alt)', width: '40%' }}/>
                     </div>
                     <div className="w-20 flex flex-col items-end gap-1.5">
-                      <div className="h-3 rounded" style={{ background: 'rgba(255,255,255,0.07)', width: '80%' }}/>
-                      <div className="h-2 rounded" style={{ background: 'rgba(255,255,255,0.04)', width: '50%' }}/>
+                      <div className="h-3 rounded" style={{ background: 'var(--tp-border)', width: '80%' }}/>
+                      <div className="h-2 rounded" style={{ background: 'var(--tp-panel-alt)', width: '50%' }}/>
                     </div>
                   </div>
                 ))}
@@ -3469,7 +3469,7 @@ export function MarketplacePage() {
             {/* FIX 8: Pagination controls */}
             {!isLoading && !search && pageCount > 1 && (
               <div className="flex items-center justify-center gap-2 py-6"
-                style={{ borderTop: '1px solid rgba(255,255,255,0.06)' }}>
+                style={{ borderTop: '1px solid var(--tp-border)' }}>
                 <button
                   type="button"
                   onClick={() => setPage(p => Math.max(1, p - 1))}
@@ -3510,7 +3510,7 @@ export function MarketplacePage() {
             {isFetching && !isLoading && (
               <div className="sticky bottom-3 flex justify-end px-4 pointer-events-none">
                 <div className="flex items-center gap-1.5 px-2.5 py-1.5"
-                  style={{ background: 'rgba(0,0,0,0.82)', border: '1px solid rgba(255,255,255,0.08)' }}>
+                  style={{ background: 'var(--tp-panel)', border: '1px solid var(--tp-border)' }}>
                   <svg className="w-2.5 h-2.5 animate-spin" viewBox="0 0 24 24" fill="none"
                     style={{ color: '#D4AF37' }}>
                     <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="2" strokeOpacity="0.2"/>
@@ -3551,7 +3551,7 @@ export function MarketplacePage() {
               initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
               transition={{ duration: 0.22 }}
               className="fixed inset-0 z-[60] md:hidden"
-              style={{ background: 'rgba(0,0,0,0.85)' }}
+              style={{ background: 'var(--tp-panel)' }}
               onClick={() => setSheetOpen(false)}
             />
             {/* Sheet */}
@@ -3564,7 +3564,7 @@ export function MarketplacePage() {
               className="fixed bottom-0 left-0 right-0 z-[70] md:hidden overflow-hidden"
               style={{
                 background:   '#0D0D0D',
-                border:       '1px solid rgba(255,255,255,0.1)',
+                border:       '1px solid var(--tp-border)',
                 borderBottom: 'none',
                 maxHeight:    '90dvh',
               }}
