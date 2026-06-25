@@ -166,16 +166,16 @@ function PortfolioChart({ totalValue, pnlPct, perfData, onTimeframeChange }: {
 
   return (
     <div className="shrink-0 mx-4 mb-2"
-      style={{ border: '1px solid rgba(255,255,255,0.06)', background: 'rgba(0,0,0,0.25)' }}>
+      style={{ border: `1px solid var(--tp-border)`, background: 'var(--tp-panel)' }}>
 
       {/* Header */}
       <div className="flex items-center justify-between px-4 py-2 shrink-0"
-        style={{ borderBottom: '1px solid rgba(255,255,255,0.05)', background: 'rgba(0,0,0,0.32)' }}>
+        style={{ borderBottom: `1px solid var(--tp-border)`, background: 'var(--tp-panel)' }}>
         <div className="flex items-center gap-3">
           <span className="font-mono text-[6.5px] tracking-[0.2em] uppercase"
-            style={{ color: 'rgba(255,255,255,0.2)' }}>{t.vault.portfolioValue}</span>
+            style={{ color: 'var(--tp-text-4)' }}>{t.vault.portfolioValue}</span>
           <span className="font-sans text-[13px] font-semibold"
-            style={{ color: 'rgba(255,255,255,0.85)', letterSpacing: '-0.02em' }}>
+            style={{ color: 'var(--tp-text-1)', letterSpacing: '-0.02em' }}>
             {fmtETH(totalValue)} ETH
           </span>
           <span className="font-mono text-[9px] font-semibold"
@@ -184,7 +184,7 @@ function PortfolioChart({ totalValue, pnlPct, perfData, onTimeframeChange }: {
           </span>
           {hoverVal && (
             <motion.span key={hoverIdx} initial={{ opacity: 0 }} animate={{ opacity: 1 }}
-              className="font-mono text-[8.5px]" style={{ color: 'rgba(255,255,255,0.4)' }}>
+              className="font-mono text-[8.5px]" style={{ color: 'var(--tp-text-3)' }}>
               · {fmtETH(hoverVal)} ETH
             </motion.span>
           )}
@@ -194,9 +194,9 @@ function PortfolioChart({ totalValue, pnlPct, perfData, onTimeframeChange }: {
             <button key={tfVal} type="button" onClick={() => handleTf(tfVal)}
               className="px-2 py-0.5 font-mono text-[7px]"
               style={{
-                background: tf === tfVal ? 'rgba(255,255,255,0.08)' : 'transparent',
-                border:     tf === tfVal ? '1px solid rgba(255,255,255,0.12)' : '1px solid transparent',
-                color:      tf === tfVal ? 'rgba(255,255,255,0.65)' : 'rgba(255,255,255,0.25)',
+                background: tf === tfVal ? 'var(--tp-panel-alt)' : 'transparent',
+                border:     tf === tfVal ? `1px solid var(--tp-border)` : '1px solid transparent',
+                color:      tf === tfVal ? 'var(--tp-text-2)' : 'var(--tp-text-4)',
               }}>
               {tfVal === '7D' ? t.vault.timeframe7d : tfVal === '30D' ? t.vault.timeframe30d : t.vault.timeframe90d}
             </button>
@@ -230,7 +230,7 @@ function PortfolioChart({ totalValue, pnlPct, perfData, onTimeframeChange }: {
           {hoverPt && (
             <>
               <line x1={hoverPt.x} y1={0} x2={hoverPt.x} y2={H}
-                stroke="rgba(255,255,255,0.12)" strokeWidth="1" strokeDasharray="3,3"/>
+                stroke="var(--tp-border)" strokeWidth="1" strokeDasharray="3,3"/>
               <circle cx={hoverPt.x} cy={hoverPt.y} r="3.5" fill={color} opacity="0.9"/>
             </>
           )}
@@ -271,12 +271,12 @@ function AllocationDonut({ holdings }: { holdings: Holding[] }) {
   }, [holdings, total])
 
   return (
-    <div className="flex flex-col h-full" style={{ borderLeft: '1px solid rgba(255,255,255,0.05)' }}>
+    <div className="flex flex-col h-full" style={{ borderLeft: `1px solid var(--tp-border)` }}>
       <div className="flex items-center justify-between px-3 shrink-0"
-        style={{ height: 36, background: 'rgba(0,0,0,0.38)', borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
+        style={{ height: 36, background: 'var(--tp-panel)', borderBottom: `1px solid var(--tp-border)` }}>
         <span className="font-mono text-[7px] tracking-[0.2em] uppercase"
-          style={{ color: 'rgba(255,255,255,0.22)' }}>{t.vault.allocation}</span>
-        <span className="font-mono text-[7px]" style={{ color: 'rgba(255,255,255,0.18)' }}>
+          style={{ color: 'var(--tp-text-4)' }}>{t.vault.allocation}</span>
+        <span className="font-mono text-[7px]" style={{ color: 'var(--tp-text-5)' }}>
           {fmtUSD(total)}
         </span>
       </div>
@@ -289,9 +289,9 @@ function AllocationDonut({ holdings }: { holdings: Holding[] }) {
           ))}
           <circle cx="56" cy="56" r="30" fill="var(--ac-paper, #070707)"/>
           <text x="56" y="52" textAnchor="middle" fontFamily="monospace"
-            fontSize="8" fill="rgba(255,255,255,0.45)">{t.vault.total}</text>
+            fontSize="8" fill="var(--tp-text-3)">{t.vault.total}</text>
           <text x="56" y="65" textAnchor="middle" fontFamily="monospace"
-            fontSize="9" fontWeight="bold" fill="rgba(255,255,255,0.7)">
+            fontSize="9" fontWeight="bold" fill="var(--tp-text-2)">
             {fmtETH(total)}
           </text>
         </svg>
@@ -302,7 +302,7 @@ function AllocationDonut({ holdings }: { holdings: Holding[] }) {
           const pct = (val / total * 100).toFixed(1)
           return (
             <div key={h.id} className="flex items-center justify-between py-1.5"
-              style={{ borderBottom: '1px solid rgba(255,255,255,0.03)' }}>
+              style={{ borderBottom: `1px solid var(--tp-border)` }}>
               <div className="flex items-center gap-2">
                 <span className="size-2 rounded-sm" style={{ background: PHASE_COLOR[h.phase] }}/>
                 <span className="font-mono text-[8.5px]" style={{ color: PHASE_COLOR[h.phase] }}>
@@ -310,8 +310,8 @@ function AllocationDonut({ holdings }: { holdings: Holding[] }) {
                 </span>
               </div>
               <div className="text-right">
-                <div className="font-mono text-[8px]" style={{ color: 'rgba(255,255,255,0.5)' }}>{pct}%</div>
-                <div className="font-mono text-[7px]" style={{ color: 'rgba(255,255,255,0.25)' }}>{fmtUSD(val)}</div>
+                <div className="font-mono text-[8px]" style={{ color: 'var(--tp-text-2)' }}>{pct}%</div>
+                <div className="font-mono text-[7px]" style={{ color: 'var(--tp-text-4)' }}>{fmtUSD(val)}</div>
               </div>
             </div>
           )
@@ -332,7 +332,7 @@ function SortHeader({
   return (
     <button type="button" onClick={() => onSort(sk)}
       className="flex items-center gap-0.5 font-mono text-[6.5px] tracking-wider cursor-pointer select-none"
-      style={{ color: active ? 'rgba(255,255,255,0.45)' : 'rgba(255,255,255,0.15)', flex, minWidth }}>
+      style={{ color: active ? 'var(--tp-text-3)' : 'var(--tp-text-5)', flex, minWidth }}>
       {label}
       {active && (
         <span style={{ fontSize: 8, marginLeft: 1, color: '#D4AF37' }}>
@@ -445,15 +445,15 @@ export function VaultPage() {
 
       {/* Stats row */}
       <motion.div className="grid grid-cols-4 gap-px shrink-0 mx-4 mb-2"
-        style={{ background: 'rgba(255,255,255,0.04)' }}
+        style={{ background: 'var(--tp-border)' }}
         variants={TABLE_V} initial="hidden" animate="show">
         {STATS.map(s => (
           <motion.div key={s.label} variants={ROW_V}
-            className="px-4 py-2.5" style={{ background: 'rgba(8,8,8,0.9)' }}>
+            className="px-4 py-2.5" style={{ background: 'var(--tp-panel)' }}>
             <div className="font-mono text-[6.5px] tracking-wider uppercase mb-1"
-              style={{ color: 'rgba(255,255,255,0.2)' }}>{s.label}</div>
+              style={{ color: 'var(--tp-text-4)' }}>{s.label}</div>
             <div className="font-mono text-[16px] font-bold leading-none"
-              style={{ color: s.up ? 'rgba(255,255,255,0.88)' : '#f87171', letterSpacing: '-0.025em' }}>
+              style={{ color: s.up ? 'var(--tp-text-1)' : '#f87171', letterSpacing: '-0.025em' }}>
               {s.value}
             </div>
             <div className="font-mono text-[8px] mt-0.5"
@@ -474,16 +474,16 @@ export function VaultPage() {
 
         {/* Holdings / History table */}
         <div className="flex-1 min-w-0 flex flex-col"
-          style={{ border: '1px solid rgba(255,255,255,0.06)' }}>
+          style={{ border: `1px solid var(--tp-border)` }}>
 
           {/* Tabs */}
           <div className="flex shrink-0"
-            style={{ background: 'rgba(0,0,0,0.38)', borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
+            style={{ background: 'var(--tp-panel)', borderBottom: `1px solid var(--tp-border)` }}>
             {(['holdings', 'history'] as const).map(tab => (
               <motion.button key={tab} type="button" onClick={() => setActiveTab(tab)}
                 whileTap={{ scale: 0.97 }}
                 className="relative px-5 py-2 font-mono text-[8px] tracking-widest uppercase"
-                style={{ color: activeTab === tab ? 'rgba(255,255,255,0.75)' : 'rgba(255,255,255,0.25)' }}>
+                style={{ color: activeTab === tab ? 'var(--tp-text-1)' : 'var(--tp-text-4)' }}>
                 {tab === 'holdings' ? t.vault.myHoldings : t.vault.txHistory}
                 {activeTab === tab && (
                   <motion.div layoutId="vault-tab" className="absolute bottom-0 left-0 right-0 h-[2px]"
@@ -500,7 +500,7 @@ export function VaultPage() {
                 transition={{ duration: 0.14 }}>
                 {/* Sortable header */}
                 <div className="flex items-center px-4 shrink-0"
-                  style={{ height: 28, background: 'rgba(0,0,0,0.28)', borderBottom: '1px solid rgba(255,255,255,0.04)' }}>
+                  style={{ height: 28, background: 'var(--tp-panel-alt)', borderBottom: `1px solid var(--tp-border)` }}>
                   <SortHeader label={t.vault.asset}   sk="ticker"   sortKey={sortKey} sortDir={sortDir} onSort={handleSort} minWidth={172}/>
                   <SortHeader label={t.vault.qty}     sk="qty"      sortKey={sortKey} sortDir={sortDir} onSort={handleSort} flex={1}/>
                   <SortHeader label={t.vault.avgBuy}  sk="avgBuy"   sortKey={sortKey} sortDir={sortDir} onSort={handleSort} flex={1}/>
@@ -509,30 +509,30 @@ export function VaultPage() {
                   <SortHeader label={t.vault.pnl}     sk="pnl"      sortKey={sortKey} sortDir={sortDir} onSort={handleSort} flex={1}/>
                   <SortHeader label={t.vault.chgPct}  sk="pnlPct"   sortKey={sortKey} sortDir={sortDir} onSort={handleSort} flex={1}/>
                   {/* trade col */}
-                  <span className="font-mono text-[6.5px] tracking-wider" style={{ color: 'rgba(255,255,255,0.12)', width: 56, textAlign: 'right' }}/>
+                  <span className="font-mono text-[6.5px] tracking-wider" style={{ color: 'var(--tp-text-5)', width: 56, textAlign: 'right' }}/>
                 </div>
                 <motion.div className="flex-1 overflow-y-auto"
-                  style={{ scrollbarWidth: 'thin', scrollbarColor: 'rgba(255,255,255,0.06) transparent' }}
+                  style={{ scrollbarWidth: 'thin', scrollbarColor: 'var(--tp-border) transparent' }}
                   variants={TABLE_V} initial="hidden" animate="show">
                   {portfolioLoading && (
                     <div className="flex flex-col items-center justify-center py-16 gap-2">
                       <div className="w-5 h-5 border-2 border-t-transparent rounded-full animate-spin"
-                        style={{ borderColor: 'rgba(255,255,255,0.12)', borderTopColor: 'transparent' }} />
-                      <p className="font-mono text-[10px] tracking-wider" style={{ color: 'rgba(255,255,255,0.22)' }}>
+                        style={{ borderColor: 'var(--tp-text-5)', borderTopColor: 'transparent' }} />
+                      <p className="font-mono text-[10px] tracking-wider" style={{ color: 'var(--tp-text-4)' }}>
                         Loading portfolio...
                       </p>
                     </div>
                   )}
                   {!portfolioLoading && sortedHoldings.length === 0 && (
                     <div className="flex flex-col items-center justify-center py-16 gap-3">
-                      <svg viewBox="0 0 24 24" className="w-10 h-10" fill="none" stroke="rgba(255,255,255,0.12)" strokeWidth="1.5">
+                      <svg viewBox="0 0 24 24" className="w-10 h-10" fill="none" stroke="var(--tp-text-5)" strokeWidth="1.5">
                         <path d="M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0z" strokeLinecap="round"/>
                         <path d="M9 10h.01M15 10h.01M8 14s1.5 2 4 2 4-2 4-2" strokeLinecap="round" strokeLinejoin="round"/>
                       </svg>
-                      <p className="font-mono text-[10px] tracking-wider" style={{ color: 'rgba(255,255,255,0.22)' }}>
+                      <p className="font-mono text-[10px] tracking-wider" style={{ color: 'var(--tp-text-4)' }}>
                         No holdings yet
                       </p>
-                      <p className="font-sans text-[10px]" style={{ color: 'rgba(255,255,255,0.12)' }}>
+                      <p className="font-sans text-[10px]" style={{ color: 'var(--tp-text-5)' }}>
                         Start trading on the marketplace to build your portfolio
                       </p>
                     </div>
@@ -546,26 +546,26 @@ export function VaultPage() {
                     return (
                       <motion.div key={h.id} variants={ROW_V}
                         className="flex items-center px-4 py-2 cursor-default group"
-                        style={{ borderBottom: '1px solid rgba(255,255,255,0.025)' }}
-                        whileHover={{ background: 'rgba(255,255,255,0.016)' }}>
+                        style={{ borderBottom: `1px solid var(--tp-border)` }}
+                        whileHover={{ background: 'var(--tp-panel-alt)' }}>
                         <div style={{ minWidth: 172 }}>
                           <div className="font-mono text-[10px] font-bold" style={{ color: phaseC }}>
                             {h.ticker}
                           </div>
-                          <div className="font-sans text-[7px] mt-0.5" style={{ color: 'rgba(255,255,255,0.25)' }}>
+                          <div className="font-sans text-[7px] mt-0.5" style={{ color: 'var(--tp-text-4)' }}>
                             {h.title}
                           </div>
                         </div>
-                        <span style={{ flex: 1, fontFamily: 'monospace', fontSize: 9, color: 'rgba(255,255,255,0.55)' }}>
+                        <span style={{ flex: 1, fontFamily: 'monospace', fontSize: 9, color: 'var(--tp-text-2)' }}>
                           {h.qty.toFixed(4)}
                         </span>
-                        <span style={{ flex: 1, fontFamily: 'monospace', fontSize: 9, color: 'rgba(255,255,255,0.42)' }}>
+                        <span style={{ flex: 1, fontFamily: 'monospace', fontSize: 9, color: 'var(--tp-text-3)' }}>
                           {fmtETH(h.avgBuy)}
                         </span>
-                        <span style={{ flex: 1, fontFamily: 'monospace', fontSize: 9, color: 'rgba(255,255,255,0.65)', fontWeight: 600 }}>
+                        <span style={{ flex: 1, fontFamily: 'monospace', fontSize: 9, color: 'var(--tp-text-2)', fontWeight: 600 }}>
                           {fmtETH(h.curPrice)}
                         </span>
-                        <span style={{ flex: 1, fontFamily: 'monospace', fontSize: 9, color: 'rgba(255,255,255,0.55)' }}>
+                        <span style={{ flex: 1, fontFamily: 'monospace', fontSize: 9, color: 'var(--tp-text-2)' }}>
                           {fmtETH(value)}
                         </span>
                         <span style={{ flex: 1, fontFamily: 'monospace', fontSize: 9, fontWeight: 600,
@@ -592,46 +592,46 @@ export function VaultPage() {
                 initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
                 transition={{ duration: 0.14 }}>
                 <div className="flex items-center px-4 shrink-0"
-                  style={{ height: 28, background: 'rgba(0,0,0,0.28)', borderBottom: '1px solid rgba(255,255,255,0.04)' }}>
+                  style={{ height: 28, background: 'var(--tp-panel-alt)', borderBottom: `1px solid var(--tp-border)` }}>
                   {[t.vault.date, t.vault.side, t.vault.token, t.trade.price, t.vault.ethSpent].map(l => (
                     <span key={l} className="font-mono text-[6.5px] tracking-wider flex-1"
-                      style={{ color: 'rgba(255,255,255,0.15)' }}>{l}</span>
+                      style={{ color: 'var(--tp-text-5)' }}>{l}</span>
                   ))}
                 </div>
                 <div className="flex-1 overflow-y-auto"
-                  style={{ scrollbarWidth: 'thin', scrollbarColor: 'rgba(255,255,255,0.06) transparent' }}>
+                  style={{ scrollbarWidth: 'thin', scrollbarColor: 'var(--tp-border) transparent' }}>
                   {TXS.length === 0 && (
                     <div className="flex flex-col items-center justify-center py-16 gap-3">
-                      <svg viewBox="0 0 24 24" className="w-10 h-10" fill="none" stroke="rgba(255,255,255,0.12)" strokeWidth="1.5">
+                      <svg viewBox="0 0 24 24" className="w-10 h-10" fill="none" stroke="var(--tp-text-5)" strokeWidth="1.5">
                         <path d="M9 5H7a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-2" strokeLinecap="round"/>
                         <rect x="9" y="3" width="6" height="4" rx="1" strokeLinecap="round"/>
                         <path d="M9 12h6M9 16h4" strokeLinecap="round"/>
                       </svg>
-                      <p className="font-mono text-[10px] tracking-wider" style={{ color: 'rgba(255,255,255,0.22)' }}>
+                      <p className="font-mono text-[10px] tracking-wider" style={{ color: 'var(--tp-text-4)' }}>
                         No transactions yet
                       </p>
-                      <p className="font-sans text-[10px]" style={{ color: 'rgba(255,255,255,0.12)' }}>
+                      <p className="font-sans text-[10px]" style={{ color: 'var(--tp-text-5)' }}>
                         Your buy and sell history will appear here
                       </p>
                     </div>
                   )}
                   {TXS.map(tx => (
                     <div key={tx.id} className="flex items-center px-4 py-2.5 cursor-default"
-                      style={{ borderBottom: '1px solid rgba(255,255,255,0.025)' }}>
-                      <span style={{ flex: 1, fontFamily: 'monospace', fontSize: 8, color: 'rgba(255,255,255,0.28)' }}>
+                      style={{ borderBottom: `1px solid var(--tp-border)` }}>
+                      <span style={{ flex: 1, fontFamily: 'monospace', fontSize: 8, color: 'var(--tp-text-4)' }}>
                         {tx.date}
                       </span>
                       <span style={{ flex: 1, fontFamily: 'monospace', fontSize: 8, fontWeight: 700,
                         color: tx.side === 'buy' ? '#4ade80' : '#f87171' }}>
                         {tx.side === 'buy' ? t.common.buy : t.common.sell}
                       </span>
-                      <span style={{ flex: 1, fontFamily: 'monospace', fontSize: 9, color: 'rgba(255,255,255,0.55)' }}>
+                      <span style={{ flex: 1, fontFamily: 'monospace', fontSize: 9, color: 'var(--tp-text-2)' }}>
                         {tx.ticker}
                       </span>
-                      <span style={{ flex: 1, fontFamily: 'monospace', fontSize: 8, color: 'rgba(255,255,255,0.42)' }}>
+                      <span style={{ flex: 1, fontFamily: 'monospace', fontSize: 8, color: 'var(--tp-text-3)' }}>
                         {fmtETH(tx.price)}
                       </span>
-                      <span style={{ flex: 1, fontFamily: 'monospace', fontSize: 8, color: 'rgba(255,255,255,0.35)' }}>
+                      <span style={{ flex: 1, fontFamily: 'monospace', fontSize: 8, color: 'var(--tp-text-3)' }}>
                         {tx.eth.toFixed(3)} ETH
                       </span>
                     </div>
@@ -639,8 +639,8 @@ export function VaultPage() {
                 </div>
                 {/* Realized P&L summary */}
                 <div className="flex items-center justify-between px-4 py-2 shrink-0"
-                  style={{ borderTop: '1px solid rgba(255,255,255,0.05)', background: 'rgba(0,0,0,0.3)' }}>
-                  <span className="font-mono text-[7px] tracking-wider" style={{ color: 'rgba(255,255,255,0.22)' }}>
+                  style={{ borderTop: `1px solid var(--tp-border)`, background: 'var(--tp-panel-alt)' }}>
+                  <span className="font-mono text-[7px] tracking-wider" style={{ color: 'var(--tp-text-4)' }}>
                     {t.vault.realizedPnlClosed}
                   </span>
                   <span className="font-mono text-[10px] font-bold" style={{ color: '#4ade80' }}>
@@ -653,7 +653,7 @@ export function VaultPage() {
         </div>
 
         {/* Allocation donut */}
-        <div className="shrink-0 overflow-hidden" style={{ width: 220, border: '1px solid rgba(255,255,255,0.06)' }}>
+        <div className="shrink-0 overflow-hidden" style={{ width: 220, border: `1px solid var(--tp-border)` }}>
           <AllocationDonut holdings={HOLDINGS}/>
         </div>
       </div>
