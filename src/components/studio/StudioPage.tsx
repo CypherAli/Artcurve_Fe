@@ -123,10 +123,10 @@ function UploadForm({
 
   return (
     <div className="flex flex-col h-full"
-      style={{ borderRight:'1px solid var(--tp-border)' }}>
+      style={{ borderRight:'1px solid var(--tp-border)', background:'var(--tp-panel)' }}>
       <div className="flex items-center justify-between px-3 shrink-0"
-        style={{ height:36, background:'var(--tp-panel-alt)', borderBottom:'1px solid var(--tp-border)' }}>
-        <span className="font-mono text-[7px] tracking-[0.2em] uppercase" style={{ color:'var(--tp-text-4)' }}>{t.studio.createArtwork}</span>
+        style={{ height:36, background:'var(--tp-panel)', borderBottom:'1px solid var(--tp-border)' }}>
+        <span className="font-mono text-[7px] tracking-[0.2em] uppercase" style={{ color:'var(--tp-text-3)' }}>{t.studio.createArtwork}</span>
         {form.ticker !== '$TOKEN' && (
           <motion.span initial={{ opacity:0 }} animate={{ opacity:1 }}
             className="font-mono text-[9px] font-bold" style={{ color:'#D4AF37' }}>
@@ -388,10 +388,10 @@ function PreviewPanel({ form }: { form: FormData }) {
   const gasUSD = (Number(gasEstimate) * 3240).toFixed(2)
 
   return (
-    <div className="flex flex-col h-full">
+    <div className="flex flex-col h-full" style={{ background:'var(--tp-panel)' }}>
       <div className="flex items-center justify-between px-4 shrink-0"
-        style={{ height:36, background:'var(--tp-panel-alt)', borderBottom:'1px solid var(--tp-border)' }}>
-        <span className="font-mono text-[7px] tracking-[0.2em] uppercase" style={{ color:'var(--tp-text-4)' }}>{t.studio.previewLabel}</span>
+        style={{ height:36, background:'var(--tp-panel)', borderBottom:'1px solid var(--tp-border)' }}>
+        <span className="font-mono text-[7px] tracking-[0.2em] uppercase" style={{ color:'var(--tp-text-3)' }}>{t.studio.previewLabel}</span>
         <span className="font-mono text-[7.5px]" style={{ color:'var(--tp-text-4)' }}>{t.studio.curveLabel.replace('{type}', curveLabel(form.curveType))}</span>
       </div>
 
@@ -528,10 +528,10 @@ function ChecklistPanel({ steps, modStatus, submitError }: { steps:Step[]; modSt
 
   return (
     <div className="flex flex-col h-full"
-      style={{ borderLeft:'1px solid var(--tp-border)' }}>
+      style={{ borderLeft:'1px solid var(--tp-border)', background:'var(--tp-panel)' }}>
       <div className="flex items-center justify-between px-3 shrink-0"
-        style={{ height:36, background:'var(--tp-panel-alt)', borderBottom:'1px solid var(--tp-border)' }}>
-        <span className="font-mono text-[7px] tracking-[0.2em] uppercase" style={{ color:'var(--tp-text-4)' }}>{t.studio.launchChecklist}</span>
+        style={{ height:36, background:'var(--tp-panel)', borderBottom:'1px solid var(--tp-border)' }}>
+        <span className="font-mono text-[7px] tracking-[0.2em] uppercase" style={{ color:'var(--tp-text-3)' }}>{t.studio.launchChecklist}</span>
         <span className="font-mono text-[7.5px] font-semibold" style={{ color: done===total?'#4ade80':'var(--tp-text-3)' }}>
           {done}/{total}
         </span>
@@ -768,7 +768,7 @@ export function StudioPage() {
       {/* Top breadcrumb bar */}
       <motion.div variants={PANEL_V}
         className="flex items-center gap-3 px-4 shrink-0"
-        style={{ height:36, background:'var(--tp-panel-alt)', borderBottom:'1px solid var(--tp-border)', marginBottom:0 }}>
+        style={{ height:36, background:'var(--tp-panel)', borderBottom:'1px solid var(--tp-border)', marginBottom:0 }}>
         <span className="font-mono text-[7px] tracking-[0.2em] uppercase" style={{ color:'var(--tp-text-4)' }}>{t.studio.breadcrumbStudio}</span>
         <span style={{ color:'var(--tp-text-5)' }}>›</span>
         <span className="font-mono text-[7px]" style={{ color:'var(--tp-text-4)' }}>{t.studio.breadcrumbNew}</span>
