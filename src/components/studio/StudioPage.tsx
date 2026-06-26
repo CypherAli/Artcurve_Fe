@@ -123,10 +123,10 @@ function UploadForm({
 
   return (
     <div className="flex flex-col h-full"
-      style={{ borderRight:'1px solid rgba(255,255,255,0.05)' }}>
+      style={{ borderRight:'1px solid var(--tp-border)' }}>
       <div className="flex items-center justify-between px-3 shrink-0"
-        style={{ height:36, background:'rgba(0,0,0,0.38)', borderBottom:'1px solid rgba(255,255,255,0.05)' }}>
-        <span className="font-mono text-[7px] tracking-[0.2em] uppercase" style={{ color:'rgba(255,255,255,0.22)' }}>{t.studio.createArtwork}</span>
+        style={{ height:36, background:'var(--tp-panel-alt)', borderBottom:'1px solid var(--tp-border)' }}>
+        <span className="font-mono text-[7px] tracking-[0.2em] uppercase" style={{ color:'var(--tp-text-4)' }}>{t.studio.createArtwork}</span>
         {form.ticker !== '$TOKEN' && (
           <motion.span initial={{ opacity:0 }} animate={{ opacity:1 }}
             className="font-mono text-[9px] font-bold" style={{ color:'#D4AF37' }}>
@@ -136,7 +136,7 @@ function UploadForm({
       </div>
 
       <div className="flex-1 overflow-y-auto px-3 py-3 flex flex-col gap-3"
-        style={{ scrollbarWidth:'thin', scrollbarColor:'rgba(255,255,255,0.06) transparent' }}>
+        style={{ scrollbarWidth:'thin', scrollbarColor:'var(--tp-border) transparent' }}>
 
         {/* Artwork upload dropzone */}
         <input ref={fileRef} type="file" accept="image/*,video/mp4" hidden onChange={handleFileInput}/>
@@ -145,12 +145,12 @@ function UploadForm({
           onDragOver={e => { e.preventDefault(); setDragOver(true) }}
           onDragLeave={() => setDragOver(false)}
           onDrop={handleDrop}
-          animate={{ borderColor: dragOver ? 'rgba(212,175,55,0.6)' : fileInfo ? 'rgba(74,222,128,0.35)' : 'rgba(255,255,255,0.1)' }}
+          animate={{ borderColor: dragOver ? 'rgba(212,175,55,0.6)' : fileInfo ? 'rgba(74,222,128,0.35)' : 'var(--tp-border)' }}
           whileHover={{ borderColor:'rgba(212,175,55,0.4)' }}
           className="flex flex-col items-center justify-center gap-2 py-5 cursor-pointer"
           style={{
-            border:'1.5px dashed rgba(255,255,255,0.1)',
-            background: fileInfo ? 'rgba(74,222,128,0.04)' : 'rgba(255,255,255,0.015)',
+            border:'1.5px dashed var(--tp-border)',
+            background: fileInfo ? 'rgba(74,222,128,0.04)' : 'var(--tp-panel-alt)',
           }}>
           {fileInfo ? (
             <>
@@ -162,11 +162,11 @@ function UploadForm({
             </>
           ) : (
             <>
-              <svg viewBox="0 0 24 24" className="w-6 h-6" fill="none" stroke="rgba(255,255,255,0.22)" strokeWidth="1.5">
+              <svg viewBox="0 0 24 24" className="w-6 h-6" fill="none" stroke="var(--tp-text-4)" strokeWidth="1.5">
                 <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M17 8l-5-5-5 5M12 3v12"/>
               </svg>
-              <span className="font-mono text-[8px]" style={{ color:'rgba(255,255,255,0.22)' }}>{t.studio.uploadPrompt}</span>
-              <span className="font-mono text-[7px]" style={{ color:'rgba(255,255,255,0.12)' }}>{t.studio.uploadHint}</span>
+              <span className="font-mono text-[8px]" style={{ color:'var(--tp-text-4)' }}>{t.studio.uploadPrompt}</span>
+              <span className="font-mono text-[7px]" style={{ color:'var(--tp-text-5)' }}>{t.studio.uploadHint}</span>
             </>
           )}
         </motion.div>
@@ -174,13 +174,13 @@ function UploadForm({
         {/* Title */}
         <div>
           <label className="font-mono text-[7px] tracking-wider uppercase block mb-1"
-            style={{ color:'rgba(255,255,255,0.28)' }}>{t.studio.artworkTitleLabel}</label>
+            style={{ color:'var(--tp-text-3)' }}>{t.studio.artworkTitleLabel}</label>
           <input
             value={form.title}
             onChange={e => onTitleChange(e.target.value)}
             placeholder={t.studio.artworkTitlePlaceholder}
             className="w-full bg-transparent font-sans text-[11px] px-2.5 py-1.5 outline-none"
-            style={{ border:'1px solid rgba(255,255,255,0.1)', color:'rgba(255,255,255,0.78)', caretColor:'#D4AF37' }}
+            style={{ border:'1px solid var(--tp-border)', color:'var(--tp-text-1)', caretColor:'#D4AF37' }}
           />
         </div>
 
@@ -188,8 +188,8 @@ function UploadForm({
         <div>
           <div className="flex items-center justify-between mb-1">
             <label className="font-mono text-[7px] tracking-wider uppercase"
-              style={{ color:'rgba(255,255,255,0.28)' }}>{t.studio.tickerLabel}</label>
-            <span className="font-mono text-[6.5px]" style={{ color:'rgba(255,255,255,0.16)' }}>{t.studio.tickerHint}</span>
+              style={{ color:'var(--tp-text-3)' }}>{t.studio.tickerLabel}</label>
+            <span className="font-mono text-[6.5px]" style={{ color:'var(--tp-text-4)' }}>{t.studio.tickerHint}</span>
           </div>
           <div className="relative">
             <input
@@ -210,7 +210,7 @@ function UploadForm({
               }}
             />
             <span className="absolute right-2 top-1/2 -translate-y-1/2 font-mono text-[6.5px]"
-              style={{ color:'rgba(255,255,255,0.18)' }}>
+              style={{ color:'var(--tp-text-4)' }}>
               {form.ticker.replace('$','').length}/6
             </span>
           </div>
@@ -219,7 +219,7 @@ function UploadForm({
         {/* Category */}
         <div>
           <label className="font-mono text-[7px] tracking-wider uppercase block mb-1.5"
-            style={{ color:'rgba(255,255,255,0.28)' }}>{t.studio.categoryLabel}</label>
+            style={{ color:'var(--tp-text-3)' }}>{t.studio.categoryLabel}</label>
           <div className="flex flex-wrap gap-1">
             {CATEGORIES.map(cat => {
               const active = form.category === cat
@@ -229,9 +229,9 @@ function UploadForm({
                   whileHover={{ scale:1.04 }} whileTap={{ scale:0.96 }}
                   className="px-2 py-1 font-mono text-[7px]"
                   style={{
-                    border:`1px solid ${active?'rgba(212,175,55,0.45)':'rgba(255,255,255,0.08)'}`,
+                    border:`1px solid ${active?'rgba(212,175,55,0.45)':'var(--tp-border)'}`,
                     background: active?'rgba(212,175,55,0.1)':'transparent',
-                    color: active?'#D4AF37':'rgba(255,255,255,0.3)',
+                    color: active?'#D4AF37':'var(--tp-text-3)',
                   }}>
                   {catLabel(cat)}
                 </motion.button>
@@ -243,21 +243,21 @@ function UploadForm({
         {/* Description */}
         <div>
           <label className="font-mono text-[7px] tracking-wider uppercase block mb-1"
-            style={{ color:'rgba(255,255,255,0.28)' }}>{t.studio.descriptionLabel}</label>
+            style={{ color:'var(--tp-text-3)' }}>{t.studio.descriptionLabel}</label>
           <textarea
             value={form.description}
             onChange={e => onChange({ ...form, description:e.target.value })}
             placeholder={t.studio.descriptionPlaceholder}
             rows={3}
             className="w-full bg-transparent font-sans text-[11px] px-2.5 py-1.5 outline-none resize-none"
-            style={{ border:'1px solid rgba(255,255,255,0.1)', color:'rgba(255,255,255,0.78)', caretColor:'#D4AF37' }}
+            style={{ border:'1px solid var(--tp-border)', color:'var(--tp-text-1)', caretColor:'#D4AF37' }}
           />
         </div>
 
         {/* Curve type */}
         <div>
           <label className="font-mono text-[7px] tracking-wider uppercase block mb-1.5"
-            style={{ color:'rgba(255,255,255,0.28)' }}>{t.studio.bondingCurveTypeLabel}</label>
+            style={{ color:'var(--tp-text-3)' }}>{t.studio.bondingCurveTypeLabel}</label>
           <div className="grid grid-cols-3 gap-1">
             {(['linear','quadratic','exponential'] as const).map(ct => {
               const active = form.curveType === ct
@@ -266,9 +266,9 @@ function UploadForm({
                   whileHover={{ scale:1.03 }} whileTap={{ scale:0.97 }}
                   className="py-1.5 font-mono text-[7px] tracking-wider capitalize"
                   style={{
-                    border:`1px solid ${active?'rgba(212,175,55,0.4)':'rgba(255,255,255,0.07)'}`,
+                    border:`1px solid ${active?'rgba(212,175,55,0.4)':'var(--tp-border)'}`,
                     background: active?'rgba(212,175,55,0.07)':'transparent',
-                    color: active?'#D4AF37':'rgba(255,255,255,0.28)',
+                    color: active?'#D4AF37':'var(--tp-text-3)',
                   }}>
                   {curveLabel(ct)}
                 </motion.button>
@@ -281,24 +281,24 @@ function UploadForm({
         <div className="grid grid-cols-2 gap-2">
           <div>
             <label className="font-mono text-[7px] tracking-wider uppercase block mb-1"
-              style={{ color:'rgba(255,255,255,0.28)' }}>{t.studio.totalSupplyLabel}</label>
+              style={{ color:'var(--tp-text-3)' }}>{t.studio.totalSupplyLabel}</label>
             <input
               type="number" min="1000" max="1000000"
               value={form.supply}
               onChange={e => onChange({ ...form, supply: Math.max(1000, Number(e.target.value)) })}
               className="w-full bg-transparent font-mono text-[11px] px-2.5 py-1.5 outline-none"
-              style={{ border:'1px solid rgba(255,255,255,0.1)', color:'rgba(255,255,255,0.78)', caretColor:'#D4AF37' }}
+              style={{ border:'1px solid var(--tp-border)', color:'var(--tp-text-1)', caretColor:'#D4AF37' }}
             />
           </div>
           <div>
             <label className="font-mono text-[7px] tracking-wider uppercase block mb-1"
-              style={{ color:'rgba(255,255,255,0.28)' }}>{t.studio.initPriceLabel}</label>
+              style={{ color:'var(--tp-text-3)' }}>{t.studio.initPriceLabel}</label>
             <input
               type="number" min="0.0001" step="0.0001"
               value={form.initPrice}
               onChange={e => onChange({ ...form, initPrice: Math.max(0.0001, Number(e.target.value)) })}
               className="w-full bg-transparent font-mono text-[11px] px-2.5 py-1.5 outline-none"
-              style={{ border:'1px solid rgba(255,255,255,0.1)', color:'rgba(255,255,255,0.78)', caretColor:'#D4AF37' }}
+              style={{ border:'1px solid var(--tp-border)', color:'var(--tp-text-1)', caretColor:'#D4AF37' }}
             />
           </div>
         </div>
@@ -307,7 +307,7 @@ function UploadForm({
         <div>
           <div className="flex items-center justify-between mb-1.5">
             <label className="font-mono text-[7px] tracking-wider uppercase"
-              style={{ color:'rgba(255,255,255,0.28)' }}>{t.studio.creatorRoyaltyLabel}</label>
+              style={{ color:'var(--tp-text-3)' }}>{t.studio.creatorRoyaltyLabel}</label>
             <span className="font-mono text-[9px] font-semibold" style={{ color:'#D4AF37' }}>{form.royalty}%</span>
           </div>
           <input type="range" min="0" max="10" step="0.5"
@@ -317,8 +317,8 @@ function UploadForm({
             style={{ accentColor:'#D4AF37' }}
           />
           <div className="flex justify-between mt-0.5">
-            <span className="font-mono text-[6.5px]" style={{ color:'rgba(255,255,255,0.15)' }}>0%</span>
-            <span className="font-mono text-[6.5px]" style={{ color:'rgba(255,255,255,0.15)' }}>10%</span>
+            <span className="font-mono text-[6.5px]" style={{ color:'var(--tp-text-4)' }}>0%</span>
+            <span className="font-mono text-[6.5px]" style={{ color:'var(--tp-text-4)' }}>10%</span>
           </div>
         </div>
 
@@ -332,9 +332,9 @@ function UploadForm({
           transition={{ type:'spring', stiffness:400, damping:18 }}
           className="w-full py-3 font-mono text-[9px] tracking-[0.2em] uppercase font-bold mt-1"
           style={{
-            background: form.title ? 'linear-gradient(135deg,rgba(212,175,55,0.18),rgba(212,175,55,0.08))' : 'rgba(255,255,255,0.02)',
-            border:     form.title ? '1px solid rgba(212,175,55,0.38)' : '1px solid rgba(255,255,255,0.06)',
-            color:      form.title ? '#D4AF37' : 'rgba(255,255,255,0.14)',
+            background: form.title ? 'linear-gradient(135deg,rgba(212,175,55,0.18),rgba(212,175,55,0.08))' : 'var(--tp-panel-alt)',
+            border:     form.title ? '1px solid rgba(212,175,55,0.38)' : '1px solid var(--tp-border)',
+            color:      form.title ? '#D4AF37' : 'var(--tp-text-5)',
             cursor:     form.title && modStatus!=='checking' ? 'pointer' : 'not-allowed',
           }}>
           <AnimatePresence mode="wait">
@@ -390,9 +390,9 @@ function PreviewPanel({ form }: { form: FormData }) {
   return (
     <div className="flex flex-col h-full">
       <div className="flex items-center justify-between px-4 shrink-0"
-        style={{ height:36, background:'rgba(0,0,0,0.38)', borderBottom:'1px solid rgba(255,255,255,0.05)' }}>
-        <span className="font-mono text-[7px] tracking-[0.2em] uppercase" style={{ color:'rgba(255,255,255,0.22)' }}>{t.studio.previewLabel}</span>
-        <span className="font-mono text-[7.5px]" style={{ color:'rgba(255,255,255,0.18)' }}>{t.studio.curveLabel.replace('{type}', curveLabel(form.curveType))}</span>
+        style={{ height:36, background:'var(--tp-panel-alt)', borderBottom:'1px solid var(--tp-border)' }}>
+        <span className="font-mono text-[7px] tracking-[0.2em] uppercase" style={{ color:'var(--tp-text-4)' }}>{t.studio.previewLabel}</span>
+        <span className="font-mono text-[7.5px]" style={{ color:'var(--tp-text-4)' }}>{t.studio.curveLabel.replace('{type}', curveLabel(form.curveType))}</span>
       </div>
 
       <div className="flex-1 overflow-y-auto px-4 py-4 flex flex-col gap-4"
@@ -403,7 +403,7 @@ function PreviewPanel({ form }: { form: FormData }) {
           style={{ border:'1px solid rgba(212,175,55,0.15)', background:'rgba(212,175,55,0.04)' }}>
           {/* Artwork placeholder */}
           <div className="shrink-0 w-14 h-14 flex items-center justify-center"
-            style={{ border:'1px solid rgba(212,175,55,0.2)', background:'rgba(0,0,0,0.4)' }}>
+            style={{ border:'1px solid rgba(212,175,55,0.2)', background:'var(--tp-panel)' }}>
             <svg viewBox="0 0 24 24" className="w-5 h-5" fill="none" stroke="rgba(212,175,55,0.3)" strokeWidth="1.2">
               <rect x="3" y="3" width="18" height="18" rx="1"/><path d="M3 9h18M9 21V9"/>
             </svg>
@@ -415,37 +415,37 @@ function PreviewPanel({ form }: { form: FormData }) {
               </div>
               {form.category && (
                 <span className="font-mono text-[6.5px] px-1.5 py-0.5"
-                  style={{ border:'1px solid rgba(255,255,255,0.1)', color:'rgba(255,255,255,0.3)' }}>
+                  style={{ border:'1px solid var(--tp-border)', color:'var(--tp-text-3)' }}>
                   {catLabel(form.category).toUpperCase()}
                 </span>
               )}
             </div>
-            <div className="font-sans text-[10px] mt-0.5 truncate" style={{ color:'rgba(255,255,255,0.55)' }}>
+            <div className="font-sans text-[10px] mt-0.5 truncate" style={{ color:'var(--tp-text-2)' }}>
               {form.title || t.studio.untitledArtwork}
             </div>
             <div className="flex items-center gap-3 mt-2">
               <div>
-                <div className="font-mono text-[6px] uppercase" style={{ color:'rgba(255,255,255,0.2)' }}>{t.studio.initPriceCard}</div>
-                <div className="font-mono text-[10px]" style={{ color:'rgba(255,255,255,0.6)' }}>{form.initPrice.toFixed(4)} ETH</div>
+                <div className="font-mono text-[6px] uppercase" style={{ color:'var(--tp-text-4)' }}>{t.studio.initPriceCard}</div>
+                <div className="font-mono text-[10px]" style={{ color:'var(--tp-text-2)' }}>{form.initPrice.toFixed(4)} ETH</div>
               </div>
               <div>
-                <div className="font-mono text-[6px] uppercase" style={{ color:'rgba(255,255,255,0.2)' }}>{t.studio.supplyCard}</div>
-                <div className="font-mono text-[10px]" style={{ color:'rgba(255,255,255,0.6)' }}>{form.supply.toLocaleString()}</div>
+                <div className="font-mono text-[6px] uppercase" style={{ color:'var(--tp-text-4)' }}>{t.studio.supplyCard}</div>
+                <div className="font-mono text-[10px]" style={{ color:'var(--tp-text-2)' }}>{form.supply.toLocaleString()}</div>
               </div>
               <div>
-                <div className="font-mono text-[6px] uppercase" style={{ color:'rgba(255,255,255,0.2)' }}>{t.studio.royaltyCard}</div>
-                <div className="font-mono text-[10px]" style={{ color:'rgba(255,255,255,0.6)' }}>{form.royalty}%</div>
+                <div className="font-mono text-[6px] uppercase" style={{ color:'var(--tp-text-4)' }}>{t.studio.royaltyCard}</div>
+                <div className="font-mono text-[10px]" style={{ color:'var(--tp-text-2)' }}>{form.royalty}%</div>
               </div>
             </div>
           </div>
         </motion.div>
 
         {/* Bonding curve chart */}
-        <div style={{ border:'1px solid rgba(255,255,255,0.06)', background:'rgba(0,0,0,0.3)' }}>
+        <div style={{ border:'1px solid var(--tp-border)', background:'var(--tp-panel)' }}>
           <div className="flex items-center justify-between px-3 py-1.5"
-            style={{ borderBottom:'1px solid rgba(255,255,255,0.05)' }}>
-            <span className="font-mono text-[7px] tracking-wider" style={{ color:'rgba(255,255,255,0.22)' }}>{t.studio.bondingCurveChart}</span>
-            <span className="font-mono text-[7px]" style={{ color:'rgba(255,255,255,0.14)' }}>{t.studio.priceVsSupply}</span>
+            style={{ borderBottom:'1px solid var(--tp-border)' }}>
+            <span className="font-mono text-[7px] tracking-wider" style={{ color:'var(--tp-text-4)' }}>{t.studio.bondingCurveChart}</span>
+            <span className="font-mono text-[7px]" style={{ color:'var(--tp-text-5)' }}>{t.studio.priceVsSupply}</span>
           </div>
           <svg width="100%" viewBox="0 0 320 130" style={{ display:'block' }}>
             <defs>
@@ -466,13 +466,13 @@ function PreviewPanel({ form }: { form: FormData }) {
             {scaled[40] && (
               <>
                 <line x1={scaled[40][0].toFixed(1)} y1="12" x2={scaled[40][0].toFixed(1)} y2="118"
-                  stroke="rgba(255,255,255,0.12)" strokeDasharray="3,3" strokeWidth="1"/>
+                  stroke="var(--tp-text-5)" strokeDasharray="3,3" strokeWidth="1"/>
                 <text x={Number(scaled[40][0])+3} y="20" fontFamily="monospace" fontSize="7"
-                  fill="rgba(255,255,255,0.3)">{t.studio.supply80}</text>
+                  fill="var(--tp-text-3)">{t.studio.supply80}</text>
               </>
             )}
-            <text x="12" y="126" fontFamily="monospace" fontSize="7" fill="rgba(255,255,255,0.18)">0</text>
-            <text x="284" y="126" fontFamily="monospace" fontSize="7" fill="rgba(255,255,255,0.18)">{form.supply.toLocaleString()}</text>
+            <text x="12" y="126" fontFamily="monospace" fontSize="7" fill="var(--tp-text-4)">0</text>
+            <text x="284" y="126" fontFamily="monospace" fontSize="7" fill="var(--tp-text-4)">{form.supply.toLocaleString()}</text>
           </svg>
         </div>
 
@@ -483,10 +483,10 @@ function PreviewPanel({ form }: { form: FormData }) {
             { label: t.studio.ethToGrad,    value:`${Math.min(ethToGrad,9999).toFixed(2)} ETH`, note: t.studio.graduationThreshold },
           ].map(({ label, value, note }) => (
             <div key={label} className="px-3 py-2"
-              style={{ border:'1px solid rgba(255,255,255,0.06)', background:'rgba(0,0,0,0.2)' }}>
-              <div className="font-mono text-[6.5px] uppercase tracking-wider mb-1" style={{ color:'rgba(255,255,255,0.2)' }}>{label}</div>
-              <div className="font-mono text-[11px] font-semibold" style={{ color:'rgba(255,255,255,0.7)' }}>{value}</div>
-              <div className="font-mono text-[6.5px] mt-0.5" style={{ color:'rgba(255,255,255,0.18)' }}>{note}</div>
+              style={{ border:'1px solid var(--tp-border)', background:'var(--tp-panel)' }}>
+              <div className="font-mono text-[6.5px] uppercase tracking-wider mb-1" style={{ color:'var(--tp-text-4)' }}>{label}</div>
+              <div className="font-mono text-[11px] font-semibold" style={{ color:'var(--tp-text-1)' }}>{value}</div>
+              <div className="font-mono text-[6.5px] mt-0.5" style={{ color:'var(--tp-text-4)' }}>{note}</div>
             </div>
           ))}
         </div>
@@ -502,14 +502,14 @@ function PreviewPanel({ form }: { form: FormData }) {
             </svg>
             <div>
               <div className="font-mono text-[7px] uppercase tracking-wider" style={{ color:'rgba(255,165,0,0.55)' }}>{t.studio.estGasCost}</div>
-              <div className="font-mono text-[6.5px] mt-0.5" style={{ color:'rgba(255,255,255,0.2)' }}>{t.studio.deployDesc.replace('{type}', curveLabel(form.curveType))}</div>
+              <div className="font-mono text-[6.5px] mt-0.5" style={{ color:'var(--tp-text-4)' }}>{t.studio.deployDesc.replace('{type}', curveLabel(form.curveType))}</div>
             </div>
           </div>
           <div className="text-right">
             <div className="font-mono text-[11px] font-semibold" style={{ color:'rgba(255,165,0,0.8)' }}>
               {gasEstimate} ETH
             </div>
-            <div className="font-mono text-[6.5px]" style={{ color:'rgba(255,255,255,0.2)' }}>≈ ${gasUSD}</div>
+            <div className="font-mono text-[6.5px]" style={{ color:'var(--tp-text-4)' }}>≈ ${gasUSD}</div>
           </div>
         </div>
 
@@ -528,17 +528,17 @@ function ChecklistPanel({ steps, modStatus, submitError }: { steps:Step[]; modSt
 
   return (
     <div className="flex flex-col h-full"
-      style={{ borderLeft:'1px solid rgba(255,255,255,0.05)' }}>
+      style={{ borderLeft:'1px solid var(--tp-border)' }}>
       <div className="flex items-center justify-between px-3 shrink-0"
-        style={{ height:36, background:'rgba(0,0,0,0.38)', borderBottom:'1px solid rgba(255,255,255,0.05)' }}>
-        <span className="font-mono text-[7px] tracking-[0.2em] uppercase" style={{ color:'rgba(255,255,255,0.22)' }}>{t.studio.launchChecklist}</span>
-        <span className="font-mono text-[7.5px] font-semibold" style={{ color: done===total?'#4ade80':'rgba(255,255,255,0.28)' }}>
+        style={{ height:36, background:'var(--tp-panel-alt)', borderBottom:'1px solid var(--tp-border)' }}>
+        <span className="font-mono text-[7px] tracking-[0.2em] uppercase" style={{ color:'var(--tp-text-4)' }}>{t.studio.launchChecklist}</span>
+        <span className="font-mono text-[7.5px] font-semibold" style={{ color: done===total?'#4ade80':'var(--tp-text-3)' }}>
           {done}/{total}
         </span>
       </div>
 
       {/* Progress bar */}
-      <div className="shrink-0 h-1" style={{ background:'rgba(255,255,255,0.05)' }}>
+      <div className="shrink-0 h-1" style={{ background:'var(--tp-border)' }}>
         <motion.div className="h-full"
           animate={{ width:`${(done/total)*100}%` }}
           style={{ background:'linear-gradient(90deg,#D4AF3770,#D4AF37)' }}
@@ -556,8 +556,8 @@ function ChecklistPanel({ steps, modStatus, submitError }: { steps:Step[]; modSt
             <motion.div key={step.id} layout
               className="flex items-start gap-2.5 p-2.5"
               style={{
-                border:`1px solid ${isDone?'rgba(74,222,128,0.18)':isActive?'rgba(212,175,55,0.22)':isErr?'rgba(248,113,113,0.18)':'rgba(255,255,255,0.05)'}`,
-                background: isDone?'rgba(74,222,128,0.04)':isActive?'rgba(212,175,55,0.05)':isErr?'rgba(248,113,113,0.04)':'rgba(0,0,0,0.15)',
+                border:`1px solid ${isDone?'rgba(74,222,128,0.18)':isActive?'rgba(212,175,55,0.22)':isErr?'rgba(248,113,113,0.18)':'var(--tp-border)'}`,
+                background: isDone?'rgba(74,222,128,0.04)':isActive?'rgba(212,175,55,0.05)':isErr?'rgba(248,113,113,0.04)':'var(--tp-panel)',
               }}>
               {/* Icon */}
               <div className="shrink-0 w-4 h-4 flex items-center justify-center mt-0.5">
@@ -569,16 +569,16 @@ function ChecklistPanel({ steps, modStatus, submitError }: { steps:Step[]; modSt
                     style={{ color:'#D4AF37' }}/>
                 )}
                 {step.status==='pending' && (
-                  <span className="w-2 h-2 rounded-full" style={{ background:'rgba(255,255,255,0.14)', display:'block' }}/>
+                  <span className="w-2 h-2 rounded-full" style={{ background:'var(--tp-text-5)', display:'block' }}/>
                 )}
               </div>
               <div>
                 <div className="font-mono text-[8px]"
-                  style={{ color: isDone?'#4ade80':isActive?'#D4AF37':isErr?'#f87171':'rgba(255,255,255,0.35)' }}>
+                  style={{ color: isDone?'#4ade80':isActive?'#D4AF37':isErr?'#f87171':'var(--tp-text-3)' }}>
                   {step.label}
                 </div>
                 {step.note && (
-                  <div className="font-sans text-[7px] mt-0.5" style={{ color:'rgba(255,255,255,0.2)' }}>{step.note}</div>
+                  <div className="font-sans text-[7px] mt-0.5" style={{ color:'var(--tp-text-4)' }}>{step.note}</div>
                 )}
               </div>
             </motion.div>
@@ -588,15 +588,15 @@ function ChecklistPanel({ steps, modStatus, submitError }: { steps:Step[]; modSt
 
       {/* AI moderation status */}
       <div className="shrink-0 px-3 pb-3">
-        <div className="p-3" style={{ border:'1px solid rgba(255,255,255,0.06)', background:'rgba(0,0,0,0.2)' }}>
-          <div className="font-mono text-[7px] uppercase tracking-wider mb-2" style={{ color:'rgba(255,255,255,0.22)' }}>
+        <div className="p-3" style={{ border:'1px solid var(--tp-border)', background:'var(--tp-panel)' }}>
+          <div className="font-mono text-[7px] uppercase tracking-wider mb-2" style={{ color:'var(--tp-text-4)' }}>
             {t.studio.aiModerationTitle}
           </div>
           <AnimatePresence mode="wait">
             {modStatus === 'idle' && (
               <motion.div key="idle" initial={{ opacity:0 }} animate={{ opacity:1 }} exit={{ opacity:0 }}>
-                <div className="font-mono text-[8px]" style={{ color:'rgba(255,255,255,0.28)' }}>{t.studio.awaitingSubmission}</div>
-                <div className="font-sans text-[7px] mt-1" style={{ color:'rgba(255,255,255,0.16)' }}>
+                <div className="font-mono text-[8px]" style={{ color:'var(--tp-text-3)' }}>{t.studio.awaitingSubmission}</div>
+                <div className="font-sans text-[7px] mt-1" style={{ color:'var(--tp-text-4)' }}>
                   {t.studio.aiCheckDescription}
                 </div>
               </motion.div>
@@ -768,18 +768,18 @@ export function StudioPage() {
       {/* Top breadcrumb bar */}
       <motion.div variants={PANEL_V}
         className="flex items-center gap-3 px-4 shrink-0"
-        style={{ height:36, background:'rgba(0,0,0,0.45)', borderBottom:'1px solid rgba(255,255,255,0.06)', marginBottom:0 }}>
-        <span className="font-mono text-[7px] tracking-[0.2em] uppercase" style={{ color:'rgba(255,255,255,0.22)' }}>{t.studio.breadcrumbStudio}</span>
-        <span style={{ color:'rgba(255,255,255,0.12)' }}>›</span>
-        <span className="font-mono text-[7px]" style={{ color:'rgba(255,255,255,0.16)' }}>{t.studio.breadcrumbNew}</span>
+        style={{ height:36, background:'var(--tp-panel-alt)', borderBottom:'1px solid var(--tp-border)', marginBottom:0 }}>
+        <span className="font-mono text-[7px] tracking-[0.2em] uppercase" style={{ color:'var(--tp-text-4)' }}>{t.studio.breadcrumbStudio}</span>
+        <span style={{ color:'var(--tp-text-5)' }}>›</span>
+        <span className="font-mono text-[7px]" style={{ color:'var(--tp-text-4)' }}>{t.studio.breadcrumbNew}</span>
         {form.title && (
           <motion.span initial={{ opacity:0, x:-4 }} animate={{ opacity:1, x:0 }}
-            className="font-mono text-[7px]" style={{ color:'rgba(255,255,255,0.3)' }}>
+            className="font-mono text-[7px]" style={{ color:'var(--tp-text-3)' }}>
             › {form.title}
           </motion.span>
         )}
         <div className="ml-auto flex items-center gap-3">
-          <span className="font-mono text-[7px]" style={{ color:'rgba(255,255,255,0.16)' }}>
+          <span className="font-mono text-[7px]" style={{ color:'var(--tp-text-4)' }}>
             {isConnected && shortAddr ? `Connected: ${shortAddr}` : t.studio.notConnected}
           </span>
           <span className="size-1.5 rounded-full" style={{ background: isConnected ? '#22c55e' : '#ef4444' }}/>
