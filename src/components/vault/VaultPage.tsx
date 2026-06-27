@@ -4,7 +4,7 @@
 //  Added: portfolio chart, sortable columns, quick trade, realized P&L
 // ─────────────────────────────────────────────────────────────────
 
-import { useState, useMemo, useEffect, useRef } from 'react'
+import { useState, useMemo, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useLanguage } from '@/context/LanguageContext'
@@ -362,8 +362,6 @@ export function VaultPage() {
   const { t } = useLanguage()
   const router = useRouter()
   const isAuth = useAuthStore(s => s.isAuthenticated)
-  const mountedRef = useRef(false)
-  if (!mountedRef.current && typeof window !== 'undefined') mountedRef.current = true
 
   // ── Backend portfolio data ────────────────────────────────────────
   const portfolio  = usePortfolio()
@@ -377,7 +375,7 @@ export function VaultPage() {
   const HOLDINGS = _apiHoldings.length > 0 ? _apiHoldings : HOLDINGS_MOCK
 
   useEffect(() => {
-    if (mountedRef.current && !isAuth && !authStore.getJwt()) router.replace('/?auth=required')
+    if (!isAuth && !authStore.getJwt()) router.replace('/?auth=required')
   }, [isAuth, router])
 
   useEffect(() => {
@@ -447,8 +445,6 @@ export function VaultPage() {
       return sortDir === 'asc' ? (av as number) - (bv as number) : (bv as number) - (av as number)
     })
   }, [sortKey, sortDir])
-
-  if (!mountedRef.current) return null
 
   return (
     <motion.div

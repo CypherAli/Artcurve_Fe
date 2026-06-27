@@ -1296,7 +1296,8 @@ function FinderView({ guilds, s, onEnter, onRefresh, onCreate, joinedId, onJoin,
 }
 
 // ── Hall ─────────────────────────────────────────────────────────
-function _FeatureNode({ icon, title, sub, featured }: { icon: React.ReactNode; title: string; sub: string; featured?: boolean }) {
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+function FeatureNode({ icon, title, sub, featured }: { icon: React.ReactNode; title: string; sub: string; featured?: boolean }) {
   const C = useC()
   const d = featured ? 120 : 98
   return (
