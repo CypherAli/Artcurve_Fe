@@ -1,7 +1,7 @@
 'use client'
 
 import {
-  createContext, useContext, useState, useEffect, useCallback, useMemo,
+  createContext, useContext, useState, useCallback, useMemo,
   type ReactNode,
 } from 'react'
 import { translations, DEFAULT_LOCALE, type LocaleCode } from '@/i18n'

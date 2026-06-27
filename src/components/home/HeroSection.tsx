@@ -17,7 +17,7 @@
 // ─────────────────────────────────────────────────────────────────
 
 import { useEffect, useRef, useState } from 'react'
-import { gsap, ScrollTrigger } from '@/lib/gsap'
+import { gsap } from '@/lib/gsap'
 import { artworkService } from '@/services/artwork.service'
 import { useLanguage } from '@/context/LanguageContext'
 

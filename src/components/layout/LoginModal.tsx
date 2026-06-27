@@ -163,7 +163,7 @@ export function LoginModal({ onClose }: Props) {
   const lastTwitter     = useLastSocialAccount('artcurve_twitter_account')
   const [email,    setEmail]         = useState('')
   const [view,     setView]          = useState<View>('main')
-  const [toast,    setToast]         = useState<string | null>(null)
+  const [toast,    _setToast]         = useState<string | null>(null)
   const [showGhPicker, setShowGhPicker] = useState(false)
   const [showXPicker,  setShowXPicker]  = useState(false)
 

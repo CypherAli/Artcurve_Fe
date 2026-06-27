@@ -18,7 +18,7 @@
 // ─────────────────────────────────────────────────────────────────
 
 import React, {
-  useEffect, useRef, useState, useMemo, useCallback, memo,
+  useEffect, useRef, useState, useMemo, useCallback,
 } from 'react'
 import Image from 'next/image'
 import {
@@ -106,7 +106,7 @@ const ARTWORKS_MOCK: TradeArtwork[] = ([
   { id:22, title:'Sovereign Geometry',       ticker:'$SOVGEO',   artist:'Yuki Tanabe',     artistAddr:'0x7d0…e34', phase:'Migration',     phaseColor:PHASE_COLOR['Migration'],     basePrice:19.90, progress:93, holders:50, volume24h:13.20, image:'/images/artworks/art5.jpg',    sparkline:[2,2.6,4,8,17,42,98,154,188,199] },
   { id:23, title:'Chromatic Grief',          ticker:'$CHROMA',   artist:'Elena Vasquez',   artistAddr:'0x4f2…a91', phase:'FOMO',          phaseColor:PHASE_COLOR['FOMO'],          basePrice:4.55,  progress:60, holders:25, volume24h:2.66,  image:'/convergence/img3.jpg',         sparkline:[3,3.8,5,4.2,6.1,8,11.5,15.8,26,45.5] },
   { id:24, title:'Silent Architecture',      ticker:'$SILENT',   artist:'Ivan Sorokin',    artistAddr:'0x9c4…e17', phase:'FOMO',          phaseColor:PHASE_COLOR['FOMO'],          basePrice:7.10,  progress:69, holders:32, volume24h:4.28,  image:'/convergence/img7.jpg',         sparkline:[5,5.8,7.5,6.3,9.1,12.5,17,23.8,38.5,71] },
-] as Omit<TradeArtwork, 'artworkId' | 'contractAddress'>[]).map((a, i) => ({ ...a, artworkId: '', contractAddress: null }))
+] as Omit<TradeArtwork, 'artworkId' | 'contractAddress'>[]).map((a, _i) => ({ ...a, artworkId: '', contractAddress: null }))
 
 // ── Adapter: backend Artwork → TradeArtwork ───────────────────────
 function adaptTradeArtwork(artwork: Artwork, index: number): TradeArtwork {
@@ -547,7 +547,7 @@ function OrderBookPanel({ art, livePrice, bookTick }: { art:TradeArtwork; livePr
     [livePrice, art.id, bookTick],
   )
 
-  const Row = memo(({ lvl }: { lvl: OrderLevel }) => (
+  const Row = ({ lvl }: { lvl: OrderLevel }) => (
     <div className="relative flex items-center px-3 py-[3.5px] font-mono text-[9px]" style={{ cursor:'default' }}>
       <motion.div
         className="absolute top-0 right-0 bottom-0 pointer-events-none"
@@ -565,7 +565,7 @@ function OrderBookPanel({ art, livePrice, bookTick }: { art:TradeArtwork; livePr
         {(lvl.size*lvl.price).toFixed(3)}
       </span>
     </div>
-  ))
+  )
 
   return (
     <div className="h-full flex flex-col overflow-hidden">
@@ -890,7 +890,7 @@ function TradePanel({ art, livePrice }: { art:TradeArtwork; livePrice:number }) 
   // Side-specific colors
   const isBuy    = side === 'buy'
   const accent   = isBuy ? '#4ade80'              : '#f87171'
-  const accentBg = isBuy ? 'rgba(34,197,94,0.08)' : 'rgba(239,68,68,0.08)'
+  const _accentBg = isBuy ? 'rgba(34,197,94,0.08)' : 'rgba(239,68,68,0.08)'
   const accentBdr= isBuy ? 'rgba(34,197,94,0.28)' : 'rgba(239,68,68,0.28)'
   const btnBgAct = isBuy
     ? 'linear-gradient(135deg, rgba(34,197,94,0.18) 0%, rgba(34,197,94,0.08) 100%)'
@@ -1422,7 +1422,7 @@ export function TradePage() {
             setTrades(seedTrades(livePricesRef.current[selectedId] ?? selectedArt.basePrice, selectedId))
             return
           }
-          const mapped: RecentTrade[] = records.map((r, i) => ({
+          const mapped: RecentTrade[] = records.map((r, _i) => ({
             id:     r.id,
             side:   r.tx_type === 'BUY' ? 'buy' : 'sell',
             price:  parseFloat(r.price_per_share) || 0,

@@ -12,7 +12,7 @@
 // ─────────────────────────────────────────────────────────────────
 
 import {
-  createContext, useContext, useCallback, useEffect, useState, useMemo,
+  createContext, useContext, useCallback, useState, useMemo,
   type ReactNode,
 } from 'react'
 import { flushSync } from 'react-dom'

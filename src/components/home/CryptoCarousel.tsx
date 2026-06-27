@@ -105,8 +105,8 @@ function InfiniteRow({
   ticks: ReturnType<typeof useBinanceTicker>['ticks']
 }) {
   const doubled = [...coins, ...coins]
-  const start   = direction === 'left' ? '0%'   : '-50%'
-  const end     = direction === 'left' ? '-50%'  : '0%'
+  const _start   = direction === 'left' ? '0%'   : '-50%'
+  const _end     = direction === 'left' ? '-50%'  : '0%'
 
   return (
     <div className="overflow-hidden select-none" aria-hidden="true">

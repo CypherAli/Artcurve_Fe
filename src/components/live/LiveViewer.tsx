@@ -64,7 +64,7 @@ function ChatPanel({ roomName, hostId }: { roomName: string; hostId?: string }) 
   const scrollRef = useRef<HTMLDivElement>(null)
   const socketRef = useRef<Socket | null>(null)
   const jwt = useAuthStore(s => s.jwt)
-  const user = useAuthStore(s => s.user)
+  const _user = useAuthStore(s => s.user)
 
   useEffect(() => {
     liveService.chatMessages(roomName, 100).then(msgs => setMessages(msgs.reverse())).catch(() => {})

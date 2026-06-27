@@ -131,7 +131,7 @@ function StarDisplay({ value, size = 14 }: { value: number; size?: number }) {
   )
 }
 
-function RatingBar({ star, count, maxCount }: { star: number; count: number; maxCount: number }) {
+function _RatingBar({ star, count, maxCount }: { star: number; count: number; maxCount: number }) {
   const pct = maxCount > 0 ? (count / maxCount) * 100 : 0
   return (
     <div className="flex items-center gap-2">
@@ -155,7 +155,7 @@ function RatingBar({ star, count, maxCount }: { star: number; count: number; max
   )
 }
 
-function ReviewCard({
+function _ReviewCard({
   review,
   isOwn,
   onDelete,

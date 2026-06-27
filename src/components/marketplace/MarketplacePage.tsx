@@ -2267,7 +2267,7 @@ function InspectionDeck({
 }) {
   const { t } = useLanguage()
   const [chartRange,   setChartRange]   = useState<TimeRange>('1D')
-  const [chartHovered, setChartHovered] = useState(false)
+  const [_chartHovered, setChartHovered] = useState(false)
   const [tilt,         setTilt]         = useState({ rx: 0, ry: 0 })
   const [avgRating,    setAvgRating]    = useState<number | null>(art.rating ?? null)
   const [ratingCount,  setRatingCount]  = useState(art.ratingCount ?? 0)
@@ -2810,7 +2810,7 @@ export function MarketplacePage() {
   )
   // Auto-rotate
   const [listHovered,  setListHovered]  = useState(false)
-  const [rotateProgress, setRotateProg] = useState(0)
+  const [_rotateProgress, setRotateProg] = useState(0)
   const [nextId,       setNextId]       = useState<number | null>(null)
 
   // Live price simulation

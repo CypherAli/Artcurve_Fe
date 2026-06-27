@@ -18,16 +18,11 @@ function fmt(n: number | null, decimals = 4) {
   return n.toFixed(decimals)
 }
 
-function fmtPct(n: number | null) {
-  if (n === null) return '-'
-  return `${n >= 0 ? '+' : ''}${n.toFixed(2)}%`
-}
-
 function shortAddr(addr: string) {
   return `${addr.slice(0, 6)}…${addr.slice(-4)}`
 }
 
-function timeAgo(iso: string) {
+function _timeAgo(iso: string) {
   const diff = (Date.now() - new Date(iso).getTime()) / 1000
   if (diff < 60)      return `${Math.floor(diff)}s ago`
   if (diff < 3600)    return `${Math.floor(diff / 60)}m ago`

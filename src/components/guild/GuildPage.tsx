@@ -2,16 +2,16 @@
 import { useState, useEffect, useMemo, useRef, useCallback, createContext, useContext } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import {
-  IconDiamond, IconCoin, IconTrendingUp, IconAward, IconGift, IconShieldChevron,
-  IconMail, IconHash, IconSearch, IconRefresh, IconChevronLeft, IconBell,
-  IconMessageCircle, IconChecklist, IconWand, IconTrophy, IconPhoto, IconGavel,
+  IconCoin, IconTrendingUp, IconAward, IconGift, IconShieldChevron,
+  IconMail, IconHash, IconSearch, IconRefresh, IconChevronLeft,
+  IconChecklist, IconWand, IconTrophy, IconPhoto, IconGavel,
   IconUsers, IconMessage2, IconBuildingBank,
-  IconX, IconCheck, IconChevronDown, IconCalendar, IconUser, IconStar,
-  IconFlame, IconTarget, IconClock, IconSettings, IconPencil,
+  IconX, IconCheck, IconChevronDown, IconCalendar, IconStar,
+  IconFlame, IconTarget, IconClock, IconSettings,
 } from '@tabler/icons-react'
 import { useLanguage } from '@/context/LanguageContext'
 import { useTheme } from '@/context/ThemeContext'
-import { guildService, GUILD_FOUNDATION_FEE_ETH, type ApiGuild, type ApiGuildMember, type ApiGuildMessage, type ApiGuildAnnouncement, type ApiGuildInvite, type ApiGuildAnalytics, type ApiGuildActivity } from '@/services/guild.service'
+import { guildService, GUILD_FOUNDATION_FEE_ETH, type ApiGuild, type ApiGuildMember, type ApiGuildMessage, type ApiGuildAnnouncement, type ApiGuildAnalytics, type ApiGuildActivity } from '@/services/guild.service'
 import { useAuthStore } from '@/store/authStore'
 import { io, type Socket } from 'socket.io-client'
 
@@ -45,7 +45,7 @@ type Colors = Omit<typeof DARK, 'bannerFit' | 'bannerPos'> & { bannerFit: string
 const ThemeCtx = createContext<Colors>(DARK as Colors)
 function useC() { return useContext(ThemeCtx) }
 const SERIF = "'Cormorant Garamond', Georgia, serif"
-const EASE: [number, number, number, number] = [0.16, 1, 0.3, 1]
+const _EASE: [number, number, number, number] = [0.16, 1, 0.3, 1]
 const _SCENE = `radial-gradient(55% 50% at 50% -6%, rgba(201,169,110,0.18), transparent 60%),`
   + `radial-gradient(70% 32% at 50% 112%, rgba(201,169,110,0.10), transparent 62%),`
   + `radial-gradient(120% 120% at 50% 45%, transparent 52%, rgba(0,0,0,0.6)), ${DARK.bg}`
@@ -1296,7 +1296,7 @@ function FinderView({ guilds, s, onEnter, onRefresh, onCreate, joinedId, onJoin,
 }
 
 // ── Hall ─────────────────────────────────────────────────────────
-function FeatureNode({ icon, title, sub, featured }: { icon: React.ReactNode; title: string; sub: string; featured?: boolean }) {
+function _FeatureNode({ icon, title, sub, featured }: { icon: React.ReactNode; title: string; sub: string; featured?: boolean }) {
   const C = useC()
   const d = featured ? 120 : 98
   return (
@@ -1377,7 +1377,7 @@ function HallView({ guild, s, onLeave, onLeaveGuild }: { guild: GuildView; s: S;
   const [members, setMembers] = useState<ApiGuildMember[]>([])
   const [chatMessages, setChatMessages] = useState<ApiGuildMessage[]>([])
   const [chatInput, setChatInput] = useState('')
-  const [announcements, setAnnouncements] = useState<ApiGuildAnnouncement[]>([])
+  const [_announcements, setAnnouncements] = useState<ApiGuildAnnouncement[]>([])
   const [analytics, setAnalytics] = useState<ApiGuildAnalytics | null>(null)
   const [activities, setActivities] = useState<ApiGuildActivity[]>([])
   const chatScrollRef = useRef<HTMLDivElement>(null)
@@ -1386,7 +1386,7 @@ function HallView({ guild, s, onLeave, onLeaveGuild }: { guild: GuildView; s: S;
   // Determine role from real API
   const myMembership = members.find(m => m.user_id === currentUser?.id)
   const isGuildMaster = myMembership?.role === 'OWNER' || myMembership?.role === 'Guild Master'
-  const isModerator = isGuildMaster || myMembership?.role === 'MODERATOR'
+  const _isModerator = isGuildMaster || myMembership?.role === 'MODERATOR'
 
   // ── Fetch real data ──
   useEffect(() => {
@@ -1515,7 +1515,7 @@ function HallView({ guild, s, onLeave, onLeaveGuild }: { guild: GuildView; s: S;
           </div>
 
           <nav style={{ flex: 1, padding: '6px 0', overflow: 'auto' }}>
-            {sideMenuItems.map((item, idx) => {
+            {sideMenuItems.map((item, _idx) => {
               const isActive = activeSection === item.key
               const isSettingsItem = item.key === 'settings'
               return (

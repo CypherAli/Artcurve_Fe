@@ -137,7 +137,7 @@ export interface CandlestickChartProps {
 export function CandlestickChart({
   artId,
   sparkline,
-  phaseColor,
+  phaseColor: _phaseColor,
   range,
   height = 160,
   apiCandles,

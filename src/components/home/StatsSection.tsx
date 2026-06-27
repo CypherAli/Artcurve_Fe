@@ -9,7 +9,7 @@
 // ─────────────────────────────────────────────────────────────────
 
 import { useEffect, useRef } from 'react'
-import { gsap, ScrollTrigger } from '@/lib/gsap'
+import { gsap } from '@/lib/gsap'
 import { useLanguage } from '@/context/LanguageContext'
 
 type StatItem = { value: number; suffix: string; label: string; prefix: string }
@@ -19,7 +19,7 @@ function StatCard({
   suffix,
   label,
   prefix,
-  index,
+  index: _index,
 }: StatItem & { index: number }) {
   const numRef = useRef<HTMLSpanElement>(null)
 
