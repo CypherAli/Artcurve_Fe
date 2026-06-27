@@ -17,9 +17,10 @@
 //  · Chart cross-fade            (AnimatePresence mode="wait" on key)
 // ─────────────────────────────────────────────────────────────────
 
-import {
-  useEffect, useRef, useState, useMemo, useCallback,
+import React, {
+  useEffect, useRef, useState, useMemo, useCallback, memo,
 } from 'react'
+import Image from 'next/image'
 import {
   motion, AnimatePresence,
   useMotionValue, useMotionTemplate,
@@ -254,7 +255,7 @@ function seedTrades(price: number, artId: number): RecentTrade[] {
 // ─────────────────────────────────────────────────────────────────
 //  TokenRow
 // ─────────────────────────────────────────────────────────────────
-function TokenRow({
+const TokenRow = React.memo(function TokenRow({
   art, livePrice, isSelected, onClick,
 }: {
   art: TradeArtwork; livePrice: number; isSelected: boolean; onClick: () => void
@@ -281,10 +282,9 @@ function TokenRow({
         borderLeft:  `2px solid ${isSelected ? art.phaseColor : 'transparent'}`,
       }}
     >
-      <div className="w-8 h-8 shrink-0 overflow-hidden"
+      <div className="w-8 h-8 shrink-0 overflow-hidden relative"
         style={{ border:`1px solid ${isSelected ? art.phaseColor+'50' : 'var(--tp-border)'}` }}>
-        {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img src={art.image} alt="" className="w-full h-full object-cover" draggable={false}/>
+        <Image src={art.image} alt="" fill sizes="32px" className="object-cover" draggable={false} loading="lazy"/>
       </div>
       <div className="flex-1 min-w-0">
         <div className="flex items-center justify-between gap-1">
@@ -309,7 +309,7 @@ function TokenRow({
       </div>
     </motion.button>
   )
-}
+})
 
 // ─────────────────────────────────────────────────────────────────
 //  Token Picker Panel
@@ -471,9 +471,8 @@ function PriceHeader({ art, livePrice }: { art: TradeArtwork; livePrice: number 
           initial={{ opacity:0, x:-8 }} animate={{ opacity:1, x:0 }} exit={{ opacity:0, x:8 }}
           transition={{ duration:0.2, ease:'easeOut' }}
           className="flex items-center gap-2.5 shrink-0">
-          <div className="w-7 h-7 overflow-hidden" style={{ border:`1px solid ${art.phaseColor}55` }}>
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src={art.image} alt="" className="w-full h-full object-cover"/>
+          <div className="w-7 h-7 overflow-hidden relative" style={{ border:`1px solid ${art.phaseColor}55` }}>
+            <Image src={art.image} alt="" fill sizes="28px" className="object-cover"/>
           </div>
           <div>
             <div className="font-mono text-[11px] font-bold leading-tight" style={{ color:art.phaseColor }}>{art.ticker}</div>
@@ -548,7 +547,7 @@ function OrderBookPanel({ art, livePrice, bookTick }: { art:TradeArtwork; livePr
     [livePrice, art.id, bookTick],
   )
 
-  const Row = ({ lvl }: { lvl: OrderLevel }) => (
+  const Row = memo(({ lvl }: { lvl: OrderLevel }) => (
     <div className="relative flex items-center px-3 py-[3.5px] font-mono text-[9px]" style={{ cursor:'default' }}>
       <motion.div
         className="absolute top-0 right-0 bottom-0 pointer-events-none"
@@ -566,7 +565,7 @@ function OrderBookPanel({ art, livePrice, bookTick }: { art:TradeArtwork; livePr
         {(lvl.size*lvl.price).toFixed(3)}
       </span>
     </div>
-  )
+  ))
 
   return (
     <div className="h-full flex flex-col overflow-hidden">
@@ -704,13 +703,20 @@ interface QuoteResult {
   priceImpactPct: number
 }
 
+let quoteAbort: AbortController | null = null
+
 async function fetchQuote(artworkId: string, side: 'buy'|'sell', amount: string): Promise<QuoteResult | null> {
   if (!artworkId || !amount || parseFloat(amount) <= 0) return null
+  if (quoteAbort) quoteAbort.abort()
+  quoteAbort = new AbortController()
   try {
     const jwt = authStore.getJwt()
     const r = await fetch(
       `${API_URL}/artworks/${artworkId}/quote?side=${side}&amount=${amount}`,
-      jwt ? { headers: { Authorization: `Bearer ${jwt}` } } : {},
+      {
+        signal: quoteAbort.signal,
+        ...(jwt ? { headers: { Authorization: `Bearer ${jwt}` } } : {}),
+      },
     )
     if (!r.ok) return null
     const json = await r.json()

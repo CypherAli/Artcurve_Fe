@@ -27,6 +27,7 @@ import {
 } from 'react'
 import { motion, AnimatePresence, LayoutGroup } from 'framer-motion'
 import Link                        from 'next/link'
+import Image                       from 'next/image'
 import { gsap }                    from '@/lib/gsap'
 import { PHASE_COLOR, Phase }      from './ArtCard'
 import { CandlestickChart }        from '../common/CandlestickChart'
@@ -810,8 +811,7 @@ function ActivityFeed() {
           >
             {/* Thumbnail */}
             <div className="relative w-[22px] h-[22px] shrink-0 overflow-hidden rounded-sm">
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src={trade.art.image} alt="" className="w-full h-full object-cover" />
+              <Image src={trade.art.image} alt="" fill sizes="22px" className="object-cover" loading="lazy"/>
               <span
                 className="absolute left-0 top-0 bottom-0 w-[2px]"
                 style={{ background: trade.art.phaseColor }}
@@ -1318,9 +1318,7 @@ function RankAvatarColumn({
               zIndex:     isHigh ? 10 : isTop ? 5 : 1,
             }}
           >
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src={art.image} alt={art.title}
-              className="w-full h-full object-cover" draggable={false}/>
+            <Image src={art.image} alt={art.title} fill sizes="48px" className="object-cover" loading="lazy"/>
           </div>
         )
       })}
@@ -1592,9 +1590,8 @@ function RankTimelineFullscreen({
                       #{idx + 1}
                     </span>
                     <span className="size-2 rounded-full shrink-0" style={{ background: art.phaseColor }}/>
-                    <div className="w-7 h-7 shrink-0 overflow-hidden rounded-sm">
-                      {/* eslint-disable-next-line @next/next/no-img-element */}
-                      <img src={art.image} alt="" className="w-full h-full object-cover"/>
+                    <div className="relative w-7 h-7 shrink-0 overflow-hidden rounded-sm">
+                      <Image src={art.image} alt="" fill sizes="28px" className="object-cover" loading="lazy"/>
                     </div>
                     <div className="flex-1 min-w-0">
                       <p className="text-[10.5px] font-light truncate leading-snug"
@@ -1825,10 +1822,9 @@ function RankTimelineFullscreen({
                       >
                         {/* Artwork info */}
                         <div className="flex items-center gap-2.5 min-w-0">
-                          <div className="w-8 h-8 shrink-0 overflow-hidden rounded-sm"
+                          <div className="relative w-8 h-8 shrink-0 overflow-hidden rounded-sm"
                             style={{ border: `1px solid ${art.phaseColor}40` }}>
-                            {/* eslint-disable-next-line @next/next/no-img-element */}
-                            <img src={art.image} alt="" className="w-full h-full object-cover"/>
+                            <Image src={art.image} alt="" fill sizes="32px" className="object-cover" loading="lazy"/>
                           </div>
                           <div className="min-w-0">
                             <p className="font-light text-[11px] truncate leading-tight"
@@ -1938,10 +1934,8 @@ function RaceBar({
         style={{ background: art.phaseColor, opacity: 0.7 }}/>
 
       {/* Thumbnail */}
-      <div className="w-8 h-8 shrink-0 overflow-hidden rounded-sm">
-        {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img src={art.image} alt={art.title}
-          className="w-full h-full object-cover" draggable={false}/>
+      <div className="relative w-8 h-8 shrink-0 overflow-hidden rounded-sm">
+        <Image src={art.image} alt={art.title} fill sizes="32px" className="object-cover" loading="lazy"/>
       </div>
 
       {/* Name + ticker */}
@@ -2636,8 +2630,7 @@ function BuyModal({ art, livePrice, onClose }: { art: MarketArtwork; livePrice: 
         <div className="flex items-start gap-4 px-6 pt-5 pb-4"
           style={{ borderBottom: '1px solid var(--tp-border)' }}>
           <div className="relative w-12 h-12 shrink-0 overflow-hidden rounded-sm">
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src={art.image} alt="" className="w-full h-full object-cover"/>
+            <Image src={art.image} alt="" fill sizes="48px" className="object-cover" loading="lazy"/>
             <span className="absolute left-0 top-0 bottom-0 w-[2px]"
               style={{ background: art.phaseColor }}/>
           </div>
