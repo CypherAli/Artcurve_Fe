@@ -44,6 +44,16 @@ export function HeroSection() {
     }).catch(() => { /* keep defaults on error */ })
   }, [])
 
+  const [isDark, setIsDark] = useState(false)
+
+  useEffect(() => {
+    const check = () => setIsDark(document.documentElement.classList.contains('dark'))
+    check()
+    const observer = new MutationObserver(check)
+    observer.observe(document.documentElement, { attributes: true, attributeFilter: ['class'] })
+    return () => observer.disconnect()
+  }, [])
+
   const headingRef  = useRef<HTMLHeadingElement>(null)
   const subRef      = useRef<HTMLParagraphElement>(null)
   const ctaRef      = useRef<HTMLDivElement>(null)
@@ -257,14 +267,15 @@ export function HeroSection() {
           >
             <video
               ref={videoRef}
-              src="/videos/hero_video.mp4"
+              key={isDark ? 'dark' : 'light'}
+              src={isDark ? '/videos/hero_video_dark.mp4' : '/videos/hero_video.mp4'}
               autoPlay
               loop
               muted
               playsInline
               preload="auto"
               className="w-full h-full object-contain object-right"
-              style={{ backgroundColor: '#ffffff' }}
+              style={{ backgroundColor: 'var(--ac-paper)' }}
             />
           </div>
 
