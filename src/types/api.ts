@@ -13,6 +13,8 @@ export type ArtworkStatus =
 
 export type CurveType = 'linear' | 'quadratic' | 'exponential'
 
+export type ArtworkType = 'ORIGINAL' | 'AI_GENERATED' | 'AI_ASSISTED'
+
 export type ArtworkCategory =
   | 'Painting'
   | 'Drawing'
@@ -99,6 +101,7 @@ export interface Artwork {
   ipfs_metadata_uri:   string | null
   contract_address:    string | null   // null until deployed
   status:              ArtworkStatus
+  artwork_type:        ArtworkType
   creator_id:          string
   creator?:            ArtworkCreator
   // ── token metadata (added in migration 007) ──
@@ -126,6 +129,7 @@ export interface ArtworkSearchParams {
   q?:          string
   category?:   ArtworkCategory
   curve_type?: CurveType
+  artwork_type?: ArtworkType
   sortBy?:     'price' | 'created_at' | 'view_count' | 'supply'
   page?:       number
   limit?:      number
@@ -139,6 +143,7 @@ export interface CreateArtworkDto {
   target_cap:         string
   ticker?:            string   // auto-generated if omitted
   category?:          ArtworkCategory
+  artwork_type?:      ArtworkType
   royalty_pct?:       string   // default "5.00"
   curve_type?:        CurveType
   init_price?:        string   // default "0.00100000"

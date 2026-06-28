@@ -58,7 +58,7 @@ export const liveService = {
     post<CreateStreamResponse>('/live/create', body, true),
 
   viewerToken: (roomName: string, identity: string) =>
-    get<ViewerTokenResponse>(`/live/${roomName}/viewer-token?identity=${encodeURIComponent(identity)}`),
+    post<ViewerTokenResponse>(`/live/${roomName}/viewer-token`, { identity }),
 
   end: (roomName: string) =>
     request<{ ended: boolean }>(`/live/${roomName}`, { method: 'DELETE', auth: true }),

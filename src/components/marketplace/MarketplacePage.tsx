@@ -63,6 +63,7 @@ interface MarketArtwork {
   sparkline:      number[]    // 10-point price history
   rating:         number | null   // avg rating 1–5, null = no reviews
   ratingCount:    number
+  artworkType:    'ORIGINAL' | 'AI_GENERATED' | 'AI_ASSISTED'
 }
 
 // ── Artwork catalogue (mock,used when backend is unreachable) ───
@@ -332,9 +333,10 @@ const ARTWORKS_MOCK: MarketArtwork[] = ([
     description: 'Buildings that absorb sound,spaces designed for contemplation. Sorokin documents structures that resist the noise of the modern city. High FOMO phase.',
     sparkline: [5, 5.8, 7.5, 6.3, 9.1, 12.5, 17.0, 23.8, 38.5, 71.0],
   },
-] as Omit<MarketArtwork, 'artworkId' | 'rating' | 'ratingCount'>[]).map((a, i) => ({
+] as Omit<MarketArtwork, 'artworkId' | 'rating' | 'ratingCount' | 'artworkType'>[]).map((a, i) => ({
   ...a,
   artworkId:   '',
+  artworkType: 'ORIGINAL' as const,
   // Deterministic plausible ratings per artwork (3.50 – 5.00)
   rating:      parseFloat((3.5 + ((i * 37 + 11) % 16) / 10).toFixed(2)),
   ratingCount: 3 + ((i * 13 + 7) % 28),
@@ -388,6 +390,7 @@ function adaptArtwork(artwork: Artwork, index: number): MarketArtwork {
     sparkline:      Array.from({ length: 10 }, (_, i) => price * (1 + i * 0.1) || 1),
     rating:         null,   // fetched separately in InspectionDeck
     ratingCount:    0,
+    artworkType:    artwork.artwork_type ?? 'ORIGINAL',
   }
 }
 
@@ -710,7 +713,7 @@ function adaptRecentTrade(t: RecentTrade, idx: number): LiveTrade {
     phaseColor: PHASE_COLOR['Accumulation'], marketCap: 0, marketCapLabel: '',
     change24h: '', changePositive: true, change7d: '', volume24h: '',
     holders: 0, progress: 0, image, description: '', sparkline: [],
-    rating: null, ratingCount: 0,
+    rating: null, ratingCount: 0, artworkType: 'ORIGINAL',
   }
   const addr = t.user.wallet_address
   return {
@@ -2784,6 +2787,8 @@ export function MarketplacePage() {
     setPage,
     pageCount,
     setSortBy: _setSortBy,
+    artworkType,
+    setArtworkType,
   } = useMarketplace({ initialLimit: 20 })
   const _apiArtworks = useMemo(
     () => _rawArtworks.map(adaptArtwork),
@@ -3223,6 +3228,29 @@ export function MarketplacePage() {
               )
             })}
           </div>
+
+          {/* Artwork type chips */}
+          <div className="h-4 w-px mx-1 shrink-0"
+            style={{ background: 'var(--tp-border)' }}/>
+          {([
+            { key: 'ORIGINAL' as const,      label: `✦ ${t.marketplace.typeOriginal}`, color: '#4ade80' },
+            { key: 'AI_GENERATED' as const,  label: `⬡ ${t.marketplace.typeAiGenerated}`, color: '#a78bfa' },
+          ]).map(chip => {
+            const active = artworkType === chip.key
+            return (
+              <button key={chip.key} type="button"
+                onClick={() => setArtworkType(active ? undefined : chip.key)}
+                className="relative flex items-center gap-1 h-full px-2 shrink-0
+                           text-[8px] tracking-[0.15em] uppercase transition-colors duration-200"
+                style={{
+                  color:      active ? chip.color : 'var(--tp-text-4)',
+                  border:     `1px solid ${active ? chip.color : 'transparent'}`,
+                  background: active ? `${chip.color}1f` : 'transparent',
+                }}>
+                {chip.label}
+              </button>
+            )
+          })}
 
           {/* Race view toggle,separator + RACE button */}
           <div className="h-4 w-px mx-1 shrink-0"

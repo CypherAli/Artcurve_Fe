@@ -59,6 +59,7 @@ interface TradeArtwork {
   progress:        number
   holders:         number
   volume24h:       number
+  artworkType:     'ORIGINAL' | 'AI_GENERATED' | 'AI_ASSISTED'
 }
 
 interface OrderLevel {
@@ -106,7 +107,7 @@ const ARTWORKS_MOCK: TradeArtwork[] = ([
   { id:22, title:'Sovereign Geometry',       ticker:'$SOVGEO',   artist:'Yuki Tanabe',     artistAddr:'0x7d0…e34', phase:'Migration',     phaseColor:PHASE_COLOR['Migration'],     basePrice:19.90, progress:93, holders:50, volume24h:13.20, image:'/images/artworks/art5.jpg',    sparkline:[2,2.6,4,8,17,42,98,154,188,199] },
   { id:23, title:'Chromatic Grief',          ticker:'$CHROMA',   artist:'Elena Vasquez',   artistAddr:'0x4f2…a91', phase:'FOMO',          phaseColor:PHASE_COLOR['FOMO'],          basePrice:4.55,  progress:60, holders:25, volume24h:2.66,  image:'/convergence/img3.jpg',         sparkline:[3,3.8,5,4.2,6.1,8,11.5,15.8,26,45.5] },
   { id:24, title:'Silent Architecture',      ticker:'$SILENT',   artist:'Ivan Sorokin',    artistAddr:'0x9c4…e17', phase:'FOMO',          phaseColor:PHASE_COLOR['FOMO'],          basePrice:7.10,  progress:69, holders:32, volume24h:4.28,  image:'/convergence/img7.jpg',         sparkline:[5,5.8,7.5,6.3,9.1,12.5,17,23.8,38.5,71] },
-] as Omit<TradeArtwork, 'artworkId' | 'contractAddress'>[]).map((a, _i) => ({ ...a, artworkId: '', contractAddress: null }))
+] as Omit<TradeArtwork, 'artworkId' | 'contractAddress' | 'artworkType'>[]).map((a, _i) => ({ ...a, artworkId: '', contractAddress: null, artworkType: 'ORIGINAL' as const }))
 
 // ── Adapter: backend Artwork → TradeArtwork ───────────────────────
 function adaptTradeArtwork(artwork: Artwork, index: number): TradeArtwork {
@@ -139,8 +140,9 @@ function adaptTradeArtwork(artwork: Artwork, index: number): TradeArtwork {
     image,
     sparkline:  Array.from({ length: 10 }, (_, i) => price * (1 + i * 0.1) || 1),
     progress,
-    holders:    0,
-    volume24h:  0,
+    holders:     0,
+    volume24h:   0,
+    artworkType: artwork.artwork_type ?? 'ORIGINAL',
   }
 }
 
@@ -326,16 +328,18 @@ function TokenPickerPanel({
   const { t } = useLanguage()
   const [search,      setSearch]      = useState('')
   const [phaseFilter, setPhaseFilter] = useState<Phase|'All'>('All')
+  const [typeFilter, setTypeFilter]  = useState<'ORIGINAL'|'AI_GENERATED'|undefined>(undefined)
 
   const filtered = useMemo(() => {
     let list: TradeArtwork[] = artworks
     if (phaseFilter !== 'All') list = list.filter(a => a.phase === phaseFilter)
+    if (typeFilter) list = list.filter(a => a.artworkType === typeFilter)
     if (search.trim()) {
       const q = search.toLowerCase()
       list = list.filter(a => a.ticker.toLowerCase().includes(q) || a.title.toLowerCase().includes(q))
     }
     return [...list].sort((a,b) => (sortPrices[b.id]??b.basePrice) - (sortPrices[a.id]??a.basePrice))
-  }, [artworks, sortPrices, search, phaseFilter])
+  }, [artworks, sortPrices, search, phaseFilter, typeFilter])
 
   const phases: (Phase|'All')[] = ['All','Accumulation','FOMO','Migration']
   const chipLabel = (p: Phase|'All') =>
@@ -390,6 +394,31 @@ function TokenPickerPanel({
                 background: active ? c+'0c' : 'transparent',
               }}>
               {chipLabel(p)}
+            </motion.button>
+          )
+        })}
+      </div>
+
+      {/* Artwork type chips */}
+      <div className="flex gap-1 px-2.5 py-1.5 shrink-0" style={{ borderBottom:'1px solid var(--tp-border)' }}>
+        {([
+          { key: 'ORIGINAL' as const,     label: `✦ ${t.trade.chipOriginal}`, color: '#4ade80' },
+          { key: 'AI_GENERATED' as const, label: `⬡ ${t.trade.chipAiArt}`,    color: '#a78bfa' },
+        ]).map(chip => {
+          const active = typeFilter === chip.key
+          return (
+            <motion.button key={chip.key} type="button"
+              onClick={() => setTypeFilter(active ? undefined : chip.key)}
+              whileHover={{ scale: 1.04 }}
+              whileTap={{ scale: 0.94 }}
+              transition={{ type: 'spring', stiffness: 420, damping: 18 }}
+              className="flex-1 py-0.5 font-mono text-[7px] tracking-wider"
+              style={{
+                color:      active ? chip.color : 'var(--tp-text-4)',
+                border:     `1px solid ${active ? chip.color+'45' : 'var(--tp-border)'}`,
+                background: active ? chip.color+'0c' : 'transparent',
+              }}>
+              {chip.label}
             </motion.button>
           )
         })}

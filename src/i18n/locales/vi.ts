@@ -39,6 +39,7 @@ const vi: Translations = {
     edition: 'Ấn bản', editionOpen: 'Mở',
     bondingCurveHistory: 'Đường cong · Lịch sử giá',
     currentHolders: 'nhà sưu tập',
+    typeOriginal: 'Thủ công', typeAiGenerated: 'AI Art',
   },
   trade: {
     markets: 'Thị trường', search: 'Tìm kiếm…', change24h: 'Thay đổi 24H',
@@ -55,6 +56,7 @@ const vi: Translations = {
     confirming: 'Đang xác nhận…', orderExecuted: 'Lệnh đã khớp', noResults: 'Không có kết quả',
     tickerName: 'MÃ / TÊN', price24h: 'GIÁ / 24H',
     chipAll: 'Tất cả', chipAcc: 'TL', chipFomo: 'FOMO', chipMig: 'NY',
+    chipOriginal: 'THỦ CÔNG', chipAiArt: 'AI ART',
     spread: 'Spread', tradeHeader: 'GIAO DỊCH', graduation: 'NIÊM YẾT', candlestick: 'CANDLESTICK',
     open: 'Mở cửa', high: 'Cao nhất', low: 'Thấp nhất', close: 'Đóng cửa',
   },
@@ -123,6 +125,8 @@ const vi: Translations = {
     curveLinear: 'Tuyến tính', curveQuadratic: 'Bậc hai', curveExponential: 'Hàm mũ',
     untitledArtwork: 'Tác phẩm chưa đặt tên', clickToChange: 'nhấn để thay đổi',
     aiModerationTitle: 'Kiểm duyệt AI',
+    artworkTypeLabel: 'Loại tác phẩm', typeOriginal: 'Thủ công (Vẽ tay)',
+    typeAiGenerated: 'AI tạo ra', typeAiAssisted: 'AI hỗ trợ',
   },
   vault: {
     portfolioValue: 'Giá trị danh mục', timeframe7d: '7N', timeframe30d: '30N', timeframe90d: '90N',

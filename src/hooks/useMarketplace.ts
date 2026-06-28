@@ -13,28 +13,31 @@
 import { useState } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { artworkService } from '@/services/artwork.service'
-import type { Artwork } from '@/types/api'
+import type { Artwork, ArtworkType } from '@/types/api'
 
 export type MarketplaceSortBy = 'price' | 'created_at' | 'view_count'
 
 interface UseMarketplaceOptions {
-  initialPage?:   number
-  initialLimit?:  number
-  initialSortBy?: MarketplaceSortBy
+  initialPage?:        number
+  initialLimit?:       number
+  initialSortBy?:      MarketplaceSortBy
+  initialArtworkType?: ArtworkType
 }
 
 export function useMarketplace({
-  initialPage   = 1,
-  initialLimit  = 20,
-  initialSortBy = 'created_at',
+  initialPage        = 1,
+  initialLimit       = 20,
+  initialSortBy      = 'created_at',
+  initialArtworkType,
 }: UseMarketplaceOptions = {}) {
-  const [page,   setPage]   = useState(initialPage)
-  const [limit,  setLimit]  = useState(initialLimit)
-  const [sortBy, setSortBy] = useState<MarketplaceSortBy>(initialSortBy)
+  const [page,        setPage]        = useState(initialPage)
+  const [limit,       setLimit]       = useState(initialLimit)
+  const [sortBy,      setSortBy]      = useState<MarketplaceSortBy>(initialSortBy)
+  const [artworkType, setArtworkType] = useState<ArtworkType | undefined>(initialArtworkType)
 
   const { data, isLoading, isFetching, error, refetch } = useQuery({
-    queryKey: ['artworks', 'list', page, limit, sortBy],
-    queryFn:  () => artworkService.list({ page, limit, sortBy }),
+    queryKey: ['artworks', 'list', page, limit, sortBy, artworkType],
+    queryFn:  () => artworkService.list({ page, limit, sortBy, artwork_type: artworkType }),
     staleTime: 30_000,          // 30 s
     placeholderData: (prev) => prev, // keep previous page visible while loading next
   })
@@ -49,6 +52,8 @@ export function useMarketplace({
     error,
     sortBy,
     setSortBy,
+    artworkType,
+    setArtworkType,
     setPage,
     setLimit,
     refetch,

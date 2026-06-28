@@ -74,6 +74,7 @@ interface FormData {
   ticker:      string
   description: string
   category:    Category
+  artworkType: 'ORIGINAL' | 'AI_GENERATED' | 'AI_ASSISTED'
   supply:      number   // total token supply
   initPrice:   number   // initial price ETH
   curveType:   'linear' | 'quadratic' | 'exponential'
@@ -234,6 +235,34 @@ function UploadForm({
                     color: active?'#D4AF37':'var(--tp-text-3)',
                   }}>
                   {catLabel(cat)}
+                </motion.button>
+              )
+            })}
+          </div>
+        </div>
+
+        {/* Artwork Type */}
+        <div>
+          <label className="font-mono text-[7px] tracking-wider uppercase block mb-1.5"
+            style={{ color:'var(--tp-text-3)' }}>{t.studio.artworkTypeLabel}</label>
+          <div className="flex flex-wrap gap-1">
+            {([
+              { key: 'ORIGINAL' as const,      label: t.studio.typeOriginal,    color: '#4ade80' },
+              { key: 'AI_GENERATED' as const,  label: t.studio.typeAiGenerated, color: '#a78bfa' },
+              { key: 'AI_ASSISTED' as const,   label: t.studio.typeAiAssisted,  color: '#60a5fa' },
+            ]).map(opt => {
+              const active = form.artworkType === opt.key
+              return (
+                <motion.button key={opt.key} type="button"
+                  onClick={() => onChange({ ...form, artworkType: opt.key })}
+                  whileHover={{ scale:1.04 }} whileTap={{ scale:0.96 }}
+                  className="px-2 py-1 font-mono text-[7px]"
+                  style={{
+                    border:`1px solid ${active ? `${opt.color}73` : 'var(--tp-border)'}`,
+                    background: active ? `${opt.color}1a` : 'transparent',
+                    color: active ? opt.color : 'var(--tp-text-3)',
+                  }}>
+                  {opt.label}
                 </motion.button>
               )
             })}
@@ -650,8 +679,8 @@ export function StudioPage() {
 
   const [form, setForm] = useState<FormData>({
     title: '', ticker: '$TOKEN', description: '',
-    category: 'Digital', supply: 100_000,
-    initPrice: 0.001, curveType: 'quadratic', royalty: 5,
+    category: 'Digital', artworkType: 'ORIGINAL',
+    supply: 100_000, initPrice: 0.001, curveType: 'quadratic', royalty: 5,
   })
   const [modStatus, setModStatus]   = useState<ModerationStatus>('idle')
   const [fileInfo,  setFileInfo]    = useState<{ name:string; size:string } | null>(null)
@@ -746,6 +775,7 @@ export function StudioPage() {
         target_cap:        String(form.supply * form.initPrice),
         ticker:            form.ticker !== '$TOKEN' ? form.ticker : undefined,
         category:          form.category,
+        artwork_type:      form.artworkType,
         royalty_pct:       form.royalty.toFixed(2),
         curve_type:        form.curveType,
         init_price:        form.initPrice.toFixed(8),

@@ -31,6 +31,7 @@ export interface Translations {
     phaseAccumulation: string; phaseFomo: string; phaseMigration: string
     edition: string; editionOpen: string
     bondingCurveHistory: string; currentHolders: string
+    typeOriginal: string; typeAiGenerated: string
   }
   trade: {
     markets: string; search: string; change24h: string; vol24h: string
@@ -43,6 +44,7 @@ export interface Translations {
     noResults: string; priceEth: string; bal: string; max: string
     tickerName: string; price24h: string
     chipAll: string; chipAcc: string; chipFomo: string; chipMig: string
+    chipOriginal: string; chipAiArt: string
     spread: string; tradeHeader: string; graduation: string; candlestick: string
     open: string; high: string; low: string; close: string
   }
@@ -93,6 +95,7 @@ export interface Translations {
     catPhotography: string; catSculpture: string; catMixedMedia: string; catGenerative: string
     curveLinear: string; curveQuadratic: string; curveExponential: string
     untitledArtwork: string; clickToChange: string; aiModerationTitle: string
+    artworkTypeLabel: string; typeOriginal: string; typeAiGenerated: string; typeAiAssisted: string
   }
   vault: {
     portfolioValue: string; timeframe7d: string; timeframe30d: string; timeframe90d: string
@@ -249,6 +252,7 @@ const en: Translations = {
     edition: 'Edition', editionOpen: 'Open',
     bondingCurveHistory: 'Bonding Curve · Price History',
     currentHolders: 'current holders',
+    typeOriginal: 'Original', typeAiGenerated: 'AI Art',
   },
   trade: {
     markets: 'Markets', search: 'Search…', change24h: '24H Change',
@@ -265,6 +269,7 @@ const en: Translations = {
     confirming: 'Confirming…', orderExecuted: 'Order Executed', noResults: 'No results',
     tickerName: 'TICKER / NAME', price24h: 'PRICE / 24H',
     chipAll: 'All', chipAcc: 'ACC', chipFomo: 'FOMO', chipMig: 'MIG',
+    chipOriginal: 'ORIGINAL', chipAiArt: 'AI ART',
     spread: 'Spread', tradeHeader: 'TRADE', graduation: 'GRADUATION', candlestick: 'CANDLESTICK',
     open: 'Open', high: 'High', low: 'Low', close: 'Close',
   },
@@ -333,6 +338,8 @@ const en: Translations = {
     curveLinear: 'Linear', curveQuadratic: 'Quadratic', curveExponential: 'Exponential',
     untitledArtwork: 'Untitled Artwork', clickToChange: 'click to change',
     aiModerationTitle: 'AI Moderation',
+    artworkTypeLabel: 'Artwork Type', typeOriginal: 'Original (Hand-made)',
+    typeAiGenerated: 'AI Generated', typeAiAssisted: 'AI Assisted',
   },
   vault: {
     portfolioValue: 'Portfolio Value', timeframe7d: '7D', timeframe30d: '30D', timeframe90d: '90D',

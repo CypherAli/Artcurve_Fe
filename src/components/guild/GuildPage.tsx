@@ -587,21 +587,15 @@ function formatCooldown(ms: number, s: S): string {
 // ── Gemini API for character generation ─────────────────────────
 async function generateCharacterImage(prompt: string): Promise<string | null> {
   try {
-    const key = process.env.NEXT_PUBLIC_GEMINI_KEY
-    if (!key) return null
-    const res = await fetch(
-      `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash-exp:generateContent?key=${key}`,
-      {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          contents: [{ parts: [{ text: `Generate a detailed character description as a 3D Pixar-style illustration prompt for an art guild member. The character should be a cute anthropomorphic cat in a fantasy guild setting. User's description: "${prompt}". Return ONLY the image generation prompt, nothing else. Make it vivid and detailed, under 300 chars.` }] }],
-          generationConfig: { temperature: 0.9, maxOutputTokens: 400 },
-        }),
-      },
-    )
+    const base = process.env.NEXT_PUBLIC_API_URL?.replace(/\/api\/v1$/, '') || ''
+    const res = await fetch(`${base}/api/v1/guilds/ai/character-prompt`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ prompt }),
+    })
+    if (!res.ok) return null
     const data = await res.json()
-    return data?.candidates?.[0]?.content?.parts?.[0]?.text ?? null
+    return data?.text ?? null
   } catch { return null }
 }
 

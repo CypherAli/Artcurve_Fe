@@ -1,20 +1,22 @@
 import { get, post, postForm, request } from '@/lib/http'
-import type { Artwork, ArtworkListResponse, ArtworkSearchParams, CreateArtworkDto, UpdateArtworkStatusDto, TradeHistoryResponse, IpfsUploadResult } from '@/types/api'
+import type { Artwork, ArtworkListResponse, ArtworkSearchParams, ArtworkType, CreateArtworkDto, UpdateArtworkStatusDto, TradeHistoryResponse, IpfsUploadResult } from '@/types/api'
 
 export const artworkService = {
-  list(params: { page?: number; limit?: number; sortBy?: 'price' | 'created_at' | 'view_count' } = {}) {
+  list(params: { page?: number; limit?: number; sortBy?: 'price' | 'created_at' | 'view_count'; artwork_type?: ArtworkType } = {}) {
     const q = new URLSearchParams()
-    if (params.page)   q.set('page',   String(params.page))
-    if (params.limit)  q.set('limit',  String(params.limit))
-    if (params.sortBy) q.set('sortBy', params.sortBy)
+    if (params.page)         q.set('page',         String(params.page))
+    if (params.limit)        q.set('limit',        String(params.limit))
+    if (params.sortBy)       q.set('sortBy',       params.sortBy)
+    if (params.artwork_type) q.set('artwork_type', params.artwork_type)
     return get<ArtworkListResponse>(`/artworks${q.toString() ? `?${q}` : ''}`)
   },
   search(params: ArtworkSearchParams = {}) {
     const q = new URLSearchParams()
     if (params.q)          q.set('q',          params.q)
     if (params.category)   q.set('category',   params.category)
-    if (params.curve_type) q.set('curve_type', params.curve_type)
-    if (params.sortBy)     q.set('sortBy',     params.sortBy)
+    if (params.curve_type)   q.set('curve_type',   params.curve_type)
+    if (params.artwork_type) q.set('artwork_type', params.artwork_type)
+    if (params.sortBy)       q.set('sortBy',       params.sortBy)
     if (params.page)       q.set('page',       String(params.page))
     if (params.limit)      q.set('limit',      String(params.limit))
     return get<ArtworkListResponse>(`/artworks/search${q.toString() ? `?${q}` : ''}`)
