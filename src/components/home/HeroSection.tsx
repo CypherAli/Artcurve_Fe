@@ -132,7 +132,8 @@ export function HeroSection() {
 
   return (
     <section
-      className="relative min-h-dvh flex overflow-x-hidden bg-[var(--ac-paper)]"
+      className="relative min-h-dvh flex overflow-x-hidden"
+      style={{ background: isDark ? '#000000' : '#ffffff' }}
       aria-label="Hero"
     >
 
@@ -253,13 +254,12 @@ export function HeroSection() {
         style={{ clipPath: 'inset(0 0 100% 0)' }}
         aria-hidden="true"
       >
-        {/* Outer: white bg, clips everything */}
-        <div className="relative w-full h-full bg-[var(--ac-paper)] overflow-hidden flex items-center justify-center">
+        <div className="relative w-full h-full overflow-hidden flex items-center justify-center"
+          style={{ background: isDark ? '#000000' : '#ffffff' }}>
 
-          {/* Explicit white backdrop — kills letterbox black */}
-          <div className="absolute inset-0 bg-[var(--ac-paper)] z-0" aria-hidden="true" />
+          <div className="absolute inset-0 z-0" aria-hidden="true"
+            style={{ background: isDark ? '#000000' : '#ffffff' }} />
 
-          {/* Video wrapper: scale 125% + move down 5px */}
           <div
             ref={videoWrapRef}
             className="relative z-[1] w-full h-full will-change-transform"
@@ -275,7 +275,7 @@ export function HeroSection() {
               playsInline
               preload="auto"
               className="w-full h-full object-contain object-right"
-              style={{ backgroundColor: 'var(--ac-paper)' }}
+              style={{ backgroundColor: isDark ? '#000000' : '#ffffff' }}
             />
           </div>
 
