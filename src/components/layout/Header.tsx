@@ -703,8 +703,8 @@ const THEMES = {
     skeletonBg:  'rgba(228,221,211,0.4)',
   },
   dark: {
-    bg:          'rgba(7,7,7,0.88)',
-    bgScrolled:  'rgba(7,7,7,0.96)',
+    bg:          '#000000',
+    bgScrolled:  '#000000',
     border:      'rgba(255,255,255,0.07)',
     shadow:      '0 1px 32px rgba(0,0,0,0.5)',
     logo:        'rgba(255,255,255,0.88)',
@@ -822,8 +822,8 @@ export function Header({ dark }: HeaderProps) {
         background:   scrolled ? T.bgScrolled : T.bg,
         borderBottom: `1px solid ${T.border}`,
         boxShadow:    scrolled ? T.shadow : 'none',
-        backdropFilter: dark ? 'blur(16px)' : 'none',
-        WebkitBackdropFilter: dark ? 'blur(16px)' : 'none',
+        backdropFilter: 'none',
+        WebkitBackdropFilter: 'none',
       }}
     >
       {/* ── Logo ──────────────────────────────────────────────── */}
