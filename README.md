@@ -22,6 +22,7 @@
 - [Environment Variables](#environment-variables)
 - [Project Structure](#project-structure)
 - [Pages & Routes](#pages--routes)
+- [Artwork Type System](#artwork-type-system)
 - [Web3 Integration](#web3-integration)
 - [Real-time Updates](#real-time-updates)
 - [Live Streaming](#live-streaming)
@@ -215,6 +216,38 @@ src/
 | `/wallet` | Portfolio P&L and holdings | Required |
 | `/profile/[wallet]` | Public artist profile with their artworks | Public |
 | `/auth/callback` | OAuth redirect landing (GitHub / Twitter / Telegram) | Public |
+
+---
+
+## Artwork Type System
+
+ArtCurve separates Original (hand-made) and AI-generated artworks across the platform:
+
+### Marketplace
+- **Filter chips** next to phase tabs: `Original` | `AI Art`
+- Click to toggle filter — clicking active chip deselects it (shows all)
+- Color coding: Original = green (#4ade80), AI Art = purple (#a78bfa)
+
+### Trade Page
+- Same filter chips in the TokenPickerPanel sidebar
+- Filters the artwork list by type
+
+### Studio (Create Artwork)
+- Artists self-declare artwork type when uploading:
+  - **Original (Hand-made)** — traditional/digital art created by human
+  - **AI Generated** — fully AI-created artwork
+  - **AI Assisted** — human-created with AI tools assistance
+- Default: Original
+
+### API Integration
+```typescript
+// useMarketplace hook supports artworkType filter
+const { artworks, artworkType, setArtworkType } = useMarketplace()
+
+// Service layer
+artworkService.list({ artwork_type: 'ORIGINAL' })
+artworkService.search({ artwork_type: 'AI_GENERATED', q: 'landscape' })
+```
 
 ---
 
