@@ -25,6 +25,7 @@ const ProtocolAnalyticsSection = dynamic(() => import('@/components/home/Protoco
 const EcosystemSection         = dynamic(() => import('@/components/home/EcosystemSection').then(m => ({ default: m.EcosystemSection })),                { ssr: false })
 const CryptoCarousel           = dynamic(() => import('@/components/home/CryptoCarousel').then(m => ({ default: m.CryptoCarousel })),                    { ssr: false })
 const GrandCTASection          = dynamic(() => import('@/components/home/GrandCTASection').then(m => ({ default: m.GrandCTASection })),                  { ssr: false })
+const TickerDivider            = dynamic(() => import('@/components/home/TickerDivider').then(m => ({ default: m.TickerDivider })),                      { ssr: false })
 
 const HEADER_H = 80
 
@@ -56,19 +57,19 @@ export function BelowFoldSections() {
     <>
       {/* ── 2. How It Works ────────────────────────────────────── */}
       <div id="how-it-works">
-        <StickyLine />
+        <TickerDivider />
         <HowItWorksSection />
       </div>
 
       {/* ── 3. Curated Gallery ─────────────────────────────────── */}
       <div>
-        <StickyLine />
+        <TickerDivider />
         <CuratedGallerySection />
       </div>
 
       {/* ── 4. LiveActivity wipes → TopCreators beneath ─────────── */}
       <div>
-        <StickyLine />
+        <TickerDivider />
         <div data-wipe-zone="">
           <div style={{ position: 'sticky', top: HEADER_H, zIndex: 20 }}>
             <LiveActivitySection />
@@ -82,18 +83,14 @@ export function BelowFoldSections() {
 
       {/* ── 6. Protocol Analytics ──────────────────────────────── */}
       <div>
-        <StickyLine />
-        <div style={{ marginTop: '-48px' }}>
-          <ProtocolAnalyticsSection />
-        </div>
+        <TickerDivider />
+        <ProtocolAnalyticsSection />
       </div>
 
       {/* ── 7. Ecosystem ───────────────────────────────────────── */}
       <div>
-        <StickyLine />
-        <div style={{ marginTop: '-48px' }}>
-          <EcosystemSection />
-        </div>
+        <TickerDivider />
+        <EcosystemSection />
       </div>
 
       {/* ── 7b. Live Crypto Carousel ────────────────────────────── */}
@@ -101,10 +98,8 @@ export function BelowFoldSections() {
 
       {/* ── 8. Grand CTA + Footer ──────────────────────────────── */}
       <div>
-        <StickyLine />
-        <div style={{ marginTop: '-48px' }}>
-          <GrandCTASection />
-        </div>
+        <TickerDivider />
+        <GrandCTASection />
       </div>
     </>
   )
