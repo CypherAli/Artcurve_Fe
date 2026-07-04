@@ -54,7 +54,7 @@ const WS_URL =
   TICKER_COINS.map(c => `${c.pair}@miniTicker`).join('/')
 
 let state: TickerState = { ticks: {}, connected: false }
-let listeners: Set<() => void> = new Set()
+const listeners: Set<() => void> = new Set()
 let ws: WebSocket | null = null
 let retryTimer: ReturnType<typeof setTimeout> | null = null
 let retryDelay = 1000

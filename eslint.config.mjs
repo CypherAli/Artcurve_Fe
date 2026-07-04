@@ -12,6 +12,8 @@ const eslintConfig = defineConfig([
     "out/**",
     "build/**",
     "next-env.d.ts",
+    // Skill library cho AI agent — chứa code mẫu, không phải source của app
+    ".claude/**",
   ]),
 ]);
 
