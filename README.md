@@ -12,6 +12,18 @@
 
 ---
 
+## 📚 Documentation
+
+| Tài liệu | Nội dung |
+|---|---|
+| [docs/PROJECT.md](docs/PROJECT.md) | Tổng quan kiến trúc frontend |
+| [docs/setup/](docs/setup/) | Chạy local (`local-dev.md`) · deploy (`deployment.md`) |
+| [docs/architecture/](docs/architecture/) | Kiến trúc tổng thể · state management |
+| [docs/design/](docs/design/) | Design tokens · dark mode |
+| [docs/features/](docs/features/) | Marketplace · artwork type system |
+| [docs/i18n/](docs/i18n/) | Thêm ngôn ngữ mới |
+| [AGENTS.md](AGENTS.md) · [CLAUDE.md](CLAUDE.md) | Hướng dẫn cho AI coding agent (phải ở root) |
+
 ## Table of Contents
 
 - [Overview](#overview)
