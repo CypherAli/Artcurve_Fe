@@ -41,4 +41,6 @@ yarn-error.log*
 next-env.d.ts
 
 # Claude Code session data
-.claude/
+# Track .claude/skills (agent skill library) — chỉ ignore file local
+.claude/launch.json
+.claude/settings.local.json
