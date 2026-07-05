@@ -6,6 +6,8 @@
 //  Chain: env-driven qua NEXT_PUBLIC_CHAIN_ID — PHẢI khớp BE CHAIN_ID:
 //    - 84532 (Base Sepolia, mặc định) — contracts đã deploy tại đây
 //    - 8453  (Base Mainnet) — chỉ đổi khi đã deploy contracts mainnet
+//    - 31337 (Anvil local sandbox) — chạy Artcurve_Be/contracts/sandbox.ps1
+//      rồi đặt NEXT_PUBLIC_CHAIN_ID=31337 trong .env.local (chỉ dev local)
 //
 //  QUAN TRỌNG: đổi chain thì đổi CẢ FE NEXT_PUBLIC_CHAIN_ID (Vercel)
 //  + BE CHAIN_ID (Render) đồng thời, nếu lệch SIWE login sẽ sai chain.
@@ -36,10 +38,13 @@ import {
   safeWallet,
   injectedWallet,
 } from '@rainbow-me/rainbowkit/wallets'
-import { base, baseSepolia } from 'wagmi/chains'
+import { base, baseSepolia, foundry } from 'wagmi/chains'
 
 const CHAIN_ID = Number(process.env.NEXT_PUBLIC_CHAIN_ID ?? '84532')
-const activeChain = CHAIN_ID === base.id ? base : baseSepolia
+const activeChain =
+  CHAIN_ID === base.id    ? base :
+  CHAIN_ID === foundry.id ? foundry : // 31337 — Anvil sandbox local
+  baseSepolia
 
 export const wagmiConfig = getDefaultConfig({
   appName:   'ArtCurve',

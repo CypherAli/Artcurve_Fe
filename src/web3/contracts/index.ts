@@ -1,14 +1,15 @@
-// ⚠️  TODO SAU KHI DEPLOY:
-//   1. Deploy ArtFactory contract lên Base Sepolia testnet (dùng Hardhat/Foundry)
-//   2. Deploy BondingCurveAMM contract lên Base Sepolia testnet
-//   3. Copy địa chỉ contract vào baseSepolia bên dưới
-//   4. Sau khi ra mainnet, copy địa chỉ vào base
+// ─────────────────────────────────────────────────────────────────
+//  Địa chỉ contract theo chain.
 //
-//   Lệnh deploy mẫu (Hardhat):
-//     npx hardhat run scripts/deploy.ts --network baseSepolia
+//  - baseSepolia: đã deploy bằng Artcurve_Be/contracts/deploy.ps1
+//  - base:        điền sau khi deploy mainnet
+//  - foundry:     Anvil sandbox local (chain 31337) — địa chỉ DETERMINISTIC:
+//                 sandbox.ps1 deploy bằng key Anvil #0 trên chain sạch nên
+//                 nonce 0/1/2 luôn cho ra đúng bộ địa chỉ này, không cần đổi.
 //
-//   Sau khi deploy cũng cần cập nhật src/web3/abis/ArtFactory.abi.ts
-//   với ABI từ artifacts/contracts/ArtFactory.sol/ArtFactory.json
+//  Lưu ý: mỗi artwork có BondingCurveAMM clone riêng — địa chỉ đó lấy từ
+//  API backend (artwork detail), không nằm ở đây. Đây chỉ là Factory + impl.
+// ─────────────────────────────────────────────────────────────────
 
 export const CONTRACT_ADDRESSES = {
   base: {
@@ -18,6 +19,11 @@ export const CONTRACT_ADDRESSES = {
   baseSepolia: {
     ArtFactory:      '0xBe1F8a192eD168fed99E7F5d479F1A314200F1bF' as `0x${string}`,
     BondingCurveAMM: '0xF8F4233DA0Cc3f6968a239b36010a864c6E9bFb6' as `0x${string}`,
+  },
+  // Anvil local sandbox — xem Artcurve_Be/docs/SANDBOX.md
+  foundry: {
+    ArtFactory:      '0x9fE46736679d2D9a65F0992F2272dE9f3c7fa6e0' as `0x${string}`,
+    BondingCurveAMM: '0xe7f1725E7734CE288F8367e1Bb143E90bb3F0512' as `0x${string}`,
   },
 } as const
 
