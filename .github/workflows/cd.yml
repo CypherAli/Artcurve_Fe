@@ -1,0 +1,40 @@
+# ─────────────────────────────────────────────────────────────────────────────
+#  ArtCurve Frontend — CD (tách riêng khỏi CI)
+#
+#  Vercel auto-deploy từ push main. Workflow này chạy SAU khi CI xanh
+#  (workflow_run) — chỉ xác nhận production live. Đỏ ở đây = vấn đề deploy,
+#  KHÔNG ảnh hưởng kết quả CI của code.
+# ─────────────────────────────────────────────────────────────────────────────
+name: CD
+
+on:
+  workflow_run:
+    workflows: [CI]
+    types: [completed]
+    branches: [main]
+  workflow_dispatch:
+
+jobs:
+  verify-vercel:
+    name: Verify Vercel deploy
+    if: >-
+      github.event_name == 'workflow_dispatch' ||
+      (github.event.workflow_run.conclusion == 'success' &&
+       github.event.workflow_run.event == 'push')
+    runs-on: ubuntu-latest
+    steps:
+      - name: Chờ FE production trả 200 (tối đa 5 phút)
+        run: |
+          echo "Xác nhận bản deploy Vercel sau CI xanh..."
+          for i in $(seq 1 20); do
+            code=$(curl -s -o /dev/null -w "%{http_code}" -m 30 \
+              https://artcurve-fe.vercel.app || true)
+            if [ "$code" = "200" ]; then
+              echo "✅ FE production live (HTTP 200)" >> "$GITHUB_STEP_SUMMARY"
+              exit 0
+            fi
+            echo "attempt $i/20: HTTP $code — đợi 15s..."
+            sleep 15
+          done
+          echo "❌ FE không trả 200 sau 5 phút — kiểm tra dashboard Vercel." >> "$GITHUB_STEP_SUMMARY"
+          exit 1

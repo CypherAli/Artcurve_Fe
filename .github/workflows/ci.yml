@@ -1,9 +1,12 @@
 # ─────────────────────────────────────────────────────────────────────────────
-#  ArtCurve Frontend — CI/CD
+#  ArtCurve Frontend — CI
 #
-#  CI: lint → test (jest) → build (type-check + production bundle).
-#  CD: Vercel auto-deploy khi push main; job `deploy` xác nhận production
-#      trả HTTP 200 sau deploy (Vercel không ngủ đông nên gate này tin được).
+#  CI THUẦN: lint → test → build, sinh artifact, dừng ở đó.
+#  Deploy verification nằm ở cd.yml (chạy sau khi CI xanh).
+#
+#  Artifacts:
+#    test-coverage — báo cáo coverage của jest
+#    next-build    — production bundle (.next) đã build & type-check
 # ─────────────────────────────────────────────────────────────────────────────
 name: CI
 
@@ -36,33 +39,26 @@ jobs:
       - name: Lint
         run: npm run lint
 
-      - name: Unit tests (jest)
-        run: npm test -- --ci
+      - name: Unit tests (jest + coverage)
+        run: npm test -- --ci --coverage
+
+      - name: Upload artifact — test coverage
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-coverage
+          path: coverage/
+          retention-days: 7
 
       - name: Build (type-check + production bundle)
         run: npm run build
         env:
           NEXT_PUBLIC_WALLETCONNECT_PROJECT_ID: CI_PLACEHOLDER
 
-  # ── CD: Vercel tự deploy khi push main — job này xác nhận FE live ─────────
-  deploy:
-    name: Deploy status (Vercel)
-    needs: build-and-test
-    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
-    runs-on: ubuntu-latest
-    steps:
-      - name: Chờ FE production trả 200
-        run: |
-          echo "Vercel auto-deploy được trigger bởi commit ${GITHUB_SHA::7}."
-          for i in $(seq 1 20); do
-            code=$(curl -s -o /dev/null -w "%{http_code}" -m 30 \
-              https://artcurve-fe.vercel.app || true)
-            if [ "$code" = "200" ]; then
-              echo "✅ FE production live (HTTP 200)" >> "$GITHUB_STEP_SUMMARY"
-              exit 0
-            fi
-            echo "attempt $i/20: HTTP $code — đợi 15s..."
-            sleep 15
-          done
-          echo "❌ FE không trả 200 sau 5 phút — kiểm tra dashboard Vercel." >> "$GITHUB_STEP_SUMMARY"
-          exit 1
+      - name: Upload artifact — production build
+        uses: actions/upload-artifact@v4
+        with:
+          name: next-build
+          path: |
+            .next/
+            !.next/cache
+          retention-days: 7
