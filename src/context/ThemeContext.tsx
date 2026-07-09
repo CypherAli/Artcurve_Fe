@@ -12,7 +12,7 @@
 // ─────────────────────────────────────────────────────────────────
 
 import {
-  createContext, useContext, useCallback, useState, useMemo,
+  createContext, useContext, useCallback, useState, useEffect, useMemo,
   type ReactNode,
 } from 'react'
 import { flushSync } from 'react-dom'
@@ -39,13 +39,15 @@ function applyThemeToDom(theme: Theme) {
 }
 
 export function ThemeProvider({ children }: { children: ReactNode }) {
-  // Khởi tạo 'light' cho SSR; đồng bộ với DOM (do inline script set) sau mount
-  const [theme, setThemeState] = useState<Theme>(() => {
-    if (typeof document !== 'undefined') {
-      return document.documentElement.classList.contains('dark') ? 'dark' : 'light'
-    }
-    return 'light'
-  })
+  // Luôn khởi tạo 'light' để khớp HTML server (tránh hydration mismatch).
+  // Đồng bộ với DOM thật (do inline script set trước hydrate) trong useEffect,
+  // vì useEffect chỉ chạy ở client SAU khi hydrate xong.
+  const [theme, setThemeState] = useState<Theme>('light')
+
+  useEffect(() => {
+    const domTheme = document.documentElement.classList.contains('dark') ? 'dark' : 'light'
+    setThemeState((current) => (current === domTheme ? current : domTheme))
+  }, [])
 
   const setTheme = useCallback((next: Theme) => {
     const prefersReduced =
