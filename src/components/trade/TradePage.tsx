@@ -1331,10 +1331,21 @@ export function TradePage() {
   const { artworks: _rawArtworks } = useMarketplace({ initialLimit: 50 })
   const _apiArtworks = useMemo(
     () => _rawArtworks.map(adaptTradeArtwork),
-     
+
     [_rawArtworks],
   )
-  const ARTWORKS = _apiArtworks.length > 0 ? _apiArtworks : ARTWORKS_MOCK
+  // "Khóa" data thật một khi đã tải được — trước đây mỗi lần useMarketplace
+  // refetch trục trặc thoáng qua (network blip, BE restart...) và trả về
+  // rỗng, trang lập tức rơi về ARTWORKS_MOCK (24 artwork giả với ticker như
+  // $VOID/$SOVGEO), làm UI nháy qua lại giữa data thật/giả liên tục — kèm
+  // vòng mô phỏng giá khởi động lại mỗi lần đó, sinh hiệu ứng số nhảy loạn.
+  const lastRealArtworksRef = useRef<TradeArtwork[]>([])
+  useEffect(() => {
+    if (_apiArtworks.length > 0) lastRealArtworksRef.current = _apiArtworks
+  }, [_apiArtworks])
+  const ARTWORKS = lastRealArtworksRef.current.length > 0
+    ? lastRealArtworksRef.current
+    : (_apiArtworks.length > 0 ? _apiArtworks : ARTWORKS_MOCK)
 
   const [selectedId,  setSelectedId]  = useState(1)   // first artwork
   const [chartRange,  setChartRange]  = useState<CandleRange>('1D')
