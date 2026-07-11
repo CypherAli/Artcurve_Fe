@@ -115,7 +115,9 @@ function adaptTradeArtwork(artwork: Artwork, index: number): TradeArtwork {
   const supply   = parseFloat(artwork.current_supply) || 0
   const target   = parseFloat(artwork.target_cap)     || 0
   const mc       = price * supply || price
-  const progress = target > 0 ? Math.min((mc / target) * 100, 100) : 0
+  // Làm tròn 2 chữ số — phép chia float thô trước đây hiện nguyên số dài kiểu
+  // "1.7234140551450494%" thay vì "1.72%".
+  const progress = target > 0 ? Number(Math.min((mc / target) * 100, 100).toFixed(2)) : 0
   const phase: Phase =
     progress >= 90 ? 'Migration' :
     progress >= 50 ? 'FOMO' :
@@ -1430,7 +1432,12 @@ export function TradePage() {
       })
     }, 9000)
     return () => { clearInterval(t1); clearInterval(t2); clearInterval(t3) }
-  }, [])
+  // deps rỗng trước đây khiến effect chỉ chạy 1 lần lúc mount — khi đó
+  // _apiArtworks luôn rỗng (API chưa kịp trả về), guard vô tác dụng, vòng lặp
+  // giả cứ chạy mãi kể cả sau khi data thật load xong. Thêm dependency để
+  // effect chạy lại đúng lúc data thật xuất hiện — cleanup tự clear interval
+  // cũ, guard chặn không tạo interval mới.
+  }, [_apiArtworks.length > 0])
 
   // Debounced sort-price snapshot every 8 s
   useEffect(() => {
