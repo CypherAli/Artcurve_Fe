@@ -11,7 +11,7 @@ import {
   GridLayout,
   ParticipantTile,
 } from '@livekit/components-react'
-import { Track, VideoPresets } from 'livekit-client'
+import { Track, VideoPresets, MediaDeviceFailure } from 'livekit-client'
 import '@livekit/components-styles'
 import { liveService } from '@/services/live.service'
 
@@ -51,6 +51,24 @@ export function LiveBroadcaster({ roomName }: { roomName: string }) {
     setError('No host token. Please start stream from the Live page.')
   }, [roomName])
   /* eslint-enable react-hooks/set-state-in-effect */
+
+  // Bắt lỗi camera/mic rõ ràng — trước đây không có gì cả, user chỉ thấy avatar
+  // xám im lặng mãi mãi khi permission bị từ chối / không có thiết bị / thiết bị
+  // đang bị app khác chiếm (giống triết lý Discord "fallback nhanh, báo rõ lỗi
+  // capture thay vì để stream treo im lặng").
+  const handleMediaDeviceFailure = useCallback((failure?: MediaDeviceFailure) => {
+    const messages: Record<MediaDeviceFailure, string> = {
+      [MediaDeviceFailure.PermissionDenied]:
+        'Trình duyệt đang chặn quyền Camera/Microphone. Bấm vào icon 🔒 cạnh URL → cho phép Camera & Microphone → tải lại trang.',
+      [MediaDeviceFailure.NotFound]:
+        'Không tìm thấy Camera/Microphone trên máy. Kiểm tra thiết bị đã cắm/bật chưa.',
+      [MediaDeviceFailure.DeviceInUse]:
+        'Camera/Microphone đang được ứng dụng khác sử dụng (Zoom, Meet...). Đóng ứng dụng đó rồi thử lại.',
+      [MediaDeviceFailure.Other]:
+        'Không thể truy cập Camera/Microphone. Thử tải lại trang.',
+    }
+    setError(messages[failure ?? MediaDeviceFailure.Other] ?? messages[MediaDeviceFailure.Other])
+  }, [])
 
   const handleEndStream = useCallback(async () => {
     setEnding(true)
@@ -139,11 +157,16 @@ export function LiveBroadcaster({ roomName }: { roomName: string }) {
           publishDefaults: {
             simulcast:            true,
             videoSimulcastLayers: [VideoPresets.h180, VideoPresets.h360, VideoPresets.h720],
+            // VP9 nén hiệu quả hơn H.264 mặc định ở cùng chất lượng (cách YouTube
+            // dùng làm chuẩn trung gian giữa H.264 và AV1). LiveKit tự fallback về
+            // H.264 nếu trình duyệt/thiết bị không hỗ trợ encode VP9.
+            videoCodec: 'vp9',
           },
         }}
         data-lenis-prevent
         style={{ height: 'calc(100dvh - 53px)' }}
         onDisconnected={() => router.push('/live')}
+        onMediaDeviceFailure={handleMediaDeviceFailure}
       >
         <RoomAudioRenderer />
         <BroadcastStage />
