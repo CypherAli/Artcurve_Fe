@@ -1394,8 +1394,12 @@ export function TradePage() {
       .catch(() => setOhlcvData(null))
   }, [selectedArt.artworkId, chartRange])
 
-  // ── Price simulation (3-tier) ────────────────────────────────────
+  // ── Price simulation (3-tier) — CHỈ chạy khi dùng mock data (BE offline
+  // thật sự). Trước đây chạy vô điều kiện, làm giá artwork THẬT bị random-walk
+  // trôi dần suốt phiên (cộng dồn qua nhiều giờ ra %change ảo kiểu "+146.2k%"),
+  // không khớp giá thật từ bonding curve/backend.
   useEffect(() => {
+    if (_apiArtworks.length > 0) return
     const MAX = 18
     const t1 = setInterval(() => {
       setLivePrices(prev => {
