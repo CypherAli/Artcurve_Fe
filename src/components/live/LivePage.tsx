@@ -3,6 +3,7 @@
 import { useState, useMemo, useCallback, useRef, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { motion, AnimatePresence, type Variants } from 'framer-motion'
+import { useConnectModal } from '@rainbow-me/rainbowkit'
 import { authStore } from '@/lib/auth-store'
 import { useLanguage } from '@/context/LanguageContext'
 import { translations, DEFAULT_LOCALE } from '@/i18n'
@@ -544,6 +545,14 @@ function GoLiveModal({ onClose }: { onClose: () => void }) {
     setError('')
     try {
       const jwt = authStore.getJwt()
+      // Phòng trường hợp JWT hết hạn giữa lúc mở form và lúc bấm submit
+      // (access token chỉ sống 15 phút) — báo rõ thay vì gửi "Bearer null"
+      // lên API rồi nhận lỗi 401 khó hiểu.
+      if (!jwt) {
+        setError('Phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại rồi thử tiếp.')
+        setLoading(false)
+        return
+      }
       const res = await fetch(`${API}/live/create`, {
         method:  'POST',
         headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${jwt}` },
@@ -681,9 +690,20 @@ function GoLiveModal({ onClose }: { onClose: () => void }) {
 export function LivePage() {
   const router = useRouter()
   const { t } = useLanguage()
+  const { openConnectModal } = useConnectModal()
   const [chip,       setChip]       = useState(() => translations[DEFAULT_LOCALE].live.all)
   const [goLiveOpen, setGoLiveOpen] = useState(false)
   const chipsRef = useRef<HTMLDivElement>(null)
+
+  // Yêu cầu đăng nhập trước khi mở form tạo stream — trước đây bấm "Go Live"
+  // luôn mở form dù chưa đăng nhập, chỉ vỡ lỗi 401 khó hiểu lúc submit.
+  const handleGoLiveClick = useCallback(() => {
+    if (!authStore.getJwt()) {
+      openConnectModal?.()
+      return
+    }
+    setGoLiveOpen(true)
+  }, [openConnectModal])
 
   const { streams: realStreams, loading } = useRealStreams()
 
@@ -773,7 +793,7 @@ export function LivePage() {
             {/* Go Live */}
             <motion.button
               type="button"
-              onClick={() => setGoLiveOpen(true)}
+              onClick={handleGoLiveClick}
               className="shrink-0 flex items-center gap-2 px-5 py-2 text-sm font-semibold rounded-full"
               style={{ background: '#dc2626', color: 'white' }}
               whileHover={{ background: '#b91c1c' }}
