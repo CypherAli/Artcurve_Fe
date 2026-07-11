@@ -550,7 +550,10 @@ function GoLiveModal({ onClose }: { onClose: () => void }) {
         body:    JSON.stringify({ title: title.trim(), category: cat }),
       })
       if (!res.ok) throw new Error((await res.text()) || 'Failed to create stream')
-      const data = await res.json()
+      // BE bọc mọi response thành công trong { data: T } (TransformInterceptor) —
+      // đọc thẳng res.json() thiếu 1 lớp .data khiến roomName/token luôn undefined,
+      // route thành "/studio/stream/undefined" và LiveKit nhận access_token=undefined.
+      const { data } = await res.json() as { data: { roomName: string; token: string } }
       sessionStorage.setItem(`livekit_host_token_${data.roomName}`, data.token)
       router.push(`/studio/stream/${data.roomName}`)
     } catch (err: unknown) {
