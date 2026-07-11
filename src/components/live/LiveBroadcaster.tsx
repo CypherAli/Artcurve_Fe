@@ -11,7 +11,7 @@ import {
   GridLayout,
   ParticipantTile,
 } from '@livekit/components-react'
-import { Track } from 'livekit-client'
+import { Track, VideoPresets } from 'livekit-client'
 import '@livekit/components-styles'
 import { liveService } from '@/services/live.service'
 
@@ -127,6 +127,20 @@ export function LiveBroadcaster({ roomName }: { roomName: string }) {
         connect={true}
         video={true}
         audio={true}
+        // Chất lượng kiểu YouTube: quay 1080p nếu webcam hỗ trợ, simulcast 3 lớp
+        // (180p/360p/720p) để mỗi viewer tự nhận đúng độ phân giải theo băng thông
+        // — thay vì 1 luồng cố định cho tất cả như trước.
+        options={{
+          adaptiveStream: true,
+          dynacast:       true,
+          videoCaptureDefaults: {
+            resolution: VideoPresets.h1080.resolution,
+          },
+          publishDefaults: {
+            simulcast:            true,
+            videoSimulcastLayers: [VideoPresets.h180, VideoPresets.h360, VideoPresets.h720],
+          },
+        }}
         data-lenis-prevent
         style={{ height: 'calc(100dvh - 53px)' }}
         onDisconnected={() => router.push('/live')}

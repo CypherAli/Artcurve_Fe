@@ -472,6 +472,10 @@ export function LiveViewer({ roomName }: { roomName: string }) {
             connect={true}
             video={false}
             audio={false}
+            // adaptiveStream: tự động chọn lớp simulcast phù hợp kích thước
+            // khung hình + băng thông của viewer (giống cách YouTube chọn độ
+            // phân giải) thay vì luôn nhận nguyên bản 1080p dù xem nhỏ.
+            options={{ adaptiveStream: true, dynacast: true }}
             onDisconnected={() => setEnded(true)}
             data-lenis-prevent
             style={{ height: '100%' }}
