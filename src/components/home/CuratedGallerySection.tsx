@@ -311,9 +311,11 @@ export function CuratedGallerySection() {
         {artworks.map((art, i) => {
           const phase = getPhase(art)
           const artistName = art.creator?.username ?? art.creator?.wallet_address?.slice(0, 8) ?? 'Unknown'
-          // Resolve image: try IPFS gateway, fallback to placeholder
-          const imgSrc = art.ipfs_metadata_uri
-            ? `https://ipfs.io/ipfs/${art.ipfs_metadata_uri.replace('ipfs://', '')}`
+          // Resolve image: ưu tiên image_uri (ảnh thật) — ipfs_metadata_uri có thể
+          // là hash giả từ seed cũ (QmFake.../QmPlaceholder), gây vỡ ảnh.
+          const rawImg = art.image_uri ?? art.ipfs_metadata_uri ?? ''
+          const imgSrc = rawImg
+            ? `https://ipfs.io/ipfs/${rawImg.replace('ipfs://', '')}`
             : `/images/artworks/art${(i % 5) + 1}.jpg`
 
           return (

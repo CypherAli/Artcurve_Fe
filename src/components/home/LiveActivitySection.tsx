@@ -26,9 +26,14 @@ function normalize(r: RecentTrade, idx: number) {
     type:    (r.tx_type === 'BUY' || r.tx_type === 'MINT' ? 'BUY' : 'SELL') as 'BUY' | 'SELL',
     wallet:  `${w.slice(0, 4)}…${w.slice(-4)}`,
     artwork: r.artwork.title,
-    img:     r.artwork.ipfs_metadata_uri
-      ? `https://ipfs.io/ipfs/${r.artwork.ipfs_metadata_uri.replace('ipfs://', '')}`
-      : `/images/artworks/art${(idx % 5) + 1}.jpg`,
+    img: (() => {
+      // Ưu tiên image_uri (ảnh thật) — ipfs_metadata_uri có thể là hash giả
+      // từ seed cũ (QmFake.../QmPlaceholder), gây vỡ ảnh.
+      const rawImg = r.artwork.image_uri ?? r.artwork.ipfs_metadata_uri ?? ''
+      return rawImg
+        ? `https://ipfs.io/ipfs/${rawImg.replace('ipfs://', '')}`
+        : `/images/artworks/art${(idx % 5) + 1}.jpg`
+    })(),
     amount:  `${parseFloat(r.share_amount).toFixed(2)} ${r.artwork.ticker ?? 'TOKEN'}`,
     time:    idx === 0 ? 'Just now' : timeAgo(new Date(r.timestamp)),
   }

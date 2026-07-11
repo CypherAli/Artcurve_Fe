@@ -124,7 +124,10 @@ function adaptTradeArtwork(artwork: Artwork, index: number): TradeArtwork {
                      'Accumulation'
   const addr  = artwork.creator?.wallet_address ?? '0x000000000000'
   const artist = artwork.creator?.username ?? `${addr.slice(0,5)}…${addr.slice(-3)}`
-  const rawImg = artwork.ipfs_metadata_uri ?? ''
+  // Ưu tiên image_uri (ảnh thật upload qua Pinata) — ipfs_metadata_uri chỉ nên
+  // dùng làm fallback vì DB seed cũ có hash giả (QmFake.../QmPlaceholder)
+  // không tồn tại thật trên IPFS, gây vỡ ảnh. Đồng bộ logic với MarketplacePage.
+  const rawImg = artwork.image_uri ?? artwork.ipfs_metadata_uri ?? ''
   const image  = rawImg.startsWith('ipfs://')
     ? `https://gateway.pinata.cloud/ipfs/${rawImg.replace('ipfs://', '')}`
     : rawImg || '/images/artworks/art1.jpg'
@@ -1328,7 +1331,7 @@ function TradePanel({ art, livePrice }: { art:TradeArtwork; livePrice:number }) 
 export function TradePage() {
   const { t } = useLanguage()
   // ── Backend data (falls back to mock when API unreachable) ────────
-  const { artworks: _rawArtworks } = useMarketplace({ initialLimit: 50 })
+  const { artworks: _rawArtworks, isLoading: _marketplaceLoading } = useMarketplace({ initialLimit: 50 })
   const _apiArtworks = useMemo(
     () => _rawArtworks.map(adaptTradeArtwork),
 
@@ -1346,6 +1349,10 @@ export function TradePage() {
   const ARTWORKS = lastRealArtworksRef.current.length > 0
     ? lastRealArtworksRef.current
     : (_apiArtworks.length > 0 ? _apiArtworks : ARTWORKS_MOCK)
+  // (_marketplaceLoading hiện chưa dùng để đổi ARTWORKS — nhiều chỗ dưới giả
+  // định ARTWORKS luôn có ít nhất 1 phần tử, trả [] lúc loading sẽ crash.
+  // Còn lại: khoảnh khắc mock hiện <1s lúc tải trang lần đầu, chấp nhận được.)
+  void _marketplaceLoading
 
   const [selectedId,  setSelectedId]  = useState(1)   // first artwork
   const [chartRange,  setChartRange]  = useState<CandleRange>('1D')
