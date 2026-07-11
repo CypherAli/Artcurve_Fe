@@ -3,7 +3,7 @@
 import { useState, useMemo, useCallback, useRef, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { motion, AnimatePresence, type Variants } from 'framer-motion'
-import { useConnectModal } from '@rainbow-me/rainbowkit'
+import { LoginModal } from '@/components/layout/LoginModal'
 import { authStore } from '@/lib/auth-store'
 import { useLanguage } from '@/context/LanguageContext'
 import { translations, DEFAULT_LOCALE } from '@/i18n'
@@ -690,20 +690,23 @@ function GoLiveModal({ onClose }: { onClose: () => void }) {
 export function LivePage() {
   const router = useRouter()
   const { t } = useLanguage()
-  const { openConnectModal } = useConnectModal()
-  const [chip,       setChip]       = useState(() => translations[DEFAULT_LOCALE].live.all)
-  const [goLiveOpen, setGoLiveOpen] = useState(false)
+  const [chip,        setChip]        = useState(() => translations[DEFAULT_LOCALE].live.all)
+  const [goLiveOpen,  setGoLiveOpen]  = useState(false)
+  const [showLogin,   setShowLogin]   = useState(false)
   const chipsRef = useRef<HTMLDivElement>(null)
 
   // Yêu cầu đăng nhập trước khi mở form tạo stream — trước đây bấm "Go Live"
   // luôn mở form dù chưa đăng nhập, chỉ vỡ lỗi 401 khó hiểu lúc submit.
+  // Dùng LoginModal chung của app (hỗ trợ cả ví SIWE lẫn Gmail/GitHub/Twitter
+  // OAuth) — KHÔNG dùng RainbowKit openConnectModal vì nó chỉ có kết nối ví,
+  // sẽ ẩn mất lựa chọn đăng nhập Gmail mà user đã quen dùng ở nơi khác.
   const handleGoLiveClick = useCallback(() => {
     if (!authStore.getJwt()) {
-      openConnectModal?.()
+      setShowLogin(true)
       return
     }
     setGoLiveOpen(true)
-  }, [openConnectModal])
+  }, [])
 
   const { streams: realStreams, loading } = useRealStreams()
 
@@ -739,6 +742,7 @@ export function LivePage() {
     <>
       <AnimatePresence>
         {goLiveOpen && <GoLiveModal key="golive" onClose={() => setGoLiveOpen(false)}/>}
+        {showLogin && <LoginModal onClose={() => setShowLogin(false)}/>}
       </AnimatePresence>
 
       {/* ── YouTube-style left sidebar ── */}
