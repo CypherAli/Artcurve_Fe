@@ -1342,12 +1342,14 @@ export function TradePage() {
   // rỗng, trang lập tức rơi về ARTWORKS_MOCK (24 artwork giả với ticker như
   // $VOID/$SOVGEO), làm UI nháy qua lại giữa data thật/giả liên tục — kèm
   // vòng mô phỏng giá khởi động lại mỗi lần đó, sinh hiệu ứng số nhảy loạn.
-  const lastRealArtworksRef = useRef<TradeArtwork[]>([])
+  // Dùng useState (không phải useRef) vì giá trị này trực tiếp ảnh hưởng
+  // render — đọc ref.current trong lúc render vi phạm rule react-hooks/refs.
+  const [lockedArtworks, setLockedArtworks] = useState<TradeArtwork[]>([])
   useEffect(() => {
-    if (_apiArtworks.length > 0) lastRealArtworksRef.current = _apiArtworks
+    if (_apiArtworks.length > 0) setLockedArtworks(_apiArtworks)
   }, [_apiArtworks])
-  const ARTWORKS = lastRealArtworksRef.current.length > 0
-    ? lastRealArtworksRef.current
+  const ARTWORKS = lockedArtworks.length > 0
+    ? lockedArtworks
     : (_apiArtworks.length > 0 ? _apiArtworks : ARTWORKS_MOCK)
   // (_marketplaceLoading hiện chưa dùng để đổi ARTWORKS — nhiều chỗ dưới giả
   // định ARTWORKS luôn có ít nhất 1 phần tử, trả [] lúc loading sẽ crash.
