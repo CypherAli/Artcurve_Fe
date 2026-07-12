@@ -753,7 +753,7 @@ export function LivePage() {
         {/* ── Sticky chip bar ── */}
         <div className="sticky z-10"
           style={{ top: 68, background: 'var(--ac-paper)', backdropFilter: 'blur(20px)', borderBottom: '1px solid var(--tp-border)' }}>
-          <div className="flex items-center px-6" style={{ height: 52, paddingTop: 6, paddingBottom: 6 }}>
+          <div className="flex items-center px-6" style={{ height: 72, paddingTop: 14, paddingBottom: 14 }}>
 
             {/* Chips */}
             <div ref={chipsRef}
@@ -766,7 +766,7 @@ export function LivePage() {
                   className="shrink-0 whitespace-nowrap font-medium"
                   style={{
                     fontSize: 14,
-                    padding: '7px 16px',
+                    padding: '10px 18px',
                     borderRadius: 8,
                     border: chip === c ? 'none' : '1px solid var(--tp-border)',
                   }}
